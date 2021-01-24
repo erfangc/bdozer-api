@@ -3,6 +3,9 @@ package com.starburst.starburst
 import com.starburst.starburst.models.*
 import com.starburst.starburst.models.enums.ExpenseType
 
+/**
+ * [DCFGenerator] service
+ */
 class DCFGenerator {
 
     fun generate(modelInput: ModelInput): ModelOutput {
@@ -10,7 +13,6 @@ class DCFGenerator {
         // calculate the revenue going forward
         val subscriptionDriver = modelInput.revenueDriver?.subscriptionDriver
         subscriptionDriver ?: error("subscriptionDriver cannot be null")
-
 
         // project a financial statement for each year that it takes this company
         // to reach its TAM
@@ -31,6 +33,7 @@ class DCFGenerator {
                     ExpenseType.Fixed ->
                         expenseDriver.fixedAmount ?: 0.0
                 }
+
                 Item(
                     name = expenseDriver.incomeStatementItemName,
                     value = value,
@@ -42,11 +45,16 @@ class DCFGenerator {
                         )
                     )
                 )
+
             }
 
             // project the depreciation & amortizations for the period
 
             // project the non-cash expenses for the period
+
+            // compute other items from the previous balance-sheet and add CAPEX
+
+            // compute cash flow statements
 
             val items = mutableListOf(
                 Item(name = "Revenue", value = revenue, type = Type.IncomeStatement),
@@ -82,4 +90,5 @@ class DCFGenerator {
             else -> error("this is not supposed to happen")
         }
     }
+
 }
