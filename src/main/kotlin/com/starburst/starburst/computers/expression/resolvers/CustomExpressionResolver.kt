@@ -10,7 +10,7 @@ data class Custom(
 class CustomExpressionResolver(private val ctx: ResolverContext): ExpressionResolver {
     override fun resolveExpression(cell: Cell): Cell {
         val expression = cell.driver?.custom?.expression ?: error("")
-        return ItemExpressionResolver(ctx)
+        return StringExpressionResolver(ctx)
             .resolveExpression(cell.copy(expression = expression))
     }
 }

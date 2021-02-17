@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 
-internal class ItemExpressionResolverTest {
+internal class StringExpressionResolverTest {
 
     @Test
     fun resolveExpression() {
@@ -43,7 +43,7 @@ internal class ItemExpressionResolverTest {
             cells = cells
         )
 
-        val result = ItemExpressionResolver(ctx)
+        val result = StringExpressionResolver(ctx)
             .resolveExpression(cells.find { it.name == "Random_Period2" }!!)
 
         assertEquals("(Costs_Period2+Aircraft_Parts_Period2)/2", result.expression)

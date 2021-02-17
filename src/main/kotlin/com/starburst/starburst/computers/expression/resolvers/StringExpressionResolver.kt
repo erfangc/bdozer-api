@@ -7,12 +7,12 @@ import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token.NOT_MATCHED
 
 /**
- * [ItemExpressionResolver] resolves a [Cell] whose value is linked to an [Item] with [Item.expression] populated.
+ * [StringExpressionResolver] resolves a [Cell] whose value is linked to an [Item] with [Item.expression] populated.
  * Normally [Item]'s expression is the sum of drivers - [Item] may take on value specified by [Item.expression]. This resolver
  * populates such expression with real cells
  *
  */
-class ItemExpressionResolver(ctx: ResolverContext) : ExpressionResolver {
+class StringExpressionResolver(ctx: ResolverContext) : ExpressionResolver {
 
     //
     // create a lookup dictionary of item/driver names -> cell names

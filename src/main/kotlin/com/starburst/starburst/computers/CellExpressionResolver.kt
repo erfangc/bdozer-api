@@ -5,11 +5,6 @@ import com.starburst.starburst.models.Cell
 import com.starburst.starburst.models.DriverType
 import com.starburst.starburst.models.Model
 
-data class ResolverContext(
-    val cells: List<Cell>,
-    val model: Model
-)
-
 /**
  * Takes cells and based on their driver resolves
  * an expression for the cell's value as a function of other cells
@@ -35,7 +30,7 @@ class CellExpressionResolver {
                 Resolve the cell expression for cells that are driven by Item(s)
                  */
                 if (cell.item.expression != null) {
-                    ItemExpressionResolver(ctx).resolveExpression(cell.copy(expression = cell.item.expression))
+                    StringExpressionResolver(ctx).resolveExpression(cell.copy(expression = cell.item.expression))
                 } else {
                     cell
                 }

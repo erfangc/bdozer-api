@@ -11,7 +11,3 @@ data class Cell(
     val dependentCellNames: List<String> = emptyList()
 )
 
-data class Address(
-    val row: Int,
-    val column: String
-)

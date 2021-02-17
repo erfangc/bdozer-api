@@ -13,10 +13,3 @@ data class Driver(
     val fixedCost: FixedCost? = null,
     val custom: Custom? = null
 )
-
-enum class DriverType {
-    SaaSRevenue,
-    Custom,
-    VariableCost,
-    FixedCost
-}

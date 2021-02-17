@@ -17,12 +17,11 @@ internal class CustomExpressionResolverTest {
         val model = fakeAircraftCompany()
 
         val cells = CellExpressionResolver()
-            .resolveCellExpressions(model, CellGenerator().generateCells(model = model))
+            .resolveCellExpressions(
+                model, CellGenerator().generateCells(model = model)
+            )
 
-        val ctx = ResolverContext(
-            model = model,
-            cells = cells
-        )
+        val ctx = ResolverContext(model = model, cells = cells)
 
         val results = CustomExpressionResolver(ctx)
             .resolveExpression(cells.find { it.name == "Aircraft_Parts_Period2" }!!)
