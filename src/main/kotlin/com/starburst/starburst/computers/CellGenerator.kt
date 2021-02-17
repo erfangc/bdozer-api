@@ -16,13 +16,41 @@ class CellGenerator {
 
     fun generateCells(model: Model): List<Cell> {
         val periods = model.periods ?: 5
+
         return (1..periods).flatMap { period ->
-            model.drivers.map { driver ->
-                Cell(
-                    period = period,
-                    name = "${driver.name}_Period$period",
-                    driver = driver
-                )
+            model.items.flatMap { item ->
+                if (item.expression == null) {
+                    // if there are no explicit expressions then
+                    // the expression of a Item is just the sum of the drivers
+                    val driverCells = (item.drivers ?: emptyList()).map { driver ->
+                        Cell(
+                            period = period,
+                            name = "${driver.name}_Period$period",
+                            driver = driver
+                        )
+                    }
+
+                    // create a cell for the item itself
+                    val itemCell = Cell(
+                        period = period,
+                        name =  "${item.name}_Period$period",
+                        item = item,
+                        // by default the value of the item is the sum of it's drivers
+                        expression = driverCells.joinToString("+") { it.name },
+                        dependentCellNames = driverCells.map { it.name }
+                    )
+                    // end
+                    driverCells + itemCell
+                } else {
+                    listOf(
+                        Cell(
+                            period = period,
+                            item = item,
+                            name =  "${item.name}_Period$period"
+                        )
+                    )
+                }
+
             }
         }
 

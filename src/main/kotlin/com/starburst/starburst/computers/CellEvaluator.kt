@@ -2,11 +2,10 @@ package com.starburst.starburst.computers
 
 import com.starburst.starburst.models.Cell
 import com.starburst.starburst.models.Model
+import org.mariuszgromada.math.mxparser.Argument
+import org.mariuszgromada.math.mxparser.Expression
 import org.slf4j.LoggerFactory
 import java.util.*
-import javax.script.ScriptEngineManager
-import javax.script.ScriptException
-import javax.script.SimpleBindings
 
 /**
  * For ever cell to be evaluated, use a depth-first approach to evaluate its value
@@ -14,13 +13,9 @@ import javax.script.SimpleBindings
  */
 class CellEvaluator {
 
-    private val engine = ScriptEngineManager().getEngineByExtension("js")
     private val logger = LoggerFactory.getLogger(CellEvaluator::class.java)
 
-    fun evaluate(
-        model: Model,
-        cells: List<Cell>
-    ): List<Cell> {
+    fun evaluate(model: Model, cells: List<Cell>): List<Cell> {
 
         val stack = Stack<Cell>()
 
@@ -29,15 +24,15 @@ class CellEvaluator {
         // as a mutable map, so we can update the cells in place
         // as they are being evaluated
         //
-        val cellLookup = cells.associateBy { it.name }.toMutableMap()
+        val cellLookupByName = cells.associateBy { it.name }.toMutableMap()
 
         /**
          * helper function to determine the unmet dependencies of any given cell
          * this requires the loop up
          */
         fun unmetDependencies(cell: Cell): List<Cell> {
-            return cell.dependencies.map { dep ->
-                cellLookup[dep]!!
+            return cell.dependentCellNames.map { dep ->
+                cellLookupByName[dep]!!
             }.filter { it.value == null }
         }
 
@@ -71,28 +66,52 @@ class CellEvaluator {
 
                 if (unmetDependencies.isEmpty()) {
                     // evaluate the cell
-                    val simpleBindings = SimpleBindings()
-                    headCell.dependencies.forEach { dep ->
-                        simpleBindings[dep] = cellLookup[dep]?.value
-                    }
-
+                    // using mXparser
                     val value = try {
-                        engine.eval(headCell.expression, simpleBindings).toString().toDoubleOrNull() ?: 0.0
-                    } catch (e: ScriptException) {
+                        val e = Expression(headCell.expression)
+                        // add some common arguments
+                        e.addArguments(Argument("period", headCell.period.toDouble()))
+                        e.missingUserDefinedArguments.forEach { argName ->
+                            e.addArguments(
+                                Argument(
+                                    argName, cellLookupByName[argName]?.value
+                                        ?: error("unable to resolve $argName")
+                                )
+                            )
+                        }
+                        e.calculate()
+                    } catch (e: Exception) {
                         logger.error("Unable to evaluate cell value", e)
                         0.0
                     }
-
-                    cellLookup[headCell.name] = headCell.copy(value = value)
+                    cellLookupByName[headCell.name] = headCell.copy(value = value)
                     stack.pop()
                 } else {
-                    // push dependencies
-                    unmetDependencies.forEach { dependentCell -> stack.push(dependentCell) }
-                    // TODO check circular reference
+                    // push dependencies into the stack, so they will now be evaluated
+                    unmetDependencies.forEach { dependentCell ->
+                        // circular dependency handling code
+                        checkCircularReference(stack, dependentCell)
+                        stack.push(dependentCell)
+                    }
                 }
             }
         }
-        return cells.map { cell -> cellLookup[cell.name]!! }
+        return cells.map { cell -> cellLookupByName[cell.name]!! }
+    }
+
+    private fun checkCircularReference(stack: Stack<Cell>, dependentCell: Cell) {
+        if (stack.contains(dependentCell)) {
+            // we trace the circular reference back to it's source
+            // and print this chain - by traversing the stack as if it's a list in reverse
+            val chain = mutableListOf(dependentCell)
+            var currCell = stack.pop()
+            while (currCell != dependentCell) {
+                chain.add(currCell)
+                currCell = stack.pop()
+            }
+            val chainStr = chain.joinToString(" -> ") { it.name }
+            error("Circular dependency found, $chainStr")
+        }
     }
 
 }

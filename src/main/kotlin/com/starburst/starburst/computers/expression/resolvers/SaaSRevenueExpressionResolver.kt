@@ -1,7 +1,7 @@
-package com.starburst.starburst.computers.drivers
+package com.starburst.starburst.computers.expression.resolvers
 
+import com.starburst.starburst.computers.ResolverContext
 import com.starburst.starburst.models.Cell
-import com.starburst.starburst.models.Model
 
 data class SaaSRevenue(
     val totalSubscriptionAtTerminalYear: Int,
@@ -9,12 +9,16 @@ data class SaaSRevenue(
     val averageRevenuePerSubscription: Double
 )
 
-class SaaSRevenueExpressionResolver {
-    fun resolveExpression(model: Model, cell: Cell): Cell {
-        val periods = model.periods ?: 5
+/**
+ * [SaaSRevenueExpressionResolver] takes assumptions from [SaaSRevenue] and
+ * turns them into expressions that expects growth toward a terminal subscription rate
+ */
+class SaaSRevenueExpressionResolver(private val ctx: ResolverContext) {
+    fun resolveExpression(cell: Cell): Cell {
+        val periods = ctx.model.periods ?: 5
         val period = cell.period
         val driver = cell.driver
-        val saaSRevenue = driver.saaSRevenue ?: error("")
+        val saaSRevenue = driver?.saaSRevenue ?: error("")
 
         val (
             totalSubscriptionAtTerminalYear,
@@ -24,7 +28,7 @@ class SaaSRevenueExpressionResolver {
 
         return cell.copy(
             expression = "((((${totalSubscriptionAtTerminalYear} - ${initialSubscriptions}) / $periods) * $period) + $initialSubscriptions) * $averageRevenuePerSubscription",
-            dependencies = emptyList()
+            dependentCellNames = emptyList()
         )
     }
 }
