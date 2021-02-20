@@ -15,7 +15,9 @@ import com.starburst.starburst.models.ReservedNames.OperatingExpense
 import com.starburst.starburst.models.ReservedNames.OperatingIncome
 import com.starburst.starburst.models.ReservedNames.Revenue
 import com.starburst.starburst.models.ReservedNames.TaxExpense
+import org.springframework.stereotype.Service
 
+@Service
 class GenericModelBuilder {
 
     /**
