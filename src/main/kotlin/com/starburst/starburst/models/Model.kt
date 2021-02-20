@@ -3,6 +3,7 @@ package com.starburst.starburst.models
 data class Model(
 
     val items: List<Item> = emptyList(),
+
     /*
     assumptions
      */
@@ -11,7 +12,7 @@ data class Model(
     val sharesOutstanding: Double? = null,
     val dilutedSharesOutstanding: Double? = null,
     val corporateTaxRate: Double = 0.1,
-    val costOnDebt: Double = 0.05,
+    val costOfDebt: Double = 0.05,
 
     /*
     projection period
