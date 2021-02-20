@@ -1,6 +1,6 @@
 package com.starburst.starburst.models
 
-object ReservedNames {
+object ReservedItemNames {
     const val Revenue = "Revenue"
     const val CostOfGoodsSold = "CostOfGoodsSold"
     const val GrossProfit = "GrossProfit"

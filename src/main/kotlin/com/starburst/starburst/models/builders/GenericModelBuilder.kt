@@ -6,15 +6,15 @@ import com.starburst.starburst.computers.CellGenerator
 import com.starburst.starburst.models.Cell
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
-import com.starburst.starburst.models.ReservedNames.CostOfGoodsSold
-import com.starburst.starburst.models.ReservedNames.GrossProfit
-import com.starburst.starburst.models.ReservedNames.InterestExpense
-import com.starburst.starburst.models.ReservedNames.NetIncome
-import com.starburst.starburst.models.ReservedNames.NonOperatingExpense
-import com.starburst.starburst.models.ReservedNames.OperatingExpense
-import com.starburst.starburst.models.ReservedNames.OperatingIncome
-import com.starburst.starburst.models.ReservedNames.Revenue
-import com.starburst.starburst.models.ReservedNames.TaxExpense
+import com.starburst.starburst.models.ReservedItemNames.CostOfGoodsSold
+import com.starburst.starburst.models.ReservedItemNames.GrossProfit
+import com.starburst.starburst.models.ReservedItemNames.InterestExpense
+import com.starburst.starburst.models.ReservedItemNames.NetIncome
+import com.starburst.starburst.models.ReservedItemNames.NonOperatingExpense
+import com.starburst.starburst.models.ReservedItemNames.OperatingExpense
+import com.starburst.starburst.models.ReservedItemNames.OperatingIncome
+import com.starburst.starburst.models.ReservedItemNames.Revenue
+import com.starburst.starburst.models.ReservedItemNames.TaxExpense
 import org.springframework.stereotype.Service
 
 @Service
