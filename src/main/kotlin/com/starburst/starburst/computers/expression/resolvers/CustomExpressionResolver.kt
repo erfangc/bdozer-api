@@ -9,7 +9,7 @@ data class CustomDriver(
 
 class CustomExpressionResolver(private val ctx: ResolverContext): ExpressionResolver {
     override fun resolveExpression(cell: Cell): Cell {
-        val expression = cell.driver?.customDriver?.formula ?: error("")
+        val expression = cell.driver?.customDriver?.formula ?: error("formula is required for custom cells")
         return StringExpressionResolver(ctx)
             .resolveExpression(cell.copy(expression = expression))
     }

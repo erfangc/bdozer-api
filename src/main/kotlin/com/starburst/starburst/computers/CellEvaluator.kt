@@ -96,7 +96,7 @@ class CellEvaluator {
                 }
             }
         }
-        return cells.map { cell -> cellLookupByName[cell.name]!! }
+        return cells.map { cell -> cellLookupByName[cell.name] ?: error("") }
     }
 
     private fun checkCircularReference(stack: Stack<Cell>, dependentCell: Cell) {

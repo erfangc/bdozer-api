@@ -1,6 +1,6 @@
 package com.starburst.starburst.computers
 
-import com.starburst.starburst.computers.CellGeneratorTest.Companion.pcCorp
+import com.starburst.starburst.computers.ModelToCellTranslatorTest.Companion.pcCorp
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -11,7 +11,7 @@ internal class CellExpressionResolverTest {
         val model = pcCorp()
         val results = CellExpressionResolver().resolveCellExpressions(
             model,
-            CellGenerator().generateCells(model)
+            ModelToCellTranslator().generateCells(model)
         )
 
         Assertions.assertEquals(10, results.size)

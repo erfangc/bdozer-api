@@ -1,6 +1,6 @@
 package com.starburst.starburst.computers
 
-import com.starburst.starburst.computers.CellGeneratorTest.Companion.pcCorp
+import com.starburst.starburst.computers.ModelToCellTranslatorTest.Companion.pcCorp
 import com.starburst.starburst.computers.expression.resolvers.CustomDriverExpressionResolverTest.Companion.circularReferenceModel
 import com.starburst.starburst.computers.expression.resolvers.CustomDriverExpressionResolverTest.Companion.fakeAircraftCompany
 import org.junit.jupiter.api.Test
@@ -18,7 +18,7 @@ internal class CellEvaluatorTest {
             model = model,
             cells = CellExpressionResolver().resolveCellExpressions(
                 model = model,
-                cells = CellGenerator().generateCells(model)
+                cells = ModelToCellTranslator().generateCells(model)
             )
         )
 
@@ -48,7 +48,7 @@ internal class CellEvaluatorTest {
             model = model,
             cells = CellExpressionResolver().resolveCellExpressions(
                 model = model,
-                cells = CellGenerator().generateCells(model)
+                cells = ModelToCellTranslator().generateCells(model)
             )
         )
         assertEquals(8, results.size)
@@ -63,7 +63,7 @@ internal class CellEvaluatorTest {
                 model = model,
                 cells = CellExpressionResolver().resolveCellExpressions(
                     model = model,
-                    cells = CellGenerator().generateCells(model)
+                    cells = ModelToCellTranslator().generateCells(model)
                 )
             )
         }

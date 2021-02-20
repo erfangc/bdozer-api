@@ -1,4 +1,4 @@
-package com.starburst.starburst.models
+package com.starburst.starburst.computers
 
 object ReservedItemNames {
     const val Revenue = "Revenue"
@@ -10,4 +10,6 @@ object ReservedItemNames {
     const val TaxExpense = "TaxExpense"
     const val InterestExpense = "InterestExpense"
     const val NetIncome = "NetIncome"
+    // Balance Sheet
+
 }

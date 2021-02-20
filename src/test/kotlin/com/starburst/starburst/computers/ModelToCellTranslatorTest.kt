@@ -10,13 +10,13 @@ import com.starburst.starburst.models.Model
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class CellGeneratorTest {
+internal class ModelToCellTranslatorTest {
 
     @Test
     fun generateCells() {
         val model = pcCorp()
 
-        val results = CellGenerator().generateCells(model)
+        val results = ModelToCellTranslator().generateCells(model)
 
         assertEquals(10, results.size)
 

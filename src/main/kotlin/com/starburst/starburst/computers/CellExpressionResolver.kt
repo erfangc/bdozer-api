@@ -53,7 +53,7 @@ class CellExpressionResolver {
 
                     DriverType.Custom -> CustomExpressionResolver(ctx)
                         .resolveExpression(cell)
-                    else -> error("")
+                    else -> error("unable to determine driver type")
                 }
             }
 

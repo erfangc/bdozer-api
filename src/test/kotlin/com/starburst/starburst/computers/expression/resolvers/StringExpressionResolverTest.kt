@@ -1,7 +1,7 @@
 package com.starburst.starburst.computers.expression.resolvers
 
 import com.starburst.starburst.computers.CellExpressionResolver
-import com.starburst.starburst.computers.CellGenerator
+import com.starburst.starburst.computers.ModelToCellTranslator
 import com.starburst.starburst.computers.ResolverContext
 import com.starburst.starburst.models.Driver
 import com.starburst.starburst.models.DriverType
@@ -36,7 +36,7 @@ internal class StringExpressionResolverTest {
         )
 
         val cells = CellExpressionResolver()
-            .resolveCellExpressions(model, CellGenerator().generateCells(model = model))
+            .resolveCellExpressions(model, ModelToCellTranslator().generateCells(model = model))
 
         val ctx = ResolverContext(
             model = model,

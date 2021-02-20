@@ -2,19 +2,19 @@ package com.starburst.starburst.models.builders
 
 import com.starburst.starburst.computers.CellEvaluator
 import com.starburst.starburst.computers.CellExpressionResolver
-import com.starburst.starburst.computers.CellGenerator
+import com.starburst.starburst.computers.ModelToCellTranslator
 import com.starburst.starburst.models.Cell
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
-import com.starburst.starburst.models.ReservedItemNames.CostOfGoodsSold
-import com.starburst.starburst.models.ReservedItemNames.GrossProfit
-import com.starburst.starburst.models.ReservedItemNames.InterestExpense
-import com.starburst.starburst.models.ReservedItemNames.NetIncome
-import com.starburst.starburst.models.ReservedItemNames.NonOperatingExpense
-import com.starburst.starburst.models.ReservedItemNames.OperatingExpense
-import com.starburst.starburst.models.ReservedItemNames.OperatingIncome
-import com.starburst.starburst.models.ReservedItemNames.Revenue
-import com.starburst.starburst.models.ReservedItemNames.TaxExpense
+import com.starburst.starburst.computers.ReservedItemNames.CostOfGoodsSold
+import com.starburst.starburst.computers.ReservedItemNames.GrossProfit
+import com.starburst.starburst.computers.ReservedItemNames.InterestExpense
+import com.starburst.starburst.computers.ReservedItemNames.NetIncome
+import com.starburst.starburst.computers.ReservedItemNames.NonOperatingExpense
+import com.starburst.starburst.computers.ReservedItemNames.OperatingExpense
+import com.starburst.starburst.computers.ReservedItemNames.OperatingIncome
+import com.starburst.starburst.computers.ReservedItemNames.Revenue
+import com.starburst.starburst.computers.ReservedItemNames.TaxExpense
 import org.springframework.stereotype.Service
 
 @Service
@@ -133,7 +133,7 @@ class ModelService {
     }
 
     fun evaluateModel(model: Model): List<Cell> {
-        val generateCells = CellGenerator().generateCells(model)
+        val generateCells = ModelToCellTranslator().generateCells(model)
         val cells = CellExpressionResolver().resolveCellExpressions(model, generateCells)
         return CellEvaluator().evaluate(model, cells)
     }

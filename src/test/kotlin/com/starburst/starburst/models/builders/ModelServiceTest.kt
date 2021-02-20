@@ -1,7 +1,7 @@
 package com.starburst.starburst.models.builders
 
 import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.ReservedItemNames
+import com.starburst.starburst.computers.ReservedItemNames
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
