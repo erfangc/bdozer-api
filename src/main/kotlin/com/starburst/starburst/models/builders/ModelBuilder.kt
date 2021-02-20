@@ -22,8 +22,9 @@ import org.springframework.stereotype.Service
 class ModelBuilder {
 
     /**
-     * Recreate and ensure correctness of the formula of key items
-     * are correct: e.g. Revenue, CostOfGoodsSold
+     * This method enhances the user provided [Model] to become a fully formed
+     * [Model] that is ready to be evaluated. This means mandatory [Item] are added
+     * and their relationships automatically defined and linkage established
      */
     fun reformulateModel(model: Model): Model {
         return model.copy(incomeStatementItems = reformulateIncomeStatement(model))
