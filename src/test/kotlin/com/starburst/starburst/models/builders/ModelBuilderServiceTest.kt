@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 
-internal class ModelServiceTest {
+internal class ModelBuilderServiceTest {
 
     @Test
     fun reformulateModel() {
-        val modelBuilder = ModelService()
+        val modelBuilder = ModelBuilderService()
 
         val model = modelBuilder.createModel()
 

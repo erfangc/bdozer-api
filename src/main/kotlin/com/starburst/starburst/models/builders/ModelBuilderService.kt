@@ -22,10 +22,11 @@ import com.starburst.starburst.computers.ReservedItemNames.ShareholdersEquity
 import com.starburst.starburst.computers.ReservedItemNames.TaxExpense
 import com.starburst.starburst.computers.ReservedItemNames.TotalAsset
 import com.starburst.starburst.computers.ReservedItemNames.TotalLiability
+import com.starburst.starburst.models.builders.SkeletonModel.skeletonModel
 import org.springframework.stereotype.Service
 
 @Service
-class ModelService {
+class ModelBuilderService {
 
     /**
      * Recreate and ensure correctness of the formula of key items
@@ -35,6 +36,8 @@ class ModelService {
         return model.copy(incomeStatementItems = reformulateIncomeStatement(model))
     }
 
+    private val modelToCellTranslator = ModelToCellTranslator()
+
     private fun reformulateIncomeStatement(model: Model): List<Item> {
         // everything until revenue
         val newItems = mutableListOf<Item>()
@@ -42,6 +45,7 @@ class ModelService {
         model.incomeStatementItems.forEach { item ->
             // test if we are at a break point - if not add to buffer
             when {
+                // update formula as well as historical value for NetIncome
                 item.name == NetIncome -> {
                     val historicalValue = (newItems.find { it.name == OperatingIncome }?.historicalValue ?: 0.0) -
                             (newItems.find { it.name == NonOperatingExpense }?.historicalValue ?: 0.0) -
@@ -55,11 +59,13 @@ class ModelService {
                     )
                     buffer.clear()
                 }
+                // update formula as well as historical value for GrossProfit
                 item.name == GrossProfit -> {
                     val historicalValue = (newItems.find { it.name == Revenue }?.historicalValue ?: 0.0) -
                             (newItems.find { it.name == CostOfGoodsSold }?.historicalValue ?: 0.0)
                     newItems.add(item.copy(expression = "$Revenue-$CostOfGoodsSold", historicalValue = historicalValue))
                 }
+                // update formula as well as historical value for Operating Income
                 item.name == OperatingIncome -> {
                     val historicalValue = (newItems.find { it.name == GrossProfit }?.historicalValue ?: 0.0) -
                             (newItems.find { it.name == OperatingExpense }?.historicalValue ?: 0.0)
@@ -109,81 +115,11 @@ class ModelService {
      * this doesn't have to be the only skeleton model available
      */
     fun createModel(): Model {
-        return Model(
-            periods = 5,
-            incomeStatementItems = listOf(
-                Item(
-                    name = Revenue,
-                    expression = "0.0"
-                ),
-                Item(
-                    name = CostOfGoodsSold,
-                    expression = "0.0"
-                ),
-                Item(
-                    name = GrossProfit,
-                    expression = "$Revenue - $CostOfGoodsSold"
-                ),
-                Item(
-                    name = OperatingExpense,
-                    expression = "0.0"
-                ),
-                Item(
-                    name = OperatingIncome,
-                    expression = "$GrossProfit - $OperatingExpense"
-                ),
-                Item(
-                    name = NonOperatingExpense,
-                    expression = "0.0"
-                ),
-                Item(
-                    name = InterestExpense,
-                    expression = "0.0"
-                ),
-                Item(
-                    name = TaxExpense,
-                    expression = "0.0"
-                ),
-                Item(
-                    name = NetIncome,
-                    expression = "$OperatingIncome - $NonOperatingExpense - $InterestExpense - $TaxExpense"
-                )
-            ),
-            balanceSheetItems = listOf(
-                Item(
-                    name = CurrentAsset,
-                    historicalValue = 0.0
-                ),
-                Item(
-                    name = LongTermAsset,
-                    historicalValue = 0.0
-                ),
-                Item(
-                    name = TotalAsset,
-                    historicalValue = 0.0
-                ),
-                Item(
-                    name = CurrentLiability,
-                    historicalValue = 0.0
-                ),
-                Item(
-                    name = LongTermLiability,
-                    historicalValue = 0.0
-                ),
-                Item(
-                    name = TotalLiability,
-                    historicalValue = 0.0
-                ),
-                Item(
-                    name = ShareholdersEquity,
-                    historicalValue = 0.0
-                )
-            )
-        )
+        return skeletonModel
     }
 
     fun evaluateModel(model: Model): List<Cell> {
-        val generateCells = ModelToCellTranslator().generateCells(model)
+        val generateCells = modelToCellTranslator.generateCells(model)
         val cells = CellExpressionResolver().resolveCellExpressions(model, generateCells)
         return CellEvaluator().evaluate(model, cells)
     }

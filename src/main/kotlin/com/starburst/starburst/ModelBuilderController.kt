@@ -2,26 +2,26 @@ package com.starburst.starburst
 
 import com.starburst.starburst.models.Cell
 import com.starburst.starburst.models.Model
-import com.starburst.starburst.models.builders.ModelService
+import com.starburst.starburst.models.builders.ModelBuilderService
 import org.springframework.web.bind.annotation.*
 
 @CrossOrigin
 @RestController
-class ModelBuilderController(private val modelService: ModelService) {
+class ModelBuilderController(private val modelBuilderService: ModelBuilderService) {
 
     @GetMapping("createModel")
     fun createModel(): Model {
-        return modelService.createModel()
+        return modelBuilderService.createModel()
     }
 
     @PostMapping("evaluateModel")
     fun evaluateModel(@RequestBody model: Model): List<Cell> {
-        return modelService.evaluateModel(model)
+        return modelBuilderService.evaluateModel(model)
     }
 
     @PostMapping("reformulateModel")
     fun reformulateModel(@RequestBody model: Model): Model {
-        return modelService.reformulateModel(model)
+        return modelBuilderService.reformulateModel(model)
     }
 
 }
