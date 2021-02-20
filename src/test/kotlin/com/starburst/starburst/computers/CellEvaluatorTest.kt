@@ -1,8 +1,8 @@
 package com.starburst.starburst.computers
 
 import com.starburst.starburst.computers.CellGeneratorTest.Companion.pcCorp
-import com.starburst.starburst.computers.expression.resolvers.CustomExpressionResolverTest.Companion.circularReferenceModel
-import com.starburst.starburst.computers.expression.resolvers.CustomExpressionResolverTest.Companion.fakeAircraftCompany
+import com.starburst.starburst.computers.expression.resolvers.CustomDriverExpressionResolverTest.Companion.circularReferenceModel
+import com.starburst.starburst.computers.expression.resolvers.CustomDriverExpressionResolverTest.Companion.fakeAircraftCompany
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*

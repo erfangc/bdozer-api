@@ -18,7 +18,7 @@ import com.starburst.starburst.models.ReservedItemNames.TaxExpense
 import org.springframework.stereotype.Service
 
 @Service
-class GenericModelBuilder {
+class ModelService {
 
     /**
      * Recreate and ensure correctness of the formula of key items
@@ -31,12 +31,35 @@ class GenericModelBuilder {
         model.items.forEach { item ->
             // test if we are at a break point - if not add to buffer
             when {
+                item.name == NetIncome -> {
+                    val historicalValue = (newItems.find { it.name == OperatingIncome }?.historicalValue ?: 0.0) -
+                    (newItems.find { it.name == NonOperatingExpense }?.historicalValue ?: 0.0) -
+                    (newItems.find { it.name == InterestExpense }?.historicalValue ?: 0.0) -
+                    (newItems.find { it.name == TaxExpense }?.historicalValue ?: 0.0)
+                    newItems.add(
+                        item.copy(
+                            expression = "$OperatingIncome-$NonOperatingExpense-$InterestExpense-$TaxExpense",
+                            historicalValue = historicalValue
+                        )
+                    )
+                    buffer.clear()
+                }
+                item.name == GrossProfit -> {
+                    val historicalValue = (newItems.find { it.name == Revenue }?.historicalValue ?: 0.0) -
+                            (newItems.find { it.name == CostOfGoodsSold }?.historicalValue ?: 0.0)
+                    newItems.add(item.copy(expression = "$Revenue-$CostOfGoodsSold", historicalValue = historicalValue))
+                }
+                item.name == OperatingIncome -> {
+                    val historicalValue = (newItems.find { it.name == GrossProfit }?.historicalValue ?: 0.0) -
+                            (newItems.find { it.name == OperatingExpense }?.historicalValue ?: 0.0)
+                    newItems.add(item.copy(expression = "$GrossProfit-$OperatingExpense", historicalValue = historicalValue))
+                }
                 atBreakPoint(item) -> {
                     // clear the buffer if we are at a break point
                     // set the break point's expression to be the sum of the other items
                     val expression = buffer.joinToString("+") { it.name }
+                    newItems.add(item.copy(expression = expression, historicalValue = buffer.sumByDouble { it.historicalValue }))
                     buffer.clear()
-                    newItems.add(item.copy(expression = expression))
                 }
                 shouldSkip(item) -> {
                     // these items don't matter, and they shouldn't
@@ -54,7 +77,7 @@ class GenericModelBuilder {
     }
 
     private fun shouldSkip(item: Item): Boolean {
-        return setOf(GrossProfit, OperatingIncome, InterestExpense, TaxExpense, NetIncome).contains(item.name)
+        return setOf(InterestExpense, TaxExpense).contains(item.name)
     }
 
     private fun atBreakPoint(item: Item): Boolean {

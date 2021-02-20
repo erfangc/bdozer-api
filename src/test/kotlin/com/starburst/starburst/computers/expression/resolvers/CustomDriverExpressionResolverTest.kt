@@ -10,7 +10,7 @@ import com.starburst.starburst.models.Model
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class CustomExpressionResolverTest {
+internal class CustomDriverExpressionResolverTest {
 
     @Test
     fun resolveExpression() {
@@ -36,12 +36,12 @@ internal class CustomExpressionResolverTest {
                     drivers = listOf(
                         Driver(
                             name = "Aircraft_Revenue",
-                            custom = Custom(expression = "(100% + period * 5%) * 200"),
+                            customDriver = CustomDriver(formula = "(100% + period * 5%) * 200"),
                             type = DriverType.Custom
                         ),
                         Driver(
                             name = "Aircraft_Parts",
-                            custom = Custom(expression = "Aircraft_Revenue * 0.35"),
+                            customDriver = CustomDriver(formula = "Aircraft_Revenue * 0.35"),
                             type = DriverType.Custom
                         )
                     ),
@@ -61,12 +61,12 @@ internal class CustomExpressionResolverTest {
                     drivers = listOf(
                         Driver(
                             name = "D1",
-                            custom = Custom(expression = "10 + Bad"),
+                            customDriver = CustomDriver(formula = "10 + Bad"),
                             type = DriverType.Custom
                         ),
                         Driver(
                             name = "D2",
-                            custom = Custom(expression = "D1 / 10"),
+                            customDriver = CustomDriver(formula = "D1 / 10"),
                             type = DriverType.Custom
                         )
                     ),
