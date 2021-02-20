@@ -1,12 +1,10 @@
-package com.starburst.starburst.computers
+package com.starburst.starburst.models.translator.resolvers
 
-import com.starburst.starburst.computers.expression.resolvers.FixedCost
-import com.starburst.starburst.computers.expression.resolvers.SaaSRevenue
-import com.starburst.starburst.computers.expression.resolvers.VariableCost
 import com.starburst.starburst.models.Driver
 import com.starburst.starburst.models.DriverType
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.translator.ModelToCellTranslator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

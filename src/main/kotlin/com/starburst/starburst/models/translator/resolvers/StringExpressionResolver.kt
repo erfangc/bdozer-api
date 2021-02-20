@@ -1,7 +1,7 @@
-package com.starburst.starburst.computers.expression.resolvers
+package com.starburst.starburst.models.translator.resolvers
 
 import com.starburst.starburst.computers.ResolverContext
-import com.starburst.starburst.models.Cell
+import com.starburst.starburst.cells.Cell
 import com.starburst.starburst.models.Item
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token.NOT_MATCHED

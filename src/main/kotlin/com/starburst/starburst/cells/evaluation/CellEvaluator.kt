@@ -1,6 +1,6 @@
-package com.starburst.starburst.computers
+package com.starburst.starburst.cells.evaluation
 
-import com.starburst.starburst.models.Cell
+import com.starburst.starburst.cells.Cell
 import com.starburst.starburst.models.Model
 import org.mariuszgromada.math.mxparser.Argument
 import org.mariuszgromada.math.mxparser.Expression

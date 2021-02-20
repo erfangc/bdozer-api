@@ -1,4 +1,7 @@
-package com.starburst.starburst.models
+package com.starburst.starburst.cells
+
+import com.starburst.starburst.models.Driver
+import com.starburst.starburst.models.Item
 
 data class Cell(
     val period: Int,

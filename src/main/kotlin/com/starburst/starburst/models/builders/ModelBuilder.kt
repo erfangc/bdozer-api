@@ -1,32 +1,25 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.computers.CellEvaluator
-import com.starburst.starburst.computers.CellExpressionResolver
-import com.starburst.starburst.computers.ModelToCellTranslator
-import com.starburst.starburst.models.Cell
+import com.starburst.starburst.cells.evaluation.CellEvaluator
+import com.starburst.starburst.models.translator.CellExpressionResolver
+import com.starburst.starburst.models.translator.ModelToCellTranslator
+import com.starburst.starburst.cells.Cell
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.computers.ReservedItemNames.CostOfGoodsSold
-import com.starburst.starburst.computers.ReservedItemNames.CurrentAsset
-import com.starburst.starburst.computers.ReservedItemNames.CurrentLiability
 import com.starburst.starburst.computers.ReservedItemNames.GrossProfit
 import com.starburst.starburst.computers.ReservedItemNames.InterestExpense
-import com.starburst.starburst.computers.ReservedItemNames.LongTermAsset
-import com.starburst.starburst.computers.ReservedItemNames.LongTermLiability
 import com.starburst.starburst.computers.ReservedItemNames.NetIncome
 import com.starburst.starburst.computers.ReservedItemNames.NonOperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingIncome
 import com.starburst.starburst.computers.ReservedItemNames.Revenue
-import com.starburst.starburst.computers.ReservedItemNames.ShareholdersEquity
 import com.starburst.starburst.computers.ReservedItemNames.TaxExpense
-import com.starburst.starburst.computers.ReservedItemNames.TotalAsset
-import com.starburst.starburst.computers.ReservedItemNames.TotalLiability
 import com.starburst.starburst.models.builders.SkeletonModel.skeletonModel
 import org.springframework.stereotype.Service
 
 @Service
-class ModelBuilderService {
+class ModelBuilder {
 
     /**
      * Recreate and ensure correctness of the formula of key items

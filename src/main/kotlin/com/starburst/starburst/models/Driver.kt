@@ -1,9 +1,9 @@
 package com.starburst.starburst.models
 
-import com.starburst.starburst.computers.expression.resolvers.CustomDriver
-import com.starburst.starburst.computers.expression.resolvers.FixedCost
-import com.starburst.starburst.computers.expression.resolvers.SaaSRevenue
-import com.starburst.starburst.computers.expression.resolvers.VariableCost
+import com.starburst.starburst.models.translator.resolvers.CustomDriver
+import com.starburst.starburst.models.translator.resolvers.FixedCost
+import com.starburst.starburst.models.translator.resolvers.SaaSRevenue
+import com.starburst.starburst.models.translator.resolvers.VariableCost
 
 data class Driver(
     val name: String,

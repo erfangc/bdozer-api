@@ -1,6 +1,6 @@
-package com.starburst.starburst.computers
+package com.starburst.starburst.models.translator
 
-import com.starburst.starburst.models.Cell
+import com.starburst.starburst.cells.Cell
 import com.starburst.starburst.models.Model
 
 /**
@@ -35,7 +35,7 @@ class ModelToCellTranslator {
                     // create a cell for the item itself
                     val itemCell = Cell(
                         period = period,
-                        name =  "${item.name}_Period$period",
+                        name = "${item.name}_Period$period",
                         item = item,
                         // by default the value of the item is the sum of it's drivers
                         expression = driverCells.joinToString("+") { it.name },
@@ -48,7 +48,7 @@ class ModelToCellTranslator {
                         Cell(
                             period = period,
                             item = item,
-                            name =  "${item.name}_Period$period"
+                            name = "${item.name}_Period$period"
                         )
                     )
                 }

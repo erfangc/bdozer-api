@@ -1,11 +1,11 @@
-package com.starburst.starburst.computers
+package com.starburst.starburst.cells.evaluation
 
-import com.starburst.starburst.computers.ModelToCellTranslatorTest.Companion.pcCorp
-import com.starburst.starburst.computers.expression.resolvers.CustomDriverExpressionResolverTest.Companion.circularReferenceModel
-import com.starburst.starburst.computers.expression.resolvers.CustomDriverExpressionResolverTest.Companion.fakeAircraftCompany
+import com.starburst.starburst.models.translator.CellExpressionResolver
+import com.starburst.starburst.models.translator.ModelToCellTranslator
+import com.starburst.starburst.models.translator.resolvers.ModelToCellTranslatorTest
+import com.starburst.starburst.models.translator.resolvers.CustomDriverExpressionResolverTest
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalStateException
 
@@ -13,7 +13,7 @@ internal class CellEvaluatorTest {
 
     @Test
     fun evaluate() {
-        val model = pcCorp()
+        val model = ModelToCellTranslatorTest.pcCorp()
         val results = CellEvaluator().evaluate(
             model = model,
             cells = CellExpressionResolver().resolveCellExpressions(
@@ -22,7 +22,7 @@ internal class CellEvaluatorTest {
             )
         )
 
-        assertEquals(10, results.size)
+        Assertions.assertEquals(10, results.size)
 
         assert(results.any { result -> result.value == 1275000.0 && result.name == "SaaSRevenue_Period1" })
         assert(results.any { result -> result.value == 1800000.0 && result.name == "SaaSRevenue_Period2" })
@@ -43,7 +43,7 @@ internal class CellEvaluatorTest {
 
     @Test
     internal fun evaluateWithCustomFormula() {
-        val model = fakeAircraftCompany()
+        val model = CustomDriverExpressionResolverTest.fakeAircraftCompany()
         val results = CellEvaluator().evaluate(
             model = model,
             cells = CellExpressionResolver().resolveCellExpressions(
@@ -51,13 +51,13 @@ internal class CellEvaluatorTest {
                 cells = ModelToCellTranslator().generateCells(model)
             )
         )
-        assertEquals(8, results.size)
-        assertEquals(143.0, results.find { it.name == "Profit_Period2" }?.value)
+        Assertions.assertEquals(8, results.size)
+        Assertions.assertEquals(143.0, results.find { it.name == "Profit_Period2" }?.value)
     }
 
     @Test
     internal fun evaluateWithCircularReference() {
-        val model = circularReferenceModel()
+        val model = CustomDriverExpressionResolverTest.circularReferenceModel()
         val a = assertThrows<IllegalStateException> {
             CellEvaluator().evaluate(
                 model = model,
@@ -67,6 +67,6 @@ internal class CellEvaluatorTest {
                 )
             )
         }
-        assertEquals("Circular dependency found, D1_Period1 -> I2_Period1 -> Bad_Period1", a.message)
+        Assertions.assertEquals("Circular dependency found, D1_Period1 -> I2_Period1 -> Bad_Period1", a.message)
     }
 }

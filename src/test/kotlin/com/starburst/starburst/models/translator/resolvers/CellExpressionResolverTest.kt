@@ -1,6 +1,8 @@
-package com.starburst.starburst.computers
+package com.starburst.starburst.models.translator.resolvers
 
-import com.starburst.starburst.computers.ModelToCellTranslatorTest.Companion.pcCorp
+import com.starburst.starburst.models.translator.resolvers.ModelToCellTranslatorTest.Companion.pcCorp
+import com.starburst.starburst.models.translator.CellExpressionResolver
+import com.starburst.starburst.models.translator.ModelToCellTranslator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

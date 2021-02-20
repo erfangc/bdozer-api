@@ -1,7 +1,7 @@
-package com.starburst.starburst.computers.expression.resolvers
+package com.starburst.starburst.models.translator.resolvers
 
 import com.starburst.starburst.computers.ResolverContext
-import com.starburst.starburst.models.Cell
+import com.starburst.starburst.cells.Cell
 
 data class CustomDriver(
     val formula: String = "0"

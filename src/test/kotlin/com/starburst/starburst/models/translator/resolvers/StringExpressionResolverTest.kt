@@ -1,7 +1,7 @@
-package com.starburst.starburst.computers.expression.resolvers
+package com.starburst.starburst.models.translator.resolvers
 
-import com.starburst.starburst.computers.CellExpressionResolver
-import com.starburst.starburst.computers.ModelToCellTranslator
+import com.starburst.starburst.models.translator.CellExpressionResolver
+import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.computers.ResolverContext
 import com.starburst.starburst.models.Driver
 import com.starburst.starburst.models.DriverType
