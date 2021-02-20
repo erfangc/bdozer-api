@@ -20,7 +20,7 @@ class ModelToCellTranslator {
         // TODO set the cell Address as well here
 
         return (1..periods).flatMap { period ->
-            model.items.flatMap { item ->
+            model.incomeStatementItems.flatMap { item ->
                 if (item.expression == null) {
                     // if there are no explicit expressions then
                     // the expression of a Item is just the sum of the drivers

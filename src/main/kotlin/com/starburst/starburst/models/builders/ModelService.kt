@@ -28,7 +28,7 @@ class ModelService {
         // everything until revenue
         val newItems = mutableListOf<Item>()
         val buffer = mutableListOf<Item>()
-        model.items.forEach { item ->
+        model.incomeStatementItems.forEach { item ->
             // test if we are at a break point - if not add to buffer
             when {
                 item.name == NetIncome -> {
@@ -73,7 +73,7 @@ class ModelService {
                 }
             }
         }
-        return model.copy(items = newItems.toList())
+        return model.copy(incomeStatementItems = newItems.toList())
     }
 
     private fun shouldSkip(item: Item): Boolean {
@@ -90,7 +90,7 @@ class ModelService {
      */
     fun createModel(): Model {
         return Model(
-            items = listOf(
+            incomeStatementItems = listOf(
                 Item(
                     name = Revenue,
                     expression = "0.0"

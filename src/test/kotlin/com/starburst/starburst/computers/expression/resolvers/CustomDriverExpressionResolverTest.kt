@@ -31,7 +31,7 @@ internal class CustomDriverExpressionResolverTest {
 
     companion object {
         fun fakeAircraftCompany() = Model(
-            items = listOf(
+            incomeStatementItems = listOf(
                 Item(
                     drivers = listOf(
                         Driver(
@@ -56,7 +56,7 @@ internal class CustomDriverExpressionResolverTest {
         )
 
         fun circularReferenceModel() = Model(
-            items = listOf(
+            incomeStatementItems = listOf(
                 Item(
                     drivers = listOf(
                         Driver(

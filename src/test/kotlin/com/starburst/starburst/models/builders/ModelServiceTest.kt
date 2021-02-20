@@ -15,7 +15,7 @@ internal class ModelServiceTest {
         val model = modelBuilder.createModel()
 
         val updatedModel = model.copy(
-            items = listOf(
+            incomeStatementItems = listOf(
                 Item(
                     name = "CommercialAircraft",
                     expression = "100.0"

@@ -38,7 +38,7 @@ internal class ModelToCellTranslatorTest {
 
     companion object {
         fun pcCorp() = Model(
-            items = listOf(
+            incomeStatementItems = listOf(
                 Item(
                     drivers = listOf(
                         Driver(

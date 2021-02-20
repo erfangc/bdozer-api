@@ -16,7 +16,7 @@ internal class StringExpressionResolverTest {
     @Test
     fun resolveExpression() {
         val model = Model(
-            items = listOf(
+            incomeStatementItems = listOf(
                 Item(
                     drivers = listOf(
                         Driver(

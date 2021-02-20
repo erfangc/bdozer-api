@@ -2,7 +2,9 @@ package com.starburst.starburst.models
 
 data class Model(
 
-    val items: List<Item> = emptyList(),
+    val incomeStatementItems: List<Item> = emptyList(),
+    val balanceSheetItems: List<Item> = emptyList(),
+    val otherItems: List<Item> = emptyList(),
 
     /*
     assumptions
