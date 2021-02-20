@@ -7,14 +7,21 @@ import com.starburst.starburst.models.Cell
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.computers.ReservedItemNames.CostOfGoodsSold
+import com.starburst.starburst.computers.ReservedItemNames.CurrentAsset
+import com.starburst.starburst.computers.ReservedItemNames.CurrentLiability
 import com.starburst.starburst.computers.ReservedItemNames.GrossProfit
 import com.starburst.starburst.computers.ReservedItemNames.InterestExpense
+import com.starburst.starburst.computers.ReservedItemNames.LongTermAsset
+import com.starburst.starburst.computers.ReservedItemNames.LongTermLiability
 import com.starburst.starburst.computers.ReservedItemNames.NetIncome
 import com.starburst.starburst.computers.ReservedItemNames.NonOperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingIncome
 import com.starburst.starburst.computers.ReservedItemNames.Revenue
+import com.starburst.starburst.computers.ReservedItemNames.ShareholdersEquity
 import com.starburst.starburst.computers.ReservedItemNames.TaxExpense
+import com.starburst.starburst.computers.ReservedItemNames.TotalAsset
+import com.starburst.starburst.computers.ReservedItemNames.TotalLiability
 import org.springframework.stereotype.Service
 
 @Service
@@ -25,6 +32,10 @@ class ModelService {
      * are correct: e.g. Revenue, CostOfGoodsSold
      */
     fun reformulateModel(model: Model): Model {
+        return model.copy(incomeStatementItems = reformulateIncomeStatement(model))
+    }
+
+    private fun reformulateIncomeStatement(model: Model): List<Item> {
         // everything until revenue
         val newItems = mutableListOf<Item>()
         val buffer = mutableListOf<Item>()
@@ -33,9 +44,9 @@ class ModelService {
             when {
                 item.name == NetIncome -> {
                     val historicalValue = (newItems.find { it.name == OperatingIncome }?.historicalValue ?: 0.0) -
-                    (newItems.find { it.name == NonOperatingExpense }?.historicalValue ?: 0.0) -
-                    (newItems.find { it.name == InterestExpense }?.historicalValue ?: 0.0) -
-                    (newItems.find { it.name == TaxExpense }?.historicalValue ?: 0.0)
+                            (newItems.find { it.name == NonOperatingExpense }?.historicalValue ?: 0.0) -
+                            (newItems.find { it.name == InterestExpense }?.historicalValue ?: 0.0) -
+                            (newItems.find { it.name == TaxExpense }?.historicalValue ?: 0.0)
                     newItems.add(
                         item.copy(
                             expression = "$OperatingIncome-$NonOperatingExpense-$InterestExpense-$TaxExpense",
@@ -52,13 +63,22 @@ class ModelService {
                 item.name == OperatingIncome -> {
                     val historicalValue = (newItems.find { it.name == GrossProfit }?.historicalValue ?: 0.0) -
                             (newItems.find { it.name == OperatingExpense }?.historicalValue ?: 0.0)
-                    newItems.add(item.copy(expression = "$GrossProfit-$OperatingExpense", historicalValue = historicalValue))
+                    newItems.add(
+                        item.copy(
+                            expression = "$GrossProfit-$OperatingExpense",
+                            historicalValue = historicalValue
+                        )
+                    )
                 }
                 atBreakPoint(item) -> {
                     // clear the buffer if we are at a break point
                     // set the break point's expression to be the sum of the other items
                     val expression = buffer.joinToString("+") { it.name }
-                    newItems.add(item.copy(expression = expression, historicalValue = buffer.sumByDouble { it.historicalValue }))
+                    newItems.add(
+                        item.copy(
+                            expression = expression,
+                            historicalValue = buffer.sumByDouble { it.historicalValue })
+                    )
                     buffer.clear()
                 }
                 shouldSkip(item) -> {
@@ -73,7 +93,7 @@ class ModelService {
                 }
             }
         }
-        return model.copy(incomeStatementItems = newItems.toList())
+        return newItems.toList() // make it immutable again
     }
 
     private fun shouldSkip(item: Item): Boolean {
@@ -90,6 +110,7 @@ class ModelService {
      */
     fun createModel(): Model {
         return Model(
+            periods = 5,
             incomeStatementItems = listOf(
                 Item(
                     name = Revenue,
@@ -128,7 +149,36 @@ class ModelService {
                     expression = "$OperatingIncome - $NonOperatingExpense - $InterestExpense - $TaxExpense"
                 )
             ),
-            periods = 5
+            balanceSheetItems = listOf(
+                Item(
+                    name = CurrentAsset,
+                    historicalValue = 0.0
+                ),
+                Item(
+                    name = LongTermAsset,
+                    historicalValue = 0.0
+                ),
+                Item(
+                    name = TotalAsset,
+                    historicalValue = 0.0
+                ),
+                Item(
+                    name = CurrentLiability,
+                    historicalValue = 0.0
+                ),
+                Item(
+                    name = LongTermLiability,
+                    historicalValue = 0.0
+                ),
+                Item(
+                    name = TotalLiability,
+                    historicalValue = 0.0
+                ),
+                Item(
+                    name = ShareholdersEquity,
+                    historicalValue = 0.0
+                )
+            )
         )
     }
 
