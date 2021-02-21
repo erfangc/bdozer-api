@@ -25,4 +25,6 @@ object ReservedItemNames {
     const val DepreciationAmortization = "DepreciationAmortization"
     const val StockBasedCompensation = "StockBasedCompensation"
     const val ChangeInWorkingCapital = "ChangeInWorkingCapital"
+    const val SharesOutstanding = "SharesOutstanding"
+    const val DilutedSharesOutstanding = "DilutedSharesOutstanding"
 }

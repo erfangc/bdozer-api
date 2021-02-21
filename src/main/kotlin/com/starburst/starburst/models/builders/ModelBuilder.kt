@@ -1,6 +1,5 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.spreadsheet.Cell
 import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import com.starburst.starburst.computers.ReservedItemNames.CapitalExpenditure
 import com.starburst.starburst.computers.ReservedItemNames.ChangeInWorkingCapital
@@ -19,16 +18,19 @@ import com.starburst.starburst.computers.ReservedItemNames.OperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingIncome
 import com.starburst.starburst.computers.ReservedItemNames.Revenue
 import com.starburst.starburst.computers.ReservedItemNames.ShareholdersEquity
+import com.starburst.starburst.computers.ReservedItemNames.SharesOutstanding
 import com.starburst.starburst.computers.ReservedItemNames.StockBasedCompensation
 import com.starburst.starburst.computers.ReservedItemNames.TaxExpense
 import com.starburst.starburst.computers.ReservedItemNames.TotalAsset
 import com.starburst.starburst.computers.ReservedItemNames.TotalLiability
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.ModelEvaluationOutput
 import com.starburst.starburst.models.Util.previous
 import com.starburst.starburst.models.builders.SkeletonModel.skeletonModel
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
+import com.starburst.starburst.pv.DcfCalculator
 import org.springframework.stereotype.Service
 
 @Service
@@ -117,7 +119,7 @@ class ModelBuilder {
 
         val taxExpenseIdx = idxOfInc(TaxExpense)
         val taxExpenseItem = if (incomeStatementItems[taxExpenseIdx].expression == null) {
-            incomeStatementItems[taxExpenseIdx].copy(expression = "0.0")
+            incomeStatementItems[taxExpenseIdx].copy(expression = "${model.corporateTaxRate}*($OperatingIncome-$NonOperatingExpense-$InterestExpense)")
         } else {
             incomeStatementItems[taxExpenseIdx]
         }
@@ -199,6 +201,13 @@ class ModelBuilder {
             expression = "$NetIncome-$CapitalExpenditure+$DepreciationAmortization+$StockBasedCompensation-$ChangeInWorkingCapital"
         )
 
+        val sharesOutstandingItem = Item(
+            name = SharesOutstanding,
+            description = "Shares Outstanding",
+            // TODO calculate actual shares outstanding
+            expression = model.sharesOutstanding?.toString() ?: "1.0"
+        )
+
         //
         // TODO compute the diluted number of shares to derive at enterprise value / share
         //
@@ -221,7 +230,8 @@ class ModelBuilder {
             daItem,
             sbcItem,
             changeInWorkingCapitalItem,
-            fcfItem
+            fcfItem,
+            sharesOutstandingItem
         )
 
         val balanceSheetItemsNew = listOf(
@@ -253,11 +263,12 @@ class ModelBuilder {
      * Evaluates a user provided model, prior to evaluation [reformulateModel] will be invoked
      * to ensure the model is in good form
      */
-    fun evaluateModel(model: Model): List<Cell> {
+    fun evaluateModel(model: Model): ModelEvaluationOutput {
         val fullyFormedModel = reformulateModel(model)
         val generateCells = modelToCellTranslator.generateCells(fullyFormedModel)
         val cells = CellFormulaTranslator().populateCellsWithFormulas(fullyFormedModel, generateCells)
-        return CellEvaluator().evaluate(cells)
+        val evaluatedCells = CellEvaluator().evaluate(cells)
+        return DcfCalculator(fullyFormedModel).calcPv(evaluatedCells)
     }
 
 }
