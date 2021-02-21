@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 internal class DcfCalculatorTest {
 
     @Test
-    fun calcPv() {
+    fun performDcf() {
         val model = fictitiousSaaSCompany()
         val output = ModelBuilder().evaluateModel(model)
         assertEquals(89.7663065536077, output.targetPriceUnderExitMultipleMethod)
