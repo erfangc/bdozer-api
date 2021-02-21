@@ -7,6 +7,7 @@ import com.starburst.starburst.models.Driver
 import com.starburst.starburst.models.DriverType
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.translator.subtypes.dataclasses.CustomDriver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

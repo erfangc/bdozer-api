@@ -1,4 +1,4 @@
-package com.starburst.starburst.models.translator.subtypes
+package com.starburst.starburst.models.translator.subtypes.dataclasses
 
 data class SaaSRevenue(
     val totalSubscriptionAtTerminalYear: Int,

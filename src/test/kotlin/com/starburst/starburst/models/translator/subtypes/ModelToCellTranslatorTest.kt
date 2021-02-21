@@ -5,6 +5,9 @@ import com.starburst.starburst.models.DriverType
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.translator.ModelToCellTranslator
+import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
+import com.starburst.starburst.models.translator.subtypes.dataclasses.SaaSRevenue
+import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

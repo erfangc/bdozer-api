@@ -3,8 +3,8 @@ package com.starburst.starburst
 import com.starburst.starburst.computers.ReservedItemNames
 import com.starburst.starburst.models.*
 import com.starburst.starburst.models.builders.ModelBuilder
-import com.starburst.starburst.models.translator.subtypes.SaaSRevenue
-import com.starburst.starburst.models.translator.subtypes.VariableCost
+import com.starburst.starburst.models.translator.subtypes.dataclasses.SaaSRevenue
+import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
 import org.springframework.web.bind.annotation.*
 
 @CrossOrigin
