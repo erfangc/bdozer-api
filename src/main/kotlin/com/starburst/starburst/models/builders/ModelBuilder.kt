@@ -36,6 +36,15 @@ class ModelBuilder {
 
     private val modelToCellTranslator = ModelToCellTranslator()
 
+    private fun sanitize(formula: String): String {
+        // if the formual is empty then return 0
+        return if (formula.isEmpty()) {
+            "0.0"
+        } else {
+            formula
+        }
+    }
+
     /**
      * This method enhances the user provided [Model] to become a fully formed
      * [Model] that is ready to be evaluated. This means mandatory [Item] are added
@@ -61,13 +70,13 @@ class ModelBuilder {
         val revenueIdx = idxOfInc(Revenue)
         val revenueItems = incomeStatementItems.subList(0, revenueIdx)
         val revenueSubtotal =
-            incomeStatementItems[revenueIdx].copy(expression = revenueItems.joinToString("+") { it.name })
+            incomeStatementItems[revenueIdx].copy(expression = sanitize(revenueItems.joinToString("+") { it.name }))
 
         // Step 2 - calculate cost of goods sold
         val cogsIdx = idxOfInc(CostOfGoodsSold)
         val cogsItems = incomeStatementItems.subList(revenueIdx + 1, cogsIdx)
         val cogsSubtotal =
-            incomeStatementItems[cogsIdx].copy(expression = cogsItems.joinToString("+") { it.name })
+            incomeStatementItems[cogsIdx].copy(expression = sanitize(cogsItems.joinToString("+") { it.name }))
 
         //
         // Step 3 - calculate gross profit
@@ -80,7 +89,7 @@ class ModelBuilder {
         //
         val opExpIdx = idxOfInc(OperatingExpense)
         val opExpItems = incomeStatementItems.subList(grossProfitIdx + 1, opExpIdx)
-        val opExpSubtotal = incomeStatementItems[opExpIdx].copy(expression = opExpItems.joinToString("+") { it.name })
+        val opExpSubtotal = incomeStatementItems[opExpIdx].copy(expression = sanitize(opExpItems.joinToString("+") { it.name }))
 
         //
         // Step 5 - calculate operating income
@@ -94,16 +103,24 @@ class ModelBuilder {
         val nonOpExpIdx = idxOfInc(NonOperatingExpense)
         val nonOpExpItems = incomeStatementItems.subList(opIncIdx + 1, nonOpExpIdx)
         val nonOpExpSubtotal =
-            incomeStatementItems[nonOpExpIdx].copy(expression = nonOpExpItems.joinToString("+") { it.name })
+            incomeStatementItems[nonOpExpIdx].copy(expression = sanitize(nonOpExpItems.joinToString("+") { it.name }))
 
         //
         // Step 7 - calculate interest/tax expenses
         // TODO actually do something here
         val intExpIdx = idxOfInc(InterestExpense)
-        val intExpItem = incomeStatementItems[intExpIdx]
+        val intExpItem = if (incomeStatementItems[intExpIdx].expression == null) {
+            incomeStatementItems[intExpIdx].copy(expression = "0.0")
+        } else {
+            incomeStatementItems[intExpIdx]
+        }
 
         val taxExpenseIdx = idxOfInc(TaxExpense)
-        val taxExpenseItem = incomeStatementItems[taxExpenseIdx]
+        val taxExpenseItem = if (incomeStatementItems[taxExpenseIdx].expression == null) {
+            incomeStatementItems[taxExpenseIdx].copy(expression = "0.0")
+        } else {
+            incomeStatementItems[taxExpenseIdx]
+        }
 
         //
         // Step 8 - calculate net income
@@ -138,7 +155,7 @@ class ModelBuilder {
         )
 
         // ---------------------
-        // balance sheet updates
+        // Balance sheet updates
         // ---------------------
 
         //
@@ -217,7 +234,11 @@ class ModelBuilder {
             equityItem
         )
 
-        return model.copy(incomeStatementItems = incomeStatementItemsNew, otherItems = otherItems, balanceSheetItems = balanceSheetItemsNew)
+        return model.copy(
+            incomeStatementItems = incomeStatementItemsNew,
+            balanceSheetItems = balanceSheetItemsNew,
+            otherItems = otherItems
+        )
     }
 
     /**
