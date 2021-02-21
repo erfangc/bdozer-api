@@ -1,25 +1,24 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.cells.evaluation.CellEvaluator
-import com.starburst.starburst.models.translator.CellExpressionResolver
-import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.cells.Cell
-import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.Model
+import com.starburst.starburst.cells.evaluation.CellEvaluator
 import com.starburst.starburst.computers.ReservedItemNames.CostOfGoodsSold
 import com.starburst.starburst.computers.ReservedItemNames.GrossProfit
-import com.starburst.starburst.computers.ReservedItemNames.InterestExpense
-import com.starburst.starburst.computers.ReservedItemNames.NetIncome
 import com.starburst.starburst.computers.ReservedItemNames.NonOperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingIncome
 import com.starburst.starburst.computers.ReservedItemNames.Revenue
-import com.starburst.starburst.computers.ReservedItemNames.TaxExpense
+import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.builders.SkeletonModel.skeletonModel
+import com.starburst.starburst.models.translator.CellExpressionResolver
+import com.starburst.starburst.models.translator.ModelToCellTranslator
 import org.springframework.stereotype.Service
 
 @Service
 class ModelBuilder {
+
+    private val modelToCellTranslator = ModelToCellTranslator()
 
     /**
      * This method enhances the user provided [Model] to become a fully formed
@@ -27,81 +26,69 @@ class ModelBuilder {
      * and their relationships automatically defined and linkage established
      */
     fun reformulateModel(model: Model): Model {
-        return model.copy(incomeStatementItems = reformulateIncomeStatement(model))
-    }
 
-    private val modelToCellTranslator = ModelToCellTranslator()
-
-    private fun reformulateIncomeStatement(model: Model): List<Item> {
-        // everything until revenue
-        val newItems = mutableListOf<Item>()
-        val buffer = mutableListOf<Item>()
-        model.incomeStatementItems.forEach { item ->
-            // test if we are at a break point - if not add to buffer
-            when {
-                // update formula as well as historical value for NetIncome
-                item.name == NetIncome -> {
-                    val historicalValue = (newItems.find { it.name == OperatingIncome }?.historicalValue ?: 0.0) -
-                            (newItems.find { it.name == NonOperatingExpense }?.historicalValue ?: 0.0) -
-                            (newItems.find { it.name == InterestExpense }?.historicalValue ?: 0.0) -
-                            (newItems.find { it.name == TaxExpense }?.historicalValue ?: 0.0)
-                    newItems.add(
-                        item.copy(
-                            expression = "$OperatingIncome-$NonOperatingExpense-$InterestExpense-$TaxExpense",
-                            historicalValue = historicalValue
-                        )
-                    )
-                    buffer.clear()
-                }
-                // update formula as well as historical value for GrossProfit
-                item.name == GrossProfit -> {
-                    val historicalValue = (newItems.find { it.name == Revenue }?.historicalValue ?: 0.0) -
-                            (newItems.find { it.name == CostOfGoodsSold }?.historicalValue ?: 0.0)
-                    newItems.add(item.copy(expression = "$Revenue-$CostOfGoodsSold", historicalValue = historicalValue))
-                }
-                // update formula as well as historical value for Operating Income
-                item.name == OperatingIncome -> {
-                    val historicalValue = (newItems.find { it.name == GrossProfit }?.historicalValue ?: 0.0) -
-                            (newItems.find { it.name == OperatingExpense }?.historicalValue ?: 0.0)
-                    newItems.add(
-                        item.copy(
-                            expression = "$GrossProfit-$OperatingExpense",
-                            historicalValue = historicalValue
-                        )
-                    )
-                }
-                atBreakPoint(item) -> {
-                    // clear the buffer if we are at a break point
-                    // set the break point's expression to be the sum of the other items
-                    val expression = buffer.joinToString("+") { it.name }
-                    newItems.add(
-                        item.copy(
-                            expression = expression,
-                            historicalValue = buffer.sumByDouble { it.historicalValue })
-                    )
-                    buffer.clear()
-                }
-                shouldSkip(item) -> {
-                    // these items don't matter, and they shouldn't
-                    // be part of any buffer either
-                    newItems.add(item)
-                }
-                else -> {
-                    // these are user added items that belongs on a buffer
-                    buffer.add(item)
-                    newItems.add(item)
-                }
-            }
+        // TODO do the DCF here in abstract
+        // Step 1 - calculate revenue
+        val incomeStatementItems = model.incomeStatementItems
+        fun idxOf(name: String): Int {
+            return incomeStatementItems.indexOfFirst { it.name == name }
         }
-        return newItems.toList() // make it immutable again
+
+        val revenueIdx = idxOf(Revenue)
+        val revenueItems = incomeStatementItems.subList(0, revenueIdx)
+        val revenueSubtotal =
+            incomeStatementItems[revenueIdx].copy(expression = revenueItems.joinToString("+") { it.name })
+
+        // Step 2 - calculate cost of goods sold
+        val cogsIdx = idxOf(CostOfGoodsSold)
+        val cogsItems = incomeStatementItems.subList(revenueIdx + 1, cogsIdx)
+        val cogsSubtotal =
+            incomeStatementItems[cogsIdx].copy(expression = cogsItems.joinToString("+") { it.name })
+
+        // Step 3 - calculate gross profit
+        val grossProfitIdx = idxOf(GrossProfit)
+        val grossProfitSubtotal = incomeStatementItems[grossProfitIdx].copy(expression = "$Revenue-$CostOfGoodsSold")
+
+        // Step 4 - calculate operating expenses
+        val opExpIdx = idxOf(OperatingExpense)
+        val opExpItems = incomeStatementItems.subList(grossProfitIdx + 1, opExpIdx)
+        val opExpSubtotal = incomeStatementItems[opExpIdx].copy(expression = opExpItems.joinToString("+") { it.name })
+
+        // Step 5 - calculate operating income
+        val opIncIdx = idxOf(OperatingIncome)
+        val opIncSubtotal = incomeStatementItems[opIncIdx].copy(expression = "$GrossProfit-$OperatingExpense")
+
+        // Step 6 - calculate non-operating expenses
+        val nonOpExpIdx = idxOf(NonOperatingExpense)
+        val nonOpExpItems = incomeStatementItems.subList(opIncIdx + 1, nonOpExpIdx)
+        val nonOpExpSubtotal = incomeStatementItems[nonOpExpIdx].copy(expression = nonOpExpItems.joinToString("+") { it.name })
+
+        // Step 7 - calculate interest/tax expenses
+        // TODO actually do something here
+
+        // Step 8 - calculate net income
+
+        // Step 9 - calculate CAPEX
+        // TODO go through the drivers and figure out which ones should be treated as CAPEX
+
+        // Step 10 - calculate depreciation & amortization
+        // TODO go through the drivers and figure out which ones require depreciation & amortization adjustment
+
+        // Step 11 - calculate stock based compensation
+        // TODO go through the drivers and figure out which ones is SBC - create the formula
+
+        // Step 12 - calculate free cash flow
+
+        // Step 13 - calculate balance sheet impact
+
+        return model
     }
 
-    private fun shouldSkip(item: Item): Boolean {
-        return setOf(InterestExpense, TaxExpense).contains(item.name)
-    }
-
-    private fun atBreakPoint(item: Item): Boolean {
-        return setOf(Revenue, CostOfGoodsSold, OperatingExpense, NonOperatingExpense).contains(item.name)
+    /**
+     * Create cell name that refers to [previous] instance of an item
+     */
+    private fun previous(name: String): String {
+        return "Previous_$name"
     }
 
     /**
@@ -112,10 +99,15 @@ class ModelBuilder {
         return skeletonModel
     }
 
+    /**
+     * Evaluates a user provided model, prior to evaluation [reformulateModel] will be invoked
+     * to ensure the model is in good form
+     */
     fun evaluateModel(model: Model): List<Cell> {
-        val generateCells = modelToCellTranslator.generateCells(model)
-        val cells = CellExpressionResolver().resolveCellExpressions(model, generateCells)
-        return CellEvaluator().evaluate(model, cells)
+        val fullyFormedModel = reformulateModel(model)
+        val generateCells = modelToCellTranslator.generateCells(fullyFormedModel)
+        val cells = CellExpressionResolver().resolveCellExpressions(fullyFormedModel, generateCells)
+        return CellEvaluator().evaluate(fullyFormedModel, cells)
     }
 
 }
