@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin
 @RestController
 @RequestMapping("models")
-class ModelsController {
+class ModelsController(private val modelBuilder: ModelBuilder) {
 
     @GetMapping("default")
     fun default(): Model {
-        return defaultModel()
+        return modelBuilder.reformulateModel(defaultModel())
     }
 
     companion object {

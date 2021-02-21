@@ -74,7 +74,7 @@ class ModelBuilder {
         val revenueSubtotal =
             incomeStatementItems[revenueIdx].copy(
                 expression = sanitize(revenueItems.joinToString("+") { it.name }),
-                historicalValue = revenueItems.sumByDouble { it.historicalValue ?: 0.0 }
+                historicalValue = revenueItems.sumByDouble { it.historicalValue }
             )
 
         //
@@ -85,7 +85,7 @@ class ModelBuilder {
         val cogsSubtotal =
             incomeStatementItems[cogsIdx].copy(
                 expression = sanitize(cogsItems.joinToString("+") { it.name }),
-                historicalValue = cogsItems.sumByDouble { it.historicalValue ?: 0.0 }
+                historicalValue = cogsItems.sumByDouble { it.historicalValue }
             )
 
         //
@@ -94,7 +94,7 @@ class ModelBuilder {
         val grossProfitIdx = idxOfInc(GrossProfit)
         val grossProfitSubtotal = incomeStatementItems[grossProfitIdx].copy(
             expression = "$Revenue-$CostOfGoodsSold",
-            historicalValue = revenueSubtotal.historicalValue!! - cogsSubtotal.historicalValue!!
+            historicalValue = revenueSubtotal.historicalValue - cogsSubtotal.historicalValue
         )
 
         //
@@ -104,7 +104,7 @@ class ModelBuilder {
         val opExpItems = incomeStatementItems.subList(grossProfitIdx + 1, opExpIdx)
         val opExpSubtotal = incomeStatementItems[opExpIdx].copy(
             expression = sanitize(opExpItems.joinToString("+") { it.name }),
-            historicalValue = opExpItems.sumByDouble { it.historicalValue ?: 0.0 }
+            historicalValue = opExpItems.sumByDouble { it.historicalValue }
         )
 
         //
@@ -113,7 +113,7 @@ class ModelBuilder {
         val opIncIdx = idxOfInc(OperatingIncome)
         val opIncSubtotal = incomeStatementItems[opIncIdx].copy(
             expression = "$GrossProfit-$OperatingExpense",
-            historicalValue = opExpItems.sumByDouble { it.historicalValue ?: 0.0 }
+            historicalValue = opExpItems.sumByDouble { it.historicalValue }
         )
 
         //
@@ -124,7 +124,7 @@ class ModelBuilder {
         val nonOpExpSubtotal =
             incomeStatementItems[nonOpExpIdx].copy(
                 expression = sanitize(nonOpExpItems.joinToString("+") { it.name }),
-                historicalValue = nonOpExpItems.sumByDouble { it.historicalValue ?: 0.0 }
+                historicalValue = nonOpExpItems.sumByDouble { it.historicalValue }
             )
 
         //
@@ -139,7 +139,9 @@ class ModelBuilder {
 
         val taxExpenseIdx = idxOfInc(TaxExpense)
         val taxExpenseItem = if (incomeStatementItems[taxExpenseIdx].expression == null) {
-            incomeStatementItems[taxExpenseIdx].copy(expression = "${model.corporateTaxRate}*($OperatingIncome-$NonOperatingExpense-$InterestExpense)")
+            incomeStatementItems[taxExpenseIdx].copy(
+                expression = "${model.corporateTaxRate}*($OperatingIncome-$NonOperatingExpense-$InterestExpense)"
+            )
         } else {
             incomeStatementItems[taxExpenseIdx]
         }
@@ -150,10 +152,10 @@ class ModelBuilder {
         val netIncomeIdx = idxOfInc(NetIncome)
         val netIncomeSubtotal = incomeStatementItems[netIncomeIdx].copy(
             expression = "$OperatingIncome-$NonOperatingExpense-$InterestExpense-$TaxExpense",
-            historicalValue = (opIncSubtotal.historicalValue ?: 0.0) -
-                    (nonOpExpSubtotal.historicalValue ?: 0.0) -
-                    (intExpItem.historicalValue ?: 0.0) -
-                    (taxExpenseItem.historicalValue ?: 0.0)
+            historicalValue = opIncSubtotal.historicalValue -
+                    nonOpExpSubtotal.historicalValue -
+                    intExpItem.historicalValue -
+                    taxExpenseItem.historicalValue
         )
 
         //
