@@ -91,6 +91,6 @@ internal class ModelBuilderTest {
 
         val cells = modelBuilder.evaluateModel(reformulated)
 
-        assertEquals(85, cells.size)
+        assertEquals(reformulated.incomeStatementItems.size, cells.size / model.periods)
     }
 }

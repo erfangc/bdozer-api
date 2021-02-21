@@ -19,4 +19,10 @@ object ReservedItemNames {
     const val LongTermLiability = "LongTermLiability"
     const val TotalLiability = "TotalLiability"
     const val ShareholdersEquity = "ShareholdersEquity"
+    // Non-GaaP / Other
+    const val FreeCashFlow = "FreeCashFlow"
+    const val CapitalExpenditure = "CapitalExpenditure"
+    const val DepreciationAmortization = "DepreciationAmortization"
+    const val StockBasedCompensation = "StockBasedCompensation"
+    const val ChangeInWorkingCapital = "ChangeInWorkingCapital"
 }
