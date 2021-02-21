@@ -1,4 +1,4 @@
-package com.starburst.starburst.cells
+package com.starburst.starburst.spreadsheet
 
 data class Address(
     val sheet: Int,

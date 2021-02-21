@@ -1,6 +1,6 @@
-package com.starburst.starburst.models.translator.resolvers
+package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.translator.CellExpressionResolver
+import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.computers.ResolverContext
 import com.starburst.starburst.models.Driver
@@ -10,23 +10,23 @@ import com.starburst.starburst.models.Model
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class CustomDriverExpressionResolverTest {
+internal class CustomDriverExpressionTranslatorTest {
 
     @Test
     fun resolveExpression() {
         val model = fakeAircraftCompany()
 
-        val cells = CellExpressionResolver()
-            .resolveCellExpressions(
+        val cells = CellFormulaTranslator()
+            .populateCellsWithFormulas(
                 model, ModelToCellTranslator().generateCells(model = model)
             )
 
         val ctx = ResolverContext(model = model, cells = cells)
 
-        val results = CustomExpressionResolver(ctx)
-            .resolveExpression(cells.find { it.name == "Aircraft_Parts_Period2" }!!)
+        val results = CustomExpressionTranslator(ctx)
+            .translateFormula(cells.find { it.name == "Aircraft_Parts_Period2" }!!)
 
-        assertEquals("Aircraft_Revenue_Period2*0.35", results.expression)
+        assertEquals("Aircraft_Revenue_Period2*0.35", results.formula)
     }
 
     companion object {

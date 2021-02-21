@@ -1,6 +1,6 @@
-package com.starburst.starburst.cells.evaluation
+package com.starburst.starburst.spreadsheet.evaluation
 
-import com.starburst.starburst.cells.Cell
+import com.starburst.starburst.spreadsheet.Cell
 import com.starburst.starburst.models.Model
 import org.mariuszgromada.math.mxparser.Argument
 import org.mariuszgromada.math.mxparser.Expression
@@ -15,7 +15,17 @@ class CellEvaluator {
 
     private val logger = LoggerFactory.getLogger(CellEvaluator::class.java)
 
-    fun evaluate(model: Model, cells: List<Cell>): List<Cell> {
+    /**
+     * Takes as input a list of cells that is pure formula
+     * and output those same cells with values populated
+     */
+    fun evaluate(cells: List<Cell>): List<Cell> {
+
+        // we cannot reference in this method Item/Driver - because domain specific business logic
+        // must be handled prior to this step, otherwise it becomes very easy to conflate
+        // the evaluation of this DAG of cells with concepts that are rooted in the nature of modeling
+        // such as "how to depreciate an asset" etc.
+        // TODO make a defensive copy of the cells without referencing Item/Driver
 
         val stack = Stack<Cell>()
 
@@ -68,7 +78,7 @@ class CellEvaluator {
                     // evaluate the cell
                     // using mXparser
                     val value = try {
-                        val e = Expression(headCell.expression)
+                        val e = Expression(headCell.formula)
                         // add some common arguments
                         e.addArguments(Argument("period", headCell.period.toDouble()))
                         e.missingUserDefinedArguments.forEach { argName ->
@@ -81,9 +91,12 @@ class CellEvaluator {
                         }
                         e.calculate()
                     } catch (e: Exception) {
-                        logger.error("Unable to evaluate cell value", e)
+                        logger.error("Unable to evaluate cell ${cell.name}", e)
                         0.0
                     }
+                    //
+                    // update the cached source of cell values
+                    //
                     cellLookupByName[headCell.name] = headCell.copy(value = value)
                     stack.pop()
                 } else {

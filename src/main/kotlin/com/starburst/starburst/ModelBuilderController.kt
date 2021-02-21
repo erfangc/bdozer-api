@@ -1,6 +1,6 @@
 package com.starburst.starburst
 
-import com.starburst.starburst.cells.Cell
+import com.starburst.starburst.spreadsheet.Cell
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.builders.ModelBuilder
 import org.springframework.web.bind.annotation.*

@@ -1,4 +1,4 @@
-package com.starburst.starburst.models.translator.resolvers
+package com.starburst.starburst.models.translator.subtypes
 
 import com.starburst.starburst.models.Driver
 import com.starburst.starburst.models.DriverType
@@ -16,20 +16,25 @@ internal class ModelToCellTranslatorTest {
 
         val results = ModelToCellTranslator().generateCells(model)
 
-        assertEquals(10, results.size)
+        assertEquals(15, results.size)
 
+        assert(results.any { result -> result.name == "Revenue_Period0" })
         assert(results.any { result -> result.name == "Revenue_Period1" })
         assert(results.any { result -> result.name == "Revenue_Period2" })
 
+        assert(results.any { result -> result.name == "SaaSRevenue_Period0" })
         assert(results.any { result -> result.name == "SaaSRevenue_Period1" })
         assert(results.any { result -> result.name == "SaaSRevenue_Period2" })
 
+        assert(results.any { result -> result.name == "Salary_Period0" })
         assert(results.any { result -> result.name == "Salary_Period1" })
         assert(results.any { result -> result.name == "Salary_Period2" })
 
+        assert(results.any { result -> result.name == "Computers_Period0" })
         assert(results.any { result -> result.name == "Computers_Period1" })
         assert(results.any { result -> result.name == "Computers_Period2" })
 
+        assert(results.any { result -> result.name == "COGS_Period0" })
         assert(results.any { result -> result.name == "COGS_Period1" })
         assert(results.any { result -> result.name == "COGS_Period2" })
     }

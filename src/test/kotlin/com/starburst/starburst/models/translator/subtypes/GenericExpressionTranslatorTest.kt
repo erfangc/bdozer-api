@@ -1,6 +1,6 @@
-package com.starburst.starburst.models.translator.resolvers
+package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.translator.CellExpressionResolver
+import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.computers.ResolverContext
 import com.starburst.starburst.models.Driver
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 
-internal class StringExpressionResolverTest {
+internal class GenericExpressionTranslatorTest {
 
     @Test
     fun resolveExpression() {
@@ -35,18 +35,18 @@ internal class StringExpressionResolverTest {
             periods = 2
         )
 
-        val cells = CellExpressionResolver()
-            .resolveCellExpressions(model, ModelToCellTranslator().generateCells(model = model))
+        val cells = CellFormulaTranslator()
+            .populateCellsWithFormulas(model, ModelToCellTranslator().generateCells(model = model))
 
         val ctx = ResolverContext(
             model = model,
             cells = cells
         )
 
-        val result = StringExpressionResolver(ctx)
-            .resolveExpression(cells.find { it.name == "Random_Period2" }!!)
+        val result = GenericExpressionTranslator(ctx)
+            .translateFormula(cells.find { it.name == "Random_Period2" }!!)
 
-        assertEquals("(Costs_Period2+Aircraft_Parts_Period2)/2", result.expression)
+        assertEquals("(Costs_Period2+Aircraft_Parts_Period2)/2", result.formula)
 
     }
 }

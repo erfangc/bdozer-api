@@ -1,6 +1,6 @@
 package com.starburst.starburst.models.translator
 
-import com.starburst.starburst.cells.Cell
+import com.starburst.starburst.spreadsheet.Cell
 import com.starburst.starburst.models.Model
 
 /**
@@ -17,10 +17,9 @@ class ModelToCellTranslator {
     fun generateCells(model: Model): List<Cell> {
 
         val periods = model.periods
-        // TODO set the cell Address as well here
 
-        return (1..periods).flatMap { period ->
-            model.incomeStatementItems.flatMap { item ->
+        return (0..periods).flatMap { period ->
+            val incomeStatementCells = model.incomeStatementItems.flatMap { item ->
                 if (item.expression == null) {
                     // if there are no explicit expressions then
                     // the expression of a Item is just the sum of the drivers
@@ -38,7 +37,7 @@ class ModelToCellTranslator {
                         name = "${item.name}_Period$period",
                         item = item,
                         // by default the value of the item is the sum of it's drivers
-                        expression = driverCells.joinToString("+") { it.name },
+                        formula = driverCells.joinToString("+") { it.name },
                         dependentCellNames = driverCells.map { it.name }
                     )
                     // end
@@ -53,8 +52,33 @@ class ModelToCellTranslator {
                     )
                 }
             }
-        }
 
+            /*
+            create the balance sheet cells
+             */
+            val balanceSheetCells = model.balanceSheetItems.map { item ->
+                Cell(
+                    name = "${item.name}_Period$period",
+                    formula = item.expression,
+                    item = item,
+                    period = period
+                )
+            }
+
+            /*
+            create the other cells
+             */
+            val otherCells = model.otherItems.map { item ->
+                Cell(
+                    name = "${item.name}_Period$period",
+                    formula = item.expression,
+                    item = item,
+                    period = period
+                )
+            }
+
+            incomeStatementCells + balanceSheetCells + otherCells
+        }
     }
 
 }

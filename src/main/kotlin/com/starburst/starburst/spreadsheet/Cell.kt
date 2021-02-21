@@ -1,4 +1,4 @@
-package com.starburst.starburst.cells
+package com.starburst.starburst.spreadsheet
 
 import com.starburst.starburst.models.Driver
 import com.starburst.starburst.models.Item
@@ -9,7 +9,7 @@ data class Cell(
     val driver: Driver? = null,
     val item: Item? = null,
     val value: Double? = null,
-    val expression: String? = null,
+    val formula: String? = null,
     val address: Address? = null,
     val dependentCellNames: List<String> = emptyList()
 )

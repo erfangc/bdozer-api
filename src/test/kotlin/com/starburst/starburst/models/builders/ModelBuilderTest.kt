@@ -1,10 +1,9 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.models.Item
 import com.starburst.starburst.computers.ReservedItemNames
+import com.starburst.starburst.models.Item
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 
 internal class ModelBuilderTest {
 
@@ -91,6 +90,10 @@ internal class ModelBuilderTest {
 
         val cells = modelBuilder.evaluateModel(reformulated)
 
-        assertEquals(reformulated.incomeStatementItems.size, cells.size / model.periods)
+        val expected = reformulated.incomeStatementItems.size +
+                reformulated.balanceSheetItems.size +
+                reformulated.otherItems.size
+        val actual = cells.size / (model.periods + 1)
+        assertEquals(expected, actual)
     }
 }

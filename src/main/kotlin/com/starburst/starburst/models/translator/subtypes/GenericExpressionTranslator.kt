@@ -1,21 +1,24 @@
-package com.starburst.starburst.models.translator.resolvers
+package com.starburst.starburst.models.translator.subtypes
 
+import com.starburst.starburst.spreadsheet.Cell
 import com.starburst.starburst.computers.ResolverContext
-import com.starburst.starburst.cells.Cell
 import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.Util.previous
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token.NOT_MATCHED
 
 /**
- * [StringExpressionResolver] resolves a [Cell] whose value is linked to an [Item] with [Item.expression] populated.
+ * [GenericExpressionTranslator] resolves a [Cell] whose value is linked to an [Item] with [Item.expression] populated.
  * Normally [Item]'s expression is the sum of drivers - [Item] may take on value specified by [Item.expression]. This resolver
  * populates such expression with real cells
  *
  */
-class StringExpressionResolver(ctx: ResolverContext) : ExpressionResolver {
+class GenericExpressionTranslator(ctx: ResolverContext) : ExpressionTranslator {
 
     //
     // create a lookup dictionary of item/driver names -> cell names
+    // the first layer of the lookup is by period, the second layer of the map
+    // is by name
     //
     private val lookup = ctx.cells.groupBy { it.period }
         .mapValues { entry -> entry.value.associateBy { it.driver?.name ?: it.item?.name ?: error("") } }
@@ -24,8 +27,8 @@ class StringExpressionResolver(ctx: ResolverContext) : ExpressionResolver {
      * The primary job is to tokenize the expression of a given [Item] and replace
      * the generic tokens with actual cell names as well as populate the dependency tree
      */
-    override fun resolveExpression(cell: Cell): Cell {
-        val origEl = Expression(cell.expression)
+    override fun translateFormula(cell: Cell): Cell {
+        val origEl = Expression(cell.formula)
 
         val tokens = mutableListOf<String>()
         val dependentCellNames = mutableListOf<String>()
@@ -36,7 +39,25 @@ class StringExpressionResolver(ctx: ResolverContext) : ExpressionResolver {
         origEl.copyOfInitialTokens.forEach { token ->
             val tokenStr = token.tokenStr
             if (token.tokenTypeId == NOT_MATCHED) {
-                val dependentCell = lookup[cell.period]?.get(tokenStr)
+                //
+                // create a library of cells that can be referenced by the current cell
+                //
+                val period = cell.period
+
+                val currentPeriodCells = lookup[period] ?: emptyMap()
+                val previousPeriodCells = lookup[period - 1]
+                    ?.map { (key, value) ->
+                        // this steps enable formulas to reference Previous_<ItemName>
+                        // to be possible
+                        // note that - for the case where 'period = 1' we must use historical value
+                        // which means the cell generator must've created these
+                        previous(key) to value
+                    }
+                    ?.toMap() ?: emptyMap()
+
+                val cellLibrary =  currentPeriodCells + previousPeriodCells
+
+                val dependentCell = cellLibrary[tokenStr]
                 if (dependentCell != null) {
                     dependentCellNames.add(dependentCell.name)
                     tokens.add(dependentCell.name)
@@ -51,7 +72,7 @@ class StringExpressionResolver(ctx: ResolverContext) : ExpressionResolver {
 
         }
         return cell.copy(
-            expression = tokens.joinToString(""),
+            formula = tokens.joinToString(""),
             dependentCellNames = dependentCellNames.toList() // make the list immutable again
         )
     }

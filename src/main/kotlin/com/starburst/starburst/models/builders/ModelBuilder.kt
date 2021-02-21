@@ -1,7 +1,7 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.cells.Cell
-import com.starburst.starburst.cells.evaluation.CellEvaluator
+import com.starburst.starburst.spreadsheet.Cell
+import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import com.starburst.starburst.computers.ReservedItemNames.CapitalExpenditure
 import com.starburst.starburst.computers.ReservedItemNames.ChangeInWorkingCapital
 import com.starburst.starburst.computers.ReservedItemNames.CostOfGoodsSold
@@ -11,17 +11,23 @@ import com.starburst.starburst.computers.ReservedItemNames.DepreciationAmortizat
 import com.starburst.starburst.computers.ReservedItemNames.FreeCashFlow
 import com.starburst.starburst.computers.ReservedItemNames.GrossProfit
 import com.starburst.starburst.computers.ReservedItemNames.InterestExpense
+import com.starburst.starburst.computers.ReservedItemNames.LongTermAsset
+import com.starburst.starburst.computers.ReservedItemNames.LongTermLiability
 import com.starburst.starburst.computers.ReservedItemNames.NetIncome
 import com.starburst.starburst.computers.ReservedItemNames.NonOperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingExpense
 import com.starburst.starburst.computers.ReservedItemNames.OperatingIncome
 import com.starburst.starburst.computers.ReservedItemNames.Revenue
+import com.starburst.starburst.computers.ReservedItemNames.ShareholdersEquity
 import com.starburst.starburst.computers.ReservedItemNames.StockBasedCompensation
 import com.starburst.starburst.computers.ReservedItemNames.TaxExpense
+import com.starburst.starburst.computers.ReservedItemNames.TotalAsset
+import com.starburst.starburst.computers.ReservedItemNames.TotalLiability
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.Util.previous
 import com.starburst.starburst.models.builders.SkeletonModel.skeletonModel
-import com.starburst.starburst.models.translator.CellExpressionResolver
+import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import org.springframework.stereotype.Service
 
@@ -39,17 +45,26 @@ class ModelBuilder {
 
         // Step 1 - calculate revenue
         val incomeStatementItems = model.incomeStatementItems
-        fun idxOf(name: String): Int {
+        val balanceSheetItems = model.balanceSheetItems
+
+        /**
+         * a helper function to get the idx of an item by a certain name
+         */
+        fun idxOfBal(name: String): Int {
+            return balanceSheetItems.indexOfFirst { it.name == name }
+        }
+
+        fun idxOfInc(name: String): Int {
             return incomeStatementItems.indexOfFirst { it.name == name }
         }
 
-        val revenueIdx = idxOf(Revenue)
+        val revenueIdx = idxOfInc(Revenue)
         val revenueItems = incomeStatementItems.subList(0, revenueIdx)
         val revenueSubtotal =
             incomeStatementItems[revenueIdx].copy(expression = revenueItems.joinToString("+") { it.name })
 
         // Step 2 - calculate cost of goods sold
-        val cogsIdx = idxOf(CostOfGoodsSold)
+        val cogsIdx = idxOfInc(CostOfGoodsSold)
         val cogsItems = incomeStatementItems.subList(revenueIdx + 1, cogsIdx)
         val cogsSubtotal =
             incomeStatementItems[cogsIdx].copy(expression = cogsItems.joinToString("+") { it.name })
@@ -57,26 +72,26 @@ class ModelBuilder {
         //
         // Step 3 - calculate gross profit
         //
-        val grossProfitIdx = idxOf(GrossProfit)
+        val grossProfitIdx = idxOfInc(GrossProfit)
         val grossProfitSubtotal = incomeStatementItems[grossProfitIdx].copy(expression = "$Revenue-$CostOfGoodsSold")
 
         //
         // Step 4 - calculate operating expenses
         //
-        val opExpIdx = idxOf(OperatingExpense)
+        val opExpIdx = idxOfInc(OperatingExpense)
         val opExpItems = incomeStatementItems.subList(grossProfitIdx + 1, opExpIdx)
         val opExpSubtotal = incomeStatementItems[opExpIdx].copy(expression = opExpItems.joinToString("+") { it.name })
 
         //
         // Step 5 - calculate operating income
         //
-        val opIncIdx = idxOf(OperatingIncome)
+        val opIncIdx = idxOfInc(OperatingIncome)
         val opIncSubtotal = incomeStatementItems[opIncIdx].copy(expression = "$GrossProfit-$OperatingExpense")
 
         //
         // Step 6 - calculate non-operating expenses
         //
-        val nonOpExpIdx = idxOf(NonOperatingExpense)
+        val nonOpExpIdx = idxOfInc(NonOperatingExpense)
         val nonOpExpItems = incomeStatementItems.subList(opIncIdx + 1, nonOpExpIdx)
         val nonOpExpSubtotal =
             incomeStatementItems[nonOpExpIdx].copy(expression = nonOpExpItems.joinToString("+") { it.name })
@@ -84,16 +99,16 @@ class ModelBuilder {
         //
         // Step 7 - calculate interest/tax expenses
         // TODO actually do something here
-        val intExpIdx = idxOf(InterestExpense)
+        val intExpIdx = idxOfInc(InterestExpense)
         val intExpItem = incomeStatementItems[intExpIdx]
 
-        val taxExpenseIdx = idxOf(TaxExpense)
+        val taxExpenseIdx = idxOfInc(TaxExpense)
         val taxExpenseItem = incomeStatementItems[taxExpenseIdx]
 
         //
         // Step 8 - calculate net income
         //
-        val netIncomeIdx = idxOf(NetIncome)
+        val netIncomeIdx = idxOfInc(NetIncome)
         val netIncomeSubtotal = incomeStatementItems[netIncomeIdx].copy(
             expression = "$OperatingIncome-$NonOperatingExpense-$InterestExpense-$TaxExpense"
         )
@@ -122,14 +137,39 @@ class ModelBuilder {
             expression = "0"
         )
 
+        // ---------------------
+        // balance sheet updates
+        // ---------------------
+
         //
-        // Step 12 - calculate balance sheet impact
+        // TODO actually introduce expressions instead of carrying over the previous balance
         //
-        // TODO
+        val caIdx = idxOfBal(CurrentAsset)
+        val caItem = balanceSheetItems[caIdx].copy(expression = previous(CurrentAsset))
+
+        val ltaIdx = idxOfBal(LongTermAsset)
+        val ltaItem = balanceSheetItems[ltaIdx].copy(expression = previous(LongTermAsset))
+
+        val taIdx = idxOfBal(TotalAsset)
+        val taItem = balanceSheetItems[taIdx].copy(expression = previous(TotalAsset))
+
+        val clIdx = idxOfBal(CurrentLiability)
+        val clItem = balanceSheetItems[clIdx].copy(expression = previous(CurrentLiability))
+
+        val ltlIdx = idxOfBal(LongTermLiability)
+        val ltlItem = balanceSheetItems[ltlIdx].copy(expression = previous(LongTermLiability))
+
+        val ttlIdx = idxOfBal(TotalLiability)
+        val ttlItem = balanceSheetItems[ttlIdx].copy(expression = previous(TotalLiability))
+
+        val equityIdx = idxOfBal(ShareholdersEquity)
+        val equityItem = balanceSheetItems[equityIdx].copy(expression = previous(ShareholdersEquity))
+
+
         val changeInWorkingCapitalItem = Item(
             name = ChangeInWorkingCapital,
             description = "Change in Working Capital",
-        //  expression = "($CurrentAsset-$CurrentLiability)-(${previous(CurrentAsset)}-${previous(CurrentLiability)})"
+            //  expression = "($CurrentAsset-$CurrentLiability)-(${previous(CurrentAsset)}-${previous(CurrentLiability)})"
             expression = "0"
         )
 
@@ -142,6 +182,9 @@ class ModelBuilder {
             expression = "$NetIncome-$CapitalExpenditure+$DepreciationAmortization+$StockBasedCompensation-$ChangeInWorkingCapital"
         )
 
+        //
+        // TODO compute the diluted number of shares to derive at enterprise value / share
+        //
         val incomeStatementItemsNew = revenueItems +
                 revenueSubtotal +
                 cogsItems +
@@ -164,14 +207,17 @@ class ModelBuilder {
             fcfItem
         )
 
-        return model.copy(incomeStatementItems = incomeStatementItemsNew, otherItems = otherItems)
-    }
+        val balanceSheetItemsNew = listOf(
+            caItem,
+            ltaItem,
+            taItem,
+            clItem,
+            ltlItem,
+            ttlItem,
+            equityItem
+        )
 
-    /**
-     * Create cell name that refers to [previous] instance of an item
-     */
-    private fun previous(name: String): String {
-        return "Previous_$name"
+        return model.copy(incomeStatementItems = incomeStatementItemsNew, otherItems = otherItems, balanceSheetItems = balanceSheetItemsNew)
     }
 
     /**
@@ -189,8 +235,8 @@ class ModelBuilder {
     fun evaluateModel(model: Model): List<Cell> {
         val fullyFormedModel = reformulateModel(model)
         val generateCells = modelToCellTranslator.generateCells(fullyFormedModel)
-        val cells = CellExpressionResolver().resolveCellExpressions(fullyFormedModel, generateCells)
-        return CellEvaluator().evaluate(fullyFormedModel, cells)
+        val cells = CellFormulaTranslator().populateCellsWithFormulas(fullyFormedModel, generateCells)
+        return CellEvaluator().evaluate(cells)
     }
 
 }
