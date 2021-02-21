@@ -23,6 +23,7 @@ class ModelsController {
             incomeStatementItems = listOf(
                 Item(
                     name = "Cloud_Hosting_Revenue",
+                    description = "Cloud Hosting Revenue",
                     drivers = listOf(
                         Driver(
                             name = "Subscription",
@@ -33,13 +34,15 @@ class ModelsController {
                                 averageRevenuePerSubscription = 120.0
                             )
                         )
-                    )
+                    ),
+                    historicalValue = 120_000.0
                 ),
                 Item(
                     name = ReservedItemNames.Revenue
                 ),
                 Item(
                     name = "Cloud_Hosting_COGS",
+                    description = "Cloud Hosting COGS",
                     drivers = listOf(
                         Driver(
                             name = "Equipment",
@@ -48,40 +51,53 @@ class ModelsController {
                                 percentOfRevenue = 0.2
                             )
                         )
-                    )
+                    ),
+                    historicalValue = 24_000.0
                 ),
                 Item(
                     name = ReservedItemNames.CostOfGoodsSold,
+                    description = "Cost of Goods Sold",
                 ),
 
                 Item(
-                    name = ReservedItemNames.GrossProfit
+                    name = ReservedItemNames.GrossProfit,
+                    description = "Gross Profit",
                 ),
                 Item(
-                    name = "ResearchAndDevelopment",
-                    expression = "Revenue * 0.14"
+                    name = "Research_and_Development",
+                    description  = "Research and Development",
+                    expression = "Revenue * 0.14",
+                    historicalValue = 16_800.0
                 ),
                 Item(
                     name = "SGA",
-                    expression = "100000"
+                    description  = "Selling General & Administrative",
+                    expression = "100000",
+                    historicalValue = 100000.0
                 ),
                 Item(
-                    name = ReservedItemNames.OperatingExpense
+                    name = ReservedItemNames.OperatingExpense,
+                    description = "Operating Expense"
                 ),
                 Item(
-                    name = ReservedItemNames.OperatingIncome
+                    name = ReservedItemNames.OperatingIncome,
+                    description = "Operating Income"
                 ),
                 Item(
-                    name = ReservedItemNames.NonOperatingExpense
+                    name = ReservedItemNames.NonOperatingExpense,
+                    description = "Non-Operating Expense"
                 ),
                 Item(
-                    name = ReservedItemNames.InterestExpense
+                    name = ReservedItemNames.InterestExpense,
+                    description = "Interest Expense"
                 ),
                 Item(
-                    name = ReservedItemNames.TaxExpense
+                    name = ReservedItemNames.TaxExpense,
+                    description = "Tax Expense"
                 ),
                 Item(
-                    name = ReservedItemNames.NetIncome
+                    name = ReservedItemNames.NetIncome,
+                    description = "Net Income"
                 )
             ),
             balanceSheetItems = listOf(

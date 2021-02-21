@@ -39,7 +39,7 @@ class ModelBuilder {
     private val modelToCellTranslator = ModelToCellTranslator()
 
     private fun sanitize(formula: String): String {
-        // if the formual is empty then return 0
+        // if the formula is empty then return 0
         return if (formula.isEmpty()) {
             "0.0"
         } else {
@@ -72,32 +72,49 @@ class ModelBuilder {
         val revenueIdx = idxOfInc(Revenue)
         val revenueItems = incomeStatementItems.subList(0, revenueIdx)
         val revenueSubtotal =
-            incomeStatementItems[revenueIdx].copy(expression = sanitize(revenueItems.joinToString("+") { it.name }))
+            incomeStatementItems[revenueIdx].copy(
+                expression = sanitize(revenueItems.joinToString("+") { it.name }),
+                historicalValue = revenueItems.sumByDouble { it.historicalValue ?: 0.0 }
+            )
 
+        //
         // Step 2 - calculate cost of goods sold
+        //
         val cogsIdx = idxOfInc(CostOfGoodsSold)
         val cogsItems = incomeStatementItems.subList(revenueIdx + 1, cogsIdx)
         val cogsSubtotal =
-            incomeStatementItems[cogsIdx].copy(expression = sanitize(cogsItems.joinToString("+") { it.name }))
+            incomeStatementItems[cogsIdx].copy(
+                expression = sanitize(cogsItems.joinToString("+") { it.name }),
+                historicalValue = cogsItems.sumByDouble { it.historicalValue ?: 0.0 }
+            )
 
         //
         // Step 3 - calculate gross profit
         //
         val grossProfitIdx = idxOfInc(GrossProfit)
-        val grossProfitSubtotal = incomeStatementItems[grossProfitIdx].copy(expression = "$Revenue-$CostOfGoodsSold")
+        val grossProfitSubtotal = incomeStatementItems[grossProfitIdx].copy(
+            expression = "$Revenue-$CostOfGoodsSold",
+            historicalValue = revenueSubtotal.historicalValue!! - cogsSubtotal.historicalValue!!
+        )
 
         //
         // Step 4 - calculate operating expenses
         //
         val opExpIdx = idxOfInc(OperatingExpense)
         val opExpItems = incomeStatementItems.subList(grossProfitIdx + 1, opExpIdx)
-        val opExpSubtotal = incomeStatementItems[opExpIdx].copy(expression = sanitize(opExpItems.joinToString("+") { it.name }))
+        val opExpSubtotal = incomeStatementItems[opExpIdx].copy(
+            expression = sanitize(opExpItems.joinToString("+") { it.name }),
+            historicalValue = opExpItems.sumByDouble { it.historicalValue ?: 0.0 }
+        )
 
         //
         // Step 5 - calculate operating income
         //
         val opIncIdx = idxOfInc(OperatingIncome)
-        val opIncSubtotal = incomeStatementItems[opIncIdx].copy(expression = "$GrossProfit-$OperatingExpense")
+        val opIncSubtotal = incomeStatementItems[opIncIdx].copy(
+            expression = "$GrossProfit-$OperatingExpense",
+            historicalValue = opExpItems.sumByDouble { it.historicalValue ?: 0.0 }
+        )
 
         //
         // Step 6 - calculate non-operating expenses
@@ -105,7 +122,10 @@ class ModelBuilder {
         val nonOpExpIdx = idxOfInc(NonOperatingExpense)
         val nonOpExpItems = incomeStatementItems.subList(opIncIdx + 1, nonOpExpIdx)
         val nonOpExpSubtotal =
-            incomeStatementItems[nonOpExpIdx].copy(expression = sanitize(nonOpExpItems.joinToString("+") { it.name }))
+            incomeStatementItems[nonOpExpIdx].copy(
+                expression = sanitize(nonOpExpItems.joinToString("+") { it.name }),
+                historicalValue = nonOpExpItems.sumByDouble { it.historicalValue ?: 0.0 }
+            )
 
         //
         // Step 7 - calculate interest/tax expenses
@@ -129,7 +149,11 @@ class ModelBuilder {
         //
         val netIncomeIdx = idxOfInc(NetIncome)
         val netIncomeSubtotal = incomeStatementItems[netIncomeIdx].copy(
-            expression = "$OperatingIncome-$NonOperatingExpense-$InterestExpense-$TaxExpense"
+            expression = "$OperatingIncome-$NonOperatingExpense-$InterestExpense-$TaxExpense",
+            historicalValue = (opIncSubtotal.historicalValue ?: 0.0) -
+                    (nonOpExpSubtotal.historicalValue ?: 0.0) -
+                    (intExpItem.historicalValue ?: 0.0) -
+                    (taxExpenseItem.historicalValue ?: 0.0)
         )
 
         //

@@ -14,7 +14,7 @@ data class Item(
     /**
      * [historicalValue] the latest actual value for this item
      */
-    val historicalValue: Double? = null,
+    val historicalValue: Double = 0.0,
 
     /**
      * List of [Driver] that compose this item's value in the future

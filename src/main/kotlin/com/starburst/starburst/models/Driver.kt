@@ -12,5 +12,5 @@ data class Driver(
     val variableCost: VariableCost? = null,
     val fixedCost: FixedCost? = null,
     val customDriver: CustomDriver? = null,
-    val historicalValue: Double? = null
+    val historicalValue: Double = 0.0
 )
