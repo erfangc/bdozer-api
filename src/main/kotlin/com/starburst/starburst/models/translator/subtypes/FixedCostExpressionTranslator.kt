@@ -5,8 +5,8 @@ import com.starburst.starburst.spreadsheet.Cell
 
 class FixedCostExpressionTranslator(private val ctx: ResolverContext): ExpressionTranslator {
     override fun translateFormula(cell: Cell): Cell {
-        val driver = cell.driver
-        val fixedCost = driver?.fixedCost ?: error("a fixed cost must be specified")
+        val item = cell.item
+        val fixedCost = item?.fixedCost ?: error("a fixed cost must be specified")
         return cell.copy(
             formula = "${fixedCost.cost}",
             dependentCellNames = emptyList()

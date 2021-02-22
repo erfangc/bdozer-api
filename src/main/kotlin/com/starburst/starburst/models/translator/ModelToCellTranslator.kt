@@ -19,38 +19,15 @@ class ModelToCellTranslator {
         val periods = model.periods
 
         return (0..periods).flatMap { period ->
-            val incomeStatementCells = model.incomeStatementItems.flatMap { item ->
-                if (item.expression == null) {
-                    // if there are no explicit expressions then
-                    // the expression of a Item is just the sum of the drivers
-                    val driverCells = (item.drivers ?: emptyList()).map { driver ->
-                        Cell(
-                            period = period,
-                            name = "${driver.name}_Period$period",
-                            driver = driver
-                        )
-                    }
-
-                    // create a cell for the item itself
-                    val itemCell = Cell(
-                        period = period,
-                        name = "${item.name}_Period$period",
-                        item = item,
-                        // by default the value of the item is the sum of it's drivers
-                        formula = driverCells.joinToString("+") { it.name },
-                        dependentCellNames = driverCells.map { it.name }
-                    )
-                    // end
-                    driverCells + itemCell
-                } else {
-                    listOf(
-                        Cell(
-                            period = period,
-                            item = item,
-                            name = "${item.name}_Period$period"
-                        )
-                    )
-                }
+            /*
+            create the income statement sheet cells
+             */
+            val incomeStatementCells = model.incomeStatementItems.map { item ->
+                Cell(
+                    period = period,
+                    item = item,
+                    name = "${item.name}_Period$period"
+                )
             }
 
             /*

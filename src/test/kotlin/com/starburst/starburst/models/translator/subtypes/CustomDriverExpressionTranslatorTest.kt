@@ -3,7 +3,6 @@ package com.starburst.starburst.models.translator.subtypes
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.computers.ResolverContext
-import com.starburst.starburst.models.Driver
 import com.starburst.starburst.models.DriverType
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
@@ -34,19 +33,12 @@ internal class CustomDriverExpressionTranslatorTest {
         fun fakeAircraftCompany() = Model(
             incomeStatementItems = listOf(
                 Item(
-                    drivers = listOf(
-                        Driver(
-                            name = "Aircraft_Revenue",
-                            customDriver = CustomDriver(formula = "(100% + period * 5%) * 200"),
-                            type = DriverType.Custom
-                        ),
-                        Driver(
-                            name = "Aircraft_Parts",
-                            customDriver = CustomDriver(formula = "Aircraft_Revenue * 0.35"),
-                            type = DriverType.Custom
-                        )
-                    ),
-                    name = "Income_Statement"
+                    name = "Aircraft_Revenue",
+                    expression = "(100% + period * 5%) * 200"
+                ),
+                Item(
+                    name = "Aircraft_Parts",
+                    expression = "Aircraft_Revenue * 0.35",
                 ),
                 Item(
                     expression = "Aircraft_Revenue - Aircraft_Parts",
@@ -59,23 +51,18 @@ internal class CustomDriverExpressionTranslatorTest {
         fun circularReferenceModel() = Model(
             incomeStatementItems = listOf(
                 Item(
-                    drivers = listOf(
-                        Driver(
-                            name = "D1",
-                            customDriver = CustomDriver(formula = "10 + Bad"),
-                            type = DriverType.Custom
-                        ),
-                        Driver(
-                            name = "D2",
-                            customDriver = CustomDriver(formula = "D1 / 10"),
-                            type = DriverType.Custom
-                        )
-                    ),
-                    name = "I1"
+                    name = "I1",
+                    type = DriverType.Custom,
+                    expression = "10 + Bad"
                 ),
                 Item(
-                    expression = "D1 * D2",
-                    name = "I2"
+                    name = "I2",
+                    type = DriverType.Custom,
+                    expression = "I3 / 10"
+                ),
+                Item(
+                    expression = "I1 * I2",
+                    name = "I3"
                 ),
                 Item(
                     expression = "I2 + 100.0",

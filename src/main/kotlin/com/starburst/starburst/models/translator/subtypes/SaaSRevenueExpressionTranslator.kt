@@ -11,8 +11,8 @@ class SaaSRevenueExpressionTranslator(private val ctx: ResolverContext) {
     fun resolveExpression(cell: Cell): Cell {
         val periods = ctx.model.periods
         val period = cell.period
-        val driver = cell.driver
-        val saaSRevenue = driver?.saaSRevenue ?: error("saaSRevenue fields must be populated")
+        val item = cell.item
+        val saaSRevenue = item?.saaSRevenue ?: error("saaSRevenue fields must be populated")
 
         val (
             totalSubscriptionAtTerminalYear,

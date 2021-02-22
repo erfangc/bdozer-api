@@ -23,7 +23,6 @@ class CellFormulaTranslator {
 
         return cells.map { cell ->
 
-            val driver = cell.driver
             val item = cell.item
             val period = cell.period
 
@@ -35,27 +34,14 @@ class CellFormulaTranslator {
             driver (defaults to zero)
              */
             if (period == 0) {
-                val historicalValue = item?.historicalValue ?: driver?.historicalValue ?: 0.0
+                val historicalValue = item.historicalValue
                 cell.copy(formula = "$historicalValue")
             }
             /*
-            Next, we handle cases where an Item has a formula defined, in this case
-            driver formula is ignored
-             */
-            else if (item != null) {
-                if (item.expression != null) {
-                    val updatedCell = cell.copy(formula = item.expression)
-                    GenericExpressionTranslator(ctx)
-                        .translateFormula(updatedCell)
-                } else {
-                    cell
-                }
-            }
-            /*
-            Finally, the only other way a cell can have a formula is if it belongs to a driver
+            Next, we find the correct formula for the cell depending on it's item and period
              */
             else {
-                when (driver?.type) {
+                when (item.type) {
                     DriverType.SaaSRevenue -> SaaSRevenueExpressionTranslator(ctx)
                         .resolveExpression(cell)
 
@@ -67,8 +53,6 @@ class CellFormulaTranslator {
 
                     DriverType.Custom -> CustomExpressionTranslator(ctx)
                         .translateFormula(cell)
-
-                    else -> error("unable to determine driver type")
                 }
             }
 

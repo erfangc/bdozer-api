@@ -42,7 +42,7 @@ class CellEvaluator {
          */
         fun unmetDependencies(cell: Cell): List<Cell> {
             return cell.dependentCellNames.map { dep ->
-                cellLookupByName[dep]!!
+                cellLookupByName[dep] ?: error("referenced cell $dep does not exist")
             }.filter { it.value == null }
         }
 

@@ -21,8 +21,7 @@ internal class ModelBuilderTest {
 
         val expected = reformulated.incomeStatementItems.size +
                 reformulated.balanceSheetItems.size +
-                reformulated.otherItems.size +
-                2 // +2 for the driver
+                reformulated.otherItems.size
 
         val actual = cells.size / (model.periods + 1)
 

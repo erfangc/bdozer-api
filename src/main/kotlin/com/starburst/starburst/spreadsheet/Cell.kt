@@ -1,13 +1,11 @@
 package com.starburst.starburst.spreadsheet
 
-import com.starburst.starburst.models.Driver
 import com.starburst.starburst.models.Item
 
 data class Cell(
     val period: Int,
     val name: String,
-    val driver: Driver? = null,
-    val item: Item? = null,
+    val item: Item,
     val value: Double? = null,
     val formula: String? = null,
     val address: Address? = null,

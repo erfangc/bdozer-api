@@ -21,7 +21,7 @@ class GenericExpressionTranslator(ctx: ResolverContext) : ExpressionTranslator {
     // is by name
     //
     private val lookup = ctx.cells.groupBy { it.period }
-        .mapValues { entry -> entry.value.associateBy { it.driver?.name ?: it.item?.name ?: error("") } }
+        .mapValues { entry -> entry.value.associateBy { it.item.name } }
 
     /**
      * The primary job is to tokenize the expression of a given [Item] and replace

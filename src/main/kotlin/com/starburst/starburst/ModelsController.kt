@@ -24,16 +24,11 @@ class ModelsController(private val modelBuilder: ModelBuilder) {
                 Item(
                     name = "Cloud_Hosting_Revenue",
                     description = "Cloud Hosting Revenue",
-                    drivers = listOf(
-                        Driver(
-                            name = "Subscription",
-                            type = DriverType.SaaSRevenue,
-                            saaSRevenue = SaaSRevenue(
-                                totalSubscriptionAtTerminalYear = 100_000,
-                                initialSubscriptions = 1_000,
-                                averageRevenuePerSubscription = 120.0
-                            )
-                        )
+                    type = DriverType.SaaSRevenue,
+                    saaSRevenue = SaaSRevenue(
+                        totalSubscriptionAtTerminalYear = 100_000,
+                        initialSubscriptions = 1_000,
+                        averageRevenuePerSubscription = 120.0
                     ),
                     historicalValue = 120_000.0
                 ),
@@ -41,16 +36,11 @@ class ModelsController(private val modelBuilder: ModelBuilder) {
                     name = ReservedItemNames.Revenue
                 ),
                 Item(
-                    name = "Cloud_Hosting_COGS",
-                    description = "Cloud Hosting COGS",
-                    drivers = listOf(
-                        Driver(
-                            name = "Equipment",
-                            type = DriverType.VariableCost,
-                            variableCost = VariableCost(
-                                percentOfRevenue = 0.2
-                            )
-                        )
+                    name = "Cloud_Hosting_Equipment",
+                    description = "Cloud Hosting Equipment",
+                    type = DriverType.VariableCost,
+                    variableCost = VariableCost(
+                        percentOfRevenue = 0.2
                     ),
                     historicalValue = 24_000.0
                 ),

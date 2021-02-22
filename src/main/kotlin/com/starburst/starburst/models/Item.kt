@@ -1,5 +1,9 @@
 package com.starburst.starburst.models
 
+import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
+import com.starburst.starburst.models.translator.subtypes.dataclasses.SaaSRevenue
+import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
+
 data class Item(
     /**
      * [name] of this item, this is akin to an identifier
@@ -16,18 +20,15 @@ data class Item(
      */
     val historicalValue: Double = 0.0,
 
-    /**
-     * List of [Driver] that compose this item's value in the future
-     * essentially components that aggregates into this [Item]
-     */
-    val drivers: List<Driver>? = emptyList(),
+    val expression: String = "0.0",
 
-    /**
-     * [expression] this is mutually exclusive with [Driver] in that
-     * if [expression] is populated this item will take on the value specified
-     * by [expression] instead of being aggregated up from [Driver]
-     */
-    val expression: String? = null,
+    val segment: String? = null,
 
-    val segment: String? = null
+    val type: DriverType = DriverType.Custom,
+
+    val saaSRevenue: SaaSRevenue? = null,
+
+    val variableCost: VariableCost? = null,
+
+    val fixedCost: FixedCost? = null
 )
