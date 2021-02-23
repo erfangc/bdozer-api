@@ -1,6 +1,6 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.computers.ReservedItemNames
+import com.starburst.starburst.models.ReservedItemNames
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 

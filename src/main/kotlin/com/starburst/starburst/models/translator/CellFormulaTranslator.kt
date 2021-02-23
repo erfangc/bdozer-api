@@ -1,7 +1,7 @@
 package com.starburst.starburst.models.translator
 
 import com.starburst.starburst.spreadsheet.Cell
-import com.starburst.starburst.computers.ResolverContext
+import com.starburst.starburst.models.ResolverContext
 import com.starburst.starburst.models.ItemType
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.translator.subtypes.*

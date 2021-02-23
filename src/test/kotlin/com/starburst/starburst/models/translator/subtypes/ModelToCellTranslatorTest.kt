@@ -1,6 +1,6 @@
 package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.computers.ReservedItemNames.Revenue
+import com.starburst.starburst.models.ReservedItemNames.Revenue
 import com.starburst.starburst.models.ItemType
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model

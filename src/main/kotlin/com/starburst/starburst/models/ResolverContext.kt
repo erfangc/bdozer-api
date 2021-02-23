@@ -1,4 +1,4 @@
-package com.starburst.starburst.computers
+package com.starburst.starburst.models
 
 import com.starburst.starburst.spreadsheet.Cell
 import com.starburst.starburst.models.Model

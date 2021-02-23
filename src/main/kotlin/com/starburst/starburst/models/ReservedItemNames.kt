@@ -1,4 +1,4 @@
-package com.starburst.starburst.computers
+package com.starburst.starburst.models
 
 object ReservedItemNames {
     // Income Statement

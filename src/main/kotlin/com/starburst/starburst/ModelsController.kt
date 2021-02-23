@@ -1,6 +1,6 @@
 package com.starburst.starburst
 
-import com.starburst.starburst.computers.ReservedItemNames
+import com.starburst.starburst.models.ReservedItemNames
 import com.starburst.starburst.models.*
 import com.starburst.starburst.models.builders.ModelBuilder
 import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue

@@ -1,7 +1,7 @@
 package com.starburst.starburst.pv
 
-import com.starburst.starburst.computers.ReservedItemNames.FreeCashFlow
-import com.starburst.starburst.computers.ReservedItemNames.SharesOutstanding
+import com.starburst.starburst.models.ReservedItemNames.FreeCashFlow
+import com.starburst.starburst.models.ReservedItemNames.SharesOutstanding
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.ModelEvaluationOutput
 import com.starburst.starburst.spreadsheet.Cell
@@ -10,8 +10,8 @@ import kotlin.math.pow
 class DcfCalculator(private val model: Model) {
 
     fun calcPv(cells: List<Cell>): ModelEvaluationOutput {
-        val fcfCells = cells.filter { it.item?.name == FreeCashFlow }.sortedBy { it.period }
-        val sharesOutstandingCells = cells.filter { it.item?.name == SharesOutstanding }.sortedBy { it.period }
+        val fcfCells = cells.filter { it.item.name == FreeCashFlow }.sortedBy { it.period }
+        val sharesOutstandingCells = cells.filter { it.item.name == SharesOutstanding }.sortedBy { it.period }
 
         if (fcfCells.isEmpty())
             error("cannot find $FreeCashFlow cells")
