@@ -12,7 +12,7 @@ class SaaSRevenueExpressionTranslator(private val ctx: ResolverContext) {
         val periods = ctx.model.periods
         val period = cell.period
         val item = cell.item
-        val saaSRevenue = item?.saaSRevenue ?: error("saaSRevenue fields must be populated")
+        val saaSRevenue = item?.subscriptionRevenue ?: error("saaSRevenue fields must be populated")
 
         val (
             totalSubscriptionAtTerminalYear,

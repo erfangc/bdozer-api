@@ -1,7 +1,7 @@
 package com.starburst.starburst.models
 
 import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
-import com.starburst.starburst.models.translator.subtypes.dataclasses.SaaSRevenue
+import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
 import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
 
 data class Item(
@@ -24,9 +24,9 @@ data class Item(
 
     val segment: String? = null,
 
-    val type: DriverType = DriverType.Custom,
+    val type: ItemType = ItemType.Custom,
 
-    val saaSRevenue: SaaSRevenue? = null,
+    val subscriptionRevenue: SubscriptionRevenue? = null,
 
     val variableCost: VariableCost? = null,
 

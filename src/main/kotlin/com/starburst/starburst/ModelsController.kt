@@ -3,7 +3,7 @@ package com.starburst.starburst
 import com.starburst.starburst.computers.ReservedItemNames
 import com.starburst.starburst.models.*
 import com.starburst.starburst.models.builders.ModelBuilder
-import com.starburst.starburst.models.translator.subtypes.dataclasses.SaaSRevenue
+import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
 import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
 import org.springframework.web.bind.annotation.*
 
@@ -24,8 +24,8 @@ class ModelsController(private val modelBuilder: ModelBuilder) {
                 Item(
                     name = "Cloud_Hosting_Revenue",
                     description = "Cloud Hosting Revenue",
-                    type = DriverType.SaaSRevenue,
-                    saaSRevenue = SaaSRevenue(
+                    type = ItemType.SubscriptionRevenue,
+                    subscriptionRevenue = SubscriptionRevenue(
                         totalSubscriptionAtTerminalYear = 100_000,
                         initialSubscriptions = 1_000,
                         averageRevenuePerSubscription = 120.0
@@ -38,7 +38,7 @@ class ModelsController(private val modelBuilder: ModelBuilder) {
                 Item(
                     name = "Cloud_Hosting_Equipment",
                     description = "Cloud Hosting Equipment",
-                    type = DriverType.VariableCost,
+                    type = ItemType.VariableCost,
                     variableCost = VariableCost(
                         percentOfRevenue = 0.2
                     ),

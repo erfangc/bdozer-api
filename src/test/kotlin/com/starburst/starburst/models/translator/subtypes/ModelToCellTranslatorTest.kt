@@ -1,12 +1,12 @@
 package com.starburst.starburst.models.translator.subtypes
 
 import com.starburst.starburst.computers.ReservedItemNames.Revenue
-import com.starburst.starburst.models.DriverType
+import com.starburst.starburst.models.ItemType
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
-import com.starburst.starburst.models.translator.subtypes.dataclasses.SaaSRevenue
+import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
 import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -40,8 +40,8 @@ internal class ModelToCellTranslatorTest {
             incomeStatementItems = listOf(
                 Item(
                     name = "SaaSRevenue",
-                    type = DriverType.SaaSRevenue,
-                    saaSRevenue = SaaSRevenue(
+                    type = ItemType.SubscriptionRevenue,
+                    subscriptionRevenue = SubscriptionRevenue(
                         totalSubscriptionAtTerminalYear = 120_000,
                         initialSubscriptions = 50_000,
                         averageRevenuePerSubscription = 15.0
@@ -53,14 +53,14 @@ internal class ModelToCellTranslatorTest {
                 ),
                 Item(
                     name = "Computers",
-                    type = DriverType.FixedCost,
+                    type = ItemType.FixedCost,
                     fixedCost = FixedCost(
                         cost = 1000.0
                     )
                 ),
                 Item(
                     name = "Salary",
-                    type = DriverType.VariableCost,
+                    type = ItemType.VariableCost,
                     variableCost = VariableCost(
                         percentOfRevenue = 0.25
                     )

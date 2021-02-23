@@ -3,7 +3,7 @@ package com.starburst.starburst.models.translator.subtypes
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.computers.ResolverContext
-import com.starburst.starburst.models.DriverType
+import com.starburst.starburst.models.ItemType
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
@@ -20,7 +20,7 @@ internal class GenericExpressionTranslatorTest {
                 Item(
                     name = "Aircraft_Parts",
                     fixedCost = FixedCost(1000.0),
-                    type = DriverType.FixedCost
+                    type = ItemType.FixedCost
                 ),
                 Item(
                     expression = "(Aircraft_Parts + Aircraft_Parts) / 2",

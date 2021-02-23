@@ -2,7 +2,7 @@ package com.starburst.starburst.models.translator
 
 import com.starburst.starburst.spreadsheet.Cell
 import com.starburst.starburst.computers.ResolverContext
-import com.starburst.starburst.models.DriverType
+import com.starburst.starburst.models.ItemType
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.translator.subtypes.*
 
@@ -42,16 +42,16 @@ class CellFormulaTranslator {
              */
             else {
                 when (item.type) {
-                    DriverType.SaaSRevenue -> SaaSRevenueExpressionTranslator(ctx)
+                    ItemType.SubscriptionRevenue -> SaaSRevenueExpressionTranslator(ctx)
                         .resolveExpression(cell)
 
-                    DriverType.VariableCost -> VariableCostExpressionTranslator(ctx)
+                    ItemType.VariableCost -> VariableCostExpressionTranslator(ctx)
                         .translateFormula(cell)
 
-                    DriverType.FixedCost -> FixedCostExpressionTranslator(ctx)
+                    ItemType.FixedCost -> FixedCostExpressionTranslator(ctx)
                         .translateFormula(cell)
 
-                    DriverType.Custom -> CustomExpressionTranslator(ctx)
+                    ItemType.Custom -> CustomExpressionTranslator(ctx)
                         .translateFormula(cell)
                 }
             }

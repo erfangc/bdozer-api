@@ -3,10 +3,9 @@ package com.starburst.starburst.models.translator.subtypes
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.computers.ResolverContext
-import com.starburst.starburst.models.DriverType
+import com.starburst.starburst.models.ItemType
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
-import com.starburst.starburst.models.translator.subtypes.dataclasses.CustomDriver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -52,12 +51,12 @@ internal class CustomDriverExpressionTranslatorTest {
             incomeStatementItems = listOf(
                 Item(
                     name = "I1",
-                    type = DriverType.Custom,
+                    type = ItemType.Custom,
                     expression = "10 + Bad"
                 ),
                 Item(
                     name = "I2",
-                    type = DriverType.Custom,
+                    type = ItemType.Custom,
                     expression = "I3 / 10"
                 ),
                 Item(

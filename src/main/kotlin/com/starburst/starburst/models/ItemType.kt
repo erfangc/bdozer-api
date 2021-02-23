@@ -1,7 +1,7 @@
 package com.starburst.starburst.models
 
-enum class DriverType {
-    SaaSRevenue,
+enum class ItemType {
+    SubscriptionRevenue,
     Custom,
     VariableCost,
     FixedCost
