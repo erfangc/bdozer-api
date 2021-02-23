@@ -60,7 +60,7 @@ internal class ModelToCellTranslatorTest {
                 ),
                 Item(
                     name = "Salary",
-                    type = ItemType.PercentOfTotalAsset,
+                    type = ItemType.PercentOfRevenue,
                     percentOfRevenue = PercentOfRevenue(
                         percentOfRevenue = 0.25
                     )
