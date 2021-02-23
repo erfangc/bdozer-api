@@ -1,6 +1,5 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import com.starburst.starburst.computers.ReservedItemNames.CapitalExpenditure
 import com.starburst.starburst.computers.ReservedItemNames.ChangeInWorkingCapital
 import com.starburst.starburst.computers.ReservedItemNames.CostOfGoodsSold
@@ -31,6 +30,7 @@ import com.starburst.starburst.models.builders.SkeletonModel.skeletonModel
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.pv.DcfCalculator
+import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import org.springframework.stereotype.Service
 
 @Service
@@ -54,7 +54,9 @@ class ModelBuilder {
      */
     fun reformulateModel(model: Model): Model {
 
+        //
         // Step 1 - calculate revenue
+        //
         val incomeStatementItems = model.incomeStatementItems
         val balanceSheetItems = model.balanceSheetItems
 
@@ -131,20 +133,10 @@ class ModelBuilder {
         // Step 7 - calculate interest/tax expenses
         // TODO actually do something here
         val intExpIdx = idxOfInc(InterestExpense)
-        val intExpItem = if (incomeStatementItems[intExpIdx].expression == null) {
-            incomeStatementItems[intExpIdx].copy(expression = "0.0")
-        } else {
-            incomeStatementItems[intExpIdx]
-        }
+        val intExpItem = incomeStatementItems[intExpIdx]
 
         val taxExpenseIdx = idxOfInc(TaxExpense)
-        val taxExpenseItem = if (incomeStatementItems[taxExpenseIdx].expression == null) {
-            incomeStatementItems[taxExpenseIdx].copy(
-                expression = "${model.corporateTaxRate}*($OperatingIncome-$NonOperatingExpense-$InterestExpense)"
-            )
-        } else {
-            incomeStatementItems[taxExpenseIdx]
-        }
+        val taxExpenseItem = incomeStatementItems[taxExpenseIdx]
 
         //
         // Step 8 - calculate net income
@@ -186,36 +178,67 @@ class ModelBuilder {
         // Balance sheet updates
         // ---------------------
 
-        //
-        // TODO actually introduce expressions instead of carrying over the previous balance
-        //
         val caIdx = idxOfBal(CurrentAsset)
-        val caItem = balanceSheetItems[caIdx].copy(expression = previous(CurrentAsset))
+        val caItems = balanceSheetItems.subList(0, caIdx)
+        val caItem = balanceSheetItems[caIdx].copy(
+            expression = if (caItems.isEmpty())
+                previous(CurrentAsset)
+            else caItems.joinToString("+") { it.name },
+            historicalValue = caItems.sumByDouble { it.historicalValue }
+        )
 
         val ltaIdx = idxOfBal(LongTermAsset)
-        val ltaItem = balanceSheetItems[ltaIdx].copy(expression = previous(LongTermAsset))
+        val ltaItems = balanceSheetItems.subList(caIdx + 1, ltaIdx)
+        val ltaItem = balanceSheetItems[ltaIdx].copy(
+            expression = if (ltaItems.isEmpty())
+                previous(LongTermAsset)
+            else
+                ltaItems.joinToString("+") { it.name },
+            historicalValue = ltaItems.sumByDouble { it.historicalValue }
+        )
 
         val taIdx = idxOfBal(TotalAsset)
-        val taItem = balanceSheetItems[taIdx].copy(expression = previous(TotalAsset))
+        val taItem = balanceSheetItems[taIdx].copy(
+            expression = "$CurrentAsset+$LongTermAsset",
+            historicalValue = caItem.historicalValue + ltaItem.historicalValue
+        )
 
         val clIdx = idxOfBal(CurrentLiability)
-        val clItem = balanceSheetItems[clIdx].copy(expression = previous(CurrentLiability))
+        val clItems = balanceSheetItems.subList(taIdx + 1, clIdx)
+        val clItem = balanceSheetItems[clIdx].copy(
+            expression = if (clItems.isEmpty())
+                previous(CurrentLiability)
+            else
+                clItems.joinToString("+") { it.name },
+            historicalValue = clItems.sumByDouble { it.historicalValue }
+        )
 
         val ltlIdx = idxOfBal(LongTermLiability)
-        val ltlItem = balanceSheetItems[ltlIdx].copy(expression = previous(LongTermLiability))
+        val ltlItems = balanceSheetItems.subList(clIdx + 1, ltlIdx)
+        val ltlItem = balanceSheetItems[ltlIdx].copy(
+            expression = if (ltlItems.isEmpty())
+                previous(LongTermLiability)
+            else
+                ltlItems.joinToString("+") { it.name },
+            historicalValue = ltlItems.sumByDouble { it.historicalValue }
+        )
 
         val ttlIdx = idxOfBal(TotalLiability)
-        val ttlItem = balanceSheetItems[ttlIdx].copy(expression = previous(TotalLiability))
+        val tl = balanceSheetItems[ttlIdx].copy(
+            expression = "$CurrentLiability+$LongTermLiability",
+            historicalValue = clItem.historicalValue + ltlItem.historicalValue
+        )
 
         val equityIdx = idxOfBal(ShareholdersEquity)
-        val equityItem = balanceSheetItems[equityIdx].copy(expression = previous(ShareholdersEquity))
-
+        val equityItem = balanceSheetItems[equityIdx].copy(
+            expression = "$TotalAsset-$TotalLiability",
+            historicalValue = taItem.historicalValue - tl.historicalValue
+        )
 
         val changeInWorkingCapitalItem = Item(
             name = ChangeInWorkingCapital,
             description = "Change in Working Capital",
-            //  expression = "($CurrentAsset-$CurrentLiability)-(${previous(CurrentAsset)}-${previous(CurrentLiability)})"
-            expression = "0"
+            expression = "($CurrentAsset-$CurrentLiability)-(${previous(CurrentAsset)}-${previous(CurrentLiability)})"
         )
 
         //
@@ -230,7 +253,7 @@ class ModelBuilder {
         val sharesOutstandingItem = Item(
             name = SharesOutstanding,
             description = "Shares Outstanding",
-            // TODO calculate actual shares outstanding
+            // TODO calculate actual shares outstanding based on convertibles, SBCs
             expression = model.sharesOutstanding?.toString() ?: "1.0"
         )
 
@@ -260,15 +283,17 @@ class ModelBuilder {
             sharesOutstandingItem
         )
 
-        val balanceSheetItemsNew = listOf(
-            caItem,
-            ltaItem,
-            taItem,
-            clItem,
-            ltlItem,
-            ttlItem,
-            equityItem
-        )
+        val balanceSheetItemsNew = caItems +
+                caItem +
+                ltaItems +
+                ltaItem +
+                taItem +
+                clItems +
+                clItem +
+                ltlItems +
+                ltlItem +
+                tl +
+                equityItem
 
         return model.copy(
             incomeStatementItems = incomeStatementItemsNew,

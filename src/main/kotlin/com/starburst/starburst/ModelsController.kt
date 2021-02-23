@@ -4,7 +4,7 @@ import com.starburst.starburst.computers.ReservedItemNames
 import com.starburst.starburst.models.*
 import com.starburst.starburst.models.builders.ModelBuilder
 import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
-import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
+import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfRevenue
 import org.springframework.web.bind.annotation.*
 
 @CrossOrigin
@@ -38,8 +38,8 @@ class ModelsController(private val modelBuilder: ModelBuilder) {
                 Item(
                     name = "Cloud_Hosting_Equipment",
                     description = "Cloud Hosting Equipment",
-                    type = ItemType.VariableCost,
-                    variableCost = VariableCost(
+                    type = ItemType.PercentOfRevenue,
+                    percentOfRevenue = PercentOfRevenue(
                         percentOfRevenue = 0.2
                     ),
                     historicalValue = 24_000.0

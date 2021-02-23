@@ -3,7 +3,7 @@ package com.starburst.starburst.spreadsheet.evaluation
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.models.translator.subtypes.ModelToCellTranslatorTest
-import com.starburst.starburst.models.translator.subtypes.CustomDriverExpressionTranslatorTest
+import com.starburst.starburst.models.translator.subtypes.CustomDriverFormulaTranslatorTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -36,7 +36,7 @@ internal class CellEvaluatorTest {
 
     @Test
     internal fun evaluateWithCustomFormula() {
-        val model = CustomDriverExpressionTranslatorTest.fakeAircraftCompany()
+        val model = CustomDriverFormulaTranslatorTest.fakeAircraftCompany()
         val results = CellEvaluator().evaluate(
             cells = CellFormulaTranslator().populateCellsWithFormulas(
                 model = model,
@@ -49,7 +49,7 @@ internal class CellEvaluatorTest {
 
     @Test
     internal fun evaluateWithCircularReference() {
-        val model = CustomDriverExpressionTranslatorTest.circularReferenceModel()
+        val model = CustomDriverFormulaTranslatorTest.circularReferenceModel()
         val a = assertThrows<IllegalStateException> {
             CellEvaluator().evaluate(
                 cells = CellFormulaTranslator().populateCellsWithFormulas(

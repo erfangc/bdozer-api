@@ -1,5 +1,5 @@
 package com.starburst.starburst.models.translator.subtypes.dataclasses
 
-data class VariableCost(
+data class PercentOfRevenue(
     val percentOfRevenue: Double
 )

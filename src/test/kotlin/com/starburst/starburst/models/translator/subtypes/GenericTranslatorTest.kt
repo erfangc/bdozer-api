@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 
-internal class GenericExpressionTranslatorTest {
+internal class GenericTranslatorTest {
 
     @Test
     fun resolveExpression() {
@@ -38,7 +38,7 @@ internal class GenericExpressionTranslatorTest {
             cells = cells
         )
 
-        val result = GenericExpressionTranslator(ctx)
+        val result = GenericTranslator(ctx)
             .translateFormula(cells.find { it.name == "Random_Period2" }!!)
 
         assertEquals("(Aircraft_Parts_Period2+Aircraft_Parts_Period2)/2", result.formula)

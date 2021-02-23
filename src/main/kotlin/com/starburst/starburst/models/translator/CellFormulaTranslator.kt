@@ -42,16 +42,19 @@ class CellFormulaTranslator {
              */
             else {
                 when (item.type) {
-                    ItemType.SubscriptionRevenue -> SaaSRevenueExpressionTranslator(ctx)
+                    ItemType.SubscriptionRevenue -> SubscriptionRevenueTranslator(ctx)
                         .resolveExpression(cell)
 
-                    ItemType.VariableCost -> VariableCostExpressionTranslator(ctx)
+                    ItemType.PercentOfRevenue -> PercentOfRevenueTranslator(ctx)
                         .translateFormula(cell)
 
-                    ItemType.FixedCost -> FixedCostExpressionTranslator(ctx)
+                    ItemType.PercentOfTotalAsset -> PercentOfTotalAssetTranslator(ctx)
                         .translateFormula(cell)
 
-                    ItemType.Custom -> CustomExpressionTranslator(ctx)
+                    ItemType.FixedCost -> FixedCostTranslator(ctx)
+                        .translateFormula(cell)
+
+                    ItemType.Custom -> CustomTranslator(ctx)
                         .translateFormula(cell)
                 }
             }

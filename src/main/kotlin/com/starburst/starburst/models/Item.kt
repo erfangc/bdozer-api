@@ -1,8 +1,9 @@
 package com.starburst.starburst.models
 
+import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfTotalAsset
 import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
 import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
-import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
+import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfRevenue
 
 data class Item(
     /**
@@ -28,7 +29,10 @@ data class Item(
 
     val subscriptionRevenue: SubscriptionRevenue? = null,
 
-    val variableCost: VariableCost? = null,
+    val percentOfTotalAsset: PercentOfTotalAsset? = null,
+
+    val percentOfRevenue: PercentOfRevenue? = null,
 
     val fixedCost: FixedCost? = null
 )
+

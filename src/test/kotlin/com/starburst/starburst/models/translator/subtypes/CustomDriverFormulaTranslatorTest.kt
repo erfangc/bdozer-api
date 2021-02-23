@@ -9,7 +9,7 @@ import com.starburst.starburst.models.Model
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class CustomDriverExpressionTranslatorTest {
+internal class CustomDriverFormulaTranslatorTest {
 
     @Test
     fun resolveExpression() {
@@ -22,7 +22,7 @@ internal class CustomDriverExpressionTranslatorTest {
 
         val ctx = ResolverContext(model = model, cells = cells)
 
-        val results = CustomExpressionTranslator(ctx)
+        val results = CustomTranslator(ctx)
             .translateFormula(cells.find { it.name == "Aircraft_Parts_Period2" }!!)
 
         assertEquals("Aircraft_Revenue_Period2*0.35", results.formula)

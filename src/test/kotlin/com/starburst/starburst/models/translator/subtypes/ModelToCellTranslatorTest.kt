@@ -7,7 +7,7 @@ import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
 import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
-import com.starburst.starburst.models.translator.subtypes.dataclasses.VariableCost
+import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfRevenue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -60,8 +60,8 @@ internal class ModelToCellTranslatorTest {
                 ),
                 Item(
                     name = "Salary",
-                    type = ItemType.VariableCost,
-                    variableCost = VariableCost(
+                    type = ItemType.PercentOfTotalAsset,
+                    percentOfRevenue = PercentOfRevenue(
                         percentOfRevenue = 0.25
                     )
                 )
