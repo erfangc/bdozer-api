@@ -11,6 +11,7 @@ import com.starburst.starburst.models.ReservedItemNames.CurrentAsset
 import com.starburst.starburst.models.ReservedItemNames.CurrentLiability
 import com.starburst.starburst.models.ReservedItemNames.DepreciationAmortization
 import com.starburst.starburst.models.ReservedItemNames.FreeCashFlow
+import com.starburst.starburst.models.ReservedItemNames.FreeCashFlowPerShare
 import com.starburst.starburst.models.ReservedItemNames.GrossProfit
 import com.starburst.starburst.models.ReservedItemNames.InterestExpense
 import com.starburst.starburst.models.ReservedItemNames.LongTermAsset
@@ -257,7 +258,8 @@ class ModelBuilder {
         val changeInWorkingCapitalItem = Item(
             name = ChangeInWorkingCapital,
             description = "Change in Working Capital",
-            expression = "($CurrentAsset-$CurrentLiability)-(${previous(CurrentAsset)}-${previous(CurrentLiability)})"
+            expression = "($CurrentAsset-$CurrentLiability)-(${previous(CurrentAsset)}-${previous(CurrentLiability)})",
+            historicalValue = 0.0
         )
 
         //
@@ -266,7 +268,19 @@ class ModelBuilder {
         val fcfItem = Item(
             name = FreeCashFlow,
             description = "Free Cash Flow",
-            expression = "$NetIncome-$CapitalExpenditure+$DepreciationAmortization+$StockBasedCompensation-$ChangeInWorkingCapital"
+            expression = "$NetIncome-$CapitalExpenditure+$DepreciationAmortization+$StockBasedCompensation-$ChangeInWorkingCapital",
+            historicalValue = netIncomeSubtotal.historicalValue -
+                    capexItem.historicalValue +
+                    daItem.historicalValue +
+                    sbcItem.historicalValue -
+                    changeInWorkingCapitalItem.historicalValue
+        )
+
+        val fcfPerShareItem = Item(
+            name = FreeCashFlowPerShare,
+            description = "Free Cash Flow Per Share",
+            expression = "$FreeCashFlow/$SharesOutstanding",
+            historicalValue = fcfItem.historicalValue / sharesOutstandingItem.historicalValue
         )
 
         //
@@ -292,7 +306,8 @@ class ModelBuilder {
             sbcItem,
             changeInWorkingCapitalItem,
             fcfItem,
-            sharesOutstandingItem
+            sharesOutstandingItem,
+            fcfPerShareItem
         )
 
         val balanceSheetItemsNew = caItems +

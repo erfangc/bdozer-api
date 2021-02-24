@@ -21,6 +21,7 @@ object ReservedItemNames {
     const val ShareholdersEquity = "ShareholdersEquity"
     // Non-GaaP / Other
     const val FreeCashFlow = "FreeCashFlow"
+    const val FreeCashFlowPerShare = "FreeCashFlowPerShare"
     const val CapitalExpenditure = "CapitalExpenditure"
     const val DepreciationAmortization = "DepreciationAmortization"
     const val StockBasedCompensation = "StockBasedCompensation"
