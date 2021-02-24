@@ -11,7 +11,7 @@ data class Model(
      */
     val currentPrice: Double = 1.0,
     val beta: Double = 1.0,
-    val sharesOutstanding: Double? = null,
+    val sharesOutstanding: Double = 1.0,
     val dilutedSharesOutstanding: Double? = null,
     val corporateTaxRate: Double = 0.1,
     val costOfDebt: Double = 0.04,

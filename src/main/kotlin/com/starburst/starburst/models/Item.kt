@@ -1,9 +1,6 @@
 package com.starburst.starburst.models
 
-import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfTotalAsset
-import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
-import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
-import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfRevenue
+import com.starburst.starburst.models.translator.subtypes.dataclasses.*
 
 data class Item(
     /**
@@ -16,6 +13,8 @@ data class Item(
      */
     val description: String? = null,
 
+    val type: ItemType = ItemType.Custom,
+
     /**
      * [historicalValue] the latest actual value for this item
      */
@@ -25,14 +24,18 @@ data class Item(
 
     val segment: String? = null,
 
-    val type: ItemType = ItemType.Custom,
-
     val subscriptionRevenue: SubscriptionRevenue? = null,
 
     val percentOfTotalAsset: PercentOfTotalAsset? = null,
 
     val percentOfRevenue: PercentOfRevenue? = null,
 
-    val fixedCost: FixedCost? = null
+    val unitSalesRevenue: UnitSalesRevenue? = null,
+
+    val fixedCost: FixedCost? = null,
+
+    val stockBasedCompensation: Boolean = false,
+
+    val nonCashExpense: Boolean = false
 )
 

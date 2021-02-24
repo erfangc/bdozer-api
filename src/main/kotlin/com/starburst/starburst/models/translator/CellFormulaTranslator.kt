@@ -54,6 +54,9 @@ class CellFormulaTranslator {
                     ItemType.FixedCost -> FixedCostTranslator(ctx)
                         .translateFormula(cell)
 
+                    ItemType.UnitSalesRevenue -> UnitSalesRevenueTranslator(ctx)
+                        .translateFormula(cell)
+
                     ItemType.Custom -> CustomTranslator(ctx)
                         .translateFormula(cell)
                 }

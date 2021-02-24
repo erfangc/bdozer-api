@@ -1,5 +1,9 @@
 package com.starburst.starburst.models.builders
 
+import com.starburst.starburst.dcf.DCFCalculator
+import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.ModelEvaluationOutput
 import com.starburst.starburst.models.ReservedItemNames.CapitalExpenditure
 import com.starburst.starburst.models.ReservedItemNames.ChangeInWorkingCapital
 import com.starburst.starburst.models.ReservedItemNames.CostOfGoodsSold
@@ -22,14 +26,10 @@ import com.starburst.starburst.models.ReservedItemNames.StockBasedCompensation
 import com.starburst.starburst.models.ReservedItemNames.TaxExpense
 import com.starburst.starburst.models.ReservedItemNames.TotalAsset
 import com.starburst.starburst.models.ReservedItemNames.TotalLiability
-import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.Model
-import com.starburst.starburst.models.ModelEvaluationOutput
 import com.starburst.starburst.models.Util.previous
-import com.starburst.starburst.models.builders.SkeletonModel.skeletonModel
+import com.starburst.starburst.models.builders.SkeletonModel.dropbox
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
-import com.starburst.starburst.pv.DcfCalculator
 import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import org.springframework.stereotype.Service
 
@@ -115,7 +115,7 @@ class ModelBuilder {
         val opIncIdx = idxOfInc(OperatingIncome)
         val opIncSubtotal = incomeStatementItems[opIncIdx].copy(
             expression = "$GrossProfit-$OperatingExpense",
-            historicalValue = opExpItems.sumByDouble { it.historicalValue }
+            historicalValue = grossProfitSubtotal.historicalValue - opExpSubtotal.historicalValue
         )
 
         //
@@ -136,7 +136,9 @@ class ModelBuilder {
         val intExpItem = incomeStatementItems[intExpIdx]
 
         val taxExpenseIdx = idxOfInc(TaxExpense)
-        val taxExpenseItem = incomeStatementItems[taxExpenseIdx]
+        val taxExpenseItem = incomeStatementItems[taxExpenseIdx].copy(
+            expression = "($OperatingIncome-$NonOperatingExpense-$InterestExpense)*${model.corporateTaxRate}"
+        )
 
         //
         // Step 8 - calculate net income
@@ -161,17 +163,34 @@ class ModelBuilder {
         //
         // Step 10 - calculate depreciation & amortization
         // TODO go through the drivers and figure out which ones require depreciation & amortization adjustment
+        val nonCashItems = incomeStatementItems.filter { it.nonCashExpense }
         val daItem = Item(
             name = DepreciationAmortization,
-            expression = "0"
+            expression = if (nonCashItems.isNotEmpty())
+                nonCashItems.joinToString("+") { it.name }
+            else
+                "0.0",
+            historicalValue = nonCashItems.sumByDouble { it.historicalValue }
         )
 
         //
         // Step 11 - calculate stock based compensation
-        // TODO go through the drivers and figure out which ones is SBC - create the formula
+        val sbcItems = incomeStatementItems.filter { it.stockBasedCompensation }
         val sbcItem = Item(
             name = StockBasedCompensation,
-            expression = "0"
+            expression = if (sbcItems.isNotEmpty()) {
+                sbcItems.joinToString("+") { it.name }
+            } else {
+                "0.0"
+            },
+            historicalValue = sbcItems.sumByDouble { it.historicalValue }
+        )
+
+        val sharesOutstandingItem = Item(
+            name = SharesOutstanding,
+            description = "Shares Outstanding",
+            expression = "${previous(SharesOutstanding)}+$StockBasedCompensation/${model.currentPrice}",
+            historicalValue = model.sharesOutstanding
         )
 
         // ---------------------
@@ -250,13 +269,6 @@ class ModelBuilder {
             expression = "$NetIncome-$CapitalExpenditure+$DepreciationAmortization+$StockBasedCompensation-$ChangeInWorkingCapital"
         )
 
-        val sharesOutstandingItem = Item(
-            name = SharesOutstanding,
-            description = "Shares Outstanding",
-            // TODO calculate actual shares outstanding based on convertibles, SBCs
-            expression = model.sharesOutstanding?.toString() ?: "1.0"
-        )
-
         //
         // TODO compute the diluted number of shares to derive at enterprise value / share
         //
@@ -307,7 +319,7 @@ class ModelBuilder {
      * this doesn't have to be the only skeleton model available
      */
     fun createModel(): Model {
-        return skeletonModel
+        return dropbox
     }
 
     /**
@@ -319,7 +331,7 @@ class ModelBuilder {
         val generateCells = modelToCellTranslator.generateCells(fullyFormedModel)
         val cells = CellFormulaTranslator().populateCellsWithFormulas(fullyFormedModel, generateCells)
         val evaluatedCells = CellEvaluator().evaluate(cells)
-        return DcfCalculator(fullyFormedModel).calcPv(evaluatedCells)
+        return DCFCalculator(fullyFormedModel).calcPv(evaluatedCells)
     }
 
 }

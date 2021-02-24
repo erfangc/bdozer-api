@@ -42,8 +42,8 @@ internal class ModelToCellTranslatorTest {
                     name = "SaaSRevenue",
                     type = ItemType.SubscriptionRevenue,
                     subscriptionRevenue = SubscriptionRevenue(
-                        totalSubscriptionAtTerminalYear = 120_000,
-                        initialSubscriptions = 50_000,
+                        totalSubscriptionAtTerminalYear = 120_000.0,
+                        initialSubscriptions = 50_000.0,
                         averageRevenuePerSubscription = 15.0
                     )
                 ),

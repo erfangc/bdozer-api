@@ -1,7 +1,7 @@
 package com.starburst.starburst
 
-import com.starburst.starburst.ModelsController.Companion.defaultModel
+import com.starburst.starburst.models.builders.SkeletonModel.dropbox
 
 object Provier {
-    fun fictitiousSaaSCompany() = defaultModel()
+    fun fictitiousSaaSCompany() = dropbox
 }

@@ -1,11 +1,11 @@
-package com.starburst.starburst.pv
+package com.starburst.starburst.dcf
 
 import com.starburst.starburst.Provier.fictitiousSaaSCompany
 import com.starburst.starburst.models.builders.ModelBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class DcfCalculatorTest {
+internal class DCFCalculatorTest {
 
     @Test
     fun performDcf() {

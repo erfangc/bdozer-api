@@ -1,4 +1,4 @@
-package com.starburst.starburst.pv
+package com.starburst.starburst.dcf
 
 import com.starburst.starburst.models.ReservedItemNames.FreeCashFlow
 import com.starburst.starburst.models.ReservedItemNames.SharesOutstanding
@@ -7,7 +7,7 @@ import com.starburst.starburst.models.ModelEvaluationOutput
 import com.starburst.starburst.spreadsheet.Cell
 import kotlin.math.pow
 
-class DcfCalculator(private val model: Model) {
+class DCFCalculator(private val model: Model) {
 
     fun calcPv(cells: List<Cell>): ModelEvaluationOutput {
         val fcfCells = cells.filter { it.item.name == FreeCashFlow }.sortedBy { it.period }
