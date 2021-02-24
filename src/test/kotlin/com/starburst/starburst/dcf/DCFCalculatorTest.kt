@@ -11,8 +11,8 @@ internal class DCFCalculatorTest {
     fun performDcf() {
         val model = fictitiousSaaSCompany()
         val output = ModelBuilder().evaluateModel(model)
-        assertEquals(99.74034061511966, output.targetPriceUnderExitMultipleMethod)
-        assertEquals(154.21122566489873, output.targetPriceUnderPerpetuityMethod)
+        assertEquals(24.638747934405984, output.targetPriceUnderExitMultipleMethod)
+        assertEquals(37.65188729801535, output.targetPriceUnderPerpetuityMethod)
     }
 
 }
