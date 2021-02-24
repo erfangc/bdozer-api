@@ -14,7 +14,7 @@
 	<name>starburst</name>
 	<description>DCF generator server</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>1.8</java.version>
 		<kotlin.version>1.4.21</kotlin.version>
 	</properties>
 	<dependencies>
