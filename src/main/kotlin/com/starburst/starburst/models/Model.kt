@@ -1,7 +1,17 @@
 package com.starburst.starburst.models
 
-data class Model(
+import org.javers.core.metamodel.annotation.Id
+import java.time.Instant
+import java.util.*
 
+data class Model(
+    @Id
+    val _id: String = UUID.randomUUID().toString(),
+    val name: String = "Untitled Model",
+    val symbol: String? = null,
+    val cik: String? = null,
+    val description: String? = null,
+    val tags: List<String> = emptyList(),
     val incomeStatementItems: List<Item> = emptyList(),
     val balanceSheetItems: List<Item> = emptyList(),
     val otherItems: List<Item> = emptyList(),
@@ -23,6 +33,8 @@ data class Model(
     /**
      * Projection period
      */
-    val periods: Int = 5
+    val periods: Int = 5,
 
+    val updatedAt: Instant = Instant.now(),
+    val updatedBy: String? = null
 )

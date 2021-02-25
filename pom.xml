@@ -20,6 +20,27 @@
 		<java-jwt.version>3.13.0</java-jwt.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.litote.kmongo</groupId>
+			<artifactId>kmongo</artifactId>
+			<version>4.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-persistence-mongo</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.mongodb</groupId>
+					<artifactId>mongodb-driver-legacy</artifactId>
+				</exclusion>
+			</exclusions>
+			<version>5.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-core</artifactId>
+			<version>5.14.0</version>
+		</dependency>
 		<!--	validate auth0 issued JWT tokens	-->
 		<dependency>
 			<groupId>com.auth0</groupId>
@@ -31,7 +52,6 @@
 			<artifactId>jwks-rsa</artifactId>
 			<version>${jwks-rsa.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-kotlin</artifactId>

@@ -1,5 +1,7 @@
 package com.starburst.starburst.authn
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.interfaces.DecodedJWT
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -11,13 +13,12 @@ import javax.servlet.http.HttpServletResponse
 class AuthenticationFilter(private val jwtValidator: JwtValidator): OncePerRequestFilter() {
 
     override fun doFilterInternal(servletRequest: HttpServletRequest, servletResponse: HttpServletResponse, chain: FilterChain) {
-        if (servletRequest.method == "OPTIONS") {
+        if (servletRequest.method == "OPTIONS" || !servletRequest.requestURI.startsWith("/api")) {
             doFilter(servletRequest, servletResponse, chain)
             return
         }
 
-        val authorization = servletRequest.getHeader(HttpHeaders.AUTHORIZATION)
-        val accessToken = extractAccessToken(authorization)
+        val accessToken = extractJwtToken(servletRequest)
         try {
             jwtValidator.decodeAndVerify(accessToken)
             doFilter(servletRequest, servletResponse, chain)
@@ -26,11 +27,21 @@ class AuthenticationFilter(private val jwtValidator: JwtValidator): OncePerReque
         }
     }
 
-    private fun extractAccessToken(authorization: String): String {
-        try {
-            return authorization.replaceFirst(("^Bearer ").toRegex(), "")
-        } catch (e: Exception) {
-            throw error(e)
+    companion object {
+
+        fun decodeJWT(req: HttpServletRequest): DecodedJWT {
+            return JWT.decode(extractJwtToken(req)) ?: error("unable to decode JWT")
         }
+
+        fun extractJwtToken(req: HttpServletRequest): String {
+            val header = req.getHeader(HttpHeaders.AUTHORIZATION)
+            try {
+                return header.replaceFirst(("^Bearer ").toRegex(), "")
+            } catch (e: Exception) {
+                throw error(e)
+            }
+        }
+
     }
+
 }
