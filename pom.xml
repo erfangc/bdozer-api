@@ -16,8 +16,22 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<kotlin.version>1.4.21</kotlin.version>
+		<jwks-rsa.version>0.15.0</jwks-rsa.version>
+		<java-jwt.version>3.13.0</java-jwt.version>
 	</properties>
 	<dependencies>
+		<!--	validate auth0 issued JWT tokens	-->
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>${java-jwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>jwks-rsa</artifactId>
+			<version>${jwks-rsa.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-kotlin</artifactId>
