@@ -33,6 +33,7 @@ import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.ModelToCellTranslator
 import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class ModelBuilder {
@@ -334,7 +335,7 @@ class ModelBuilder {
      * this doesn't have to be the only skeleton model available
      */
     fun createModel(): Model {
-        return dropbox
+        return dropbox.copy(_id = UUID.randomUUID().toString())
     }
 
     /**

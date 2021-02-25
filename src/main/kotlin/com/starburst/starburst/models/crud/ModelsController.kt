@@ -10,6 +10,7 @@ import org.javers.core.JaversBuilder
 import org.litote.kmongo.*
 import org.springframework.web.bind.annotation.*
 import java.lang.Exception
+import java.time.Instant
 import javax.servlet.http.HttpServletRequest
 
 @CrossOrigin
@@ -38,7 +39,10 @@ class ModelsController(
 
     @GetMapping("{id}/history")
     fun getHistory(@PathVariable id: String): List<ModelHistory> {
-        return snapshots.find(ModelHistory::modelId eq id).limit(10).toList()
+        return snapshots
+            .find(ModelHistory::modelId eq id)
+            .toList()
+            .sortedByDescending { it.model.updatedAt }
     }
 
     @GetMapping("{id}")
@@ -54,11 +58,10 @@ class ModelsController(
             null
         }
         val updatedBy = decodeJWT(request).subject
-        val obj = newModel.copy(updatedBy = updatedBy)
+        val obj = newModel.copy(updatedBy = updatedBy, updatedAt = Instant.now())
         collection.save(obj)
         if (existingModel != null) {
-            val diff = javers.compare(existingModel, newModel)
-            val changeSummary = diff.prettyPrint()
+            val changeSummary = ""
             snapshots.save(
                 ModelHistory(
                     changeSummary = changeSummary,
