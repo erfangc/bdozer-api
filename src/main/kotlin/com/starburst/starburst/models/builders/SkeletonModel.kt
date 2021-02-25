@@ -14,9 +14,12 @@ object SkeletonModel {
         beta = 0.88,
         sharesOutstanding = 414.3,
         terminalFcfMultiple = 19.2,
+        symbol = "DBX",
+        name = "Sample Model",
         incomeStatementItems = listOf(
             Item(
                 name = "Subscriptions",
+                description = "Cloud Storage Subs",
                 subscriptionRevenue = SubscriptionRevenue(
                     totalSubscriptionAtTerminalYear = 22.0,
                     initialSubscriptions = 15.48,
