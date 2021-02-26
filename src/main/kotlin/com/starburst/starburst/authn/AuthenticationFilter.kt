@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
-import java.lang.RuntimeException
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -28,10 +27,8 @@ class AuthenticationFilter(
             doFilter(servletRequest, servletResponse, chain)
             return
         }
-
         try {
-            val accessToken = extractJwtToken(servletRequest)
-            jwtValidator.decodeAndVerify(accessToken)
+            jwtValidator.decodeAndVerify(extractJwtToken(servletRequest))
             doFilter(servletRequest, servletResponse, chain)
         } catch (e: Exception) {
             error(servletResponse, e)
@@ -42,7 +39,7 @@ class AuthenticationFilter(
         resp.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         resp.addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString())
         resp.status = 401
-        val apiError = ApiError(message = "cannot authenticate the request, underlying error ${e.message}")
+        val apiError = ApiError(message = e.message ?: "unable to verify JWT token")
         val body = objectMapper.writeValueAsString(apiError)
         resp.writer.println(body)
     }
