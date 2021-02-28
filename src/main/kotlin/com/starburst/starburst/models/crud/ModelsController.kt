@@ -6,10 +6,8 @@ import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.ModelHistory
 import com.starburst.starburst.models.builders.ModelBuilder
 import com.starburst.starburst.models.builders.SkeletonModel.dropbox
-import org.javers.core.JaversBuilder
 import org.litote.kmongo.*
 import org.springframework.web.bind.annotation.*
-import java.lang.Exception
 import java.time.Instant
 import javax.servlet.http.HttpServletRequest
 
@@ -25,7 +23,6 @@ class ModelsController(
     private val database = mongoClient.getDatabase("starburst")
     private val collection = database.getCollection<Model>(collectionName)
     private val snapshots = database.getCollection<ModelHistory>("${collectionName}_Snapshots")
-    private val javers = JaversBuilder.javers().build()
 
     @GetMapping("sample")
     fun sample(): Model {
