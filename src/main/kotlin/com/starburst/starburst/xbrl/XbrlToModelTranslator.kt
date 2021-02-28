@@ -67,10 +67,6 @@ class XbrlToModelTranslator(
     }
 
     private fun findBalanceSheetRole(nodes: NodeList?): String {
-        // ConsolidatedBalanceSheets
-        // CONSOLIDATEDBALANCESHEET
-        // StatementConsolidatedStatementsOfFinancialCondition
-        // StatementConsolidatedBalanceSheets
         return nodes?.toList()?.first {
             val roleURI = it.attributes.getNamedItem("roleURI").textContent
             val last = URI(roleURI)
@@ -88,11 +84,6 @@ class XbrlToModelTranslator(
     }
 
     private fun findIncomeStatementRole(nodes: NodeList?): String {
-        // StatementConsolidatedStatementsOfIncome
-        // ConsolidatedStatementsofOperations
-        // StatementConsolidatedStatementsOfOperations
-        // CONSOLIDATEDINCOMESTATEMENT
-        // ConsolidatedStatementsOfEarnings
         return nodes?.toList()?.first {
             val roleURI = it.attributes.getNamedItem("roleURI").textContent
             val last = URI(roleURI)

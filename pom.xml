@@ -20,6 +20,16 @@
 		<java-jwt.version>3.13.0</java-jwt.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20201115</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.12</version>
+		</dependency>
 		<!--	this is so we can read XBRL documents	-->
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
