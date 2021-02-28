@@ -20,6 +20,12 @@
 		<java-jwt.version>3.13.0</java-jwt.version>
 	</properties>
 	<dependencies>
+		<!--	this is so we can read XBRL documents	-->
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+			<version>${jackson-bom.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.litote.kmongo</groupId>
 			<artifactId>kmongo</artifactId>
