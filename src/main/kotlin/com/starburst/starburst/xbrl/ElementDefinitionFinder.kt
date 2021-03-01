@@ -2,6 +2,7 @@ package com.starburst.starburst.xbrl
 
 import com.starburst.starburst.xbrl.dataclasses.ElementDefinition
 import com.starburst.starburst.xbrl.dataclasses.XbrlUtils
+import com.starburst.starburst.xbrl.utils.ElementExtension.getElementsByTagNameSafe
 import com.starburst.starburst.xbrl.utils.NodeListExtension.toList
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -26,13 +27,13 @@ class ElementDefinitionFinder(gaapXsd: InputStream, extXsd: InputStream) {
 
     private val xml1 = XbrlUtils.readXml(gaapXsd)
     private val gaapElements = xml1
-        .getElementsByTagName("xs:element")
+        .getElementsByTagNameSafe("xs:element")
         .associateElementsbyId()
 
     private val xml2 = XbrlUtils.readXml(extXsd)
 
     private val extensionElements = xml2
-        .getElementsByTagName("xs:element")
+        .getElementsByTagNameSafe("xs:element")
         .associateElementsbyId(namespace = targetNamespaceShort(xml2))
 
     private fun targetNamespaceShort(element: Element): String {

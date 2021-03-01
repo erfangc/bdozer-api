@@ -4,14 +4,18 @@ import com.starburst.starburst.xbrl.dataclasses.*
 import com.starburst.starburst.xbrl.utils.NodeListExtension.findAllByTag
 import com.starburst.starburst.xbrl.utils.NodeListExtension.findByTag
 import com.starburst.starburst.xbrl.utils.NodeListExtension.toList
+import org.slf4j.LoggerFactory
 import org.w3c.dom.Node
 import java.io.InputStream
+import java.lang.Exception
 import java.time.LocalDate
 
 /**
  * [FactFinder]
  */
 class FactFinder(instanceStream: InputStream) {
+
+    private val log = LoggerFactory.getLogger(FactFinder::class.java)
 
     private val root = XbrlUtils
         .readXml(instanceStream)
@@ -88,6 +92,11 @@ class FactFinder(instanceStream: InputStream) {
             val period = it.second?.period
             period?.endDate ?: period?.instant
         }
-        return noSegmentNodes?.first()?.first?.textContent
+        return try {
+            noSegmentNodes?.first()?.first?.textContent
+        } catch (e: Exception) {
+            log.info("Unable to determine the value for $namespace:$name")
+            null
+        }
     }
 }

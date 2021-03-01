@@ -3,6 +3,7 @@ package com.starburst.starburst.xbrl
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.xbrl.dataclasses.XbrlUtils.readXml
+import com.starburst.starburst.xbrl.utils.ElementExtension.getElementsByTagNameSafe
 import com.starburst.starburst.xbrl.utils.NodeListExtension.toList
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
@@ -10,9 +11,9 @@ import java.io.InputStream
 import java.net.URI
 
 class XbrlToModelTranslator(
-    private val usGaapXsdStream: InputStream,
-    private val instanceStream: InputStream,
-    private val extensionXsdStream: InputStream,
+    usGaapXsdStream: InputStream,
+    instanceStream: InputStream,
+    extensionXsdStream: InputStream,
     private val calculationStream: InputStream,
     private val labelStream: InputStream,
     private val definitionStream: InputStream,
@@ -34,19 +35,19 @@ class XbrlToModelTranslator(
         to the business logic expressed within this page
          */
         val root = readXml(calculationStream)
-        val calculationLinks = root.getElementsByTagName("link:calculationLink")
+        val calculationLinks = root.getElementsByTagNameSafe("link:calculationLink")
 
         /*
         find the income statement calculation
          */
-        val incomeStatementRole = findIncomeStatementRole(root.getElementsByTagName("link:roleRef"))
+        val incomeStatementRole = findIncomeStatementRole(root.getElementsByTagNameSafe("link:roleRef"))
         val incomeStatementItems =
             linkCalculationToItems(findLinkCalculationByRole(calculationLinks, incomeStatementRole))
 
         /*
         find the income statement calculation
          */
-        val balanceSheetRole = findBalanceSheetRole(root.getElementsByTagName("link:roleRef"))
+        val balanceSheetRole = findBalanceSheetRole(root.getElementsByTagNameSafe("link:roleRef"))
         val balanceSheetItems = linkCalculationToItems(findLinkCalculationByRole(calculationLinks, balanceSheetRole))
 
         /*
@@ -57,8 +58,8 @@ class XbrlToModelTranslator(
         val name = factFinder.getString("EntityRegistrantName", "dei")
         val symbol = factFinder.getString("TradingSymbol", "dei")
         return Model(
-            name = name ?: error(""),
-            symbol = symbol ?: error(""),
+            name = name ?: "",
+            symbol = symbol ?: "",
             tags = emptyList(),
             incomeStatementItems = incomeStatementItems,
             balanceSheetItems = balanceSheetItems,
@@ -117,13 +118,13 @@ class XbrlToModelTranslator(
         // to build the income statement, first find all the loc elements
         //
         val locs = incomeStatementCalculation.childNodes.toList().filter {
-            it.nodeName == "link:loc"
+            it.nodeName == "link:loc" || it.nodeName == "loc"
         }
         val locsLookup = locs.associateBy { it.attributes.getNamedItem("xlink:label").textContent }
         val calculationArcs = incomeStatementCalculation
             .childNodes
             .toList().filter {
-                it.nodeName == "link:calculationArc"
+                it.nodeName == "link:calculationArc" || it.nodeName == "calculationArc"
             }
         val calculationArcLookup = calculationArcs
             .groupBy { it.attributes.getNamedItem("xlink:from").textContent }

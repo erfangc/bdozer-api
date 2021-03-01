@@ -50,7 +50,7 @@ class XbrlToModelTranslatorController(
         val instance = metaLink.instance.entries.first()
         val dts = instance.value.dts
 
-        val instanceFileName = instance.key.replace(".htm", "_htm.xml")
+        val instanceFileName = dts.inline.local.first().replace(".htm", "_htm.xml")
         val extensionXsdFileName = dts.schema.local.first()
         val calculationFileName = dts.calculationLink.local.first()
         val labelFileName = dts.labelLink.local.first()
