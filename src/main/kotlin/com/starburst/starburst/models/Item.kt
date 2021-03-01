@@ -1,13 +1,11 @@
 package com.starburst.starburst.models
 
 import com.starburst.starburst.models.translator.subtypes.dataclasses.*
-import org.javers.core.metamodel.annotation.Id
 
 data class Item(
     /**
      * [name] of this item, this is akin to an identifier
      */
-    @Id
     val name: String,
 
     /**
@@ -38,6 +36,11 @@ data class Item(
 
     val stockBasedCompensation: Boolean = false,
 
-    val nonCashExpense: Boolean = false
+    val nonCashExpense: Boolean = false,
+
+    /**
+     * [subtotal]
+     */
+    val subtotal: Boolean = false
 )
 
