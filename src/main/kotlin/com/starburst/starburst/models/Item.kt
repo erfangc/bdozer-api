@@ -34,13 +34,13 @@ data class Item(
 
     val fixedCost: FixedCost? = null,
 
-    val stockBasedCompensation: Boolean = false,
+    val stockBasedCompensation: Boolean? = null,
 
-    val nonCashExpense: Boolean = false,
+    val nonCashExpense: Boolean? = null,
 
     /**
      * [subtotal]
      */
-    val subtotal: Boolean = false
+    val subtotal: Boolean? = null
 )
 

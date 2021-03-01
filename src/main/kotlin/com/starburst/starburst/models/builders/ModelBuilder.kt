@@ -165,7 +165,7 @@ class ModelBuilder {
         //
         // Step 10 - calculate depreciation & amortization
         // TODO go through the drivers and figure out which ones require depreciation & amortization adjustment
-        val nonCashItems = incomeStatementItems.filter { it.nonCashExpense }
+        val nonCashItems = incomeStatementItems.filter { it.nonCashExpense == true }
         val daItem = Item(
             name = DepreciationAmortization,
             expression = if (nonCashItems.isNotEmpty())
@@ -177,7 +177,7 @@ class ModelBuilder {
 
         //
         // Step 11 - calculate stock based compensation
-        val sbcItems = incomeStatementItems.filter { it.stockBasedCompensation }
+        val sbcItems = incomeStatementItems.filter { it.stockBasedCompensation == true }
         val sbcItem = Item(
             name = StockBasedCompensation,
             expression = if (sbcItems.isNotEmpty()) {
