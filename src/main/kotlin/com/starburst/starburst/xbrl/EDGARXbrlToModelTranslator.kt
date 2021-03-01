@@ -10,7 +10,11 @@ import org.w3c.dom.NodeList
 import java.io.InputStream
 import java.net.URI
 
-class XbrlToModelTranslator(
+/**
+ * This is the main class that handles translation of the XBRL file
+ * in EDGAR filings into [Model] instances
+ */
+class EDGARXbrlToModelTranslator(
     usGaapXsdStream: InputStream,
     instanceStream: InputStream,
     extensionXsdStream: InputStream,
@@ -51,6 +55,12 @@ class XbrlToModelTranslator(
         val balanceSheetItems = linkCalculationToItems(findLinkCalculationByRole(calculationLinks, balanceSheetRole))
 
         /*
+        find the cash flow statement calculation
+         */
+        val cashFlowStatementRole = findCashFlowStatementRole(root.getElementsByTagNameSafe("link:roleRef"))
+        val cashFlowStatementItems = linkCalculationToItems(findLinkCalculationByRole(calculationLinks, cashFlowStatementRole))
+
+        /*
         as we encounter "location"s we create placeholder for them as Item(s)
         their historical values are resolved via look up against the Instance document
         labels are resolved via the label document
@@ -63,8 +73,25 @@ class XbrlToModelTranslator(
             tags = emptyList(),
             incomeStatementItems = incomeStatementItems,
             balanceSheetItems = balanceSheetItems,
+            cashFlowStatementItems = cashFlowStatementItems,
             otherItems = emptyList(),
         )
+    }
+
+    private fun findCashFlowStatementRole(nodes: NodeList): String {
+        return nodes.toList().first {
+            val roleURI = it.attributes.getNamedItem("roleURI").textContent
+            val last = URI(roleURI)
+                .path
+                .split("/")
+                .last()
+                .toLowerCase()
+            (last.contains("statement") || last.contains("consolidated"))
+                    && (
+                        (last.contains("cash") && last.contains("flow"))
+                    )
+
+        }.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find balance sheet role")
     }
 
     private fun findBalanceSheetRole(nodes: NodeList?): String {

@@ -12,8 +12,13 @@ data class Model(
     val cik: String? = null,
     val description: String? = null,
     val tags: List<String> = emptyList(),
+
+    /**
+     * The main statements
+     */
     val incomeStatementItems: List<Item> = emptyList(),
     val balanceSheetItems: List<Item> = emptyList(),
+    val cashFlowStatementItems: List<Item> = emptyList(),
     val otherItems: List<Item> = emptyList(),
 
     /**
