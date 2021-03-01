@@ -14,7 +14,6 @@
 	<name>starburst</name>
 	<description>DCF generator server</description>
 	<properties>
-		<java.version>1.8</java.version>
 		<kotlin.version>1.4.21</kotlin.version>
 		<jwks-rsa.version>0.15.0</jwks-rsa.version>
 		<java-jwt.version>3.13.0</java-jwt.version>
@@ -132,15 +131,6 @@
 						<version>${kotlin.version}</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

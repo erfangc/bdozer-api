@@ -18,12 +18,12 @@ import java.io.ByteArrayInputStream
 @RestController
 @CrossOrigin
 @RequestMapping("api/edgar-model-builder")
-class EdgarModelBuilderController(
+class EDGARModelBuilderController(
     private val http: HttpClient,
     private val objectMapper: ObjectMapper
 ) {
 
-    private val log = LoggerFactory.getLogger(EdgarModelBuilderController::class.java)
+    private val log = LoggerFactory.getLogger(EDGARModelBuilderController::class.java)
 
     //
     // at launch create the us-gaap XSD
