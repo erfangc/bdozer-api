@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.starburst.starburst.models.Model
-import com.starburst.starburst.xbrl.MetaLink
+import com.starburst.starburst.xbrl.dataclasses.MetaLink
 import com.starburst.starburst.xbrl.EDGARXbrlToModelTranslator
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
