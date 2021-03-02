@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("public/register-email")
 class RegisterEmailController(mongo: MongoClient) {
+
     private val database = mongo.getDatabase("ease-wealth")
     private val col = database.getCollection<RegisteredEmail>()
+
     @PostMapping
     fun register(@RequestParam email: String): Unit {
         col.save(
