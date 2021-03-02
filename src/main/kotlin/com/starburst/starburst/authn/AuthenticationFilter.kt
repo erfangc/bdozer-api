@@ -23,7 +23,7 @@ class AuthenticationFilter(
         servletResponse: HttpServletResponse,
         chain: FilterChain
     ) {
-        if (servletRequest.method == "OPTIONS" || !servletRequest.requestURI.startsWith("/api")) {
+        if (allowedByDefault(servletRequest)) {
             doFilter(servletRequest, servletResponse, chain)
             return
         }
@@ -34,6 +34,9 @@ class AuthenticationFilter(
             error(servletResponse, e)
         }
     }
+
+    private fun allowedByDefault(servletRequest: HttpServletRequest) =
+        servletRequest.method == "OPTIONS" || !servletRequest.requestURI.startsWith("/api")
 
     fun error(resp: HttpServletResponse, e:Exception) {
         resp.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
