@@ -50,8 +50,15 @@ class EDGARModelBuilderController(
     fun buildModel(@PathVariable cik: String): Model {
         val adsh = adsh(cik)
         val baseUrl = "https://www.sec.gov/Archives/edgar/data/$cik/${adsh.replace("-", "")}"
-        val metaLink = objectMapper
-            .readValue<MetaLink>(http.execute(HttpGet("${baseUrl}/MetaLinks.json")).entity.content)
+
+        val metaLinkGetRequest = HttpGet("${baseUrl}/MetaLinks.json")
+        val metaLink = try {
+            objectMapper
+                .readValue<MetaLink>(http.execute(metaLinkGetRequest).entity.content)
+        } catch (e: Exception) {
+            error("Unable to find MetaLinks for $adsh")
+        }
+        metaLinkGetRequest.releaseConnection()
 
         val instance = metaLink.instance.entries.first()
         val dts = instance.value.dts
@@ -83,7 +90,6 @@ class EDGARModelBuilderController(
     }
 
     private fun adsh(cik: String): String {
-
         // just query the SEC's Elasticsearch servers for the latest filing
         val httpPost = HttpPost("https://efts.sec.gov/LATEST/search-index")
         val entity = BasicHttpEntity()
@@ -97,15 +103,20 @@ class EDGARModelBuilderController(
                     "$paddedCik"
                   ],
                   "forms": [
-                    "10-K",
-                    "10-Q"
+                    "10-K"
                   ]
                 } 
             """.trimIndent().byteInputStream()
 
-        httpPost.entity = entity
-        val content = http.execute(httpPost).entity.content
-        val jsonNode = objectMapper.readTree(content)
+        val jsonNode = try {
+            httpPost.entity = entity
+            val content = http.execute(httpPost).entity.content
+            objectMapper.readTree(content)
+        } catch (e: Exception) {
+            error("unable to find latest adsh for $cik")
+        }
+        httpPost.releaseConnection()
+
         return (jsonNode.at("/hits/hits") as ArrayNode)[0].at("/_source/adsh").asText()
     }
 
