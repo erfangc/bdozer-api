@@ -6,5 +6,6 @@ import java.util.*
 data class RegisteredEmail(
     val _id: String = UUID.randomUUID().toString(),
     val timestamp: String = Instant.now().toString(),
-    val email: String
+    val email: String,
+    val stock: String? = null
 )

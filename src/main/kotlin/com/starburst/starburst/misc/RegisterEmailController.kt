@@ -14,10 +14,14 @@ class RegisterEmailController(mongo: MongoClient) {
     private val col = database.getCollection<RegisteredEmail>()
 
     @PostMapping
-    fun register(@RequestParam email: String): Unit {
+    fun register(
+        @RequestParam email: String,
+        @RequestParam(required = false) stock: String? = null
+    ): Unit {
         col.save(
             RegisteredEmail(
-                email = email
+                email = email,
+                stock = stock
             )
         )
     }
