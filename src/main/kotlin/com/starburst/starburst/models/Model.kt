@@ -1,11 +1,9 @@
 package com.starburst.starburst.models
 
-import org.javers.core.metamodel.annotation.Id
 import java.time.Instant
 import java.util.*
 
 data class Model(
-    @Id
     val _id: String = UUID.randomUUID().toString(),
     val name: String = "Untitled Model",
     val symbol: String? = null,

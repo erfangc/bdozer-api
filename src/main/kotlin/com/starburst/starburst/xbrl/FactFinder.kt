@@ -63,7 +63,7 @@ class FactFinder(instanceStream: InputStream) {
 
     }
 
-    private fun Node.toLocalDate(): LocalDate? {
+    fun Node.toLocalDate(): LocalDate? {
         return LocalDate.parse(this.textContent)
     }
 

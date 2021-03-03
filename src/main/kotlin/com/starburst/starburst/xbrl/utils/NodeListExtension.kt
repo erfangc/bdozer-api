@@ -13,6 +13,10 @@ object NodeListExtension {
         return this.childNodes.toList().filter { it.nodeName ==  tag}
     }
 
+    fun Node.attr(attr: String): String? {
+        return this.attributes.getNamedItem(attr)?.textContent
+    }
+
     fun <R> NodeList.map(transform: (Node) -> R): List<R> {
         val results = mutableListOf<R>()
         for (i in 0 until this.length) {

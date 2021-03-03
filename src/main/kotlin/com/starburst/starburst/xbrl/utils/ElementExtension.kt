@@ -6,10 +6,57 @@ import org.w3c.dom.NodeList
 object ElementExtension {
 
     /**
+     * Maps long namespace to the shorter namespace declarations
+     */
+    fun Element.longNamespaceToShortNamespaceMap(): Map<String, String> {
+        val length = this.attributes.length
+        val namespaces = mutableMapOf<String, String>()
+        for (i in 0 until length) {
+            val attribute = this.attributes.item(i)
+            if (attribute.nodeName.startsWith("xmlns:")) {
+                val shortNamespace = attribute.nodeName.split(":".toRegex(), 2).last()
+                val longNamespace = attribute.textContent
+                namespaces[longNamespace] = shortNamespace
+            }
+        }
+        return namespaces.toMap()
+    }
+
+    /**
+     * Maps short namespace to the longer namespace declarations
+     */
+    fun Element.shortNamespaceToLongNamespaceMap(): Map<String, String> {
+        val length = this.attributes.length
+        val namespaces = mutableMapOf<String, String>()
+        for (i in 0 until length) {
+            val attribute = this.attributes.item(i)
+            if (attribute.nodeName.startsWith("xmlns:")) {
+                val shortNamespace = attribute.nodeName.split(":".toRegex(), 2).last()
+                val longNamespace = attribute.textContent
+                namespaces[shortNamespace] = longNamespace
+            }
+        }
+        return namespaces.toMap()
+    }
+
+    fun Element.targetNamespace(): String? {
+        return this.attributes.getNamedItem("targetNamespace")?.textContent
+    }
+
+    fun Element.getDefaultShortNamespace(): String? {
+        val longNamespace = getDefaultLongNamespace()
+        return longNamespaceToShortNamespaceMap()[longNamespace]
+    }
+
+    fun Element.getDefaultLongNamespace(): String? {
+        return this.attributes.getNamedItem("xmlns")?.textContent
+    }
+
+    /**
      * look at xmlns declarations and return a list of namespaces
      * for this XML
      */
-    private fun Element.getNamespaces(): List<String> {
+    fun Element.getShortNamespaces(): List<String> {
         val length = this.attributes.length
         val namespaces = mutableListOf<String>()
         for (i in 0 until length) {
@@ -44,7 +91,7 @@ object ElementExtension {
                 // figure out if the requested tag is declared in the namespace
                 // if not, get rid of it - or try one of the other namespaces
                 //
-                val namespaces = this.getNamespaces()
+                val namespaces = this.getShortNamespaces()
                 if (namespace.isNotEmpty() && !namespaces.contains(namespace)) {
                     // try out other namespaces that has been declared
                     for (newNameSpace in namespaces) {

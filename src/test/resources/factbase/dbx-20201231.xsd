@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with Wdesk from Workiva-->
+<!--Copyright 2021 Workiva-->
+<!--r:35f19fee-736f-4099-a94b-5ff0c6918864,g:33edef7e-cc10-47a6-a605-d3ccc36709a0-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:dbx="http://www.dropbox.com/20201231" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:nonnum="http://www.xbrl.org/dtr/type/non-numeric" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.dropbox.com/20201231">
+  <xs:import namespace="http://fasb.org/srt/2020-01-31" schemaLocation="http://xbrl.fasb.org/srt/2020/elts/srt-2020-01-31.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2020-01-31" schemaLocation="http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd"/>
+  <xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="http://www.xbrl.org/2003/xlink-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/non-numeric" schemaLocation="http://www.xbrl.org/dtr/type/nonNumeric-2009-12-16.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/numeric" schemaLocation="http://www.xbrl.org/dtr/type/numeric-2009-12-16.xsd"/>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/country/2020-01-31" schemaLocation="https://xbrl.sec.gov/country/2020/country-2020-01-31.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2020-01-31" schemaLocation="https://xbrl.sec.gov/dei/2020/dei-2020-01-31.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="dbx-20201231_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="dbx-20201231_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="dbx-20201231_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="dbx-20201231_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="CoverPage" roleURI="http://www.dropbox.com/role/CoverPage">
+        <link:definition>0001001 - Document - Cover Page</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedBalanceSheets" roleURI="http://www.dropbox.com/role/ConsolidatedBalanceSheets">
+        <link:definition>1001002 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedBalanceSheetsParenthetical" roleURI="http://www.dropbox.com/role/ConsolidatedBalanceSheetsParenthetical">
+        <link:definition>1002003 - Statement - Consolidated Balance Sheets (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofOperations" roleURI="http://www.dropbox.com/role/ConsolidatedStatementsofOperations">
+        <link:definition>1003004 - Statement - Consolidated Statements of Operations</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofOperationsParenthetical" roleURI="http://www.dropbox.com/role/ConsolidatedStatementsofOperationsParenthetical">
+        <link:definition>1004005 - Statement - Consolidated Statements of Operations (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofComprehensiveLoss" roleURI="http://www.dropbox.com/role/ConsolidatedStatementsofComprehensiveLoss">
+        <link:definition>1005006 - Statement - Consolidated Statements of Comprehensive Loss</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofStockholdersEquity" roleURI="http://www.dropbox.com/role/ConsolidatedStatementsofStockholdersEquity">
+        <link:definition>1006007 - Statement - Consolidated Statements of Stockholders' Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofCashFlows" roleURI="http://www.dropbox.com/role/ConsolidatedStatementsofCashFlows">
+        <link:definition>1007008 - Statement - Consolidated Statements of Cash Flows</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPolicies" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPolicies">
+        <link:definition>2101101 - Disclosure - Description of the Business and Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesPolicies" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesPolicies">
+        <link:definition>2202201 - Disclosure - Description of the Business and Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesTables" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesTables">
+        <link:definition>2303301 - Disclosure - Description of the Business and Summary of Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesForeignCurrencyTransactionsDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesForeignCurrencyTransactionsDetails">
+        <link:definition>2404401 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Foreign Currency Transactions (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesRevenueRecognitionDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesRevenueRecognitionDetails">
+        <link:definition>2405402 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Revenue Recognition (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesRevenueRecognitionDetails_1" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesRevenueRecognitionDetails_1">
+        <link:definition>2405402 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Revenue Recognition (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesStockbasedCompensationDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesStockbasedCompensationDetails">
+        <link:definition>2406403 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Stock-based Compensation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesAdvertisingandpromotionalexpenseDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesAdvertisingandpromotionalexpenseDetails">
+        <link:definition>2407404 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Advertising and promotional expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesConcentrationsofCreditRiskDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesConcentrationsofCreditRiskDetails">
+        <link:definition>2408405 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Concentrations of Credit Risk (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesReceivablesDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesReceivablesDetails">
+        <link:definition>2409406 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Receivables (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesDeferredCommissionsNetDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesDeferredCommissionsNetDetails">
+        <link:definition>2410407 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Deferred Commissions, Net (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesPropertyandEquipmentNetDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesPropertyandEquipmentNetDetails">
+        <link:definition>2411408 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Property and Equipment, Net (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesEquityinvestmentsDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesEquityinvestmentsDetails">
+        <link:definition>2412409 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Equity investments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesLeaseobligationsDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesLeaseobligationsDetails">
+        <link:definition>2413410 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Lease obligations (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesRecentlyAdoptedAccountingPronouncementsDetails" roleURI="http://www.dropbox.com/role/DescriptionoftheBusinessandSummaryofSignificantAccountingPoliciesRecentlyAdoptedAccountingPronouncementsDetails">
+        <link:definition>2414411 - Disclosure - Description of the Business and Summary of Significant Accounting Policies - Recently Adopted Accounting Pronouncements (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandShortTermInvestments" roleURI="http://www.dropbox.com/role/CashCashEquivalentsandShortTermInvestments">
+        <link:definition>2115102 - Disclosure - Cash, Cash Equivalents and Short-Term Investments</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandShortTermInvestmentsTables" roleURI="http://www.dropbox.com/role/CashCashEquivalentsandShortTermInvestmentsTables">
+        <link:definition>2316302 - Disclosure - Cash, Cash Equivalents and Short-Term Investments (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandShortTermInvestmentsScheduleofCashCashEquivalentsandShortTermInvestmentsDetails" roleURI="http://www.dropbox.com/role/CashCashEquivalentsandShortTermInvestmentsScheduleofCashCashEquivalentsandShortTermInvestmentsDetails">
+        <link:definition>2417412 - Disclosure - Cash, Cash Equivalents and Short-Term Investments - Schedule of Cash, Cash Equivalents and Short-Term Investments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandShortTermInvestmentsScheduleofCashCashEquivalentsandShortTermInvestmentsDetails_1" roleURI="http://www.dropbox.com/role/CashCashEquivalentsandShortTermInvestmentsScheduleofCashCashEquivalentsandShortTermInvestmentsDetails_1">
+        <link:definition>2417412 - Disclosure - Cash, Cash Equivalents and Short-Term Investments - Schedule of Cash, Cash Equivalents and Short-Term Investments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandShortTermInvestmentsNarrativeDetails" roleURI="http://www.dropbox.com/role/CashCashEquivalentsandShortTermInvestmentsNarrativeDetails">
+        <link:definition>2418413 - Disclosure - Cash, Cash Equivalents and Short-Term Investments - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandShortTermInvestmentsContractualMaturitiesofShortTermInvestmentsDetails" roleURI="http://www.dropbox.com/role/CashCashEquivalentsandShortTermInvestmentsContractualMaturitiesofShortTermInvestmentsDetails">
+        <link:definition>2419414 - Disclosure - Cash, Cash Equivalents and Short-Term Investments - Contractual Maturities of Short Term Investments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurements" roleURI="http://www.dropbox.com/role/FairValueMeasurements">
+        <link:definition>2120103 - Disclosure - Fair Value Measurements</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurementsTables" roleURI="http://www.dropbox.com/role/FairValueMeasurementsTables">
+        <link:definition>2321303 - Disclosure - Fair Value Measurements (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurementsDetails" roleURI="http://www.dropbox.com/role/FairValueMeasurementsDetails">
+        <link:definition>2422415 - Disclosure - Fair Value Measurements (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PropertyandEquipmentNet" roleURI="http://www.dropbox.com/role/PropertyandEquipmentNet">
+        <link:definition>2123104 - Disclosure - Property and Equipment, Net</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PropertyandEquipmentNetTables" roleURI="http://www.dropbox.com/role/PropertyandEquipmentNetTables">
+        <link:definition>2324304 - Disclosure - Property and Equipment, Net (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PropertyandEquipmentNetScheduleofPropertyandEquipmentNetDetails" roleURI="http://www.dropbox.com/role/PropertyandEquipmentNetScheduleofPropertyandEquipmentNetDetails">
+        <link:definition>2425416 - Disclosure - Property and Equipment, Net - Schedule of Property and Equipment, Net (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PropertyandEquipmentNetNarrativeDetails" roleURI="http://www.dropbox.com/role/PropertyandEquipmentNetNarrativeDetails">
+        <link:definition>2426417 - Disclosure - Property and Equipment, Net - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessCombinations" roleURI="http://www.dropbox.com/role/BusinessCombinations">
+        <link:definition>2127105 - Disclosure - Business Combinations</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessCombinationsTables" roleURI="http://www.dropbox.com/role/BusinessCombinationsTables">
+        <link:definition>2328305 - Disclosure - Business Combinations (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessCombinationsScheduleofPurchaseConsiderationDetails" roleURI="http://www.dropbox.com/role/BusinessCombinationsScheduleofPurchaseConsiderationDetails">
+        <link:definition>2429418 - Disclosure - Business Combinations - Schedule of Purchase Consideration (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessCombinationsNarrativeDetails" roleURI="http://www.dropbox.com/role/BusinessCombinationsNarrativeDetails">
+        <link:definition>2430419 - Disclosure - Business Combinations - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessCombinationsScheduleofRecognizedIdentifiedAssetsAcquiredandLiabilitiesAssumedDetails" roleURI="http://www.dropbox.com/role/BusinessCombinationsScheduleofRecognizedIdentifiedAssetsAcquiredandLiabilitiesAssumedDetails">
+        <link:definition>2431420 - Disclosure - Business Combinations - Schedule of Recognized Identified Assets Acquired and Liabilities Assumed (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessCombinationsScheduleofIdentifiableFinitelivedIntangibleAssetsAcquiredandEstimatedWeightedAverageUsefulLivesDetails" roleURI="http://www.dropbox.com/role/BusinessCombinationsScheduleofIdentifiableFinitelivedIntangibleAssetsAcquiredandEstimatedWeightedAverageUsefulLivesDetails">
+        <link:definition>2432421 - Disclosure - Business Combinations - Schedule of Identifiable Finite-lived Intangible Assets Acquired and Estimated Weighted Average Useful Lives (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IntangibleAssetsNet" roleURI="http://www.dropbox.com/role/IntangibleAssetsNet">
+        <link:definition>2133106 - Disclosure - Intangible Assets, Net</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IntangibleAssetsNetTables" roleURI="http://www.dropbox.com/role/IntangibleAssetsNetTables">
+        <link:definition>2334306 - Disclosure - Intangible Assets, Net (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IntangibleAssetsNetScheduleofIntangibleAssetsDetails" roleURI="http://www.dropbox.com/role/IntangibleAssetsNetScheduleofIntangibleAssetsDetails">
+        <link:definition>2435422 - Disclosure - Intangible Assets, Net - Schedule of Intangible Assets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IntangibleAssetsNetScheduleofFutureAmortizationExpenseDetails" roleURI="http://www.dropbox.com/role/IntangibleAssetsNetScheduleofFutureAmortizationExpenseDetails">
+        <link:definition>2436423 - Disclosure - Intangible Assets, Net - Schedule of Future Amortization Expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Goodwill" roleURI="http://www.dropbox.com/role/Goodwill">
+        <link:definition>2137107 - Disclosure - Goodwill</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GoodwillTables" roleURI="http://www.dropbox.com/role/GoodwillTables">
+        <link:definition>2338307 - Disclosure - Goodwill (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GoodwillDetails" roleURI="http://www.dropbox.com/role/GoodwillDetails">
+        <link:definition>2439424 - Disclosure - Goodwill (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevolvingCreditFacility" roleURI="http://www.dropbox.com/role/RevolvingCreditFacility">
+        <link:definition>2140108 - Disclosure - Revolving Credit Facility</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevolvingCreditFacilityDetails" roleURI="http://www.dropbox.com/role/RevolvingCreditFacilityDetails">
+        <link:definition>2441425 - Disclosure - Revolving Credit Facility (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Leases" roleURI="http://www.dropbox.com/role/Leases">
+        <link:definition>2142109 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesTables" roleURI="http://www.dropbox.com/role/LeasesTables">
+        <link:definition>2343308 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesNarrativeDetails" roleURI="http://www.dropbox.com/role/LeasesNarrativeDetails">
+        <link:definition>2444426 - Disclosure - Leases - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesComponentsofLeaseExpenseDetails" roleURI="http://www.dropbox.com/role/LeasesComponentsofLeaseExpenseDetails">
+        <link:definition>2445427 - Disclosure - Leases - Components of Lease Expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesOtherLeaseInformationDetails" roleURI="http://www.dropbox.com/role/LeasesOtherLeaseInformationDetails">
+        <link:definition>2446428 - Disclosure - Leases - Other Lease Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesScheduleofFutureMinimumPaymentsDetails" roleURI="http://www.dropbox.com/role/LeasesScheduleofFutureMinimumPaymentsDetails">
+        <link:definition>2447429 - Disclosure - Leases - Schedule of Future Minimum Payments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesFutureSubtenantPaymentsReceivableDetails" roleURI="http://www.dropbox.com/role/LeasesFutureSubtenantPaymentsReceivableDetails">
+        <link:definition>2448430 - Disclosure - Leases - Future Subtenant Payments Receivable (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesFutureSubtenantPaymentsReceivableDetails_1" roleURI="http://www.dropbox.com/role/LeasesFutureSubtenantPaymentsReceivableDetails_1">
+        <link:definition>2448430 - Disclosure - Leases - Future Subtenant Payments Receivable (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingencies" roleURI="http://www.dropbox.com/role/CommitmentsandContingencies">
+        <link:definition>2149110 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesTables" roleURI="http://www.dropbox.com/role/CommitmentsandContingenciesTables">
+        <link:definition>2350309 - Disclosure - Commitments and Contingencies (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesDetails" roleURI="http://www.dropbox.com/role/CommitmentsandContingenciesDetails">
+        <link:definition>2451431 - Disclosure - Commitments and Contingencies (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesNarrativeDetails" roleURI="http://www.dropbox.com/role/CommitmentsandContingenciesNarrativeDetails">
+        <link:definition>2452432 - Disclosure - Commitments and Contingencies - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AccruedandOtherCurrentLiabilities" roleURI="http://www.dropbox.com/role/AccruedandOtherCurrentLiabilities">
+        <link:definition>2153111 - Disclosure - Accrued and Other Current Liabilities</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AccruedandOtherCurrentLiabilitiesTables" roleURI="http://www.dropbox.com/role/AccruedandOtherCurrentLiabilitiesTables">
+        <link:definition>2354310 - Disclosure - Accrued and Other Current Liabilities (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AccruedandOtherCurrentLiabilitiesDetails" roleURI="http://www.dropbox.com/role/AccruedandOtherCurrentLiabilitiesDetails">
+        <link:definition>2455433 - Disclosure - Accrued and Other Current Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquity" roleURI="http://www.dropbox.com/role/StockholdersEquity">
+        <link:definition>2156112 - Disclosure - Stockholders' Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityTables" roleURI="http://www.dropbox.com/role/StockholdersEquityTables">
+        <link:definition>2357311 - Disclosure - Stockholders' Equity (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityCommonandPreferredStockDetails" roleURI="http://www.dropbox.com/role/StockholdersEquityCommonandPreferredStockDetails">
+        <link:definition>2458434 - Disclosure - Stockholders' Equity - Common and Preferred Stock (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityStockRepurchaseProgramDetails" roleURI="http://www.dropbox.com/role/StockholdersEquityStockRepurchaseProgramDetails">
+        <link:definition>2459435 - Disclosure - Stockholders' Equity - Stock Repurchase Program (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityEquityIncentivePlansDetails" roleURI="http://www.dropbox.com/role/StockholdersEquityEquityIncentivePlansDetails">
+        <link:definition>2460436 - Disclosure - Stockholders' Equity - Equity Incentive Plans (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityScheduleofStockOptionandRestrictedStockActivityDetails" roleURI="http://www.dropbox.com/role/StockholdersEquityScheduleofStockOptionandRestrictedStockActivityDetails">
+        <link:definition>2461437 - Disclosure - Stockholders' Equity - Schedule of Stock Option and Restricted Stock Activity (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityScheduleofPreTaxIntrinsicValueofOptionsExercisedDetails" roleURI="http://www.dropbox.com/role/StockholdersEquityScheduleofPreTaxIntrinsicValueofOptionsExercisedDetails">
+        <link:definition>2462438 - Disclosure - Stockholders' Equity - Schedule of Pre-Tax Intrinsic Value of Options Exercised (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityAssumedStockOptionsDetails" roleURI="http://www.dropbox.com/role/StockholdersEquityAssumedStockOptionsDetails">
+        <link:definition>2463439 - Disclosure - Stockholders' Equity - Assumed Stock Options (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityFairValueofStockOptionAssumptionsUsedDetails" roleURI="http://www.dropbox.com/role/StockholdersEquityFairValueofStockOptionAssumptionsUsedDetails">
+        <link:definition>2464440 - Disclosure - Stockholders' Equity - Fair Value of Stock Option Assumptions Used (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityCoFounderGrantsDetails" roleURI="http://www.dropbox.com/role/StockholdersEquityCoFounderGrantsDetails">
+        <link:definition>2465441 - Disclosure - Stockholders' Equity - Co-Founder Grants (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetLossPerShare" roleURI="http://www.dropbox.com/role/NetLossPerShare">
+        <link:definition>2166113 - Disclosure - Net Loss Per Share</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetLossPerShareTables" roleURI="http://www.dropbox.com/role/NetLossPerShareTables">
+        <link:definition>2367312 - Disclosure - Net Loss Per Share (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetLossPerShareScheduleofEarningsPerShareBasicandDilutedDetails" roleURI="http://www.dropbox.com/role/NetLossPerShareScheduleofEarningsPerShareBasicandDilutedDetails">
+        <link:definition>2468442 - Disclosure - Net Loss Per Share - Schedule of Earnings Per Share, Basic and Diluted (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetLossPerShareScheduleofPotentiallyDilutiveSecuritiesExcludedfromComputationofEarningsPerShareDetails" roleURI="http://www.dropbox.com/role/NetLossPerShareScheduleofPotentiallyDilutiveSecuritiesExcludedfromComputationofEarningsPerShareDetails">
+        <link:definition>2469443 - Disclosure - Net Loss Per Share - Schedule of Potentially Dilutive Securities Excluded from Computation of Earnings Per Share (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxes" roleURI="http://www.dropbox.com/role/IncomeTaxes">
+        <link:definition>2170114 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesTables" roleURI="http://www.dropbox.com/role/IncomeTaxesTables">
+        <link:definition>2371313 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesScheduleofLossfromContinuingOperationsBeforeIncomeTaxesDetails" roleURI="http://www.dropbox.com/role/IncomeTaxesScheduleofLossfromContinuingOperationsBeforeIncomeTaxesDetails">
+        <link:definition>2472444 - Disclosure - Income Taxes - Schedule of Loss from Continuing Operations Before Income Taxes (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesComponentsofIncomeTaxExpenseBenefitDetails" roleURI="http://www.dropbox.com/role/IncomeTaxesComponentsofIncomeTaxExpenseBenefitDetails">
+        <link:definition>2473445 - Disclosure - Income Taxes - Components of Income Tax Expense (Benefit) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesIncomeTaxRateReconciliationDetails" roleURI="http://www.dropbox.com/role/IncomeTaxesIncomeTaxRateReconciliationDetails">
+        <link:definition>2474446 - Disclosure - Income Taxes - Income Tax Rate Reconciliation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesComponentsofDeferredTaxAssetsandDeferredTaxLiabilitiesDetails" roleURI="http://www.dropbox.com/role/IncomeTaxesComponentsofDeferredTaxAssetsandDeferredTaxLiabilitiesDetails">
+        <link:definition>2475447 - Disclosure - Income Taxes - Components of Deferred Tax Assets and Deferred Tax Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesAdditionalInformationDetails" roleURI="http://www.dropbox.com/role/IncomeTaxesAdditionalInformationDetails">
+        <link:definition>2476448 - Disclosure - Income Taxes - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesReconciliationofUnrecognizedTaxBenefitsDetails" roleURI="http://www.dropbox.com/role/IncomeTaxesReconciliationofUnrecognizedTaxBenefitsDetails">
+        <link:definition>2477449 - Disclosure - Income Taxes - Reconciliation of Unrecognized Tax Benefits (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GeographicAreas" roleURI="http://www.dropbox.com/role/GeographicAreas">
+        <link:definition>2178115 - Disclosure - Geographic Areas</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GeographicAreasTables" roleURI="http://www.dropbox.com/role/GeographicAreasTables">
+        <link:definition>2379314 - Disclosure - Geographic Areas (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GeographicAreasDetails" roleURI="http://www.dropbox.com/role/GeographicAreasDetails">
+        <link:definition>2480450 - Disclosure - Geographic Areas (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SubsequentEvents" roleURI="http://www.dropbox.com/role/SubsequentEvents">
+        <link:definition>2181116 - Disclosure - Subsequent Events</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SubsequentEventsDetails" roleURI="http://www.dropbox.com/role/SubsequentEventsDetails">
+        <link:definition>2482451 - Disclosure - Subsequent Events (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="dbx_LesseeOperatingAndShortTermLeasesPaymentsDueYearTwo" abstract="false" name="LesseeOperatingAndShortTermLeasesPaymentsDueYearTwo" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_CommonStockVotesPerShare" abstract="false" name="CommonStockVotesPerShare" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="dbx_LineOfCreditFacilityFrontingFeePercentage" abstract="false" name="LineOfCreditFacilityFrontingFeePercentage" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="num:percentItemType"/>
+  <xs:element id="dbx_OperatingLeaseLessorOperatingLeasePaymentsToBeReceivedLessLeaseIncentives" abstract="false" name="OperatingLeaseLessorOperatingLeasePaymentsToBeReceivedLessLeaseIncentives" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_CoFounderGrantsMember" abstract="true" name="CoFounderGrantsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_UnrecognizedTaxBenefitThatWouldResultInAdjustmentToDeferredTaxAssets" abstract="false" name="UnrecognizedTaxBenefitThatWouldResultInAdjustmentToDeferredTaxAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsAssumedThroughBusinessAcquisition" abstract="false" name="SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsAssumedThroughBusinessAcquisition" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="dbx_DebtSecuritiesAvailableForSaleSecuritiesMaturityAllocatedAndSingleMaturityDateAfterOneThroughThreeYearsAmortizedCost" abstract="false" name="DebtSecuritiesAvailableForSaleSecuritiesMaturityAllocatedAndSingleMaturityDateAfterOneThroughThreeYearsAmortizedCost" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_AccountsReceivableAndOtherReceivableMember" abstract="true" name="AccountsReceivableAndOtherReceivableMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementbySharebasedPaymentAwardEquityInstrumentsOtherthanOptionsReleasedinPeriod" abstract="false" name="SharebasedCompensationArrangementbySharebasedPaymentAwardEquityInstrumentsOtherthanOptionsReleasedinPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="dbx_CorporateHeadquartersLeaseMember" abstract="true" name="CorporateHeadquartersLeaseMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_ReversalOfStockBasedCompensationExpense" abstract="false" name="ReversalOfStockBasedCompensationExpense" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsNonvestedAggregateIntrinsicValue" abstract="false" name="SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsNonvestedAggregateIntrinsicValue" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_BusinessCombinationSeparatelyRecognizedTransactionsPreexistingRelationshipPersonnelAgreement" abstract="false" name="BusinessCombinationSeparatelyRecognizedTransactionsPreexistingRelationshipPersonnelAgreement" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_AssetsImpairedDueToVirtualWorkModelMember" abstract="true" name="AssetsImpairedDueToVirtualWorkModelMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_StateEnterpriseTaxCreditCarryforwardMember" abstract="true" name="StateEnterpriseTaxCreditCarryforwardMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_DeferredCommissionsMember" abstract="true" name="DeferredCommissionsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_LesseeOperatingAndShortTermLeasesPaymentsDueYearThree" abstract="false" name="LesseeOperatingAndShortTermLeasesPaymentsDueYearThree" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_HelloSignMember" abstract="true" name="HelloSignMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_SharesSubjectToRepurchaseMember" abstract="true" name="SharesSubjectToRepurchaseMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_ReversalOfStockBasedCompensationPreviouslyRecognized" abstract="false" name="ReversalOfStockBasedCompensationPreviouslyRecognized" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_LineOfCreditFacilityCovenantTermsLiquidityRatioRequiredMinimum" abstract="false" name="LineOfCreditFacilityCovenantTermsLiquidityRatioRequiredMinimum" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_LesseeOperatingAndShortTermLeasesPaymentsDueYearOne" abstract="false" name="LesseeOperatingAndShortTermLeasesPaymentsDueYearOne" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_LeaseArrangementsDomain" abstract="true" name="LeaseArrangementsDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_LesseeOperatingAndShortTermLeasesPaymentsDue" abstract="false" name="LesseeOperatingAndShortTermLeasesPaymentsDue" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_FinanceLeaseCost" abstract="false" name="FinanceLeaseCost" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_CustomerAMember" abstract="true" name="CustomerAMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_FinanceLeaseLiabilityInterestAndTaxes" abstract="false" name="FinanceLeaseLiabilityInterestAndTaxes" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_AvailableForSaleSecuritiesDebtMaturitiesAfterThreeYearsFairValue" abstract="false" name="AvailableForSaleSecuritiesDebtMaturitiesAfterThreeYearsFairValue" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_IntangibleAssetsGrossExcludingGoodwillRetiredDuringThePeriod" abstract="false" name="IntangibleAssetsGrossExcludingGoodwillRetiredDuringThePeriod" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_OperatingLeaseMinimumObligations" abstract="false" name="OperatingLeaseMinimumObligations" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_DeferredTaxLiabilitiesRightOfUseAssets" abstract="false" name="DeferredTaxLiabilitiesRightOfUseAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_CapitalizedContractCostsAdditions" abstract="false" name="CapitalizedContractCostsAdditions" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_LesseeOperatingSubleaseRemainingLeaseTerm" abstract="false" name="LesseeOperatingSubleaseRemainingLeaseTerm" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dbx_DebtSecuritiesAvailableForSaleSecuritiesMaturityAllocatedAndSingleMaturityDateAfterOneThroughThreeYearsFairValue" abstract="false" name="DebtSecuritiesAvailableForSaleSecuritiesMaturityAllocatedAndSingleMaturityDateAfterOneThroughThreeYearsFairValue" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_AssembledWorkforceInAssetAcquisitionMember" abstract="true" name="AssembledWorkforceInAssetAcquisitionMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_IncreaseDecreaseInAccruedLiabilitiesAndOtherLiabilities" abstract="false" name="IncreaseDecreaseInAccruedLiabilitiesAndOtherLiabilities" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsAssumedThroughBusinessAcquisitionFairValue" abstract="false" name="SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsAssumedThroughBusinessAcquisitionFairValue" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_CustomerBMember" abstract="true" name="CustomerBMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_AccruedLiabilitiesAndOtherLiabilitiesCurrentTextBlock" abstract="false" name="AccruedLiabilitiesAndOtherLiabilitiesCurrentTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType"/>
+  <xs:element id="dbx_PreferredStockholdersAndVestedOptionHoldersMember" abstract="true" name="PreferredStockholdersAndVestedOptionHoldersMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_A2008EquityIncentivePlan2017EquityIncentivePlanand2018PlanMember" abstract="true" name="A2008EquityIncentivePlan2017EquityIncentivePlanand2018PlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_OneTierRestrictedStockUnitsRSUsMember" abstract="true" name="OneTierRestrictedStockUnitsRSUsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_PropertyPlantAndEquipmentFullyDepreciatedAssetsRetired" abstract="false" name="PropertyPlantAndEquipmentFullyDepreciatedAssetsRetired" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfTranches" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfTranches" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="dbx_A2018PlanMember" abstract="true" name="A2018PlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_FinanceLeaseTenantImprovementAllowanceReceivable" abstract="false" name="FinanceLeaseTenantImprovementAllowanceReceivable" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_ClassActionLawsuitsFiledInTheUSDistrictCourtMember" abstract="true" name="ClassActionLawsuitsFiledInTheUSDistrictCourtMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_EffectiveIncomeTaxRateReconciliationPermanentDifferencesAmount" abstract="false" name="EffectiveIncomeTaxRateReconciliationPermanentDifferencesAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementBySharebasedPaymentAwardSharesCanceled" abstract="false" name="SharebasedCompensationArrangementBySharebasedPaymentAwardSharesCanceled" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="dbx_CreditAndGuaranteeAgreementMember" abstract="true" name="CreditAndGuaranteeAgreementMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_OtherAccruedLiabilitiesAndOtherLiabilitiesCurrent" abstract="false" name="OtherAccruedLiabilitiesAndOtherLiabilitiesCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_LesseeOperatingLeaseTenantImprovementAllowanceReceivable" abstract="false" name="LesseeOperatingLeaseTenantImprovementAllowanceReceivable" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_TwoTierRestrictedStockUnitsRSUsMember" abstract="true" name="TwoTierRestrictedStockUnitsRSUsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_AvailableForSaleSecuritiesDebtMaturitiesAfterThreeYearsAmortizedCost" abstract="false" name="AvailableForSaleSecuritiesDebtMaturitiesAfterThreeYearsAmortizedCost" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_DeferredTaxAssetsOperatingLossCarryforwardsNotSubjecttoExpirationAvailableToReduceFutureTaxableIncome" abstract="false" name="DeferredTaxAssetsOperatingLossCarryforwardsNotSubjecttoExpirationAvailableToReduceFutureTaxableIncome" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsAssumedinPeriodWeightedAverageGrantDateFairValue" abstract="false" name="SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsAssumedinPeriodWeightedAverageGrantDateFairValue" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="num:perShareItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsAssumedInBusinessAcquisitionWeightedAverageExercisePrice" abstract="false" name="SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsAssumedInBusinessAcquisitionWeightedAverageExercisePrice" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="num:perShareItemType"/>
+  <xs:element id="dbx_DeprecationDepletionAndAmortizationExcludingAmortizationOfDeferredSalesCommissions" abstract="false" name="DeprecationDepletionAndAmortizationExcludingAmortizationOfDeferredSalesCommissions" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_BusinessCombinationRecognizedIdentifiableAssetsAcquiredandLiabilitiesAssumedCurrentAssetsReceivablesPrepaidExpenseAndOtherAssets" abstract="false" name="BusinessCombinationRecognizedIdentifiableAssetsAcquiredandLiabilitiesAssumedCurrentAssetsReceivablesPrepaidExpenseAndOtherAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_DeferredTaxAssetsAcquiredOperatingLossCarryforwardsNotSubjecttoExpiration" abstract="false" name="DeferredTaxAssetsAcquiredOperatingLossCarryforwardsNotSubjecttoExpiration" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementBySharebasedPaymentAwardSharesAvailableForIssuanceRollForward" abstract="true" name="SharebasedCompensationArrangementBySharebasedPaymentAwardSharesAvailableForIssuanceRollForward" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dbx_LineOfCreditFacilityAccordionFeatureIncreaseLimit" abstract="false" name="LineOfCreditFacilityAccordionFeatureIncreaseLimit" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_LesseeOperatingLeaseTenantImprovementReimbursement" abstract="false" name="LesseeOperatingLeaseTenantImprovementReimbursement" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_AllocatedSharebasedCompensationExpensePostCombination" abstract="false" name="AllocatedSharebasedCompensationExpensePostCombination" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_ShareBasedCompensationArrangementByShareBasedPaymentAwardVestingRightsByStockPrice" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardVestingRightsByStockPrice" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="num:perShareItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementbySharebasedPaymentAwardAssumedThroughBusinessAcquisition" abstract="false" name="SharebasedCompensationArrangementbySharebasedPaymentAwardAssumedThroughBusinessAcquisition" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="dbx_EffectiveIncomeTaxRateReconciliationNonDeductibleCompensation" abstract="false" name="EffectiveIncomeTaxRateReconciliationNonDeductibleCompensation" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_LesseeOperatingAndShortTermLeasesPaymentsDueYearFive" abstract="false" name="LesseeOperatingAndShortTermLeasesPaymentsDueYearFive" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementbySharebasedPaymentAwardEquityInstrumentsOtherthanOptionsReleasedinPeriodWeightedAverageGrantDateFairValue" abstract="false" name="SharebasedCompensationArrangementbySharebasedPaymentAwardEquityInstrumentsOtherthanOptionsReleasedinPeriodWeightedAverageGrantDateFairValue" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="num:perShareItemType"/>
+  <xs:element id="dbx_DeferredTaxLiabilitiesFixedAndIntangibleAssets" abstract="false" name="DeferredTaxLiabilitiesFixedAndIntangibleAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_HelloSignInc.Member" abstract="true" name="HelloSignInc.Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_ReversalOfStockBasedCompensationExpensePreviouslyRecognized" abstract="false" name="ReversalOfStockBasedCompensationExpensePreviouslyRecognized" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_BusinessCombinationConsiderationTransferredStockOptionsAssumed" abstract="false" name="BusinessCombinationConsiderationTransferredStockOptionsAssumed" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_CashCashEquivalentsAndShortTermInvestmentsAmortizedCost" abstract="false" name="CashCashEquivalentsAndShortTermInvestmentsAmortizedCost" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_ShortTermInvestmentsNumberofSecurityTypes" abstract="false" name="ShortTermInvestmentsNumberofSecurityTypes" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="dbx_LesseeOperatingAndShortTermLeasesPaymentsDueAfterYearFive" abstract="false" name="LesseeOperatingAndShortTermLeasesPaymentsDueAfterYearFive" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_DeferredTaxAssetsLeaseLiability" abstract="false" name="DeferredTaxAssetsLeaseLiability" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_LesseeOperatingLeaseLeaseNotYetCommencedAmount" abstract="false" name="LesseeOperatingLeaseLeaseNotYetCommencedAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_ShareBasedCompensationArrangementBySharebasedPaymentAwardDecreaseInNumberofSharesAuthorizedFromStockGranted" abstract="false" name="ShareBasedCompensationArrangementBySharebasedPaymentAwardDecreaseInNumberofSharesAuthorizedFromStockGranted" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="dbx_SupranationalSecuritiesMember" abstract="true" name="SupranationalSecuritiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_LesseeOperatingAndShortTermLeasesPaymentsDueYearFour" abstract="false" name="LesseeOperatingAndShortTermLeasesPaymentsDueYearFour" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_SharesReleasedDuringPeriodShares" abstract="false" name="SharesReleasedDuringPeriodShares" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="dbx_LeaseArrangementsAxis" abstract="true" name="LeaseArrangementsAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="dbx_ClassActionLawsuitsFiledInTheStateOfCaliforniaSanMateoCountyMember" abstract="true" name="ClassActionLawsuitsFiledInTheStateOfCaliforniaSanMateoCountyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="dbx_IncreaseDecreaseTenantImprovementAllowanceReimbursement" abstract="false" name="IncreaseDecreaseTenantImprovementAllowanceReimbursement" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_ScheduleOfAccruedLiabilitiesAndOtherCurrentLiabilitiesTableTextBlock" abstract="false" name="ScheduleOfAccruedLiabilitiesAndOtherCurrentLiabilitiesTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType"/>
+  <xs:element id="dbx_SharebasedCompensationArrangementBySharebasedPaymentAwardOptionsVestedWeightedAverageRemainingContractualTerm" abstract="false" name="SharebasedCompensationArrangementBySharebasedPaymentAwardOptionsVestedWeightedAverageRemainingContractualTerm" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dbx_SharesPaidForTaxWithholdingForShareBasedCompensationWeightedAverageGrantDateFairValue" abstract="false" name="SharesPaidForTaxWithholdingForShareBasedCompensationWeightedAverageGrantDateFairValue" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="num:perShareItemType"/>
+  <xs:element id="dbx_PubliclyTradedEquitySecuritiesFVNIGainLoss" abstract="false" name="PubliclyTradedEquitySecuritiesFVNIGainLoss" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_AccruedLiabilitiesandOtherLiabilitiesCurrent" abstract="false" name="AccruedLiabilitiesandOtherLiabilitiesCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dbx_BusinessCombinationRequiredServicePeriod" abstract="false" name="BusinessCombinationRequiredServicePeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dbx_ShortTermInvestmentsNumberofSecurityTypesInLossPosition" abstract="false" name="ShortTermInvestmentsNumberofSecurityTypesInLossPosition" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+</xs:schema>

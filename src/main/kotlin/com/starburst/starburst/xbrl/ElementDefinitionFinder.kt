@@ -8,14 +8,20 @@ import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import java.io.InputStream
 
+/**
+ * The goal is to take the standard and extension XSDs of the filing
+ * and determine for any given tag what it's value should be
+ */
 class ElementDefinitionFinder(gaapXsd: InputStream, extXsd: InputStream) {
 
     private fun NodeList.associateElementsbyId(namespace: String = "us-gaap"): Map<String, ElementDefinition> {
         return this
             .toList()
             .map {
-                it.attributes.getNamedItem("id").textContent to
+                val id = it.attributes.getNamedItem("id").textContent
+                id to
                         ElementDefinition(
+                            id = id,
                             namespace = namespace,
                             name = it.attributes.getNamedItem("name").textContent,
                             type = it.attributes.getNamedItem("type")?.textContent ?: "",
