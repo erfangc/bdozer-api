@@ -2,25 +2,25 @@ package com.starburst.starburst.xbrl.factbase
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mongodb.client.MongoClient
+import com.mongodb.client.model.UpdateOneModel
+import com.mongodb.client.model.WriteModel
 import com.starburst.starburst.xbrl.FilingProviderImpl
 import org.apache.http.client.HttpClient
 import org.litote.kmongo.getCollection
+import org.litote.kmongo.insertOne
+import org.litote.kmongo.json
 import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.Executors
 
-data class ParseUploadSingleFilingResponse(
-    val numberOfFactsFound: Int
-)
-
 @RestController
 @RequestMapping("api/fact-base")
 @CrossOrigin
 class FactBaseController(
-    private val objectMapper: ObjectMapper,
     private val http: HttpClient,
-    mongoClient: MongoClient
+    mongoClient: MongoClient,
+    private val objectMapper: ObjectMapper
 ) {
 
     private val log = LoggerFactory.getLogger(FactBaseController::class.java)
@@ -38,10 +38,16 @@ class FactBaseController(
         val impl = FilingProviderImpl(cik, adsh, http, objectMapper)
         val parser = XbrlFactParser(impl)
         val facts = parser.parseFacts()
+        val distinctIds = facts.distinctBy { it._id }.size
         executor.submit {
-            facts.forEach { fact ->
-                col.save(fact)
+            log.info("Saving ${facts.size} facts, ($distinctIds distinct) parsed for cik=$cik and adsh=$adsh")
+            facts.chunked(100).forEach {
+                facts ->
+                val inserts = facts.map { insertOne(it) }
+                val result = col.bulkWrite(inserts)
+                log.info("Saved chunk of ${facts.size} upserts=${result.upserts.size} inserts=${result.inserts.size} wasAcknowledged=${result.wasAcknowledged()}")
             }
+            log.info("Saved ${facts.size} facts parsed for cik=$cik and adsh=$adsh")
         }
         return ParseUploadSingleFilingResponse(facts.size)
     }
