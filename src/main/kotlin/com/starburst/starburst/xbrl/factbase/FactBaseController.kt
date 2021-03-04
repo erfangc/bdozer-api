@@ -41,11 +41,8 @@ class FactBaseController(
         val distinctIds = facts.distinctBy { it._id }.size
         executor.submit {
             log.info("Saving ${facts.size} facts, ($distinctIds distinct) parsed for cik=$cik and adsh=$adsh")
-            facts.chunked(100).forEach {
-                facts ->
-                val inserts = facts.map { insertOne(it) }
-                val result = col.bulkWrite(inserts)
-                log.info("Saved chunk of ${facts.size} upserts=${result.upserts.size} inserts=${result.inserts.size} wasAcknowledged=${result.wasAcknowledged()}")
+            for (fact in facts) {
+                col.save(fact)
             }
             log.info("Saved ${facts.size} facts parsed for cik=$cik and adsh=$adsh")
         }
