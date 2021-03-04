@@ -1,5 +1,8 @@
 package com.starburst.starburst.xbrl.dataclasses
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DTS(
     val calculationLink: Link = Link(),
     val definitionLink: Link = Link(),

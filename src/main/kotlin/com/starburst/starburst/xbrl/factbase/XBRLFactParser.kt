@@ -91,8 +91,12 @@ class XBRLFactParser(private val filingProvider: FilingProvider) {
         val cik = filingProvider.cik()
         val adsh = filingProvider.adsh()
         val fileName = filingProvider.instanceDocumentFilename()
-        val id = node.attributes.getNamedItem("id").textContent
-        return "https://www.sec.gov/Archives/edgar/data/$cik/${adsh.replace("-", "")}/$fileName#$id"
+        val id = node.attr("id")
+        return if (id == null) {
+            "https://www.sec.gov/Archives/edgar/data/$cik/${adsh.replace("-", "")}/$fileName"
+        } else {
+            "https://www.sec.gov/Archives/edgar/data/$cik/${adsh.replace("-", "")}/$fileName#$id"
+        }
     }
 
     private fun symbols(instanceDocument: Element): List<String> {

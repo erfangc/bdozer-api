@@ -15,7 +15,7 @@ class FilingProviderImpl(
     private val cik: String,
     private val adsh: String,
     http: HttpClient = HttpClientBuilder.create().build(),
-    objectMapper: ObjectMapper = jacksonObjectMapper().configure()
+    objectMapper: ObjectMapper = jacksonObjectMapper()
 ) : FilingProvider {
 
     private val normalizedAdsh = adsh.replace("-", "")
