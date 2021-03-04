@@ -2,14 +2,9 @@ package com.starburst.starburst.xbrl.factbase
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mongodb.client.MongoClient
-import com.mongodb.client.model.UpdateOneModel
-import com.mongodb.client.model.WriteModel
 import com.starburst.starburst.xbrl.FilingProviderImpl
 import org.apache.http.client.HttpClient
-import org.litote.kmongo.getCollection
-import org.litote.kmongo.insertOne
-import org.litote.kmongo.json
-import org.litote.kmongo.save
+import org.litote.kmongo.*
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.Executors
@@ -38,7 +33,9 @@ class FactBaseController(
         @RequestParam nodeName: String,
         @RequestParam(required = false) dimension: String? = null
     ): List<Fact> {
-        TODO()
+        return col.find(Fact::nodeName eq nodeName).filter {
+            fact -> fact.explicitMembers.any { it.dimension == dimension } || dimension == null
+        }.toList()
     }
 
     @PostMapping("{cik}/{adsh}")
