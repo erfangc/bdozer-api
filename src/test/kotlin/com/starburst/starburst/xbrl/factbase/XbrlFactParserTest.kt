@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.w3c.dom.Element
 
-internal class XBRLFactParserTest {
+internal class XbrlFactParserTest {
 
     @Test
     fun parseFacts() {
-        val obj = XBRLFactParser(filingProvider = filingProvider())
+        val obj = XbrlFactParser(filingProvider = filingProvider())
         val facts = obj.parseFacts()
         assertEquals(1330, facts.size)
     }

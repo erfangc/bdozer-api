@@ -13,11 +13,12 @@ import com.starburst.starburst.xbrl.utils.NodeListExtension.findAllByTag
 import com.starburst.starburst.xbrl.utils.NodeListExtension.findByTag
 import com.starburst.starburst.xbrl.utils.NodeListExtension.map
 import com.starburst.starburst.xbrl.utils.NodeListExtension.toList
+import org.springframework.stereotype.Service
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.time.Instant
 
-class XBRLFactParser(private val filingProvider: FilingProvider) {
+class XbrlFactParser(private val filingProvider: FilingProvider) {
 
     private val schemaManager = SchemaManager(filingProvider)
     private val labelManager = LabelManager(filingProvider)
@@ -78,7 +79,8 @@ class XBRLFactParser(private val filingProvider: FilingProvider) {
                     verboseLabel = labels?.verboseLabel,
                     stringValue = content,
                     doubleValue = content.toDoubleOrNull(),
-                    lastUpdated = Instant.now().toString()
+                    lastUpdated = Instant.now().toString(),
+                    formType = "10-K" // TODO
                 )
             } else {
                 null

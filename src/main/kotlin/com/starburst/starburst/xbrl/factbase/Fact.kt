@@ -14,6 +14,7 @@ data class Fact(
     val primarySymbol: String,
     val symbols: List<String>,
     val nodeName: String,
+    val formType: String,
     // this essentially flattens out
     val period: XbrlPeriod,
     val explicitMembers: List<XbrlExplicitMember>,
