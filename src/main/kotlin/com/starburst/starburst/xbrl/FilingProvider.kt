@@ -11,6 +11,8 @@ interface FilingProvider {
     fun metaLink(): MetaLink
     fun formType(): String
 
+    fun inlineHtml(): String
+
     fun schemaExtension(): Element
     fun calculationLinkbase(): Element
     fun definitionLinkbase(): Element

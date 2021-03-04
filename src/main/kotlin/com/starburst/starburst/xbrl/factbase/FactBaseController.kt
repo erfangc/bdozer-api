@@ -29,6 +29,18 @@ class FactBaseController(
     private val col = database.getCollection<Fact>()
     private val executor = Executors.newCachedThreadPool()
 
+    /**
+     * Returns a list of facts matching the query
+     */
+    @GetMapping("{cik}")
+    fun queryFacts(
+        @PathVariable cik: String,
+        @RequestParam nodeName: String,
+        @RequestParam(required = false) dimension: String? = null
+    ): List<Fact> {
+        TODO()
+    }
+
     @PostMapping("{cik}/{adsh}")
     fun parseAndUploadSingleFiling(
         @PathVariable cik: String,
@@ -42,6 +54,7 @@ class FactBaseController(
         executor.submit {
             log.info("Saving ${facts.size} facts, ($distinctIds distinct) parsed for cik=$cik and adsh=$adsh")
             for (fact in facts) {
+                // for some reason bulkwrite gets stuck
                 col.save(fact)
             }
             log.info("Saved ${facts.size} facts parsed for cik=$cik and adsh=$adsh")

@@ -39,6 +39,10 @@ internal class XbrlFactParserTest {
             return "10-K"
         }
 
+        override fun inlineHtml(): String {
+            return "..."
+        }
+
         fun readFile(name: String): Element {
             println("reading $name")
             val istream = ClassPathResource(name).inputStream.readAllBytes().inputStream()

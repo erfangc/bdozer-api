@@ -76,6 +76,10 @@ class FilingProviderImpl(
         TODO("Not yet implemented")
     }
 
+    override fun inlineHtml(): String {
+        return dts.inline.local.first()
+    }
+
     override fun schemaExtension(): Element {
         return schemaExtension
     }

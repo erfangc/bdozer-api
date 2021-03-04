@@ -92,7 +92,7 @@ class XbrlFactParser(private val filingProvider: FilingProvider) {
     private fun sourceDocument(node: Node): String {
         val cik = filingProvider.cik()
         val adsh = filingProvider.adsh()
-        val fileName = filingProvider.instanceDocumentFilename()
+        val fileName = filingProvider.inlineHtml()
         val id = node.attr("id")
         return if (id == null) {
             "https://www.sec.gov/Archives/edgar/data/$cik/${adsh.replace("-", "")}/$fileName"
