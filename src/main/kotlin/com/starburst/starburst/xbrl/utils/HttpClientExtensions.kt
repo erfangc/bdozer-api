@@ -15,6 +15,7 @@ object HttpClientExtensions {
         val entity = httpResponse.entity
         val allBytes = entity.content.readAllBytes()
         get.releaseConnection()
+        log.info("Done reading remote link $link")
         return allBytes
     }
 

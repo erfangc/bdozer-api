@@ -37,10 +37,11 @@ class SchemaManager(filingProvider: FilingProvider) {
         val schema = schemas[namespace]
         return if (schema == null) {
             log.info("Retrieving US Gaap schema for $namespace")
+            val link = "http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd"
             val newlyLoadedElement = XbrlUtils.readXml(
-                http.readLink("http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd")
+                http.readLink(link)
                     ?.inputStream()
-                    ?: error("...")
+                    ?: error("Unable to download link $link")
             )
             // TODO actually retrieve the correct us-gaap schema document instead of this hard coded one
             val map = newlyLoadedElement
