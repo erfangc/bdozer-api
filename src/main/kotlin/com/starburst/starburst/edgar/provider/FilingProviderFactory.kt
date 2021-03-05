@@ -18,20 +18,13 @@ class FilingProviderFactory(
 
         val instanceFilename: String
         val instanceHtmlFilename: String
-        val instanceDocument: XmlElement
 
         val schemaFilename: String
-        val schema: XmlElement
 
         val presentationLinkbaseRef: String
         val definitionLinkbaseRef: String
         val labelLinkbaseRef: String
         val calculationLinkbaseRef: String
-
-        val presentationLinkbase: XmlElement
-        val definitionLinkbase: XmlElement
-        val labelLinkbase: XmlElement
-        val calculationLinkbase: XmlElement
 
         /*
         read from the FilingSummary to determine the
@@ -55,12 +48,12 @@ class FilingProviderFactory(
         } else {
             schemaFilename.split("\\.".toRegex(), 2).first() + ".xml"
         }
-        instanceDocument = http.readXml(instanceFilename)
+        val instanceDocument: XmlElement = http.readXml("$baseUrl/$instanceFilename")
         instanceHtmlFilename = instanceFileNode?.textContent ?: error("...")
 
         // lets now read the schema XSD file
         // and go ahead and derive the other files
-        schema = http.readXml(schemaFilename)
+        val schema: XmlElement = http.readXml("$baseUrl/$schemaFilename")
         val xsd = schema.getShortNamespace(longNamespace = "http://www.w3.org/2001/XMLSchema")
         val link = schema.getShortNamespace(longNamespace = "http://www.xbrl.org/2003/linkbase")
         val xlink = schema.getShortNamespace(longNamespace = "http://www.w3.org/1999/xlink")
@@ -77,10 +70,10 @@ class FilingProviderFactory(
         labelLinkbaseRef = linkbaseRefs["http://www.xbrl.org/2003/role/labelLinkbaseRef"] ?: error("...")
         calculationLinkbaseRef = linkbaseRefs["http://www.xbrl.org/2003/role/calculationLinkbaseRef"] ?: error("...")
 
-        presentationLinkbase = http.readXml("$baseUrl/$presentationLinkbaseRef")
-        definitionLinkbase = http.readXml("$baseUrl/$definitionLinkbaseRef")
-        labelLinkbase = http.readXml("$baseUrl/$labelLinkbaseRef")
-        calculationLinkbase = http.readXml("$baseUrl/$calculationLinkbaseRef")
+        val presentationLinkbase: XmlElement = http.readXml("$baseUrl/$presentationLinkbaseRef")
+        val definitionLinkbase: XmlElement = http.readXml("$baseUrl/$definitionLinkbaseRef")
+        val labelLinkbase: XmlElement = http.readXml("$baseUrl/$labelLinkbaseRef")
+        val calculationLinkbase: XmlElement = http.readXml("$baseUrl/$calculationLinkbaseRef")
 
         return object : FilingProvider {
 

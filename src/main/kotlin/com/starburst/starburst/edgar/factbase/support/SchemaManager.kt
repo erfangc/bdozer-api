@@ -92,8 +92,8 @@ class SchemaManager(filingProvider: FilingProvider) {
         href: String
     ): ElementDefinition? {
         val uri = URI(href)
-        val link = "${uri.scheme}://${uri.host}/${uri.path}"
-        if (linksVisited.contains(link)){
+        val link = if (uri.host == null) uri.path else "${uri.scheme}://${uri.host}${uri.path}"
+        if (!linksVisited.contains(link)){
          loadRemoteSchema(link)
         }
         return elementDefinitionsByHref[href]
