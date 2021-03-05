@@ -1,12 +1,10 @@
-package com.starburst.starburst.edgar.factbase
+package com.starburst.starburst.edgar.factbase.support
 
 import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.dataclasses.Labels
 import com.starburst.starburst.edgar.utils.ElementExtension.getDefaultLongNamespace
-import com.starburst.starburst.edgar.utils.ElementExtension.longNamespaceToShortNamespaceMap
 import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
-import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
 import java.net.URI
 
 class LabelManager(filingProvider: FilingProvider) {

@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase
+package com.starburst.starburst.edgar.factbase.support
 
 import com.starburst.starburst.edgar.XmlElement
 import com.starburst.starburst.edgar.provider.FilingProvider

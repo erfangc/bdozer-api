@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase
+package com.starburst.starburst.edgar.factbase.ingestor
 
 import com.google.common.hash.Hashing
 import com.starburst.starburst.edgar.dataclasses.XbrlContext
@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets
 
 
 class FactIdGenerator(instanceDocument: Element) {
-
     fun generateId(node: Node, context: XbrlContext): String {
 
         val nodeName = node.nodeName
@@ -29,5 +28,4 @@ class FactIdGenerator(instanceDocument: Element) {
             )
             .toString()
     }
-
 }

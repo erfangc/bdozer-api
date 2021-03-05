@@ -1,19 +1,15 @@
-package com.starburst.starburst.edgar.factbase
+package com.starburst.starburst.edgar.factbase.ingestor
 
+import com.starburst.starburst.edgar.XmlElement
 import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.dataclasses.*
-import com.starburst.starburst.edgar.utils.ElementExtension.getDefaultLongNamespace
-import com.starburst.starburst.edgar.utils.ElementExtension.getElementsByTagNameSafe
-import com.starburst.starburst.edgar.utils.ElementExtension.longNamespaceToShortNamespaceMap
-import com.starburst.starburst.edgar.utils.ElementExtension.shortNamespaceToLongNamespaceMap
-import com.starburst.starburst.edgar.utils.ElementExtension.targetNamespace
+import com.starburst.starburst.edgar.factbase.support.LabelManager
+import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.utils.LocalDateExtensions.toLocalDate
 import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.map
-import com.starburst.starburst.edgar.utils.NodeListExtension.toList
-import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.time.Instant
 
@@ -118,14 +114,14 @@ class FilingParser(private val filingProvider: FilingProvider) {
         }
     }
 
-    private fun symbols(instanceDocument: Element): List<String> {
+    private fun symbols(instanceDocument: XmlElement): List<String> {
         return listOf(primarySymbol(instanceDocument))
     }
 
-    private fun primarySymbol(instanceDocument: Element): String {
+    private fun primarySymbol(instanceDocument: XmlElement): String {
         val found = instanceDocument
-            .getElementsByTagNameSafe("dei:TradingSymbol")
-            .toList()
+            .getElementsByTag("dei:TradingSymbol")
+
         if (found.isEmpty()) {
             return "N/A"
         }
@@ -134,10 +130,9 @@ class FilingParser(private val filingProvider: FilingProvider) {
             .textContent ?: "N/A"
     }
 
-    private fun entityRegistrantName(instanceDocument: Element): String {
+    private fun entityRegistrantName(instanceDocument: XmlElement): String {
         val found = instanceDocument
-            .getElementsByTagNameSafe("dei:EntityRegistrantName")
-            .toList()
+            .getElementsByTag("dei:EntityRegistrantName")
         if (found.isEmpty()) {
             return "N/A"
         }
@@ -146,7 +141,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
             .textContent ?: "N/A"
     }
 
-    private fun cik(instanceDocument: Element): String {
+    private fun cik(instanceDocument: XmlElement): String {
         return filingProvider.cik()
     }
 
@@ -156,7 +151,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
         val instanceDocument = filingProvider.instanceDocument()
         val parts = nodeName.split(":".toRegex(), 2)
         return if (parts.size == 1) {
-            Pair(instanceDocument.getDefaultLongNamespace() ?: "", nodeName)
+            Pair(instanceDocument.defaultLongNamespace() ?: "", nodeName)
         } else {
             val shortNamespace = parts.first()
             val first = instanceDocument.shortNamespaceToLongNamespaceMap()[shortNamespace] ?: ""

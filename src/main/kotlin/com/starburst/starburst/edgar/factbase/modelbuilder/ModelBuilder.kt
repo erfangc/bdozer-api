@@ -1,30 +1,60 @@
-package com.starburst.starburst.edgar.factbase
+package com.starburst.starburst.edgar.factbase.modelbuilder
 
+import com.starburst.starburst.edgar.XmlElement
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
-import com.starburst.starburst.edgar.provider.FilingProvider
-import com.starburst.starburst.edgar.utils.ElementExtension.getElementsByTagNameSafe
+import com.starburst.starburst.edgar.dataclasses.Fact
+import com.starburst.starburst.edgar.factbase.FactBase
+import com.starburst.starburst.edgar.factbase.support.SchemaManager
+import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.edgar.utils.NodeListExtension.toList
 import com.starburst.starburst.models.HistoricalValue
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
+import org.springframework.stereotype.Service
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import java.net.URI
 
-class FactBaseModelBuilder(
-    filingProvider: FilingProvider,
-    factBase: FactBase
+@Service(value = "factBaseModelBuilder")
+class ModelBuilder(
+    private val filingProviderFactory: FilingProviderFactory,
+    private val factBase: FactBase
 ) {
 
-    private val calculationLinkbase = filingProvider.calculationLinkbase()
-    private val schemaManager = SchemaManager(filingProvider)
-    private val latestNonDimensionalFacts = factBase.getLatestNonDimensionalFacts(cik = filingProvider.cik())
-    private val facts = factBase.getAllFactsForCik(cik = filingProvider.cik())
+    internal data class ModelBuilderContext(
+        val calculationLinkbase: XmlElement,
+        val schemaManager: SchemaManager,
+        val latestNonDimensionalFacts: Map<String, Fact>,
+        val facts: List<Fact>
+    )
 
-    fun buildModel(): Model {
+    private fun buildCtx(cik: String, adsh: String): ModelBuilderContext {
+        val filingProvider = filingProviderFactory.createFilingProvider(cik, adsh)
+        return ModelBuilderContext(
+            calculationLinkbase = filingProvider.calculationLinkbase(),
+            schemaManager = SchemaManager(filingProvider),
+            latestNonDimensionalFacts = factBase.latestNonDimensionalFacts(cik = filingProvider.cik()),
+            facts = factBase.allFactsForCik(cik = filingProvider.cik())
+        )
+    }
+
+    /**
+     * Build a [Model] using facts from [FactBase] and the calculationArcs
+     * defined by the latest filing for the provided [cik]
+     */
+    fun buildModelForLatestFiling(cik: String): Model {
+        TODO("not implemented")
+    }
+
+    /**
+     * Build a [Model] using facts from [FactBase] and the calculationArcs
+     * defined by a specific filing
+     */
+    fun buildModelForFiling(cik: String, adsh: String): Model {
         /*
         high levels overview
          */
+        val ctx = buildCtx(cik, adsh)
 
         /*
         step 1 - start with the calculation XML since
@@ -32,36 +62,36 @@ class FactBaseModelBuilder(
         everything else serves as a reference (including "XBRL facts" such as actual historical values)
         to the business logic expressed within this page
          */
-        val calculationLinks = calculationLinkbase.getElementsByTagNameSafe("link:calculationLink")
+        val calculationLinks = ctx.calculationLinkbase.getElementsByTagNameSafe("link:calculationLink")
 
         /*
         find the income statement calculation
          */
-        val incomeStatementRole = findIncomeStatementRole(calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
+        val incomeStatementRole = findIncomeStatementRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
         val incomeStatementItems =
-            linkCalculationToItems(findLinkCalculationByRole(calculationLinks, incomeStatementRole))
+            linkCalculationToItems(findLinkCalculationByRole(calculationLinks, incomeStatementRole), ctx)
 
         /*
         find the income statement calculation
          */
-        val balanceSheetRole = findBalanceSheetRole(calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
-        val balanceSheetItems = linkCalculationToItems(findLinkCalculationByRole(calculationLinks, balanceSheetRole))
+        val balanceSheetRole = findBalanceSheetRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
+        val balanceSheetItems = linkCalculationToItems(findLinkCalculationByRole(calculationLinks, balanceSheetRole), ctx)
 
         /*
         find the cash flow statement calculation
          */
         val cashFlowStatementRole =
-            findCashFlowStatementRole(calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
+            findCashFlowStatementRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
         val cashFlowStatementItems =
-            linkCalculationToItems(findLinkCalculationByRole(calculationLinks, cashFlowStatementRole))
+            linkCalculationToItems(findLinkCalculationByRole(calculationLinks, cashFlowStatementRole), ctx)
 
         /*
         as we encounter "location"s we create placeholder for them as Item(s)
         their historical values are resolved via look up against the Instance document
         labels are resolved via the label document
          */
-        val name = latestNonDimensionalFacts["dei:EntityRegistrantName"]
-        val symbol = latestNonDimensionalFacts["dei:TradingSymbol"]
+        val name = ctx.latestNonDimensionalFacts["dei:EntityRegistrantName"]
+        val symbol = ctx.latestNonDimensionalFacts["dei:TradingSymbol"]
 
         return Model(
             name = name?.stringValue ?: "",
@@ -135,7 +165,7 @@ class FactBaseModelBuilder(
             ?: error("cannot find $role")
     }
 
-    private fun linkCalculationToItems(incomeStatementCalculation: Node): List<Item> {
+    private fun linkCalculationToItems(incomeStatementCalculation: Node, ctx: ModelBuilderContext): List<Item> {
         //
         // to build the income statement, first find all the loc elements
         //
@@ -157,18 +187,18 @@ class FactBaseModelBuilder(
             //
             // the fragment is actually the id to look up by
             //
-            val elementDefinition = schemaManager.getElementDefinition(href)
+            val elementDefinition = ctx.schemaManager.getElementDefinition(href)
             val name = elementDefinition?.name ?: error("Unable to find element definition name for $href")
 
             //
             // populate the historical value of the item
             //
-            val historicalValue = latestHistoricalValue(elementDefinition)
+            val historicalValue = latestHistoricalValue(elementDefinition, ctx)
 
             //
             // populate all historical values
             //
-            val historicalValues = historicalValues(elementDefinition)
+            val historicalValues = historicalValues(elementDefinition, ctx)
 
             Item(
                 name = name,
@@ -184,7 +214,7 @@ class FactBaseModelBuilder(
                             ?: error("cannot find loc for $to")
 
                         // the fragment is actually the id to look up by
-                        val elementName = (schemaManager.getElementDefinition(toHref)
+                        val elementName = (ctx.schemaManager.getElementDefinition(toHref)
                             ?: error("unable to find a schema definition for $toHref")).name
 
                         // we must look up the element definition to get it's name in the instance file
@@ -206,8 +236,8 @@ class FactBaseModelBuilder(
         }
     }
 
-    private fun historicalValues(elementDefinition: ElementDefinition): List<HistoricalValue> {
-        val filteredFacts = facts
+    private fun historicalValues(elementDefinition: ElementDefinition, ctx: ModelBuilderContext): List<HistoricalValue> {
+        val filteredFacts = ctx.facts
             .filter {
                 it.explicitMembers.isEmpty()
                         && elementDefinition.name == it.elementName
@@ -228,8 +258,8 @@ class FactBaseModelBuilder(
         }
     }
 
-    private fun latestHistoricalValue(elementDefinition: ElementDefinition): Double? {
+    private fun latestHistoricalValue(elementDefinition: ElementDefinition, ctx: ModelBuilderContext): Double? {
         val nodeName = elementDefinition.name
-        return latestNonDimensionalFacts[nodeName]?.doubleValue
+        return ctx.latestNonDimensionalFacts[nodeName]?.doubleValue
     }
 }
