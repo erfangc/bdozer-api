@@ -10,6 +10,7 @@ import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.map
+import org.slf4j.LoggerFactory
 import org.w3c.dom.Node
 import java.time.Instant
 
@@ -26,6 +27,8 @@ class FilingParser(private val filingProvider: FilingProvider) {
         .getElementsByTag("context")
         .associate { it.attr("id") to toContext(it) }
 
+    private val log = LoggerFactory.getLogger(FilingParser::class.java)
+
     fun parseFacts(): List<Fact> {
 
         /*
@@ -33,6 +36,9 @@ class FilingParser(private val filingProvider: FilingProvider) {
         reverse lookup everything else
          */
         val instanceDocument = filingProvider.instanceDocument()
+
+        val instanceDocumentFilename = filingProvider.instanceDocumentFilename()
+        log.info("Parsing instance document $instanceDocumentFilename")
 
 
         /*
@@ -100,7 +106,9 @@ class FilingParser(private val filingProvider: FilingProvider) {
             }
         }
         // TODO deduplicate the fact(s)
-        return facts.filterNotNull()
+        val ret = facts.filterNotNull()
+        log.info("Found ${ret.size} facts in $instanceDocumentFilename, out of ${facts.size} expected, after removing duplicates")
+        return ret
     }
 
     private fun formType(instanceDocument: XmlElement): String {

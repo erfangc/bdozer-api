@@ -36,7 +36,7 @@ class FilingProviderFactory(
         // find the XSD
         schemaFilename = files
             ?.find { file -> file.textContent.endsWith(".xsd") }
-            ?.textContent ?: error("...")
+            ?.textContent ?: error("no schema files can be found for cik=$cik adsh=$adsh")
 
         // find the XML instance document name
         val instanceFileNode = files.find { file ->
