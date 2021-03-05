@@ -2,7 +2,6 @@ package com.starburst.starburst.edgar.factbase.support
 
 import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.dataclasses.Labels
-import com.starburst.starburst.edgar.utils.ElementExtension.getDefaultLongNamespace
 import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import java.net.URI
@@ -10,39 +9,28 @@ import java.net.URI
 class LabelManager(filingProvider: FilingProvider) {
 
     private val labelElement = filingProvider.labelLinkbase()
-    private val targetNamespace = "http://www.xbrl.org/2003/linkbase"
 
-    private val nsPrefix = if (labelElement.getDefaultLongNamespace() == targetNamespace)
-        ""
-    else {
-        val ns = labelElement
-            .longNamespaceToShortNamespaceMap()
-            .entries
-            .find { it.key == targetNamespace }
-            ?.value ?: error("...")
-        "$ns:"
-    }
-
-    private val node = labelElement.getElementByTag("${nsPrefix}labelLink") ?: error("...")
+    private val link = labelElement.getShortNamespace("http://www.xbrl.org/2003/linkbase")
+    private val node = labelElement.getElementByTag("${link}labelLink") ?: error("...")
 
     // we have loc = locators, label (which is what we want) and labelArc
     // since we are doing a reverse lookup, we need to
 
     // 1 - build a map of locator(s), from schema definition Ids (the hrefs) -> xlink:label
     private val locs = node
-        .getElementsByTag("${nsPrefix}loc")
+        .getElementsByTag("${link}loc")
         .map {
             val href = it.attr("xlink:href")
             URI(href).fragment to it.attr("xlink:label")
         }.toMap()
 
     // 2 - build a map of labelArcs, from locator xlink:label -> labelArc
-    private val labelArcs = node.getElementsByTag("${nsPrefix}labelArc").map {
+    private val labelArcs = node.getElementsByTag("${link}labelArc").map {
         it.attr("xlink:from") to it.attr("xlink:to")
     }.toMap()
 
     // 3 - build a map of labelArcs -> label(s)
-    private val labels = node.getElementsByTag("${nsPrefix}label").groupBy {
+    private val labels = node.getElementsByTag("${link}label").groupBy {
         it.attr("xlink:label")
     }.map {
             (label, nodes) ->

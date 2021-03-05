@@ -6,6 +6,8 @@ package com.starburst.starburst.edgar.dataclasses
  */
 data class Fact(
     val _id: String,
+    val instanceDocumentElementId: String,
+
     val cik: String,
     val entityName: String,
     val primarySymbol: String,

@@ -67,11 +67,12 @@ class FilingParser(private val filingProvider: FilingProvider) {
 
                     Fact(
                         _id = factIdGenerator.generateId(node, xbrlContext),
+                        instanceDocumentElementId = node.attr("id") ?: "N/A",
                         cik = cik(instanceDocument),
                         entityName = entityRegistrantName(instanceDocument),
                         primarySymbol = primarySymbol(instanceDocument),
                         symbols = symbols(instanceDocument),
-                        formType = "10-K", // TODO use FilingSummary to figure this out
+                        formType = formType(instanceDocument),
 
                         elementName = elementDefinition.name,
                         rawElementName = node.nodeName,
@@ -100,6 +101,12 @@ class FilingParser(private val filingProvider: FilingProvider) {
         }
         // TODO deduplicate the fact(s)
         return facts.filterNotNull()
+    }
+
+    private fun formType(instanceDocument: XmlElement): String {
+        return instanceDocument
+            .getElementByTag("dei:DocumentType")
+            ?.textContent ?: "Unknown"
     }
 
     private fun sourceDocument(node: Node): String {
