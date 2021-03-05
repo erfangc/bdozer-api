@@ -28,3 +28,12 @@ each period being a `Cell`
 ## Stage 3 - `Cells` Evaluation
 
 This is a depth-first computation graph evaluation algorithm implemented by the `CellEvaluator` class
+
+## Generating the TypeScript SDK
+
+```bash
+openapi-generator-cli generate \
+  -i http://localhost:8080/v3/api-docs \
+  -g typescript-axios \
+  -o ~/equity-model-builder-ui/client
+```

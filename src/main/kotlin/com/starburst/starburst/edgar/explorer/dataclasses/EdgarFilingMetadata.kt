@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.explorer
+package com.starburst.starburst.edgar.explorer.dataclasses
 
 import java.time.LocalDate
 

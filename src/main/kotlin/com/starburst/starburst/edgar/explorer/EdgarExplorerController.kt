@@ -1,10 +1,7 @@
 package com.starburst.starburst.edgar.explorer
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.http.client.HttpClient
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.BasicHttpEntity
+import com.starburst.starburst.edgar.explorer.dataclasses.EdgarFilingMetadata
+import com.starburst.starburst.edgar.explorer.dataclasses.EdgarEntity
 import org.springframework.web.bind.annotation.*
 
 /**
@@ -21,7 +18,7 @@ class EdgarExplorerController(
 ) {
 
     @GetMapping("entities", produces = ["application/json"])
-    fun searchEntities(@RequestParam term: String): JsonNode {
+    fun searchEntities(@RequestParam term: String): List<EdgarEntity?> {
         return edgarExplorer.searchEntities(term)
     }
 
