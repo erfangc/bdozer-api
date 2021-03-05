@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.provider
 
-import org.w3c.dom.Element
+import com.starburst.starburst.edgar.XmlElement
 
 interface FilingProvider {
     fun adsh(): String
@@ -10,12 +10,12 @@ interface FilingProvider {
 
     fun inlineHtml(): String
 
-    fun schema(): Element
-    fun calculationLinkbase(): Element
-    fun definitionLinkbase(): Element
-    fun labelLinkbase(): Element
-    fun presentationLinkbase(): Element
-    fun instanceDocument(): Element
+    fun schema(): XmlElement
+    fun calculationLinkbase(): XmlElement
+    fun definitionLinkbase(): XmlElement
+    fun labelLinkbase(): XmlElement
+    fun presentationLinkbase(): XmlElement
+    fun instanceDocument(): XmlElement
 
     fun schemaExtensionFilename(): String
     fun calculationLinkbaseFilename(): String

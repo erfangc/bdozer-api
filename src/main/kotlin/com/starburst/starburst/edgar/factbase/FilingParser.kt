@@ -21,7 +21,7 @@ import java.time.Instant
  * Goes through a single filing as provided by the [FilingProvider]
  * and returns the list of [Fact]s contained within
  */
-class FaceBaseFilingParser(private val filingProvider: FilingProvider) {
+class FilingParser(private val filingProvider: FilingProvider) {
 
     private val schemaManager = SchemaManager(filingProvider)
     private val labelManager = LabelManager(filingProvider)

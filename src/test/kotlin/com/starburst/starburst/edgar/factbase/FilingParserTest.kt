@@ -1,18 +1,17 @@
 package com.starburst.starburst.edgar.factbase
 
+import com.starburst.starburst.edgar.XmlElement
 import com.starburst.starburst.edgar.provider.FilingProvider
-import com.starburst.starburst.edgar.dataclasses.MetaLink
 import com.starburst.starburst.edgar.dataclasses.XbrlUtils
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
-import org.w3c.dom.Element
 
-internal class FaceBaseFilingParserTest {
+internal class FilingParserTest {
 
     @Test
     fun parseFacts() {
-        val obj = FaceBaseFilingParser(filingProvider = filingProvider())
+        val obj = FilingParser(filingProvider = filingProvider())
         val facts = obj.parseFacts()
         assertEquals(1330, facts.size)
     }
@@ -35,45 +34,45 @@ internal class FaceBaseFilingParserTest {
             return "..."
         }
 
-        fun readFile(name: String): Element {
+        fun readFile(name: String): XmlElement {
             println("reading $name")
             val istream = ClassPathResource(name).inputStream.readAllBytes().inputStream()
-            return XbrlUtils.readXml(istream)
+            return XmlElement(XbrlUtils.readXml(istream))
         }
 
         private val schemaExtension = readFile("factbase/dbx-20201231.xsd")
 
-        override fun schema(): Element {
+        override fun schema(): XmlElement {
             return schemaExtension
         }
 
         private val calculation = readFile("factbase/dbx-20201231_cal.xml")
 
-        override fun calculationLinkbase(): Element {
+        override fun calculationLinkbase(): XmlElement {
             return calculation
         }
 
         private val definition = readFile("factbase/dbx-20201231_def.xml")
 
-        override fun definitionLinkbase(): Element {
+        override fun definitionLinkbase(): XmlElement {
             return definition
         }
 
         private val label = readFile("factbase/dbx-20201231_lab.xml")
 
-        override fun labelLinkbase(): Element {
+        override fun labelLinkbase(): XmlElement {
             return label
         }
 
         private val presentation = readFile("factbase/dbx-20201231_pre.xml")
 
-        override fun presentationLinkbase(): Element {
+        override fun presentationLinkbase(): XmlElement {
             return presentation
         }
 
         private val instance = readFile("factbase/dbx-20201231_htm.xml")
 
-        override fun instanceDocument(): Element {
+        override fun instanceDocument(): XmlElement {
             return instance
         }
 

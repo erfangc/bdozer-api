@@ -60,7 +60,7 @@ class FactBase(
         adsh: String
     ): ParseUploadSingleFilingResponse {
         log.info("Parsing facts from cik=$cik and adsh=$adsh")
-        val parser = FaceBaseFilingParser(filingProviderFactory.createFilingProvider(cik, adsh))
+        val parser = FilingParser(filingProviderFactory.createFilingProvider(cik, adsh))
         val facts = parser.parseFacts()
         val distinctIds = facts.distinctBy { it._id }.size
         executor.submit {

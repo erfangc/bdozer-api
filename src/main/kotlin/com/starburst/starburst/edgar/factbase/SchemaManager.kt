@@ -1,17 +1,13 @@
 package com.starburst.starburst.edgar.factbase
 
+import com.starburst.starburst.edgar.XmlElement
 import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
-import com.starburst.starburst.edgar.dataclasses.XbrlUtils
-import com.starburst.starburst.edgar.utils.ElementExtension.getElementsByTagNameSafe
-import com.starburst.starburst.edgar.utils.ElementExtension.getShortNamespace
-import com.starburst.starburst.edgar.utils.ElementExtension.targetNamespace
-import com.starburst.starburst.edgar.utils.HttpClientExtensions.readLink
+import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
 import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.toList
 import org.apache.http.impl.client.HttpClientBuilder
-import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import java.net.URI
 
@@ -52,11 +48,7 @@ class SchemaManager(filingProvider: FilingProvider) {
     }
 
     private fun loadRemoteSchema(schemaLocation: String): Map<String, ElementDefinition> {
-        val newlyLoadedElement = XbrlUtils.readXml(
-            http.readLink(schemaLocation)
-                ?.inputStream()
-                ?: error("Unable to download schema $schemaLocation")
-        )
+        val newlyLoadedElement = http.readXml(schemaLocation)
         val namespace = newlyLoadedElement.targetNamespace() ?: error("$schemaLocation has no target namespace")
         return processNewSchemaIntoState(newlyLoadedElement, namespace, schemaLocation)
     }
@@ -64,21 +56,18 @@ class SchemaManager(filingProvider: FilingProvider) {
     private fun loadRemoteSchemaByNamespace(namespace: String): Map<String, ElementDefinition> {
         val schemaLocation = namespaceToSchemaLocation[namespace]
             ?: error("cannot find a schema location for $namespace")
-        val newlyLoadedElement = XbrlUtils.readXml(
-            http.readLink(schemaLocation)
-                ?.inputStream()
-                ?: error("Unable to download schema $schemaLocation")
-        )
-        return processNewSchemaIntoState(newlyLoadedElement, namespace, schemaLocation)
+        val schema = http.readXml(schemaLocation)
+        return processNewSchemaIntoState(schema, namespace, schemaLocation)
     }
 
     private fun processNewSchemaIntoState(
-        newlyLoadedElement: Element,
+        schema: XmlElement,
         namespace: String,
         schemaLocation: String
     ): Map<String, ElementDefinition> {
-        val newlyLoadedElementDefinitions = newlyLoadedElement
-            .getElementsByTagNameSafe("xs:element")
+        val xsd = schema.getShortNamespace("http://www.w3.org/2001/XMLSchema")
+        val newlyLoadedElementDefinitions = schema
+            .getElementsByTagName("${xsd}element")
             .associateByElementName(namespace)
 
         linksVisited.add(schemaLocation)

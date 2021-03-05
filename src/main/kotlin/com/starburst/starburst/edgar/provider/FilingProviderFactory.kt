@@ -7,7 +7,6 @@ import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import org.apache.http.client.HttpClient
 import org.springframework.stereotype.Service
-import org.w3c.dom.Element
 
 @Service
 class FilingProviderFactory(
@@ -101,27 +100,27 @@ class FilingProviderFactory(
                 return instanceHtmlFilename
             }
 
-            override fun schema(): Element {
+            override fun schema(): XmlElement {
                 return schema
             }
 
-            override fun calculationLinkbase(): Element {
+            override fun calculationLinkbase(): XmlElement {
                 return calculationLinkbase
             }
 
-            override fun definitionLinkbase(): Element {
+            override fun definitionLinkbase(): XmlElement {
                 return definitionLinkbase
             }
 
-            override fun labelLinkbase(): Element {
+            override fun labelLinkbase(): XmlElement {
                 return labelLinkbase
             }
 
-            override fun presentationLinkbase(): Element {
+            override fun presentationLinkbase(): XmlElement {
                 return presentationLinkbase
             }
 
-            override fun instanceDocument(): Element {
+            override fun instanceDocument(): XmlElement {
                 return instanceDocument
             }
 
