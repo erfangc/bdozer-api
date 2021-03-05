@@ -31,14 +31,6 @@ internal class FaceBaseFilingParserTest {
             return "https://www.sec.gov/Archives/edgar/data/"
         }
 
-        override fun metaLink(): MetaLink {
-            TODO("Not yet implemented")
-        }
-
-        override fun formType(): String {
-            return "10-K"
-        }
-
         override fun inlineHtml(): String {
             return "..."
         }
@@ -51,7 +43,7 @@ internal class FaceBaseFilingParserTest {
 
         private val schemaExtension = readFile("factbase/dbx-20201231.xsd")
 
-        override fun schemaExtension(): Element {
+        override fun schema(): Element {
             return schemaExtension
         }
 

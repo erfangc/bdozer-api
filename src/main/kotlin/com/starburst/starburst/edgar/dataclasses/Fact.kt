@@ -12,9 +12,9 @@ data class Fact(
     val symbols: List<String>,
     val formType: String,
 
-    val nodeName: String,
+    val elementName: String,
     val longNamespace: String,
-    val rawNodeName: String,
+    val rawElementName: String,
 
     val period: XbrlPeriod,
     val explicitMembers: List<XbrlExplicitMember>,

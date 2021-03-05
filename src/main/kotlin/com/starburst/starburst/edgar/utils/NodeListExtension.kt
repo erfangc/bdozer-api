@@ -5,11 +5,11 @@ import org.w3c.dom.NodeList
 
 object NodeListExtension {
 
-    fun Node.findByTag(tag: String): Node? {
+    fun Node.getElementByTag(tag: String): Node? {
         return this.childNodes.toList().firstOrNull { it.nodeName ==  tag}
     }
 
-    fun Node.findAllByTag(tag: String): List<Node> {
+    fun Node.getElementsByTag(tag: String): List<Node> {
         return this.childNodes.toList().filter { it.nodeName ==  tag}
     }
 

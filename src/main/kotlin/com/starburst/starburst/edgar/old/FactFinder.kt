@@ -1,8 +1,8 @@
 package com.starburst.starburst.edgar.old
 
 import com.starburst.starburst.edgar.dataclasses.*
-import com.starburst.starburst.edgar.utils.NodeListExtension.findAllByTag
-import com.starburst.starburst.edgar.utils.NodeListExtension.findByTag
+import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
+import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.toList
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Node
@@ -27,13 +27,13 @@ class FactFinder(instanceStream: InputStream) {
         if (node.nodeName != "context")
             error("nodeNode must be context")
 
-        val period = node.findByTag("period")
-        val entity = node.findByTag("entity")
-        val identifier = entity?.findByTag("identifier")
+        val period = node.getElementByTag("period")
+        val entity = node.getElementByTag("entity")
+        val identifier = entity?.getElementByTag("identifier")
 
         val explicitMembers = entity
-            ?.findByTag("segment")
-            ?.findAllByTag("xbrldi:explicitMember")
+            ?.getElementByTag("segment")
+            ?.getElementsByTag("xbrldi:explicitMember")
             ?.map { myNode ->
                 XbrlExplicitMember(
                     dimension = myNode.attributes.getNamedItem("dimension").textContent,
@@ -55,9 +55,9 @@ class FactFinder(instanceStream: InputStream) {
                 }
             ),
             period = XbrlPeriod(
-                instant = period?.findByTag("instant")?.toLocalDate(),
-                startDate = period?.findByTag("startDate")?.toLocalDate(),
-                endDate = period?.findByTag("endDate")?.toLocalDate(),
+                instant = period?.getElementByTag("instant")?.toLocalDate(),
+                startDate = period?.getElementByTag("startDate")?.toLocalDate(),
+                endDate = period?.getElementByTag("endDate")?.toLocalDate(),
             )
         )
 

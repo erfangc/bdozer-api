@@ -1,11 +1,8 @@
 package com.starburst.starburst.edgar.factbase
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.mongodb.client.MongoClient
 import com.starburst.starburst.edgar.dataclasses.Fact
-import com.starburst.starburst.edgar.provider.FilingProviderImpl
-import org.apache.http.client.HttpClient
-import org.litote.kmongo.and
+import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
@@ -16,41 +13,32 @@ import java.util.concurrent.Executors
 
 @Service
 class FactBase(
-    private val http: HttpClient,
-    private val objectMapper: ObjectMapper,
+    private val filingProviderFactory: FilingProviderFactory,
     mongoClient: MongoClient
 ) {
 
     private val log = LoggerFactory.getLogger(FactBase::class.java)
+    private val col = mongoClient
+        .getDatabase("starburst")
+        .getCollection<Fact>()
 
-    private val database = mongoClient.getDatabase("starburst")
-    private val col = database.getCollection<Fact>()
     private val executor = Executors.newCachedThreadPool()
-
-    /**
-     *
-     */
-    fun searchFacts(
-        term: String,
-        cik: String? = null,
-        dimension: String? = null,
-        formType: String? = null
-    ): List<Fact> {
-        TODO()
-    }
 
     /**
      * Query the latest non-dimensional facts
      */
     fun getLatestNonDimensionalFacts(cik: String): Map<String, Fact> {
-        val byPeriod = col.find(Fact::cik eq cik).groupBy { it.period }
+        val factsByPeriod = col.find(Fact::cik eq cik).groupBy { it.period }
+
         // latest duration
-        val latestDuration = byPeriod.entries.maxByOrNull { it.key.endDate ?: LocalDate.MIN }?.value ?: emptyList()
+        val latestDuration = factsByPeriod.entries.maxByOrNull { it.key.endDate ?: LocalDate.MIN }?.value ?: emptyList()
 
         // latest instant
-        val latestInstant = byPeriod.entries.maxByOrNull { it.key.instant ?: LocalDate.MIN }?.value ?: emptyList()
+        val latestInstant = factsByPeriod.entries.maxByOrNull { it.key.instant ?: LocalDate.MIN }?.value ?: emptyList()
 
-        return (latestDuration + latestInstant).filter { it.explicitMembers.isEmpty() }.associateBy { it.nodeName }
+        return (latestDuration + latestInstant)
+            .filter { it.explicitMembers.isEmpty() }
+            .associateBy { it.elementName }
     }
 
     /**
@@ -72,8 +60,7 @@ class FactBase(
         adsh: String
     ): ParseUploadSingleFilingResponse {
         log.info("Parsing facts from cik=$cik and adsh=$adsh")
-        val impl = FilingProviderImpl(cik, adsh, http, objectMapper)
-        val parser = FaceBaseFilingParser(impl)
+        val parser = FaceBaseFilingParser(filingProviderFactory.createFilingProvider(cik, adsh))
         val facts = parser.parseFacts()
         val distinctIds = facts.distinctBy { it._id }.size
         executor.submit {

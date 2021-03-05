@@ -18,7 +18,7 @@ class FactBaseModelBuilder(
 
     private val calculationLinkbase = filingProvider.calculationLinkbase()
     private val schemaManager = SchemaManager(filingProvider)
-    private val latestNondimensionalFacts = factBase.getLatestNonDimensionalFacts(cik = filingProvider.cik())
+    private val latestNonDimensionalFacts = factBase.getLatestNonDimensionalFacts(cik = filingProvider.cik())
     private val facts = factBase.getAllFactsForCik(cik = filingProvider.cik())
 
     fun buildModel(): Model {
@@ -60,8 +60,8 @@ class FactBaseModelBuilder(
         their historical values are resolved via look up against the Instance document
         labels are resolved via the label document
          */
-        val name = latestNondimensionalFacts["dei:EntityRegistrantName"]
-        val symbol = latestNondimensionalFacts["dei:TradingSymbol"]
+        val name = latestNonDimensionalFacts["dei:EntityRegistrantName"]
+        val symbol = latestNonDimensionalFacts["dei:TradingSymbol"]
 
         return Model(
             name = name?.stringValue ?: "",
@@ -210,7 +210,7 @@ class FactBaseModelBuilder(
         val filteredFacts = facts
             .filter {
                 it.explicitMembers.isEmpty()
-                        && elementDefinition.name == it.rawNodeName
+                        && elementDefinition.name == it.elementName
                         && it.formType == "10-K" // TODO decide this based on some intelligence
             }
 
@@ -230,6 +230,6 @@ class FactBaseModelBuilder(
 
     private fun latestHistoricalValue(elementDefinition: ElementDefinition): Double? {
         val nodeName = elementDefinition.name
-        return latestNondimensionalFacts[nodeName]?.doubleValue
+        return latestNonDimensionalFacts[nodeName]?.doubleValue
     }
 }

@@ -1,16 +1,26 @@
-package com.starburst.starburst.edgar.utils
+package com.starburst.starburst.edgar
 
 import org.w3c.dom.Element
+import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 
-@Deprecated(message = "...")
-object ElementExtension {
+/**
+ * A delegated class that holds some convenience methods for working with and traversing
+ * XML [Element]. Such as creating namespace resolution methods and maps
+ */
+class XmlElement(element: Element): Element by element {
 
-    fun Element.getShortNamespace(longNamespace: String): String {
-        return if (this.getDefaultLongNamespace() == longNamespace) {
+    private val shortNamespaces = this.getShortNamespaces()
+    private val longNamespaceToShortNamespaceMap = this.longNamespaceToShortNamespaceMap()
+    private val shortNamespaceToLongNamespaceMap = this.shortNamespaceToLongNamespaceMap()
+    private val defaultLongNamespace = this.defaultLongNamespace()
+
+    fun getShortNamespace(longNamespace: String): String {
+        return if (this.defaultLongNamespace == longNamespace) {
             ""
         } else {
-            val namespace = this.longNamespaceToShortNamespaceMap()[longNamespace] ?: error("Unable to resolve the xmlns for $longNamespace")
+            val namespace = longNamespaceToShortNamespaceMap[longNamespace]
+                ?: error("Unable to resolve the xmlns for $longNamespace")
             "$namespace:"
         }
     }
@@ -18,7 +28,7 @@ object ElementExtension {
     /**
      * Maps long namespace to the shorter namespace declarations
      */
-    fun Element.longNamespaceToShortNamespaceMap(): Map<String, String> {
+    fun longNamespaceToShortNamespaceMap(): Map<String, String> {
         val length = this.attributes.length
         val namespaces = mutableMapOf<String, String>()
         for (i in 0 until length) {
@@ -35,7 +45,7 @@ object ElementExtension {
     /**
      * Maps short namespace to the longer namespace declarations
      */
-    fun Element.shortNamespaceToLongNamespaceMap(): Map<String, String> {
+    fun shortNamespaceToLongNamespaceMap(): Map<String, String> {
         val length = this.attributes.length
         val namespaces = mutableMapOf<String, String>()
         for (i in 0 until length) {
@@ -49,16 +59,24 @@ object ElementExtension {
         return namespaces.toMap()
     }
 
-    fun Element.targetNamespace(): String? {
+    /**
+     *
+     */
+    fun targetNamespace(): String? {
         return this.attributes.getNamedItem("targetNamespace")?.textContent
     }
 
-    fun Element.getDefaultShortNamespace(): String? {
-        val longNamespace = getDefaultLongNamespace()
-        return longNamespaceToShortNamespaceMap()[longNamespace]
+    /**
+     *
+     */
+    fun defaultShortNamespace(): String? {
+        return longNamespaceToShortNamespaceMap[defaultLongNamespace]
     }
 
-    fun Element.getDefaultLongNamespace(): String? {
+    /**
+     *
+     */
+    fun defaultLongNamespace(): String? {
         return this.attributes.getNamedItem("xmlns")?.textContent
     }
 
@@ -66,7 +84,7 @@ object ElementExtension {
      * look at xmlns declarations and return a list of namespaces
      * for this XML
      */
-    fun Element.getShortNamespaces(): List<String> {
+    fun getShortNamespaces(): List<String> {
         val length = this.attributes.length
         val namespaces = mutableListOf<String>()
         for (i in 0 until length) {
@@ -79,12 +97,21 @@ object ElementExtension {
         return namespaces.toList()
     }
 
+    fun getElementByTag(tag: String): Node? {
+        val nodeList = this.getElementsByTagName(tag)
+        return if (nodeList.length > 0) {
+            nodeList.item(0)
+        } else {
+            null
+        }
+    }
+
     /**
      * This method calls [Element.getElementsByTagName] with the namespace given in [tag]
      * and if that fails it goes through a waterfall of other tags to use depending on
      * the namespace that has been declared on the root element
      */
-    fun Element.getElementsByTagNameSafe(tag: String): NodeList {
+    fun getElementsByTagNameSafe(tag: String): NodeList {
         // to save on algo complexity - just call [getElementsByTagName] as you normally would
         val nl = this.getElementsByTagName(tag)
         // when that fails, think about whether to apply namespaces
@@ -101,7 +128,7 @@ object ElementExtension {
                 // figure out if the requested tag is declared in the namespace
                 // if not, get rid of it - or try one of the other namespaces
                 //
-                val namespaces = this.getShortNamespaces()
+                val namespaces = this.shortNamespaces
                 if (namespace.isNotEmpty() && !namespaces.contains(namespace)) {
                     // try out other namespaces that has been declared
                     for (newNameSpace in namespaces) {

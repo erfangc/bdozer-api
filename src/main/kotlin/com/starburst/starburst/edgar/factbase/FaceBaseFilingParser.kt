@@ -9,8 +9,8 @@ import com.starburst.starburst.edgar.utils.ElementExtension.shortNamespaceToLong
 import com.starburst.starburst.edgar.utils.ElementExtension.targetNamespace
 import com.starburst.starburst.edgar.utils.LocalDateExtensions.toLocalDate
 import com.starburst.starburst.edgar.utils.NodeListExtension.attr
-import com.starburst.starburst.edgar.utils.NodeListExtension.findAllByTag
-import com.starburst.starburst.edgar.utils.NodeListExtension.findByTag
+import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
+import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.map
 import com.starburst.starburst.edgar.utils.NodeListExtension.toList
 import org.w3c.dom.Element
@@ -27,7 +27,7 @@ class FaceBaseFilingParser(private val filingProvider: FilingProvider) {
     private val labelManager = LabelManager(filingProvider)
     private val instanceDocument = filingProvider.instanceDocument()
     private val contexts = instanceDocument
-        .findAllByTag("context")
+        .getElementsByTag("context")
         .associate { it.attr("id") to toContext(it) }
 
     fun parseFacts(): List<Fact> {
@@ -77,8 +77,8 @@ class FaceBaseFilingParser(private val filingProvider: FilingProvider) {
                         symbols = symbols(instanceDocument),
                         formType = "10-K", // TODO use FilingSummary to figure this out
 
-                        nodeName = node.nodeName,
-                        rawNodeName = elementDefinition.name,
+                        elementName = elementDefinition.name,
+                        rawElementName = node.nodeName,
                         longNamespace = elementDefinition.longNamespace,
 
                         period = xbrlContext.period,
@@ -180,7 +180,7 @@ class FaceBaseFilingParser(private val filingProvider: FilingProvider) {
     private fun isRelevant(node: Node): Boolean {
         val (namespace, _) = parseInstanceNodeName(node.nodeName)
         // this node is a fact if it's namespace is one of the ones that matter
-        val isExt = namespace == filingProvider.schemaExtension().targetNamespace()
+        val isExt = namespace == filingProvider.schema().targetNamespace()
         val lookup = instanceDocument.longNamespaceToShortNamespaceMap()
         return isExt || lookup[namespace] == "us-gaap" || lookup[namespace] == "dei"
     }
@@ -189,13 +189,13 @@ class FaceBaseFilingParser(private val filingProvider: FilingProvider) {
         if (node.nodeName != "context")
             error("nodeNode must be context")
 
-        val period = node.findByTag("period")
-        val entity = node.findByTag("entity")
-        val identifier = entity?.findByTag("identifier")
+        val period = node.getElementByTag("period")
+        val entity = node.getElementByTag("entity")
+        val identifier = entity?.getElementByTag("identifier")
 
         val explicitMembers = entity
-            ?.findByTag("segment")
-            ?.findAllByTag("xbrldi:explicitMember")
+            ?.getElementByTag("segment")
+            ?.getElementsByTag("xbrldi:explicitMember")
             ?.map { myNode ->
                 XbrlExplicitMember(
                     dimension = myNode.attributes.getNamedItem("dimension").textContent,
@@ -217,9 +217,9 @@ class FaceBaseFilingParser(private val filingProvider: FilingProvider) {
                 }
             ),
             period = XbrlPeriod(
-                instant = period?.findByTag("instant")?.toLocalDate(),
-                startDate = period?.findByTag("startDate")?.toLocalDate(),
-                endDate = period?.findByTag("endDate")?.toLocalDate(),
+                instant = period?.getElementByTag("instant")?.toLocalDate(),
+                startDate = period?.getElementByTag("startDate")?.toLocalDate(),
+                endDate = period?.getElementByTag("endDate")?.toLocalDate(),
             )
         )
 
