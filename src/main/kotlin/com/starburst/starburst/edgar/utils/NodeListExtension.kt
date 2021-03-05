@@ -17,6 +17,24 @@ object NodeListExtension {
         return this.attributes.getNamedItem(attr)?.textContent
     }
 
+    fun Node.attr(namespace: String, attr: String): String? {
+
+        // create a map of long -> short namespaces
+        val nsMap = mutableMapOf<String, String>()
+        for (i in (0 until this.attributes.length)) {
+            val item = this.attributes.item(i)
+            if (item.nodeName.startsWith("xmlns:")) {
+                val short = item.nodeName.split(":".toRegex(), 2).last()
+                val long = item.textContent
+                nsMap[long] = short
+            }
+        }
+
+        val fullAttr = nsMap[namespace]?.let { "$it:$attr" } ?: attr
+
+        return this.attributes.getNamedItem(fullAttr)?.textContent
+    }
+
     fun <R> NodeList.map(transform: (Node) -> R): List<R> {
         val results = mutableListOf<R>()
         for (i in 0 until this.length) {

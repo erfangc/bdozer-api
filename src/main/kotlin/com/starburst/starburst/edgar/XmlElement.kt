@@ -1,5 +1,6 @@
 package com.starburst.starburst.edgar
 
+import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
@@ -15,13 +16,11 @@ class XmlElement(element: Element): Element by element {
     private val shortNamespaceToLongNamespaceMap = this.shortNamespaceToLongNamespaceMap()
     private val defaultLongNamespace = this.defaultLongNamespace()
 
-    fun getShortNamespace(longNamespace: String): String {
+    fun getShortNamespace(longNamespace: String): String? {
         return if (this.defaultLongNamespace == longNamespace) {
-            ""
+            null
         } else {
-            val namespace = longNamespaceToShortNamespaceMap[longNamespace]
-                ?: error("Unable to resolve the xmlns for $longNamespace")
-            "$namespace:"
+            longNamespaceToShortNamespaceMap[longNamespace]
         }
     }
 
@@ -95,6 +94,11 @@ class XmlElement(element: Element): Element by element {
             }
         }
         return namespaces.toList()
+    }
+
+    fun getElementsByTag(namespace: String, tag: String): List<Node> {
+        val ns = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag
+        return this.getElementsByTag(ns)
     }
 
     fun getElementByTag(tag: String): Node? {

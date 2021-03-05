@@ -14,6 +14,12 @@ class FilingProviderFactory(
     private val http: HttpClient
 ) {
 
+    companion object {
+        const val X_LINK_NS = "http://www.w3.org/1999/xlink"
+        const val XSD_NS = "http://www.w3.org/2001/XMLSchema"
+        const val LINK_BASE_NS = "http://www.xbrl.org/2003/linkbase"
+    }
+
     private val log = LoggerFactory.getLogger(FilingProviderFactory::class.java)
 
     fun createFilingProvider(cik: String, adsh: String): FilingProvider {
@@ -59,15 +65,25 @@ class FilingProviderFactory(
         // lets now read the schema XSD file
         // and go ahead and derive the other files
         val schema: XmlElement = http.readXml("$baseUrl/$schemaFilename")
-        val xsd = schema.getShortNamespace(longNamespace = "http://www.w3.org/2001/XMLSchema")
-        val link = schema.getShortNamespace(longNamespace = "http://www.xbrl.org/2003/linkbase")
-        val xlink = schema.getShortNamespace(longNamespace = "http://www.w3.org/1999/xlink")
+        val xsd = schema.getShortNamespace(longNamespace = XSD_NS)?.let { "$it:" } ?: ""
+        val link = schema.getShortNamespace(longNamespace = LINK_BASE_NS)?.let { "$it:" } ?: ""
+        // for some reason this sometimes gets declared at the attribute level
+        val xlink = schema.getShortNamespace(longNamespace = X_LINK_NS)
 
         val linkbaseRefs = schema
             .getElementByTag("${xsd}annotation")
             ?.getElementByTag("${xsd}appinfo")
             ?.getElementsByTag("${link}linkbaseRef")
-            ?.associate { it.attr("${xlink}role")!! to it.attr("${xlink}href")!! }
+            ?.associate {
+                // again for some reason this gets declared either at the document or attribute level
+                val role = it.attr(X_LINK_NS, "role")
+                    ?: it.attr("$xlink:role")
+                    ?: error("cannot find $X_LINK_NS role")
+                val href = it.attr(X_LINK_NS, "href")
+                    ?: it.attr("$xlink:href")
+                    ?: error("cannot find $X_LINK_NS href")
+                role to href
+            }
             ?: error("$schemaFilename does not define linkbaseRef")
 
         presentationLinkbaseRef = linkbaseRefs["http://www.xbrl.org/2003/role/presentationLinkbaseRef"] ?: error("...")

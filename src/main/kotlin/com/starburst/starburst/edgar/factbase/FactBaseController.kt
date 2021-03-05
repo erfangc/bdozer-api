@@ -6,6 +6,7 @@ import com.starburst.starburst.edgar.factbase.ingestor.FilingIngestor
 import com.starburst.starburst.edgar.factbase.modelbuilder.ModelBuilder
 import com.starburst.starburst.models.Model
 import org.springframework.web.bind.annotation.*
+import java.util.concurrent.Executors
 
 @RestController
 @RequestMapping("api/fact-base")
@@ -15,6 +16,8 @@ class FactBaseController(
     private val filingIngestor: FilingIngestor,
     private val modelBuilder: ModelBuilder
 ) {
+
+    private val executor = Executors.newCachedThreadPool()
 
     @GetMapping("{cik}/latest-non-dimensional-facts")
     fun latestNonDimensionalFacts(@PathVariable cik: String): Map<String, Fact> {
@@ -30,8 +33,10 @@ class FactBaseController(
     fun ingestFiling(
         @RequestParam cik: String,
         @RequestParam adsh: String
-    ): FilingIngestionResponse {
-        return filingIngestor.ingestFiling(cik, adsh)
+    ) {
+        executor.execute {
+            filingIngestor.ingestFiling(cik, adsh)
+        }
     }
 
     @GetMapping("model-builder/{cik}/{adsh}")

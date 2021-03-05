@@ -98,9 +98,11 @@ class FilingParser(private val filingProvider: FilingProvider) {
                         lastUpdated = Instant.now().toString(),
                     )
                 } else {
+                    log.error("Unable to find an element definition for ${node.nodeName} cik=${filingProvider.cik()} adsh=${filingProvider.adsh()}")
                     null
                 }
             } else {
+                // skipping the node b/c it is irrelevant
                 null
             }
         }

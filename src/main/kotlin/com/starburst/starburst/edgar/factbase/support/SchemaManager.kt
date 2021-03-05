@@ -8,6 +8,7 @@ import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.toList
 import org.apache.http.impl.client.HttpClientBuilder
+import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import java.net.URI
 
@@ -26,6 +27,10 @@ import java.net.URI
  */
 class SchemaManager(filingProvider: FilingProvider) {
 
+    companion object {
+        const val XSD_NS = "http://www.w3.org/2001/XMLSchema"
+    }
+
     // TODO externalize this potentially
     private val http = HttpClientBuilder.create().build()
     private val elementDefinitionsByLongNamespace = mutableMapOf<String, Map<String, ElementDefinition>>()
@@ -34,7 +39,7 @@ class SchemaManager(filingProvider: FilingProvider) {
     private val linksVisited = hashSetOf<String>()
     private val schema = filingProvider.schema()
     private val schemaFileName = filingProvider.schemaExtensionFilename()
-    private val prefix = schema.getShortNamespace("http://www.w3.org/2001/XMLSchema")
+    private val prefix = schema.getShortNamespace(XSD_NS)?.let { "$it:" } ?: ""
 
     init {
         /*
@@ -65,9 +70,8 @@ class SchemaManager(filingProvider: FilingProvider) {
         namespace: String,
         schemaLocation: String
     ): Map<String, ElementDefinition> {
-        val xsd = schema.getShortNamespace("http://www.w3.org/2001/XMLSchema")
         val newlyLoadedElementDefinitions = schema
-            .getElementsByTagName("${xsd}element")
+            .getElementsByTag(XSD_NS, "element")
             .associateByElementName(namespace)
 
         linksVisited.add(schemaLocation)
@@ -99,7 +103,7 @@ class SchemaManager(filingProvider: FilingProvider) {
         return elementDefinitionsByHref[href]
     }
 
-    private fun NodeList.associateByElementName(longNamespace: String): Map<String, ElementDefinition> {
+    private fun List<Node>.associateByElementName(longNamespace: String): Map<String, ElementDefinition> {
         return this
             .toList()
             .map {

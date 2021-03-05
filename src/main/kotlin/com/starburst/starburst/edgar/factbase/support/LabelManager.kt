@@ -8,9 +8,13 @@ import java.net.URI
 
 class LabelManager(filingProvider: FilingProvider) {
 
+    companion object {
+        const val LINK_BASE_NS = "http://www.xbrl.org/2003/linkbase"
+    }
+
     private val labelElement = filingProvider.labelLinkbase()
 
-    private val link = labelElement.getShortNamespace("http://www.xbrl.org/2003/linkbase")
+    private val link = labelElement.getShortNamespace(LINK_BASE_NS)?.let { "$it:" } ?: ""
     private val node = labelElement.getElementByTag("${link}labelLink") ?: error("...")
 
     // we have loc = locators, label (which is what we want) and labelArc
