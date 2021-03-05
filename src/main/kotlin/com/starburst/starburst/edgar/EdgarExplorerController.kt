@@ -106,16 +106,20 @@ class EdgarExplorerController(
         val recent10Ks = tenKs.first()
         val recent10Qs = tenQs.subList(0, 4)
 
-        executor.submit {
-            filingIngestor.ingestFiling(
-                cik = cik,
-                adsh = recent10Ks.adsh
-            )
-            for (recent10Q in recent10Qs) {
+        executor.execute {
+            try {
                 filingIngestor.ingestFiling(
                     cik = cik,
-                    adsh = recent10Q.adsh
+                    adsh = recent10Ks.adsh
                 )
+                for (recent10Q in recent10Qs) {
+                    filingIngestor.ingestFiling(
+                        cik = cik,
+                        adsh = recent10Q.adsh
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

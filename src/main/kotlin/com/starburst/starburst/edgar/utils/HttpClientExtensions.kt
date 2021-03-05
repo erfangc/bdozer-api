@@ -21,8 +21,8 @@ object HttpClientExtensions {
     }
 
     fun HttpClient.readXml(link: String): XmlElement {
-        val byteArray = this.readLink(link) ?: error("$link not found")
-        return XmlElement(XbrlUtils.readXml(byteArray.inputStream()))
+        val inputStream = this.readLink(link)?.inputStream() ?: error("$link not found")
+        return XmlElement(XbrlUtils.readXml(inputStream))
     }
 
 }

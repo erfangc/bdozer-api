@@ -40,7 +40,6 @@ class FilingParser(private val filingProvider: FilingProvider) {
         val instanceDocumentFilename = filingProvider.instanceDocumentFilename()
         log.info("Parsing instance document $instanceDocumentFilename")
 
-
         /*
         parse the context first - create the lookup map
         for context(s)

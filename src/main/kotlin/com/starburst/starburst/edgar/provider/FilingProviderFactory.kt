@@ -6,12 +6,16 @@ import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import org.apache.http.client.HttpClient
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class FilingProviderFactory(
     private val http: HttpClient
 ) {
+
+    private val log = LoggerFactory.getLogger(FilingProviderFactory::class.java)
+
     fun createFilingProvider(cik: String, adsh: String): FilingProvider {
         val normalizedAdsh = adsh.replace("-", "")
         val baseUrl = "https://www.sec.gov/Archives/edgar/data/$cik/$normalizedAdsh"
@@ -48,6 +52,7 @@ class FilingProviderFactory(
         } else {
             schemaFilename.split("\\.".toRegex(), 2).first() + ".xml"
         }
+
         val instanceDocument: XmlElement = http.readXml("$baseUrl/$instanceFilename")
         instanceHtmlFilename = instanceFileNode?.textContent ?: error("...")
 
