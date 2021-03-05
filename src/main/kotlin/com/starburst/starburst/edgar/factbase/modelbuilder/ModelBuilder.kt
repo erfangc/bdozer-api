@@ -37,15 +37,7 @@ class ModelBuilder(
             facts = factBase.allFactsForCik(cik = filingProvider.cik())
         )
     }
-
-    /**
-     * Build a [Model] using facts from [FactBase] and the calculationArcs
-     * defined by the latest filing for the provided [cik]
-     */
-    fun buildModelForLatestFiling(cik: String): Model {
-        TODO("not implemented")
-    }
-
+    
     /**
      * Build a [Model] using facts from [FactBase] and the calculationArcs
      * defined by a specific filing
@@ -67,7 +59,8 @@ class ModelBuilder(
         /*
         find the income statement calculation
          */
-        val incomeStatementRole = findIncomeStatementRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
+        val incomeStatementRole =
+            findIncomeStatementRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
         val incomeStatementItems =
             linkCalculationToItems(findLinkCalculationByRole(calculationLinks, incomeStatementRole), ctx)
 
@@ -75,7 +68,8 @@ class ModelBuilder(
         find the income statement calculation
          */
         val balanceSheetRole = findBalanceSheetRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
-        val balanceSheetItems = linkCalculationToItems(findLinkCalculationByRole(calculationLinks, balanceSheetRole), ctx)
+        val balanceSheetItems =
+            linkCalculationToItems(findLinkCalculationByRole(calculationLinks, balanceSheetRole), ctx)
 
         /*
         find the cash flow statement calculation
@@ -236,7 +230,10 @@ class ModelBuilder(
         }
     }
 
-    private fun historicalValues(elementDefinition: ElementDefinition, ctx: ModelBuilderContext): List<HistoricalValue> {
+    private fun historicalValues(
+        elementDefinition: ElementDefinition,
+        ctx: ModelBuilderContext
+    ): List<HistoricalValue> {
         val filteredFacts = ctx.facts
             .filter {
                 it.explicitMembers.isEmpty()

@@ -1,7 +1,6 @@
 package com.starburst.starburst.edgar.utils
 
 import com.starburst.starburst.edgar.XmlElement
-import com.starburst.starburst.edgar.dataclasses.XbrlUtils
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
 import org.slf4j.LoggerFactory

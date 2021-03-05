@@ -2,7 +2,7 @@ package com.starburst.starburst.edgar.factbase
 
 import com.starburst.starburst.edgar.XmlElement
 import com.starburst.starburst.edgar.provider.FilingProvider
-import com.starburst.starburst.edgar.dataclasses.XbrlUtils
+import com.starburst.starburst.edgar.utils.XbrlUtils
 import com.starburst.starburst.edgar.factbase.ingestor.FilingParser
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

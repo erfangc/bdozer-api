@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.dataclasses
+package com.starburst.starburst.edgar.utils
 
 import org.w3c.dom.Element
 import java.io.InputStream
