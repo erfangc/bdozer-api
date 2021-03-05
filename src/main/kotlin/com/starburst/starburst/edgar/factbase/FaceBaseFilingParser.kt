@@ -63,28 +63,41 @@ class FaceBaseFilingParser(private val filingProvider: FilingProvider) {
                 assemble the [Fact] from the relevant context and label links
                  */
                 val elementDefinition = lookupElementDefinition(node.nodeName)
-                val content = node.textContent
-                val labels = elementDefinition?.let { getLabels(it.id) }
-                val xbrlContext = getContext(node.attr("contextRef"))
 
-                Fact(
-                    _id = factIdGenerator.generateId(node, xbrlContext),
-                    cik = cik(instanceDocument),
-                    nodeName = node.nodeName,
-                    entityName = entityRegistrantName(instanceDocument),
-                    primarySymbol = primarySymbol(instanceDocument),
-                    symbols = symbols(instanceDocument),
-                    period = xbrlContext.period,
-                    explicitMembers = xbrlContext.entity.segment?.explicitMembers ?: emptyList(),
-                    sourceDocument = sourceDocument(node),
-                    label = labels?.label,
-                    labelTerse = labels?.terseLabel,
-                    verboseLabel = labels?.verboseLabel,
-                    stringValue = content,
-                    doubleValue = content.toDoubleOrNull(),
-                    lastUpdated = Instant.now().toString(),
-                    formType = "10-K" // TODO use FilingSummary to figure this out
-                )
+                if (elementDefinition != null) {
+                    val content = node.textContent
+                    val labels = getLabels(elementDefinition.id)
+                    val xbrlContext = getContext(node.attr("contextRef"))
+
+                    Fact(
+                        _id = factIdGenerator.generateId(node, xbrlContext),
+                        cik = cik(instanceDocument),
+                        entityName = entityRegistrantName(instanceDocument),
+                        primarySymbol = primarySymbol(instanceDocument),
+                        symbols = symbols(instanceDocument),
+                        formType = "10-K", // TODO use FilingSummary to figure this out
+
+                        nodeName = node.nodeName,
+                        rawNodeName = elementDefinition.name,
+                        longNamespace = elementDefinition.longNamespace,
+
+                        period = xbrlContext.period,
+                        explicitMembers = xbrlContext.entity.segment?.explicitMembers ?: emptyList(),
+
+                        sourceDocument = sourceDocument(node),
+
+                        label = labels.label,
+                        labelTerse = labels.terseLabel,
+                        verboseLabel = labels.verboseLabel,
+
+                        stringValue = content,
+                        doubleValue = content.toDoubleOrNull(),
+
+                        lastUpdated = Instant.now().toString(),
+                    )
+                } else {
+                    null
+                }
             } else {
                 null
             }

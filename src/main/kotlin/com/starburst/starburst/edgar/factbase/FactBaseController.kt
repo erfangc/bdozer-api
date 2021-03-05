@@ -10,18 +10,6 @@ class FactBaseController(
     private val factBase: FactBase
 ) {
 
-    /**
-     * Returns a list of facts matching the query
-     */
-    @GetMapping("{cik}")
-    fun queryFacts(
-        @PathVariable cik: String,
-        @RequestParam nodeName: String,
-        @RequestParam(required = false) dimension: String? = null
-    ): List<Fact> {
-        return factBase.queryFacts(cik, nodeName, dimension)
-    }
-
     @PostMapping("{cik}/{adsh}")
     fun parseAndUploadSingleFiling(
         @PathVariable cik: String,

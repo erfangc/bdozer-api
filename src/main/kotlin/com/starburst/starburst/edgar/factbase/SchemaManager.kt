@@ -9,8 +9,8 @@ import com.starburst.starburst.edgar.utils.HttpClientExtensions.readLink
 import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.toList
 import org.apache.http.impl.client.HttpClientBuilder
-import org.slf4j.LoggerFactory
 import org.w3c.dom.NodeList
+import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -20,7 +20,8 @@ import java.util.concurrent.ConcurrentHashMap
 class SchemaManager(filingProvider: FilingProvider) {
 
     private val schemas = ConcurrentHashMap<String, Map<String, ElementDefinition>>()
-    private val log = LoggerFactory.getLogger(SchemaManager::class.java)
+    private val lookupByHref = ConcurrentHashMap<String, ElementDefinition>()
+    private val linksVisited = hashSetOf<String>()
 
     // TODO externalize this potentially
     private val http = HttpClientBuilder.create().build()
@@ -28,30 +29,34 @@ class SchemaManager(filingProvider: FilingProvider) {
     init {
         val extensionSchema = filingProvider.schemaExtension()
         val targetNamespace = extensionSchema.targetNamespace() ?: error("...")
-        schemas[targetNamespace] = extensionSchema
+        val map = extensionSchema
             .getElementsByTagNameSafe("xs:element")
-            .associateByElementName(namespace = targetNamespace)
+            .associateByElementName(longNamespace = targetNamespace)
+        schemas[targetNamespace] = map
+        map.forEach { (_, value) ->
+            lookupByHref["${filingProvider.schemaExtensionFilename()}#${value.id}"] = value
+        }
     }
 
-    private fun loadGaapSchema(namespace: String): Map<String, ElementDefinition> {
-        val schema = schemas[namespace]
-        return if (schema == null) {
-            log.info("Retrieving US Gaap schema for $namespace")
-            val link = "http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd"
-            val newlyLoadedElement = XbrlUtils.readXml(
-                http.readLink(link)
-                    ?.inputStream()
-                    ?: error("Unable to download link $link")
-            )
-            // TODO actually retrieve the correct us-gaap schema document instead of this hard coded one
-            val map = newlyLoadedElement
-                .getElementsByTagNameSafe("xs:element")
-                .associateByElementName(namespace)
-            schemas[namespace] = map
-            map
-        } else {
-            schema
+    private fun loadRemoteSchema(link: String = "http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd"): Map<String, ElementDefinition> {
+        // TODO figure out the link of the XSD so we can properly populate it's href
+        val newlyLoadedElement = XbrlUtils.readXml(
+            http.readLink(link)
+                ?.inputStream()
+                ?: error("Unable to download link $link")
+        )
+
+        val longNamespace = newlyLoadedElement.targetNamespace()
+            ?: error("schema $link does not declare a targetNamespace")
+
+        val newlyLoadedElementDefinitions = newlyLoadedElement
+            .getElementsByTagNameSafe("xs:element")
+            .associateByElementName(longNamespace)
+        schemas[longNamespace] = newlyLoadedElementDefinitions
+        newlyLoadedElementDefinitions.forEach { (_, value) ->
+            lookupByHref["$link#${value.id}"] = value
         }
+        return newlyLoadedElementDefinitions
     }
 
     fun getElementDefinition(
@@ -59,12 +64,23 @@ class SchemaManager(filingProvider: FilingProvider) {
         tag: String
     ): ElementDefinition? {
         if (!schemas.contains(namespace)) {
-            loadGaapSchema(namespace)
+            loadRemoteSchema(namespace)
         }
         return schemas[namespace]?.get(tag)
     }
 
-    private fun NodeList.associateByElementName(namespace: String): Map<String, ElementDefinition> {
+    fun getElementDefinition(
+        href: String
+    ): ElementDefinition? {
+        val uri = URI(href)
+        val link = "${uri.scheme}://${uri.host}/${uri.path}"
+        if (linksVisited.contains(link)){
+         loadRemoteSchema(link)
+        }
+        return lookupByHref[href]
+    }
+
+    private fun NodeList.associateByElementName(longNamespace: String): Map<String, ElementDefinition> {
         return this
             .toList()
             .map {
@@ -73,7 +89,7 @@ class SchemaManager(filingProvider: FilingProvider) {
                 name to
                         ElementDefinition(
                             id = id,
-                            namespace = namespace,
+                            longNamespace = longNamespace,
                             name = name,
                             type = it.attributes.getNamedItem("type")?.textContent ?: "",
                             periodType = it.attributes.getNamedItem(":xbrli:periodType")?.textContent ?: "",
@@ -81,6 +97,5 @@ class SchemaManager(filingProvider: FilingProvider) {
             }
             .toMap()
     }
-
 
 }

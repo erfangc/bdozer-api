@@ -1,33 +1,27 @@
-package com.starburst.starburst.edgar.old
+package com.starburst.starburst.edgar.factbase
 
-import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.Model
-import com.starburst.starburst.edgar.dataclasses.XbrlUtils.readXml
+import com.starburst.starburst.edgar.dataclasses.ElementDefinition
+import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.utils.ElementExtension.getElementsByTagNameSafe
 import com.starburst.starburst.edgar.utils.NodeListExtension.toList
+import com.starburst.starburst.models.HistoricalValue
+import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.Model
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
-import java.io.InputStream
 import java.net.URI
 
-/**
- * This is the main class that handles translation of the XBRL file
- * in EDGAR filings into [Model] instances
- */
-class EDGARXbrlToModelTranslator(
-    usGaapXsdStream: InputStream,
-    instanceStream: InputStream,
-    extensionXsdStream: InputStream,
-    private val calculationStream: InputStream,
-    private val labelStream: InputStream,
-    private val definitionStream: InputStream,
+class FactBaseModelBuilder(
+    filingProvider: FilingProvider,
+    factBase: FactBase
 ) {
 
-    private val factFinder = FactFinder(instanceStream)
-    private val elementDefinitionFinder = ElementDefinitionFinder(gaapXsd = usGaapXsdStream, extXsd = extensionXsdStream)
+    private val calculationLinkbase = filingProvider.calculationLinkbase()
+    private val schemaManager = SchemaManager(filingProvider)
+    private val latestNondimensionalFacts = factBase.getLatestNonDimensionalFacts(cik = filingProvider.cik())
+    private val facts = factBase.getAllFactsForCik(cik = filingProvider.cik())
 
-    fun translate(): Model {
-
+    fun buildModel(): Model {
         /*
         high levels overview
          */
@@ -38,38 +32,40 @@ class EDGARXbrlToModelTranslator(
         everything else serves as a reference (including "XBRL facts" such as actual historical values)
         to the business logic expressed within this page
          */
-        val root = readXml(calculationStream)
-        val calculationLinks = root.getElementsByTagNameSafe("link:calculationLink")
+        val calculationLinks = calculationLinkbase.getElementsByTagNameSafe("link:calculationLink")
 
         /*
         find the income statement calculation
          */
-        val incomeStatementRole = findIncomeStatementRole(root.getElementsByTagNameSafe("link:roleRef"))
+        val incomeStatementRole = findIncomeStatementRole(calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
         val incomeStatementItems =
             linkCalculationToItems(findLinkCalculationByRole(calculationLinks, incomeStatementRole))
 
         /*
         find the income statement calculation
          */
-        val balanceSheetRole = findBalanceSheetRole(root.getElementsByTagNameSafe("link:roleRef"))
+        val balanceSheetRole = findBalanceSheetRole(calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
         val balanceSheetItems = linkCalculationToItems(findLinkCalculationByRole(calculationLinks, balanceSheetRole))
 
         /*
         find the cash flow statement calculation
          */
-        val cashFlowStatementRole = findCashFlowStatementRole(root.getElementsByTagNameSafe("link:roleRef"))
-        val cashFlowStatementItems = linkCalculationToItems(findLinkCalculationByRole(calculationLinks, cashFlowStatementRole))
+        val cashFlowStatementRole =
+            findCashFlowStatementRole(calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
+        val cashFlowStatementItems =
+            linkCalculationToItems(findLinkCalculationByRole(calculationLinks, cashFlowStatementRole))
 
         /*
         as we encounter "location"s we create placeholder for them as Item(s)
         their historical values are resolved via look up against the Instance document
         labels are resolved via the label document
          */
-        val name = factFinder.getString("EntityRegistrantName", "dei")
-        val symbol = factFinder.getString("TradingSymbol", "dei")
+        val name = latestNondimensionalFacts["dei:EntityRegistrantName"]
+        val symbol = latestNondimensionalFacts["dei:TradingSymbol"]
+
         return Model(
-            name = name ?: "",
-            symbol = symbol ?: "",
+            name = name?.stringValue ?: "",
+            symbol = symbol?.stringValue ?: "",
             tags = emptyList(),
             incomeStatementItems = incomeStatementItems,
             balanceSheetItems = balanceSheetItems,
@@ -77,6 +73,7 @@ class EDGARXbrlToModelTranslator(
             otherItems = emptyList(),
         )
     }
+
 
     private fun findCashFlowStatementRole(nodes: NodeList): String {
         return nodes.toList().first {
@@ -88,7 +85,7 @@ class EDGARXbrlToModelTranslator(
                 .toLowerCase()
             (last.contains("statement") || last.contains("consolidated"))
                     && (
-                        (last.contains("cash") && last.contains("flow"))
+                    (last.contains("cash") && last.contains("flow"))
                     )
 
         }.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find balance sheet role")
@@ -102,10 +99,9 @@ class EDGARXbrlToModelTranslator(
                 .split("/")
                 .last()
                 .toLowerCase()
-
             (last.contains("statement") || last.contains("consolidated"))
                     && (
-                        (last.contains("balance") && last.contains("sheet"))
+                    (last.contains("balance") && last.contains("sheet"))
                             || (last.contains("financial") && last.contains("condition"))
                     )
         }?.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find balance sheet role")
@@ -119,7 +115,6 @@ class EDGARXbrlToModelTranslator(
                 .split("/")
                 .last()
                 .toLowerCase()
-
             (last.contains("statement") || last.contains("consolidated"))
                     && (
                     last.contains("earning")
@@ -162,18 +157,23 @@ class EDGARXbrlToModelTranslator(
             //
             // the fragment is actually the id to look up by
             //
-            val fragment = URI(href).fragment
-            val elementDefinition = elementDefinitionFinder.lookupElementDefinition(fragment)
-            val name = elementDefinition.name
+            val elementDefinition = schemaManager.getElementDefinition(href)
+            val name = elementDefinition?.name ?: error("Unable to find element definition name for $href")
 
             //
             // populate the historical value of the item
             //
-            val historicalValue = factFinder.get(name, elementDefinition.longNamespace)
+            val historicalValue = latestHistoricalValue(elementDefinition)
+
+            //
+            // populate all historical values
+            //
+            val historicalValues = historicalValues(elementDefinition)
 
             Item(
                 name = name,
                 historicalValue = historicalValue ?: 0.0,
+                historicalValues = historicalValues,
                 expression = calculationArcLookup[locLabel]
                     ?.joinToString("+") { node ->
                         val to = node.attributes.getNamedItem("xlink:to").textContent
@@ -184,9 +184,8 @@ class EDGARXbrlToModelTranslator(
                             ?: error("cannot find loc for $to")
 
                         // the fragment is actually the id to look up by
-                        val elementName = elementDefinitionFinder
-                            .lookupElementDefinition(URI(toHref).fragment)
-                            .name
+                        val elementName = (schemaManager.getElementDefinition(toHref)
+                            ?: error("unable to find a schema definition for $toHref")).name
 
                         // we must look up the element definition to get it's name in the instance file
                         val weight = node.attributes.getNamedItem("weight").textContent
@@ -207,5 +206,30 @@ class EDGARXbrlToModelTranslator(
         }
     }
 
+    private fun historicalValues(elementDefinition: ElementDefinition): List<HistoricalValue> {
+        val filteredFacts = facts
+            .filter {
+                it.explicitMembers.isEmpty()
+                        && elementDefinition.name == it.rawNodeName
+                        && it.formType == "10-K" // TODO decide this based on some intelligence
+            }
 
+        //
+        // now decide what is more relevant: Rolling LTM or Rolling YoY or Quarterly
+        //
+        return filteredFacts.map { fact ->
+            HistoricalValue(
+                factId = fact._id,
+                value = fact.doubleValue,
+                startDate = fact.period.startDate?.toString(),
+                endDate = fact.period.endDate?.toString(),
+                instant = fact.period.instant?.toString()
+            )
+        }
+    }
+
+    private fun latestHistoricalValue(elementDefinition: ElementDefinition): Double? {
+        val nodeName = elementDefinition.name
+        return latestNondimensionalFacts[nodeName]?.doubleValue
+    }
 }

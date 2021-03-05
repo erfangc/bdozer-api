@@ -5,11 +5,13 @@ import com.mongodb.client.MongoClient
 import com.starburst.starburst.edgar.dataclasses.Fact
 import com.starburst.starburst.edgar.provider.FilingProviderImpl
 import org.apache.http.client.HttpClient
+import org.litote.kmongo.and
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.concurrent.Executors
 
 @Service
@@ -26,18 +28,45 @@ class FactBase(
     private val executor = Executors.newCachedThreadPool()
 
     /**
-     * Returns a list of facts matching the query
+     *
      */
-    fun queryFacts(
-        cik: String,
-        nodeName: String,
-        dimension: String? = null
+    fun searchFacts(
+        term: String,
+        cik: String? = null,
+        dimension: String? = null,
+        formType: String? = null
     ): List<Fact> {
-        return col.find(Fact::nodeName eq nodeName).filter { fact ->
-            fact.explicitMembers.any { it.dimension == dimension } || dimension == null
-        }.toList()
+        TODO()
     }
 
+    /**
+     * Query the latest non-dimensional facts
+     */
+    fun getLatestNonDimensionalFacts(cik: String): Map<String, Fact> {
+        val byPeriod = col.find(Fact::cik eq cik).groupBy { it.period }
+        // latest duration
+        val latestDuration = byPeriod.entries.maxByOrNull { it.key.endDate ?: LocalDate.MIN }?.value ?: emptyList()
+
+        // latest instant
+        val latestInstant = byPeriod.entries.maxByOrNull { it.key.instant ?: LocalDate.MIN }?.value ?: emptyList()
+
+        return (latestDuration + latestInstant).filter { it.explicitMembers.isEmpty() }.associateBy { it.nodeName }
+    }
+
+    /**
+     * Query all the facts (across dimension and time) for a given entity
+     * designated by the CIK
+     */
+    fun getAllFactsForCik(cik: String): List<Fact> {
+        return col.find(
+            Fact::cik eq cik
+        ).toList()
+    }
+
+    /**
+     * Parse and save to database a given SEC EDGAR filing's XBRL files
+     * given the CIK and ADSH
+     */
     fun parseAndUploadSingleFiling(
         cik: String,
         adsh: String

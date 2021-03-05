@@ -22,7 +22,7 @@ class ElementDefinitionFinder(gaapXsd: InputStream, extXsd: InputStream) {
                 id to
                         ElementDefinition(
                             id = id,
-                            namespace = namespace,
+                            longNamespace = namespace,
                             name = it.attributes.getNamedItem("name").textContent,
                             type = it.attributes.getNamedItem("type")?.textContent ?: "",
                             periodType = it.attributes.getNamedItem(":xbrli:periodType")?.textContent ?: "",
