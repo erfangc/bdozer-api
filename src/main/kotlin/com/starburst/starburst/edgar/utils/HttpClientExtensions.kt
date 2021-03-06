@@ -1,5 +1,8 @@
 package com.starburst.starburst.edgar.utils
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.starburst.starburst.edgar.XmlElement
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
@@ -22,6 +25,16 @@ object HttpClientExtensions {
     fun HttpClient.readXml(link: String): XmlElement {
         val inputStream = this.readLink(link)?.inputStream() ?: error("$link not found")
         return XmlElement(XbrlUtils.readXml(inputStream))
+    }
+
+    inline fun <reified T> HttpClient.readEntity(link: String): T {
+        val objectMapper = jacksonObjectMapper()
+            .configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true)
+        val get = HttpGet(link)
+        val execute = this.execute(get)
+        val ret = objectMapper.readValue<T>(execute.entity.content)
+        get.releaseConnection()
+        return ret
     }
 
 }

@@ -1,0 +1,100 @@
+package com.starburst.starburst.edgar.factbase.filingentity
+
+import com.mongodb.client.MongoClient
+import com.starburst.starburst.edgar.bootstrapper.FilingEntityBootstrapper
+import com.starburst.starburst.edgar.factbase.filingentity.dataclasses.Address
+import com.starburst.starburst.edgar.factbase.filingentity.dataclasses.FilingEntity
+import com.starburst.starburst.edgar.factbase.filingentity.internal.SECEntity
+import com.starburst.starburst.edgar.utils.HttpClientExtensions.readEntity
+import org.apache.http.client.HttpClient
+import org.litote.kmongo.findOneById
+import org.litote.kmongo.getCollection
+import org.litote.kmongo.save
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import java.time.Instant
+import java.util.concurrent.Executors
+
+@Service
+class FilingEntityManager(
+    mongoClient: MongoClient,
+    private val bootstrapper: FilingEntityBootstrapper,
+    private val httpClient: HttpClient
+) {
+
+    private val log = LoggerFactory.getLogger(FilingEntityManager::class.java)
+    private val executor = Executors.newCachedThreadPool()
+    private val col = mongoClient
+        .getDatabase("starburst")
+        .getCollection<FilingEntity>()
+
+    fun getFilingEntity(cik: String): FilingEntity {
+        val savedEntity = col.findOneById(cik)
+        return savedEntity ?: // initiate the sequence of actions to build this entity
+        bootstrapNewFilingEntity(cik)
+    }
+
+    private fun bootstrapNewFilingEntity(cik: String): FilingEntity {
+
+        val paddedCik = (0 until (10 - cik.length)).joinToString("") { "0" } + cik
+        val secEntity = httpClient.readEntity<SECEntity>("https://data.sec.gov/submissions/CIK$paddedCik.json")
+
+        val entity = FilingEntity(
+            _id = cik,
+            cik = secEntity.cik,
+            entityType = secEntity.entityType,
+            sic = secEntity.sic,
+            sicDescription = secEntity.sicDescription,
+            insiderTransactionForOwnerExists = secEntity.insiderTransactionForOwnerExists,
+            insiderTransactionForIssuerExists = secEntity.insiderTransactionForIssuerExists,
+            name = secEntity.name ?: "Unknown",
+            tickers = secEntity.tickers,
+            exchanges = secEntity.exchanges,
+
+            ein = secEntity.ein,
+            description = secEntity.description,
+            website = secEntity.website,
+            investorWebsite = secEntity.investorWebsite,
+            category = secEntity.category,
+            fiscalYearEnd = secEntity.fiscalYearEnd,
+            stateOfIncorporation = secEntity.stateOfIncorporation,
+            stateOfIncorporationDescription = secEntity.stateOfIncorporationDescription,
+            businessAddress = Address(
+                street1 = secEntity.addresses?.business?.street1,
+                street2 = secEntity.addresses?.business?.street2,
+                city = secEntity.addresses?.business?.city,
+                stateOrCountry = secEntity.addresses?.business?.stateOrCountry,
+                zipCode = secEntity.addresses?.business?.zipCode,
+                stateOrCountryDescription = secEntity.addresses?.business?.stateOrCountryDescription,
+            ),
+            phone = secEntity.phone,
+
+            lastUpdated = Instant.now().toString(),
+            statusMessage = "Analysis for this entity is underway, we are parsing the internet for data",
+        )
+
+        col.save(entity)
+
+        executor.execute {
+
+            try {
+                bootstrapper.bootstrapFilingEntity(cik)
+                val model = bootstrapper.buildModelWithLatest10K(cik)
+
+                val updated = entity.copy(
+                    proFormaModel = model,
+                    lastUpdated = Instant.now().toString(),
+                    statusMessage = "Completed"
+                )
+                col.save(updated)
+
+                log.error("Completed bootstrapping and initial model building cik=${entity.cik}")
+            } catch (e: Exception) {
+                log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}")
+            }
+        }
+
+        return entity
+    }
+}
+

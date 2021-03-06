@@ -28,16 +28,6 @@ class ModelBuilder(
         val facts: List<Fact>
     )
 
-    private fun buildCtx(cik: String, adsh: String): ModelBuilderContext {
-        val filingProvider = filingProviderFactory.createFilingProvider(cik, adsh)
-        return ModelBuilderContext(
-            calculationLinkbase = filingProvider.calculationLinkbase(),
-            schemaManager = SchemaManager(filingProvider),
-            latestNonDimensionalFacts = factBase.latestNonDimensionalFacts(cik = filingProvider.cik()),
-            facts = factBase.allFactsForCik(cik = filingProvider.cik())
-        )
-    }
-    
     /**
      * Build a [Model] using facts from [FactBase] and the calculationArcs
      * defined by a specific filing
@@ -46,7 +36,7 @@ class ModelBuilder(
         /*
         high levels overview
          */
-        val ctx = buildCtx(cik, adsh)
+        val ctx = buildContext(cik, adsh)
 
         /*
         step 1 - start with the calculation XML since
@@ -98,7 +88,6 @@ class ModelBuilder(
         )
     }
 
-
     private fun findCashFlowStatementRole(nodes: NodeList): String {
         return nodes.toList().first {
             val roleURI = it.attributes.getNamedItem("roleURI").textContent
@@ -113,6 +102,17 @@ class ModelBuilder(
                     )
 
         }.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find balance sheet role")
+    }
+
+
+    private fun buildContext(cik: String, adsh: String): ModelBuilderContext {
+        val filingProvider = filingProviderFactory.createFilingProvider(cik, adsh)
+        return ModelBuilderContext(
+            calculationLinkbase = filingProvider.calculationLinkbase(),
+            schemaManager = SchemaManager(filingProvider),
+            latestNonDimensionalFacts = factBase.latestNonDimensionalFacts(cik = filingProvider.cik()),
+            facts = factBase.allFactsForCik(cik = filingProvider.cik())
+        )
     }
 
     private fun findBalanceSheetRole(nodes: NodeList?): String {
