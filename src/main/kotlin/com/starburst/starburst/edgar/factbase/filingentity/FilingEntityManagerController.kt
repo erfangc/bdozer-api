@@ -13,9 +13,14 @@ class FilingEntityManagerController(private val filingEntityManager: FilingEntit
         return filingEntityManager.getFilingEntity(cik)
     }
 
-    @GetMapping("{cik}/model-with-latest-10-k")
-    fun buildModelWithLatest10K(@PathVariable cik: String): Model {
-        return filingEntityManager.modelWithLatest10K(cik)
+    @GetMapping("{cik}/view-latest-10k-model")
+    fun viewLatest10kModel(@PathVariable cik: String): Model {
+        return filingEntityManager.viewLatest10kModel(cik)
+    }
+
+    @PostMapping("{cik}/rerun-model")
+    fun rerunModel(@PathVariable cik: String): Model {
+        return filingEntityManager.rerunModel(cik)
     }
 }
 

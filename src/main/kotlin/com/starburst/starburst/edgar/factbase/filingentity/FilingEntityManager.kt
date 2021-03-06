@@ -39,6 +39,22 @@ class FilingEntityManager(
         bootstrapNewFilingEntity(cik)
     }
 
+    fun viewLatest10kModel(cik: String): Model {
+        val adsh = edgarExplorer
+            .searchFilings(cik)
+            .sortedByDescending { it.period_ending }
+            .find { it.form == "10-K" }
+            ?.adsh ?: error("no 10-K filings found for $cik")
+        return modelBuilder.buildModelForFiling(cik, adsh)
+    }
+
+    fun rerunModel(cik: String): Model {
+        val entity = getFilingEntity(cik)
+        val model = viewLatest10kModel(cik)
+        col.save(entity.copy(proFormaModel = model))
+        return model
+    }
+
     private fun bootstrapNewFilingEntity(cik: String): FilingEntity {
 
         val paddedCik = (0 until (10 - cik.length)).joinToString("") { "0" } + cik
@@ -84,7 +100,7 @@ class FilingEntityManager(
 
             try {
                 bootstrapper.bootstrapFilingEntity(cik)
-                val model = modelWithLatest10K(cik)
+                val model = viewLatest10kModel(cik)
 
                 val updated = entity.copy(
                     proFormaModel = model,
@@ -100,16 +116,6 @@ class FilingEntityManager(
         }
 
         return entity
-    }
-
-
-    fun modelWithLatest10K(cik: String): Model {
-        val adsh = edgarExplorer
-            .searchFilings(cik)
-            .sortedByDescending { it.period_ending }
-            .find { it.form == "10-K" }
-            ?.adsh ?: error("no 10-K filings found for $cik")
-        return modelBuilder.buildModelForFiling(cik, adsh)
     }
 }
 
