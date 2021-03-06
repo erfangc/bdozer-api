@@ -1,6 +1,5 @@
 package com.starburst.starburst.edgar.bootstrapper
 
-import com.starburst.starburst.models.Model
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.Executors
 
@@ -12,6 +11,7 @@ class FilingEntityBootstrapperController(
 ) {
 
     private val executor = Executors.newCachedThreadPool()
+
     @PostMapping
     fun bootstrapFilingEntity(@RequestParam cik: String) {
         executor.execute {
@@ -19,8 +19,4 @@ class FilingEntityBootstrapperController(
         }
     }
 
-    @PostMapping("build-model-with-latest-10-k")
-    fun buildModelWithLatest10K(@RequestParam cik: String): Model {
-        return filingEntityBootstrapper.buildModelWithLatest10K(cik)
-    }
 }

@@ -74,8 +74,8 @@ class ModelBuilder(
         their historical values are resolved via look up against the Instance document
         labels are resolved via the label document
          */
-        val name = ctx.latestNonDimensionalFacts["dei:EntityRegistrantName"]
-        val symbol = ctx.latestNonDimensionalFacts["dei:TradingSymbol"]
+        val name = ctx.latestNonDimensionalFacts["EntityRegistrantName"]
+        val symbol = ctx.latestNonDimensionalFacts["TradingSymbol"]
 
         return Model(
             name = name?.stringValue ?: "",
@@ -187,7 +187,7 @@ class ModelBuilder(
             //
             // populate the historical value of the item
             //
-            val historicalValue = latestHistoricalValue(elementDefinition, ctx)
+            val latestHistoricalFact = latestHistoricalValue(elementDefinition, ctx)
 
             //
             // populate all historical values
@@ -196,7 +196,8 @@ class ModelBuilder(
 
             Item(
                 name = name,
-                historicalValue = historicalValue ?: 0.0,
+                description = latestHistoricalFact?.labelTerse,
+                historicalValue = latestHistoricalFact?.doubleValue ?: 0.0,
                 historicalValues = historicalValues,
                 expression = calculationArcLookup[locLabel]
                     ?.joinToString("+") { node ->
@@ -255,8 +256,8 @@ class ModelBuilder(
         }
     }
 
-    private fun latestHistoricalValue(elementDefinition: ElementDefinition, ctx: ModelBuilderContext): Double? {
+    private fun latestHistoricalValue(elementDefinition: ElementDefinition, ctx: ModelBuilderContext): Fact? {
         val nodeName = elementDefinition.name
-        return ctx.latestNonDimensionalFacts[nodeName]?.doubleValue
+        return ctx.latestNonDimensionalFacts[nodeName]
     }
 }

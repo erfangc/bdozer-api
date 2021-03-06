@@ -18,7 +18,9 @@ class FactBase(mongoClient: MongoClient) {
      * Query the latest non-dimensional facts
      */
     fun latestNonDimensionalFacts(cik: String): Map<String, Fact> {
-        val factsByPeriod = col.find(Fact::cik eq cik).groupBy { it.period }
+        val factsByPeriod = col.find(Fact::cik eq cik).filter {
+            it.explicitMembers.isEmpty()
+        }.groupBy { it.period }
 
         // latest duration
         val latestDuration = factsByPeriod.entries.maxByOrNull { it.key.endDate ?: LocalDate.MIN }?.value ?: emptyList()
@@ -27,7 +29,6 @@ class FactBase(mongoClient: MongoClient) {
         val latestInstant = factsByPeriod.entries.maxByOrNull { it.key.instant ?: LocalDate.MIN }?.value ?: emptyList()
 
         return (latestDuration + latestInstant)
-            .filter { it.explicitMembers.isEmpty() }
             .associateBy { it.elementName }
     }
 

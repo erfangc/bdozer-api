@@ -11,20 +11,10 @@ import java.util.concurrent.Executors
 @Service
 class FilingEntityBootstrapper(
     private val filingIngestor: FilingIngestor,
-    private val edgarExplorer: EdgarExplorer,
-    private val modelBuilder: ModelBuilder
+    private val edgarExplorer: EdgarExplorer
 ) {
 
     private val log = LoggerFactory.getLogger(FilingEntityBootstrapper::class.java)
-
-    fun buildModelWithLatest10K(cik: String): Model {
-        val adsh = edgarExplorer
-            .searchFilings(cik)
-            .sortedByDescending { it.period_ending }
-            .find { it.form == "10-K" }
-            ?.adsh ?: error("no 10-K filings found for $cik")
-        return modelBuilder.buildModelForFiling(cik, adsh)
-    }
 
     fun bootstrapFilingEntity(cik: String) {
         //

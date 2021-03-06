@@ -2,10 +2,13 @@ package com.starburst.starburst.edgar.factbase.filingentity
 
 import com.mongodb.client.MongoClient
 import com.starburst.starburst.edgar.bootstrapper.FilingEntityBootstrapper
+import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.filingentity.dataclasses.Address
 import com.starburst.starburst.edgar.factbase.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.edgar.factbase.filingentity.internal.SECEntity
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelBuilder
 import com.starburst.starburst.edgar.utils.HttpClientExtensions.readEntity
+import com.starburst.starburst.models.Model
 import org.apache.http.client.HttpClient
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
@@ -19,7 +22,9 @@ import java.util.concurrent.Executors
 class FilingEntityManager(
     mongoClient: MongoClient,
     private val bootstrapper: FilingEntityBootstrapper,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val modelBuilder: ModelBuilder,
+    private val edgarExplorer: EdgarExplorer
 ) {
 
     private val log = LoggerFactory.getLogger(FilingEntityManager::class.java)
@@ -79,7 +84,7 @@ class FilingEntityManager(
 
             try {
                 bootstrapper.bootstrapFilingEntity(cik)
-                val model = bootstrapper.buildModelWithLatest10K(cik)
+                val model = modelWithLatest10K(cik)
 
                 val updated = entity.copy(
                     proFormaModel = model,
@@ -95,6 +100,16 @@ class FilingEntityManager(
         }
 
         return entity
+    }
+
+
+    fun modelWithLatest10K(cik: String): Model {
+        val adsh = edgarExplorer
+            .searchFilings(cik)
+            .sortedByDescending { it.period_ending }
+            .find { it.form == "10-K" }
+            ?.adsh ?: error("no 10-K filings found for $cik")
+        return modelBuilder.buildModelForFiling(cik, adsh)
     }
 }
 
