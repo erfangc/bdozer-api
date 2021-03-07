@@ -28,12 +28,6 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>pl.zankowski</groupId>
-			<artifactId>iextrading4j-all</artifactId>
-			<version>${iextrading4j-all.version}</version>
-		</dependency>
-
 		<!--	guava	-->
 		<dependency>
 			<groupId>com.google.guava</groupId>
