@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.filingentity.internal
+package com.starburst.starburst.edgar.filingentity.internal
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 

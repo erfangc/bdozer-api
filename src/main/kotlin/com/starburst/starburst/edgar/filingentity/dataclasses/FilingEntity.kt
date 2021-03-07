@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.filingentity.dataclasses
+package com.starburst.starburst.edgar.filingentity.dataclasses
 
 import com.starburst.starburst.models.Model
 

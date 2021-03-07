@@ -1,6 +1,6 @@
-package com.starburst.starburst.edgar.factbase.filingentity
+package com.starburst.starburst.edgar.filingentity
 
-import com.starburst.starburst.edgar.factbase.filingentity.dataclasses.FilingEntity
+import com.starburst.starburst.edgar.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.models.Model
 import org.springframework.web.bind.annotation.*
 
@@ -21,6 +21,11 @@ class FilingEntityManagerController(private val filingEntityManager: FilingEntit
     @PostMapping("{cik}/rerun-model")
     fun rerunModel(@PathVariable cik: String): Model {
         return filingEntityManager.rerunModel(cik)
+    }
+
+    @PostMapping("{cik}")
+    fun bootstrapFilingEntity(@PathVariable cik: String): FilingEntity {
+        return filingEntityManager.bootstrapFilingEntity(cik)
     }
 }
 

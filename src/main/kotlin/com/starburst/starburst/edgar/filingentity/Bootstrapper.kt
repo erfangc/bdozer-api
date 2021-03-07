@@ -1,20 +1,17 @@
-package com.starburst.starburst.edgar.bootstrapper
+package com.starburst.starburst.edgar.filingentity
 
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.ingestor.FilingIngestor
-import com.starburst.starburst.edgar.factbase.modelbuilder.ModelBuilder
-import com.starburst.starburst.models.Model
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.concurrent.Executors
 
 @Service
-class FilingEntityBootstrapper(
+class Bootstrapper(
     private val filingIngestor: FilingIngestor,
     private val edgarExplorer: EdgarExplorer
 ) {
 
-    private val log = LoggerFactory.getLogger(FilingEntityBootstrapper::class.java)
+    private val log = LoggerFactory.getLogger(Bootstrapper::class.java)
 
     fun bootstrapFilingEntity(cik: String) {
         //

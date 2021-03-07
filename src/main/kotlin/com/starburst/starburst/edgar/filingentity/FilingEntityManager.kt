@@ -1,11 +1,10 @@
-package com.starburst.starburst.edgar.factbase.filingentity
+package com.starburst.starburst.edgar.filingentity
 
 import com.mongodb.client.MongoClient
-import com.starburst.starburst.edgar.bootstrapper.FilingEntityBootstrapper
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
-import com.starburst.starburst.edgar.factbase.filingentity.dataclasses.Address
-import com.starburst.starburst.edgar.factbase.filingentity.dataclasses.FilingEntity
-import com.starburst.starburst.edgar.factbase.filingentity.internal.SECEntity
+import com.starburst.starburst.edgar.filingentity.dataclasses.Address
+import com.starburst.starburst.edgar.filingentity.dataclasses.FilingEntity
+import com.starburst.starburst.edgar.filingentity.internal.SECEntity
 import com.starburst.starburst.edgar.factbase.modelbuilder.ModelBuilder
 import com.starburst.starburst.edgar.utils.HttpClientExtensions.readEntity
 import com.starburst.starburst.models.Model
@@ -21,7 +20,7 @@ import java.util.concurrent.Executors
 @Service
 class FilingEntityManager(
     mongoClient: MongoClient,
-    private val bootstrapper: FilingEntityBootstrapper,
+    private val bootstrapper: Bootstrapper,
     private val httpClient: HttpClient,
     private val modelBuilder: ModelBuilder,
     private val edgarExplorer: EdgarExplorer
@@ -36,7 +35,7 @@ class FilingEntityManager(
     fun getFilingEntity(cik: String): FilingEntity {
         val savedEntity = col.findOneById(cik)
         return savedEntity ?: // initiate the sequence of actions to build this entity
-        bootstrapNewFilingEntity(cik)
+        bootstrapFilingEntity(cik)
     }
 
     fun viewLatest10kModel(cik: String): Model {
@@ -55,7 +54,7 @@ class FilingEntityManager(
         return model
     }
 
-    private fun bootstrapNewFilingEntity(cik: String): FilingEntity {
+    fun bootstrapFilingEntity(cik: String): FilingEntity {
 
         val paddedCik = (0 until (10 - cik.length)).joinToString("") { "0" } + cik
         val secEntity = httpClient.readEntity<SECEntity>("https://data.sec.gov/submissions/CIK$paddedCik.json")

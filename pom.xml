@@ -2,40 +2,57 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.4.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.starburst</groupId>
 	<artifactId>starburst</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>starburst</name>
-	<description>DCF generator server</description>
+
 	<properties>
 		<kotlin.version>1.4.21</kotlin.version>
 		<jwks-rsa.version>0.15.0</jwks-rsa.version>
 		<java-jwt.version>3.13.0</java-jwt.version>
+		<guava.version>30.0-jre</guava.version>
+		<json.version>20201115</json.version>
+		<httpclient.version>4.5.12</httpclient.version>
+		<kmongo.version>4.2.4</kmongo.version>
+		<MathParser.org-mXparser.version>4.4.2</MathParser.org-mXparser.version>
+		<iextrading4j-all.version>3.4.2</iextrading4j-all.version>
 	</properties>
+
 	<dependencies>
+		<dependency>
+			<groupId>pl.zankowski</groupId>
+			<artifactId>iextrading4j-all</artifactId>
+			<version>${iextrading4j-all.version}</version>
+		</dependency>
+
 		<!--	guava	-->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>30.0-jre</version>
+			<version>${guava.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20201115</version>
+			<version>${json.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.12</version>
+			<version>${httpclient.version}</version>
 		</dependency>
+
 		<!--	this is so we can read XBRL documents	-->
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -45,8 +62,9 @@
 		<dependency>
 			<groupId>org.litote.kmongo</groupId>
 			<artifactId>kmongo</artifactId>
-			<version>4.2.4</version>
+			<version>${kmongo.version}</version>
 		</dependency>
+
 		<!--	validate auth0 issued JWT tokens	-->
 		<dependency>
 			<groupId>com.auth0</groupId>
@@ -58,6 +76,7 @@
 			<artifactId>jwks-rsa</artifactId>
 			<version>${jwks-rsa.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-kotlin</artifactId>
@@ -66,8 +85,9 @@
 		<dependency>
 			<groupId>org.mariuszgromada.math</groupId>
 			<artifactId>MathParser.org-mXparser</artifactId>
-			<version>4.4.2</version>
+			<version>${MathParser.org-mXparser.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -94,6 +114,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>

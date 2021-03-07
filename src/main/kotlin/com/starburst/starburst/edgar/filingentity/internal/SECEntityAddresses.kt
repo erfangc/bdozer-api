@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.filingentity.internal
+package com.starburst.starburst.edgar.filingentity.internal
 
 data class SECEntityAddresses(
     val mailing: SECEntityAddress? = null,
