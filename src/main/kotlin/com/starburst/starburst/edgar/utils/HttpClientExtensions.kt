@@ -24,7 +24,7 @@ object HttpClientExtensions {
 
     fun HttpClient.readXml(link: String): XmlElement {
         val inputStream = this.readLink(link)?.inputStream() ?: error("$link not found")
-        return XmlElement(XbrlUtils.readXml(inputStream))
+        return XbrlUtils.readXml(inputStream)
     }
 
     inline fun <reified T> HttpClient.readEntity(link: String): T {

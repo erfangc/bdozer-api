@@ -38,7 +38,7 @@ internal class FilingParserTest {
         fun readFile(name: String): XmlElement {
             println("reading $name")
             val istream = ClassPathResource(name).inputStream.readAllBytes().inputStream()
-            return XmlElement(XbrlUtils.readXml(istream))
+            return XbrlUtils.readXml(istream)
         }
 
         private val schemaExtension = readFile("factbase/dbx-20201231.xsd")

@@ -35,12 +35,14 @@ class Bootstrapper(
                     adsh = recent10K.adsh
                 )
             }
+
             for (recent10Q in recent10Qs) {
                 filingIngestor.ingestFiling(
                     cik = cik,
                     adsh = recent10Q.adsh
                 )
             }
+
             log.info("Completed bootstrapping cik=$cik")
         } catch (e: Exception) {
             log.error("Unable to complete bootstrapping cik=$cik", e)

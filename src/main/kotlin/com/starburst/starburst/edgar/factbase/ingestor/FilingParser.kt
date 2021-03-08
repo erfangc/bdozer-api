@@ -22,11 +22,16 @@ import java.time.LocalDate
  */
 class FilingParser(private val filingProvider: FilingProvider) {
 
+    companion object {
+        const val xbrl = "http://www.xbrl.org/2003/instance"
+        const val xbrldi = "http://xbrl.org/2006/xbrldi"
+    }
+
     private val schemaManager = SchemaManager(filingProvider)
     private val labelManager = LabelManager(filingProvider)
     private val instanceDocument = filingProvider.instanceDocument()
     private val contexts = instanceDocument
-        .getElementsByTag("context")
+        .getElementsByTag(xbrl, "context")
         .associate { it.attr("id") to toContext(it) }
 
     private val log = LoggerFactory.getLogger(FilingParser::class.java)
@@ -146,6 +151,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
     ): Boolean {
 
         val endDate = LocalDate.parse(documentPeriodEndDate(instanceDocument))
+
         /*
         Figure out the correct period start date
         a canonical must be for this period
@@ -163,11 +169,12 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 .plusDays(1)
         }
 
-        return (
-                context.period.instant == endDate
-                        || (context.period.startDate == startDate && context.period.endDate == endDate)
-                )
-                && context.entity.segment?.explicitMembers?.isNullOrEmpty() == true
+        val entity = context.entity
+        val period = context.period
+
+        return (period.instant == endDate
+                || (period.startDate == startDate && period.endDate == endDate))
+                && (entity.segment?.explicitMembers?.isNullOrEmpty() ?: true)
     }
 
     private fun documentPeriodEndDate(instanceDocument: XmlElement): String {
@@ -289,16 +296,14 @@ class FilingParser(private val filingProvider: FilingProvider) {
     }
 
     private fun toContext(node: Node): XbrlContext {
-        if (node.nodeName != "context")
-            error("nodeNode must be context")
 
-        val period = node.getElementByTag("period")
-        val entity = node.getElementByTag("entity")
-        val identifier = entity?.getElementByTag("identifier")
+        val period = node.getElementByTag(xbrl, "period")
+        val entity = node.getElementByTag(xbrl, "entity")
+        val identifier = entity?.getElementByTag(xbrl, "identifier")
 
         val explicitMembers = entity
-            ?.getElementByTag("segment")
-            ?.getElementsByTag("xbrldi:explicitMember")
+            ?.getElementByTag(xbrl, "segment")
+            ?.getElementsByTag(xbrldi, "explicitMember")
             ?.map { myNode ->
                 XbrlExplicitMember(
                     dimension = myNode.attributes.getNamedItem("dimension").textContent,

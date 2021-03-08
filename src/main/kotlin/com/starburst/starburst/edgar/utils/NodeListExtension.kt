@@ -1,5 +1,9 @@
 package com.starburst.starburst.edgar.utils
 
+import com.starburst.starburst.edgar.XmlElement
+import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
+import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
+import org.apache.http.impl.client.HttpClientBuilder
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 
@@ -11,6 +15,16 @@ object NodeListExtension {
 
     fun Node.getElementsByTag(tag: String): List<Node> {
         return this.childNodes.toList().filter { it.nodeName ==  tag}
+    }
+
+    fun Node.getElementByTag(namespace: String, tag: String): Node? {
+        val myTag = XmlElement(this.ownerDocument.documentElement).getShortNamespace(namespace)?.let { "$it:$tag" } ?: tag
+        return this.childNodes.toList().firstOrNull { it.nodeName ==  myTag}
+    }
+
+    fun Node.getElementsByTag(namespace: String, tag: String): List<Node> {
+        val myTag = XmlElement(this.ownerDocument.documentElement).getShortNamespace(namespace)?.let { "$it:$tag" } ?: tag
+        return this.childNodes.toList().filter { it.nodeName ==  myTag}
     }
 
     fun Node.attr(attr: String): String? {

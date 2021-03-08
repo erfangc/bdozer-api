@@ -60,7 +60,7 @@ class FilingProviderFactory(
         }
 
         val instanceDocument: XmlElement = http.readXml("$baseUrl/$instanceFilename")
-        instanceHtmlFilename = instanceFileNode?.textContent ?: error("...")
+        instanceHtmlFilename = instanceFileNode?.textContent ?: ""
 
         // lets now read the schema XSD file
         // and go ahead and derive the other files
