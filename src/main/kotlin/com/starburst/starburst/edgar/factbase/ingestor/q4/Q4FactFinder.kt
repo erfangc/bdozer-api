@@ -58,12 +58,14 @@ class Q4FactFinder(
                 }
             }
 
+        val errors = mutableListOf<String>()
         /*
         go through each fact from the 10-K and try to replicate it
          */
         val q4Facts = tenKFacts.mapNotNull { fyFact ->
 
             val fyContext = toFyContext(fyFact)
+            val identityContext = toIdentityContext(fyFact)
             val q4Context = q4Context(fyContext)
 
             /*
@@ -75,7 +77,7 @@ class Q4FactFinder(
                 /*
                 derive q4 value
                  */
-                val valuesByQ = quarters[fyContext] ?: emptyMap()
+                val valuesByQ = quarters[identityContext] ?: emptyMap()
 
                 try {
                     //
@@ -95,7 +97,7 @@ class Q4FactFinder(
                         lastUpdated = Instant.now().toString(),
                     )
                 } catch (e: Exception) {
-                    log.error("error summing past 3 quarter's data, error, ${e.message}")
+                    errors.add("${fyFact.elementName} ${fyContext.entity.segment?.explicitMembers?.joinToString(",")}")
                     null
                 }
             } else {
@@ -111,10 +113,12 @@ class Q4FactFinder(
                 )
             }
         }
+        log.info("Unable to infer Q4 items for fiscalYear=$fiscalYear for ${errors.joinToString(";")}")
         log.info("Found ${q4Facts.size} Q4 facts, saving them now")
         q4Facts.forEach { q4Fact ->
             col.save(q4Fact)
         }
+
         log.info("Saved ${q4Facts.size} Q4 facts")
     }
 
