@@ -28,7 +28,7 @@ object NodeListExtension {
     }
 
     fun Node.attr(attr: String): String? {
-        return this.attributes.getNamedItem(attr)?.textContent
+        return this.attributes?.getNamedItem(attr)?.textContent
     }
 
     fun Node.attr(namespace: String, attr: String): String? {

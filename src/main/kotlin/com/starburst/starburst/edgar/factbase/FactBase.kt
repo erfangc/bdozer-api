@@ -25,7 +25,6 @@ class FactBase(mongoClient: MongoClient) {
     fun latestNonDimensionalFacts(cik: String): Map<String, Fact> {
         val latestFacts = col.find(and(
             Fact::cik eq cik,
-            Fact::canonical eq true
         )).filter {
             it.explicitMembers.isEmpty() && (
                     it.period.endDate == LocalDate.parse(it.documentPeriodEndDate)

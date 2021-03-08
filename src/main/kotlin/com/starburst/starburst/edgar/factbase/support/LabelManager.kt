@@ -48,11 +48,15 @@ class LabelManager(filingProvider: FilingProvider) {
         val loc = locs[schemaElementId] ?: error("no loc found for $schemaElementId")
         val arcLabel = labelArcs[loc] ?: error("no labelArc found for $loc, derived from $schemaElementId")
         val labels = labels[arcLabel] ?: emptyMap()
+        val label = labels["http://www.xbrl.org/2003/role/label"]
+        val terseLabel = labels["http://www.xbrl.org/2003/role/terseLabel"] ?: label
+        val verboseLabel = labels["http://www.xbrl.org/2003/role/verboseLabel"] ?: terseLabel
+        val documentation = labels["http://www.xbrl.org/2003/role/documentation"]
         return Labels(
-            label = labels["http://www.xbrl.org/2003/role/label"],
-            terseLabel = labels["http://www.xbrl.org/2003/role/terseLabel"],
-            verboseLabel = labels["http://www.xbrl.org/2003/role/verboseLabel"],
-            documentation = labels["http://www.xbrl.org/2003/role/documentation"]
+            label = label,
+            terseLabel = terseLabel,
+            verboseLabel = verboseLabel,
+            documentation = documentation
         )
     }
 

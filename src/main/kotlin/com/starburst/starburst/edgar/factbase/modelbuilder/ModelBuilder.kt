@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import java.net.URI
-import java.time.LocalDate
 
 @Service(value = "factBaseModelBuilder")
 class ModelBuilder(
@@ -221,13 +220,14 @@ class ModelBuilder(
         }
 
         //
-        // TODO investigate why there are duplicates
+        // there are duplicates in the calculation arc(s) - this attempts to remove that
         //
         return itemsLookup.values.groupBy { it.name }.map { entry ->
-            if (entry.value.size != 1) {
-                entry.value.first { it.expression != "0.0" }
+            val duplicatedItems = entry.value
+            if (duplicatedItems.size != 1) {
+                duplicatedItems.find { it.expression != "0.0" } ?: duplicatedItems.first()
             } else {
-                entry.value.first()
+                duplicatedItems.first()
             }
         }
     }
@@ -240,7 +240,6 @@ class ModelBuilder(
             .filter {
                         elementDefinition.name == it.elementName
                         && it.formType == "10-K"
-                        && it.canonical
             }
 
         //

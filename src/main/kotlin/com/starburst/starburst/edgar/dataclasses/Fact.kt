@@ -21,14 +21,6 @@ data class Fact(
     val period: XbrlPeriod,
 
     /**
-     * A canonical fact is one in which the context
-     * is neither a dimensional nor historical
-     *
-     * ex: Revenues of FY0, not a historical revenue, not a dimensional revenue
-     */
-    val canonical: Boolean,
-
-    /**
      * This can be Q1, Q2, Q3, Q4
      */
     val documentFiscalPeriodFocus: String,

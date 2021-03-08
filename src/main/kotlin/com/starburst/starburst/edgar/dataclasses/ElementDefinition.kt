@@ -4,6 +4,6 @@ data class ElementDefinition(
     val id: String,
     val longNamespace: String,
     val name: String,
-    val periodType: String,
-    val type: String,
+    val periodType: String? = null,
+    val type: String? = null,
 )

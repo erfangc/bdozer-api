@@ -107,15 +107,15 @@ class SchemaManager(filingProvider: FilingProvider) {
         return this
             .toList()
             .map {
-                val id = it.attributes.getNamedItem("id").textContent
+                val id = it.attr("id")
                 val name = it.attr("name") ?: error("name is not defined on $id in schema")
                 name to
                         ElementDefinition(
-                            id = id,
+                            id = id ?: name,
                             longNamespace = longNamespace,
                             name = name,
-                            type = it.attributes.getNamedItem("type")?.textContent ?: "",
-                            periodType = it.attributes.getNamedItem(":xbrli:periodType")?.textContent ?: "",
+                            type = it.attr("type"),
+                            periodType = it.attr(":xbrli:periodType"),
                         )
             }
             .toMap()

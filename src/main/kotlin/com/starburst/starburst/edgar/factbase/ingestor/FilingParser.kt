@@ -9,7 +9,7 @@ import com.starburst.starburst.edgar.utils.LocalDateExtensions.toLocalDate
 import com.starburst.starburst.edgar.utils.NodeListExtension.attr
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
-import com.starburst.starburst.edgar.utils.NodeListExtension.map
+import com.starburst.starburst.edgar.utils.NodeListExtension.toList
 import org.slf4j.LoggerFactory
 import org.threeten.extra.YearQuarter
 import org.w3c.dom.Node
@@ -30,6 +30,9 @@ class FilingParser(private val filingProvider: FilingProvider) {
     private val schemaManager = SchemaManager(filingProvider)
     private val labelManager = LabelManager(filingProvider)
     private val instanceDocument = filingProvider.instanceDocument()
+    /*
+    create a look up of the Xbrl context objects for each fact to refer back to
+     */
     private val contexts = instanceDocument
         .getElementsByTag(xbrl, "context")
         .associate { it.attr("id") to toContext(it) }
@@ -48,112 +51,119 @@ class FilingParser(private val filingProvider: FilingProvider) {
         log.info("Parsing instance document $instanceDocumentFilename")
 
         /*
-        parse the context first - create the lookup map
-        for context(s)
+        create counters for the different types of facts we will encounter along the way
          */
+        var relevant = 0
+        var irrelevantTag = 0 // ex: xlink:footnote
+        var irrelevantPeriod = 0 // ex: facts with context from past period
+        var elementDefinitionNotFound = 0 // ex: other misc problems
 
         /*
-        parse the label(s) next - create the lookup map
+        now begin processing each element as a potential fact we can create and store
          */
+        val facts = instanceDocument.childNodes.toList().mapNotNull { node ->
+            val context = getContext(node.attr("contextRef"))
+            val elementDefinition = lookupElementDefinition(node.nodeName)
+            val adsh = filingProvider.adsh()
 
-        val facts = instanceDocument.childNodes.map { node ->
-            //
-            // filter the node, if it is not one of the relevant ones, then don't process it
-            //
-            if (isRelevant(node)) {
+            /*
+            filter the node, if it is not one of the relevant ones, then don't process it
+             */
+            if (!isNodeRelevant(node) || context == null) {
+                irrelevantTag++
+                null // return null to skip
+            } else if (!isFactInPeriod(context)) {
+                irrelevantPeriod++
+                null // return null to skip
+            } else if (elementDefinition == null) {
+                elementDefinitionNotFound++
+                null // return null to skip
+            } else {
+                relevant++
+                val content = node.textContent
+                val labels = getLabels(elementDefinition.id)
+
+                val symbols = symbols(instanceDocument)
+                val documentFiscalPeriodFocus = documentFiscalPeriodFocus(instanceDocument)
+                val documentFiscalYearFocus = documentFiscalYearFocus(instanceDocument)
+                val documentPeriodEndDate = documentPeriodEndDate(instanceDocument)
+                val explicitMembers = context.entity.segment?.explicitMembers ?: emptyList()
+                val elementName = elementDefinition.name
+
                 /*
                 generate idempotent identifiers if the same information
                 repeats across documents, this way there are no duplicates for the same piece of information
-                 */
-                val factIdGenerator = FactIdGenerator(instanceDocument)
+                */
+                val factIdGenerator = FactIdGenerator()
+                val id = factIdGenerator.generateId(
+                    elementName = elementName,
+                    context = context,
+                    documentPeriodEndDate = documentPeriodEndDate
+                )
 
-                /*
-                assemble the [Fact] from the relevant context and label links
-                 */
-                val elementDefinition = lookupElementDefinition(node.nodeName)
+                val instanceDocumentElementId = node.attr("id") ?: "N/A"
+                val cik = cik()
+                val entityName = entityRegistrantName(instanceDocument)
+                val primarySymbol = primarySymbol(instanceDocument)
+                val formType = formType(instanceDocument)
 
-                val adsh = filingProvider.adsh()
-                if (elementDefinition != null) {
-                    val content = node.textContent
-                    val labels = getLabels(elementDefinition.id)
-                    val xbrlContext = getContext(node.attr("contextRef"))
+                Fact(
+                    _id = id,
+                    instanceDocumentElementId = instanceDocumentElementId,
+                    cik = cik,
+                    adsh = adsh,
+                    entityName = entityName,
+                    primarySymbol = primarySymbol,
+                    symbols = symbols,
+                    formType = formType,
 
-                    val symbols = symbols(instanceDocument)
-                    val documentFiscalPeriodFocus = documentFiscalPeriodFocus(instanceDocument)
-                    val documentFiscalYearFocus = documentFiscalYearFocus(instanceDocument)
-                    val documentPeriodEndDate = documentPeriodEndDate(instanceDocument)
-                    val explicitMembers = xbrlContext.entity.segment?.explicitMembers ?: emptyList()
+                    documentFiscalPeriodFocus = documentFiscalPeriodFocus,
+                    documentFiscalYearFocus = documentFiscalYearFocus,
+                    documentPeriodEndDate = documentPeriodEndDate,
 
-                    val _id = factIdGenerator.generateId(
-                        node = node,
-                        context = xbrlContext,
-                        documentPeriodEndDate = documentPeriodEndDate
-                    )
+                    elementName = elementName,
+                    rawElementName = node.nodeName,
+                    longNamespace = elementDefinition.longNamespace,
 
-                    val instanceDocumentElementId = node.attr("id") ?: "N/A"
-                    val cik = cik(instanceDocument)
-                    val entityName = entityRegistrantName(instanceDocument)
-                    val primarySymbol = primarySymbol(instanceDocument)
-                    val formType = formType(instanceDocument)
+                    period = context.period,
+                    explicitMembers = explicitMembers,
 
+                    sourceDocument = sourceDocument(node),
 
-                    Fact(
-                        _id = _id,
-                        instanceDocumentElementId = instanceDocumentElementId,
-                        cik = cik,
-                        adsh = adsh,
-                        entityName = entityName,
-                        primarySymbol = primarySymbol,
-                        symbols = symbols,
-                        formType = formType,
+                    label = labels.label,
+                    labelTerse = labels.terseLabel,
+                    verboseLabel = labels.verboseLabel,
 
-                        canonical = isCanonical(instanceDocument, xbrlContext),
+                    stringValue = content,
+                    doubleValue = content.toDoubleOrNull(),
 
-                        documentFiscalPeriodFocus = documentFiscalPeriodFocus,
-                        documentFiscalYearFocus = documentFiscalYearFocus,
-                        documentPeriodEndDate = documentPeriodEndDate,
-
-                        elementName = elementDefinition.name,
-                        rawElementName = node.nodeName,
-                        longNamespace = elementDefinition.longNamespace,
-
-                        period = xbrlContext.period,
-                        explicitMembers = explicitMembers,
-
-                        sourceDocument = sourceDocument(node),
-
-                        label = labels.label,
-                        labelTerse = labels.terseLabel,
-                        verboseLabel = labels.verboseLabel,
-
-                        stringValue = content,
-                        doubleValue = content.toDoubleOrNull(),
-
-                        lastUpdated = Instant.now().toString(),
-                    )
-                } else {
-                    log.error("Unable to find an element definition for ${node.nodeName} cik=${filingProvider.cik()} adsh=$adsh")
-                    null
-                }
-            } else {
-                // skipping the node b/c it is irrelevant
-                null
+                    lastUpdated = Instant.now().toString(),
+                )
             }
         }
-        val ret = facts.filterNotNull()
-        log.info("Found ${ret.size} facts in $instanceDocumentFilename, out of ${facts.size} expected, after removing duplicates")
-        return ret
+        // the XMLs sometimes contain duplicates
+        val distinctFacts = facts.distinctBy { it._id }
+        log.info(
+            "$instanceDocumentFilename has ${distinctFacts.size} distinct relevant facts, " +
+                    "totalRelevantFacts=${facts.size}, " +
+                    "relevant=$relevant, " +
+                    "irrelevantTag=$irrelevantTag, " +
+                    "irrelevantPeriod=$irrelevantPeriod, " +
+                    "elementDefinitionNotFound=$elementDefinitionNotFound"
+        )
+        return distinctFacts
     }
 
-    private fun isCanonical(
-        instanceDocument: XmlElement,
-        context: XbrlContext
-    ): Boolean {
+    /**
+     * Determines if the fact being reported is for the period
+     * it is intended to be reported and not a restatement of some historical period
+     */
+    private fun isFactInPeriod(context: XbrlContext): Boolean {
 
         val endDate = LocalDate.parse(documentPeriodEndDate(instanceDocument))
 
         /*
-        Figure out the correct period start date
+        figure out the correct period start date
         a canonical must be for this period
          */
         val formType = formType(instanceDocument)
@@ -164,17 +174,14 @@ class FilingParser(private val filingProvider: FilingProvider) {
         } else {
             YearQuarter
                 .from(endDate)
-                .minusQuarters(1)
-                .atEndOfQuarter()
-                .plusDays(1)
+                .atDay(1)
         }
 
-        val entity = context.entity
         val period = context.period
 
-        return (period.instant == endDate
-                || (period.startDate == startDate && period.endDate == endDate))
-                && (entity.segment?.explicitMembers?.isNullOrEmpty() ?: true)
+        return period.instant == endDate
+                || (period.startDate == startDate && period.endDate == endDate)
+
     }
 
     private fun documentPeriodEndDate(instanceDocument: XmlElement): String {
@@ -256,13 +263,13 @@ class FilingParser(private val filingProvider: FilingProvider) {
             .textContent ?: "N/A"
     }
 
-    private fun cik(instanceDocument: XmlElement): String {
+    private fun cik(): String {
         return filingProvider.cik()
     }
 
     private fun parseInstanceNodeName(nodeName: String?): Pair<String, String> {
         if (nodeName == null)
-            error("...")
+            error("nodeName cannot be null")
         val instanceDocument = filingProvider.instanceDocument()
         val parts = nodeName.split(":".toRegex(), 2)
         return if (parts.size == 1) {
@@ -276,24 +283,40 @@ class FilingParser(private val filingProvider: FilingProvider) {
 
     private fun lookupElementDefinition(nodeName: String): ElementDefinition? {
         val (namespace, tag) = parseInstanceNodeName(nodeName)
-        return schemaManager.getElementDefinition(namespace, tag)
+        return if (namespace.isNullOrEmpty()) {
+            null
+        } else {
+            schemaManager.getElementDefinition(namespace, tag)
+        }
     }
 
     private fun getLabels(elementId: String): Labels {
         return labelManager.getLabel(elementId)
     }
 
-    private fun getContext(contextRef: String?): XbrlContext {
-        return contexts[contextRef] ?: error("unable to find context $contextRef")
+    private fun getContext(contextRef: String?): XbrlContext? {
+        return contexts[contextRef]
     }
 
-    private fun isRelevant(node: Node): Boolean {
+    private fun isNodeRelevant(node: Node): Boolean {
         val (namespace, _) = parseInstanceNodeName(node.nodeName)
-        // this node is a fact if it's namespace is one of the ones that matter
-        val isExt = namespace == filingProvider.schema().targetNamespace()
+
+        //
+        // this node is a fact if it's
+        // namespace is one of the ones that matter
+        //
+        val isExternalNamespace = namespace == filingProvider.schema().targetNamespace()
         val lookup = instanceDocument.longNamespaceToShortNamespaceMap()
-        return isExt || lookup[namespace] == "us-gaap" || lookup[namespace] == "dei"
+        return isRelevantElementDefinition(isExternalNamespace, lookup, namespace)
     }
+
+    private fun isRelevantElementDefinition(
+        isExternalNamespace: Boolean,
+        lookup: Map<String, String>,
+        namespace: String
+    ) = (isExternalNamespace
+            || lookup[namespace] == "us-gaap"
+            || lookup[namespace] == "dei")
 
     private fun toContext(node: Node): XbrlContext {
 
@@ -325,9 +348,9 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 }
             ),
             period = XbrlPeriod(
-                instant = period?.getElementByTag("instant")?.toLocalDate(),
-                startDate = period?.getElementByTag("startDate")?.toLocalDate(),
-                endDate = period?.getElementByTag("endDate")?.toLocalDate(),
+                instant = period?.getElementByTag(xbrl, "instant")?.toLocalDate(),
+                startDate = period?.getElementByTag(xbrl, "startDate")?.toLocalDate(),
+                endDate = period?.getElementByTag(xbrl, "endDate")?.toLocalDate(),
             )
         )
 
