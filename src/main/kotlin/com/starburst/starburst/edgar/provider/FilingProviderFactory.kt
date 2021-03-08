@@ -1,12 +1,8 @@
 package com.starburst.starburst.edgar.provider
 
-import com.starburst.starburst.edgar.XmlElement
+import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
-import com.starburst.starburst.edgar.utils.NodeListExtension.attr
-import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
-import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import org.apache.http.client.HttpClient
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,12 +11,10 @@ class FilingProviderFactory(
 ) {
 
     companion object {
-        const val X_LINK_NS = "http://www.w3.org/1999/xlink"
-        const val XSD_NS = "http://www.w3.org/2001/XMLSchema"
-        const val LINK_BASE_NS = "http://www.xbrl.org/2003/linkbase"
+        const val xlink = "http://www.w3.org/1999/xlink"
+        const val xsd = "http://www.w3.org/2001/XMLSchema"
+        const val link = "http://www.xbrl.org/2003/linkbase"
     }
-
-    private val log = LoggerFactory.getLogger(FilingProviderFactory::class.java)
 
     fun createFilingProvider(cik: String, adsh: String): FilingProvider {
         val normalizedAdsh = adsh.replace("-", "")
@@ -65,23 +59,20 @@ class FilingProviderFactory(
         // lets now read the schema XSD file
         // and go ahead and derive the other files
         val schema: XmlElement = http.readXml("$baseUrl/$schemaFilename")
-        val xsd = schema.getShortNamespace(longNamespace = XSD_NS)?.let { "$it:" } ?: ""
-        val link = schema.getShortNamespace(longNamespace = LINK_BASE_NS)?.let { "$it:" } ?: ""
         // for some reason this sometimes gets declared at the attribute level
-        val xlink = schema.getShortNamespace(longNamespace = X_LINK_NS)
 
         val linkbaseRefs = schema
-            .getElementByTag("${xsd}annotation")
-            ?.getElementByTag("${xsd}appinfo")
-            ?.getElementsByTag("${link}linkbaseRef")
+            .getElementByTag(xsd, "annotation")
+            ?.getElementByTag(xsd, "appinfo")
+            ?.getElementsByTag(link, "linkbaseRef")
             ?.associate {
                 // again for some reason this gets declared either at the document or attribute level
-                val role = it.attr(X_LINK_NS, "role")
-                    ?: it.attr("$xlink:role")
-                    ?: error("cannot find $X_LINK_NS role")
-                val href = it.attr(X_LINK_NS, "href")
-                    ?: it.attr("$xlink:href")
-                    ?: error("cannot find $X_LINK_NS href")
+                val role = it.attr(xlink, "role")
+                    ?: it.attr(xlink, "role")
+                    ?: error("cannot find $xlink role")
+                val href = it.attr(xlink, "href")
+                    ?: it.attr(xlink, "href")
+                    ?: error("cannot find $xlink href")
                 role to href
             }
             ?: error("$schemaFilename does not define linkbaseRef")

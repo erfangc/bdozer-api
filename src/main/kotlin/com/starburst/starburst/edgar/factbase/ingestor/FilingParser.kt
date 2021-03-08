@@ -1,15 +1,12 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
-import com.starburst.starburst.edgar.XmlElement
+import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.edgar.dataclasses.*
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.utils.LocalDateExtensions.toLocalDate
-import com.starburst.starburst.edgar.utils.NodeListExtension.attr
-import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
-import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
-import com.starburst.starburst.edgar.utils.NodeListExtension.toList
+import com.starburst.starburst.xml.XmlNode
 import org.slf4j.LoggerFactory
 import org.threeten.extra.YearQuarter
 import org.w3c.dom.Node
@@ -67,7 +64,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
         /*
         now begin processing each element as a potential fact we can create and store
          */
-        val facts = instanceDocument.childNodes.toList().mapNotNull { node ->
+        val facts = instanceDocument.childNodes().mapNotNull { node ->
             val context = getContext(node.attr("contextRef"))
             val elementDefinition = lookupElementDefinition(node.nodeName)
             val adsh = filingProvider.adsh()
@@ -234,7 +231,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
             ?.textContent ?: "Unknown"
     }
 
-    private fun sourceDocument(node: Node): String {
+    private fun sourceDocument(node: XmlNode): String {
         val cik = filingProvider.cik()
         val adsh = filingProvider.adsh().replace("-", "")
         val fileName = filingProvider.inlineHtml()
@@ -328,7 +325,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
             || lookup[namespace] == "us-gaap"
             || lookup[namespace] == "dei")
 
-    private fun toContext(node: Node): XbrlContext {
+    private fun toContext(node: XmlNode): XbrlContext {
 
         val period = node.getElementByTag(xbrl, "period")
         val entity = node.getElementByTag(xbrl, "entity")

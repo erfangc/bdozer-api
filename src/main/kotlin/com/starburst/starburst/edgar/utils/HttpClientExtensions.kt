@@ -3,7 +3,8 @@ package com.starburst.starburst.edgar.utils
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.starburst.starburst.edgar.XmlElement
+import com.starburst.starburst.xml.XbrlUtils
+import com.starburst.starburst.xml.XmlElement
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
 import org.slf4j.LoggerFactory

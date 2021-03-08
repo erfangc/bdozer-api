@@ -1,18 +1,15 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder
 
-import com.starburst.starburst.edgar.XmlElement
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
 import com.starburst.starburst.edgar.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.FactBase.Companion.allHistoricalValues
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
-import com.starburst.starburst.edgar.utils.NodeListExtension.toList
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
+import com.starburst.starburst.xml.XmlNode
 import org.springframework.stereotype.Service
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
 import java.net.URI
 
 @Service(value = "factBaseModelBuilder")
@@ -21,12 +18,10 @@ class ModelBuilder(
     private val factBase: FactBase
 ) {
 
-    internal data class ModelBuilderContext(
-        val calculationLinkbase: XmlElement,
-        val schemaManager: SchemaManager,
-        val latestNonDimensionalFacts: Map<String, Fact>,
-        val facts: List<Fact>
-    )
+    companion object {
+        const val link = "http://www.xbrl.org/2003/linkbase"
+        const val xlink = "http://www.w3.org/1999/xlink"
+    }
 
     /**
      * Build a [Model] using facts from [FactBase] and the calculationArcs
@@ -44,20 +39,20 @@ class ModelBuilder(
         everything else serves as a reference (including "XBRL facts" such as actual historical values)
         to the business logic expressed within this page
          */
-        val calculationLinks = ctx.calculationLinkbase.getElementsByTagNameSafe("link:calculationLink")
+        val calculationLinks = ctx.calculationLinkbase.getElementsByTag(link, "calculationLink")
 
         /*
         find the income statement calculation
          */
         val incomeStatementRole =
-            findIncomeStatementRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
+            findIncomeStatementRole(ctx.calculationLinkbase.getElementsByTag(link, "roleRef"))
         val incomeStatementItems =
             linkCalculationToItems(findLinkCalculationByRole(calculationLinks, incomeStatementRole), ctx)
 
         /*
         find the income statement calculation
          */
-        val balanceSheetRole = findBalanceSheetRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
+        val balanceSheetRole = findBalanceSheetRole(ctx.calculationLinkbase.getElementsByTag(link, "roleRef"))
         val balanceSheetItems =
             linkCalculationToItems(findLinkCalculationByRole(calculationLinks, balanceSheetRole), ctx)
 
@@ -65,7 +60,7 @@ class ModelBuilder(
         find the cash flow statement calculation
          */
         val cashFlowStatementRole =
-            findCashFlowStatementRole(ctx.calculationLinkbase.getElementsByTagNameSafe("link:roleRef"))
+            findCashFlowStatementRole(ctx.calculationLinkbase.getElementsByTag(link, "roleRef"))
         val cashFlowStatementItems =
             linkCalculationToItems(findLinkCalculationByRole(calculationLinks, cashFlowStatementRole), ctx)
 
@@ -88,8 +83,8 @@ class ModelBuilder(
         )
     }
 
-    private fun findCashFlowStatementRole(nodes: NodeList): String {
-        return nodes.toList().first {
+    private fun findCashFlowStatementRole(nodes: List<XmlNode>): String {
+        return nodes.first {
             val roleURI = it.attributes.getNamedItem("roleURI").textContent
             val last = URI(roleURI)
                 .path
@@ -97,9 +92,7 @@ class ModelBuilder(
                 .last()
                 .toLowerCase()
             (last.contains("statement") || last.contains("consolidated"))
-                    && (
-                    (last.contains("cash") && last.contains("flow"))
-                    )
+                    && ((last.contains("cash") && last.contains("flow")))
 
         }.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find balance sheet role")
     }
@@ -115,8 +108,8 @@ class ModelBuilder(
         )
     }
 
-    private fun findBalanceSheetRole(nodes: NodeList?): String {
-        return nodes?.toList()?.first {
+    private fun findBalanceSheetRole(nodes: List<XmlNode>): String {
+        return nodes.first {
             val roleURI = it.attributes.getNamedItem("roleURI").textContent
             val last = URI(roleURI)
                 .path
@@ -128,11 +121,11 @@ class ModelBuilder(
                     (last.contains("balance") && last.contains("sheet"))
                             || (last.contains("financial") && last.contains("condition"))
                     )
-        }?.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find balance sheet role")
+        }.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find balance sheet role")
     }
 
-    private fun findIncomeStatementRole(nodes: NodeList?): String {
-        return nodes?.toList()?.first {
+    private fun findIncomeStatementRole(nodes: List<XmlNode>): String {
+        return nodes.first {
             val roleURI = it.attributes.getNamedItem("roleURI").textContent
             val last = URI(roleURI)
                 .path
@@ -147,42 +140,37 @@ class ModelBuilder(
                             || last.contains("ofearning")
                             || last.contains("ofoperation")
                     )
-        }?.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find income statement role")
+        }.attributes?.getNamedItem("roleURI")?.textContent ?: error("unable to find income statement role")
     }
 
-    private fun findLinkCalculationByRole(calculationLinks: NodeList, role: String): Node {
+    private fun findLinkCalculationByRole(calculationLinks: List<XmlNode>, role: String): XmlNode {
         val list = calculationLinks.toList()
         return list
             .find {
-                it.attributes.getNamedItem("xlink:role").textContent == role
+                it.attr(xlink, "role") == role
             }
             ?: error("cannot find $role")
     }
 
-    private fun linkCalculationToItems(incomeStatementCalculation: Node, ctx: ModelBuilderContext): List<Item> {
+    private fun linkCalculationToItems(incomeStatementCalculation: XmlNode, ctx: ModelBuilderContext): List<Item> {
         //
         // to build the income statement, first find all the loc elements
         //
-        val locs = incomeStatementCalculation.childNodes.toList().filter {
-            it.nodeName == "link:loc" || it.nodeName == "loc"
-        }
-        val locsLookup = locs.associateBy { it.attributes.getNamedItem("xlink:label").textContent }
-        val calculationArcs = incomeStatementCalculation
-            .childNodes
-            .toList().filter {
-                it.nodeName == "link:calculationArc" || it.nodeName == "calculationArc"
-            }
-        val calculationArcLookup = calculationArcs
-            .groupBy { it.attributes.getNamedItem("xlink:from").textContent }
+        val locs = incomeStatementCalculation.getElementsByTag(link, "loc")
+        val locsLookup = locs.associateBy { it.attr(xlink, "label") }
+        val calculationArcs = incomeStatementCalculation.getElementsByTag(link, "calculationArc")
+
+        val calculationArcLookup = calculationArcs.groupBy { it.attr(xlink, "from") }
 
         val itemsLookup = locsLookup.mapValues { (locLabel, loc) ->
-            val href = loc.attributes.getNamedItem("xlink:href").textContent
+            val elementDefinition = loc.attr(xlink, "href")?.let { href ->
+                ctx.schemaManager.getElementDefinition(href)
+            } ?: error("Unable to find element definition name for ${loc.attr(xlink, "href")}")
 
             //
             // the fragment is actually the id to look up by
             //
-            val elementDefinition = ctx.schemaManager.getElementDefinition(href)
-            val name = elementDefinition?.name ?: error("Unable to find element definition name for $href")
+            val name = elementDefinition.name
 
             //
             // populate the historical value of the item
@@ -200,11 +188,9 @@ class ModelBuilder(
                 historicalValues = historicalValues,
                 expression = calculationArcLookup[locLabel]
                     ?.joinToString("+") { node ->
-                        val to = node.attributes.getNamedItem("xlink:to").textContent
+                        val to = node.attr(xlink, "to")
                         val toHref = locsLookup[to]
-                            ?.attributes
-                            ?.getNamedItem("xlink:href")
-                            ?.textContent
+                            ?.attr(xlink, "href")
                             ?: error("cannot find loc for $to")
 
                         // the fragment is actually the id to look up by

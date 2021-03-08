@@ -1,20 +1,22 @@
-package com.starburst.starburst.edgar
+package com.starburst.starburst.xml
 
-import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
+import com.starburst.starburst.xml.NodeListExtension.toList
 import org.w3c.dom.Element
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
 
 /**
  * A delegated class that holds some convenience methods for working with and traversing
  * XML [Element]. Such as creating namespace resolution methods and maps
  */
-class XmlElement(element: Element): Element by element {
+class XmlElement(element: Element) : Element by element {
 
     private val shortNamespaces = this.getShortNamespaces()
     private val longNamespaceToShortNamespaceMap = this.longNamespaceToShortNamespaceMap()
     private val shortNamespaceToLongNamespaceMap = this.shortNamespaceToLongNamespaceMap()
     private val defaultLongNamespace = this.defaultLongNamespace()
+
+    fun childNodes(): List<XmlNode> {
+        return this.childNodes.toList().map { XmlNode(it, this) }
+    }
 
     fun getShortNamespace(longNamespace: String): String? {
         return if (this.defaultLongNamespace == longNamespace) {
@@ -59,21 +61,21 @@ class XmlElement(element: Element): Element by element {
     }
 
     /**
-     *
+     * Return the target namespace of the root element
      */
     fun targetNamespace(): String? {
         return this.attributes.getNamedItem("targetNamespace")?.textContent
     }
 
     /**
-     *
+     * Returns the default xmlns in short form
      */
     fun defaultShortNamespace(): String? {
         return longNamespaceToShortNamespaceMap[defaultLongNamespace]
     }
 
     /**
-     *
+     * Returns the default xmlns in long form
      */
     fun defaultLongNamespace(): String? {
         return this.attributes.getNamedItem("xmlns")?.textContent
@@ -96,60 +98,27 @@ class XmlElement(element: Element): Element by element {
         return namespaces.toList()
     }
 
-    fun getElementsByTag(namespace: String, tag: String): List<Node> {
-        val ns = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag
-        return this.getElementsByTag(ns)
+    fun getElementsByTag(namespace: String, tag: String): List<XmlNode> {
+        val newTag = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag
+        return this.getElementsByTag(newTag)
     }
 
-    fun getElementByTag(tag: String): Node? {
+    fun getElementsByTag(tag: String): List<XmlNode> {
+        return childNodes().filter { it.nodeName == tag }
+    }
+
+    fun getElementByTag(tag: String): XmlNode? {
         val nodeList = this.getElementsByTagName(tag)
         return if (nodeList.length > 0) {
-            nodeList.item(0)
+            nodeList.item(0)?.let { XmlNode(it, this) }
         } else {
             null
         }
     }
 
-    /**
-     * This method calls [Element.getElementsByTagName] with the namespace given in [tag]
-     * and if that fails it goes through a waterfall of other tags to use depending on
-     * the namespace that has been declared on the root element
-     */
-    fun getElementsByTagNameSafe(tag: String): NodeList {
-        // to save on algo complexity - just call [getElementsByTagName] as you normally would
-        val nl = this.getElementsByTagName(tag)
-        // when that fails, think about whether to apply namespaces
-        if (nl.length == 0) {
-            val parts = tag.split(":".toRegex(), 2)
-            val namespace = if (parts.size > 1) parts.first() else ""
-            val elementTag = if (parts.size > 1) parts.last() else parts.first()
-
-            // first try it without the namespace
-            val attemptWithoutNamespace = this.getElementsByTagName(elementTag)
-
-            if (attemptWithoutNamespace.length == 0) {
-                //
-                // figure out if the requested tag is declared in the namespace
-                // if not, get rid of it - or try one of the other namespaces
-                //
-                val namespaces = this.shortNamespaces
-                if (namespace.isNotEmpty() && !namespaces.contains(namespace)) {
-                    // try out other namespaces that has been declared
-                    for (newNameSpace in namespaces) {
-                        val nodeList = this.getElementsByTagName("$newNameSpace:$elementTag")
-                        if (nodeList.length != 0) {
-                            return nodeList
-                        }
-                    }
-                    return attemptWithoutNamespace
-                } else {
-                    return attemptWithoutNamespace
-                }
-            } else {
-                return attemptWithoutNamespace
-            }
-        } else {
-            return nl
-        }
+    fun getElementByTag(namespace: String, tag: String): XmlNode? {
+        val newTag = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag
+        return this.getElementByTag(newTag)
     }
+
 }

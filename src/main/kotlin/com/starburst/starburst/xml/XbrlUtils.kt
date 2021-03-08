@@ -1,7 +1,5 @@
-package com.starburst.starburst.edgar.utils
+package com.starburst.starburst.xml
 
-import com.starburst.starburst.edgar.XmlElement
-import org.w3c.dom.Element
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 

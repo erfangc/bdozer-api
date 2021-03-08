@@ -1,15 +1,11 @@
 package com.starburst.starburst.edgar.factbase.support
 
-import com.starburst.starburst.edgar.XmlElement
-import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
+import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
-import com.starburst.starburst.edgar.utils.NodeListExtension.attr
-import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
-import com.starburst.starburst.edgar.utils.NodeListExtension.toList
+import com.starburst.starburst.xml.XmlElement
+import com.starburst.starburst.xml.XmlNode
 import org.apache.http.impl.client.HttpClientBuilder
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
 import java.net.URI
 
 /**
@@ -97,13 +93,13 @@ class SchemaManager(filingProvider: FilingProvider) {
     ): ElementDefinition? {
         val uri = URI(href)
         val link = if (uri.host == null) uri.path else "${uri.scheme}://${uri.host}${uri.path}"
-        if (!linksVisited.contains(link)){
-         loadRemoteSchema(link)
+        if (!linksVisited.contains(link)) {
+            loadRemoteSchema(link)
         }
         return elementDefinitionsByHref[href]
     }
 
-    private fun List<Node>.associateByElementName(longNamespace: String): Map<String, ElementDefinition> {
+    private fun List<XmlNode>.associateByElementName(longNamespace: String): Map<String, ElementDefinition> {
         return this
             .toList()
             .map {

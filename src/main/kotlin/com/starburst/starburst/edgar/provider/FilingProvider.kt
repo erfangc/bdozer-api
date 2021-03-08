@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.provider
 
-import com.starburst.starburst.edgar.XmlElement
+import com.starburst.starburst.xml.XmlElement
 
 interface FilingProvider {
     fun adsh(): String
