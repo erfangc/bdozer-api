@@ -8,7 +8,8 @@ import java.nio.charset.StandardCharsets
 
 
 class FactIdGenerator(instanceDocument: Element) {
-    fun generateId(node: Node, context: XbrlContext): String {
+
+    fun generateId(node: Node, context: XbrlContext, documentPeriodEndDate: String): String {
 
         val nodeName = node.nodeName
         val entityId = context.entity.identifier.value
@@ -23,9 +24,10 @@ class FactIdGenerator(instanceDocument: Element) {
         return Hashing
             .sha256()
             .hashString(
-                "$nodeName$entityId$instant$startDate$endDate$explicitMembers",
+                "$nodeName$entityId$documentPeriodEndDate$instant$startDate$endDate$explicitMembers",
                 StandardCharsets.UTF_8
             )
             .toString()
     }
+
 }

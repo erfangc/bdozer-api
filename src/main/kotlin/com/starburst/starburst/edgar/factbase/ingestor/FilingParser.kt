@@ -1,18 +1,20 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
 import com.starburst.starburst.edgar.XmlElement
-import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.dataclasses.*
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
+import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.utils.LocalDateExtensions.toLocalDate
 import com.starburst.starburst.edgar.utils.NodeListExtension.attr
-import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.getElementByTag
+import com.starburst.starburst.edgar.utils.NodeListExtension.getElementsByTag
 import com.starburst.starburst.edgar.utils.NodeListExtension.map
 import org.slf4j.LoggerFactory
+import org.threeten.extra.YearQuarter
 import org.w3c.dom.Node
 import java.time.Instant
+import java.time.LocalDate
 
 /**
  * Goes through a single filing as provided by the [FilingProvider]
@@ -65,26 +67,53 @@ class FilingParser(private val filingProvider: FilingProvider) {
                  */
                 val elementDefinition = lookupElementDefinition(node.nodeName)
 
+                val adsh = filingProvider.adsh()
                 if (elementDefinition != null) {
                     val content = node.textContent
                     val labels = getLabels(elementDefinition.id)
                     val xbrlContext = getContext(node.attr("contextRef"))
 
+                    val symbols = symbols(instanceDocument)
+                    val documentFiscalPeriodFocus = documentFiscalPeriodFocus(instanceDocument)
+                    val documentFiscalYearFocus = documentFiscalYearFocus(instanceDocument)
+                    val documentPeriodEndDate = documentPeriodEndDate(instanceDocument)
+                    val explicitMembers = xbrlContext.entity.segment?.explicitMembers ?: emptyList()
+
+                    val _id = factIdGenerator.generateId(
+                        node = node,
+                        context = xbrlContext,
+                        documentPeriodEndDate = documentPeriodEndDate
+                    )
+
+                    val instanceDocumentElementId = node.attr("id") ?: "N/A"
+                    val cik = cik(instanceDocument)
+                    val entityName = entityRegistrantName(instanceDocument)
+                    val primarySymbol = primarySymbol(instanceDocument)
+                    val formType = formType(instanceDocument)
+
+
                     Fact(
-                        _id = factIdGenerator.generateId(node, xbrlContext),
-                        instanceDocumentElementId = node.attr("id") ?: "N/A",
-                        cik = cik(instanceDocument),
-                        entityName = entityRegistrantName(instanceDocument),
-                        primarySymbol = primarySymbol(instanceDocument),
-                        symbols = symbols(instanceDocument),
-                        formType = formType(instanceDocument),
+                        _id = _id,
+                        instanceDocumentElementId = instanceDocumentElementId,
+                        cik = cik,
+                        adsh = adsh,
+                        entityName = entityName,
+                        primarySymbol = primarySymbol,
+                        symbols = symbols,
+                        formType = formType,
+
+                        canonical = isCanonical(instanceDocument, xbrlContext),
+
+                        documentFiscalPeriodFocus = documentFiscalPeriodFocus,
+                        documentFiscalYearFocus = documentFiscalYearFocus,
+                        documentPeriodEndDate = documentPeriodEndDate,
 
                         elementName = elementDefinition.name,
                         rawElementName = node.nodeName,
                         longNamespace = elementDefinition.longNamespace,
 
                         period = xbrlContext.period,
-                        explicitMembers = xbrlContext.entity.segment?.explicitMembers ?: emptyList(),
+                        explicitMembers = explicitMembers,
 
                         sourceDocument = sourceDocument(node),
 
@@ -98,7 +127,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
                         lastUpdated = Instant.now().toString(),
                     )
                 } else {
-                    log.error("Unable to find an element definition for ${node.nodeName} cik=${filingProvider.cik()} adsh=${filingProvider.adsh()}")
+                    log.error("Unable to find an element definition for ${node.nodeName} cik=${filingProvider.cik()} adsh=$adsh")
                     null
                 }
             } else {
@@ -106,10 +135,73 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 null
             }
         }
-        // TODO deduplicate the fact(s)
         val ret = facts.filterNotNull()
         log.info("Found ${ret.size} facts in $instanceDocumentFilename, out of ${facts.size} expected, after removing duplicates")
         return ret
+    }
+
+    private fun isCanonical(
+        instanceDocument: XmlElement,
+        context: XbrlContext
+    ): Boolean {
+
+        val endDate = LocalDate.parse(documentPeriodEndDate(instanceDocument))
+        /*
+        Figure out the correct period start date
+        a canonical must be for this period
+         */
+        val formType = formType(instanceDocument)
+        val startDate = if (formType == "10-K") {
+            endDate
+                .minusYears(1)
+                .plusDays(1)
+        } else {
+            YearQuarter
+                .from(endDate)
+                .minusQuarters(1)
+                .atEndOfQuarter()
+                .plusDays(1)
+        }
+
+        return (
+                context.period.instant == endDate
+                        || (context.period.startDate == startDate && context.period.endDate == endDate)
+                )
+                && context.entity.segment?.explicitMembers?.isNullOrEmpty() == true
+    }
+
+    private fun documentPeriodEndDate(instanceDocument: XmlElement): String {
+        val found = instanceDocument
+            .getElementsByTag("dei:DocumentPeriodEndDate")
+        if (found.isEmpty()) {
+            return "N/A"
+        }
+        return found
+            .first()
+            .textContent ?: "N/A"
+    }
+
+    private fun documentFiscalYearFocus(instanceDocument: XmlElement): Int {
+        val found = instanceDocument
+            .getElementsByTag("dei:DocumentFiscalYearFocus")
+        if (found.isEmpty()) {
+            return 0
+        }
+        return found
+            .first()
+            .textContent
+            .toIntOrNull() ?: 0
+    }
+
+    private fun documentFiscalPeriodFocus(instanceDocument: XmlElement): String {
+        val found = instanceDocument
+            .getElementsByTag("dei:DocumentFiscalPeriodFocus")
+        if (found.isEmpty()) {
+            return "N/A"
+        }
+        return found
+            .first()
+            .textContent ?: "N/A"
     }
 
     private fun formType(instanceDocument: XmlElement): String {
@@ -120,13 +212,13 @@ class FilingParser(private val filingProvider: FilingProvider) {
 
     private fun sourceDocument(node: Node): String {
         val cik = filingProvider.cik()
-        val adsh = filingProvider.adsh()
+        val adsh = filingProvider.adsh().replace("-", "")
         val fileName = filingProvider.inlineHtml()
         val id = node.attr("id")
         return if (id == null) {
-            "https://www.sec.gov/Archives/edgar/data/$cik/${adsh.replace("-", "")}/$fileName"
+            "https://www.sec.gov/ix?doc=/Archives/edgar/data/$cik/$adsh/$fileName"
         } else {
-            "https://www.sec.gov/Archives/edgar/data/$cik/${adsh.replace("-", "")}/$fileName#$id"
+            "https://www.sec.gov/ix?doc=/Archives/edgar/data/$cik/$adsh/$fileName#$id"
         }
     }
 

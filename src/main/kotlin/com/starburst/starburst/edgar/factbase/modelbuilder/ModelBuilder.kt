@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import java.net.URI
+import java.time.LocalDate
 
 @Service(value = "factBaseModelBuilder")
 class ModelBuilder(
@@ -237,9 +238,9 @@ class ModelBuilder(
     ): List<HistoricalValue> {
         val filteredFacts = ctx.facts
             .filter {
-                it.explicitMembers.isEmpty()
-                        && elementDefinition.name == it.elementName
-                        && it.formType == "10-K" // TODO decide this based on some intelligence
+                        elementDefinition.name == it.elementName
+                        && it.formType == "10-K"
+                        && it.canonical
             }
 
         //

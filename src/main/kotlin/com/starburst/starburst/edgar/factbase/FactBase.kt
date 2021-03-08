@@ -2,6 +2,7 @@ package com.starburst.starburst.edgar.factbase
 
 import com.mongodb.client.MongoClient
 import com.starburst.starburst.edgar.dataclasses.Fact
+import org.litote.kmongo.and
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.springframework.stereotype.Service
@@ -14,22 +15,28 @@ class FactBase(mongoClient: MongoClient) {
         .getDatabase("starburst")
         .getCollection<Fact>()
 
+    fun deleteAll(cik: String) {
+        col.deleteMany(Fact::cik eq cik)
+    }
+
     /**
      * Query the latest non-dimensional facts
      */
     fun latestNonDimensionalFacts(cik: String): Map<String, Fact> {
-        val factsByPeriod = col.find(Fact::cik eq cik).filter {
-            it.explicitMembers.isEmpty()
-        }.groupBy { it.period }
-
-        // latest duration
-        val latestDuration = factsByPeriod.entries.maxByOrNull { it.key.endDate ?: LocalDate.MIN }?.value ?: emptyList()
-
-        // latest instant
-        val latestInstant = factsByPeriod.entries.maxByOrNull { it.key.instant ?: LocalDate.MIN }?.value ?: emptyList()
-
-        return (latestDuration + latestInstant)
-            .associateBy { it.elementName }
+        val latestFacts = col.find(and(
+            Fact::cik eq cik,
+            Fact::canonical eq true
+        )).filter {
+            it.explicitMembers.isEmpty() && (
+                    it.period.endDate == LocalDate.parse(it.documentPeriodEndDate)
+            ||
+                    it.period.instant == LocalDate.parse(it.documentPeriodEndDate)
+            )
+        }
+            .groupBy { it.documentFiscalYearFocus }
+            .entries.maxByOrNull { it.key }
+            ?.value ?: emptyList()
+        return latestFacts.associateBy { it.elementName }
     }
 
     /**
@@ -37,9 +44,7 @@ class FactBase(mongoClient: MongoClient) {
      * designated by the CIK
      */
     fun allFactsForCik(cik: String): List<Fact> {
-        return col.find(
-            Fact::cik eq cik
-        ).toList()
+        return col.find(Fact::cik eq cik).toList()
     }
 
 }
