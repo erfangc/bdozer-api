@@ -1,8 +1,10 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
-data class FilingIngestionResponse(
+import com.starburst.starburst.edgar.dataclasses.Fact
+
+data class ParseFactsResponse(
+    val facts: List<Fact>,
     val documentFiscalPeriodFocus: String,
     val documentFiscalYearFocus: Int,
     val documentPeriodEndDate: String,
-    val numberOfFactsFound: Int
 )

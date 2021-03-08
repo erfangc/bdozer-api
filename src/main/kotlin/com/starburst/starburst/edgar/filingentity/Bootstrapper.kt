@@ -29,18 +29,31 @@ class Bootstrapper(
         try {
             factBase.deleteAll(cik)
 
-            for (recent10K in recent10Ks) {
+            val tenKResults = recent10Ks.map { recent10K ->
                 filingIngestor.ingestFiling(
                     cik = cik,
                     adsh = recent10K.adsh
                 )
             }
 
-            for (recent10Q in recent10Qs) {
+            val tenQResults = recent10Qs.map { recent10Q ->
                 filingIngestor.ingestFiling(
                     cik = cik,
                     adsh = recent10Q.adsh
                 )
+            }
+
+            /*
+            for every 10-K that has at least 3 10Qs backing it, back-fill Q4 data
+             */
+            for (tenK in tenKResults) {
+                val year = tenK.documentFiscalYearFocus
+                val numTenQsInYear =
+                    tenQResults.filter { tenQResult -> tenQResult.documentFiscalYearFocus == year }.size
+                if (numTenQsInYear >= 3) {
+                    log.info("Ingesting Q-4 filing for cik=$cik year=$year")
+                    filingIngestor.ingestQ4Facts(cik, year)
+                }
             }
 
             log.info("Completed bootstrapping cik=$cik")

@@ -13,8 +13,8 @@ internal class FilingParserTest {
     @Test
     fun parseFacts() {
         val obj = FilingParser(filingProvider = filingProvider())
-        val facts = obj.parseFacts()
-        assertEquals(1330, facts.size)
+        val response = obj.parseFacts()
+        assertEquals(1330, response.facts.size)
     }
 
     private fun filingProvider() = object : FilingProvider {

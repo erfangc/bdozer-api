@@ -39,6 +39,25 @@ class FactBaseController(
         }
     }
 
+
+    /**
+     * Why? b/c we only have 3 10-Qs and 1 10-K
+     * thus standalone Q4 info is missing
+     */
+    @PostMapping("filing-ingestor/q4")
+    fun ingestQ4Facts(
+        @RequestParam cik: String,
+        @RequestParam year: Int
+    ) {
+        executor.execute {
+            try {
+                filingIngestor.ingestQ4Facts(cik, year)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     @GetMapping("model-builder/{cik}/{adsh}")
     fun buildModelForFiling(@PathVariable adsh: String, @PathVariable cik: String): Model {
         return modelBuilder.buildModelForFiling(cik, adsh)

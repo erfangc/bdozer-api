@@ -30,6 +30,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
     private val schemaManager = SchemaManager(filingProvider)
     private val labelManager = LabelManager(filingProvider)
     private val instanceDocument = filingProvider.instanceDocument()
+
     /*
     create a look up of the Xbrl context objects for each fact to refer back to
      */
@@ -39,7 +40,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
 
     private val log = LoggerFactory.getLogger(FilingParser::class.java)
 
-    fun parseFacts(): List<Fact> {
+    fun parseFacts(): ParseFactsResponse {
 
         /*
         go through the instance document and
@@ -57,6 +58,11 @@ class FilingParser(private val filingProvider: FilingProvider) {
         var irrelevantTag = 0 // ex: xlink:footnote
         var irrelevantPeriod = 0 // ex: facts with context from past period
         var elementDefinitionNotFound = 0 // ex: other misc problems
+
+        // get some document level information
+        val documentFiscalPeriodFocus = documentFiscalPeriodFocus(instanceDocument)
+        val documentFiscalYearFocus = documentFiscalYearFocus(instanceDocument)
+        val documentPeriodEndDate = documentPeriodEndDate(instanceDocument)
 
         /*
         now begin processing each element as a potential fact we can create and store
@@ -84,9 +90,6 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 val labels = getLabels(elementDefinition.id)
 
                 val symbols = symbols(instanceDocument)
-                val documentFiscalPeriodFocus = documentFiscalPeriodFocus(instanceDocument)
-                val documentFiscalYearFocus = documentFiscalYearFocus(instanceDocument)
-                val documentPeriodEndDate = documentPeriodEndDate(instanceDocument)
                 val explicitMembers = context.entity.segment?.explicitMembers ?: emptyList()
                 val elementName = elementDefinition.name
 
@@ -151,7 +154,14 @@ class FilingParser(private val filingProvider: FilingProvider) {
                     "irrelevantPeriod=$irrelevantPeriod, " +
                     "elementDefinitionNotFound=$elementDefinitionNotFound"
         )
-        return distinctFacts
+
+        return ParseFactsResponse(
+            facts = distinctFacts,
+            documentFiscalPeriodFocus = documentFiscalPeriodFocus,
+            documentPeriodEndDate = documentPeriodEndDate,
+            documentFiscalYearFocus = documentFiscalYearFocus
+        )
+
     }
 
     /**
@@ -283,7 +293,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
 
     private fun lookupElementDefinition(nodeName: String): ElementDefinition? {
         val (namespace, tag) = parseInstanceNodeName(nodeName)
-        return if (namespace.isNullOrEmpty()) {
+        return if (namespace.isEmpty()) {
             null
         } else {
             schemaManager.getElementDefinition(namespace, tag)
