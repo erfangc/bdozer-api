@@ -4,10 +4,10 @@ import com.starburst.starburst.edgar.XmlElement
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
 import com.starburst.starburst.edgar.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.FactBase
+import com.starburst.starburst.edgar.factbase.FactBase.Companion.allHistoricalValues
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.edgar.utils.NodeListExtension.toList
-import com.starburst.starburst.models.HistoricalValue
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 import org.springframework.stereotype.Service
@@ -188,11 +188,10 @@ class ModelBuilder(
             // populate the historical value of the item
             //
             val latestHistoricalFact = latestHistoricalValue(elementDefinition, ctx)
-
-            //
-            // populate all historical values
-            //
-            val historicalValues = historicalValues(elementDefinition, ctx)
+            val historicalValues = ctx.facts.allHistoricalValues(
+                elmName = name,
+                explicitMembers = latestHistoricalFact?.explicitMembers ?: emptyList()
+            )
 
             Item(
                 name = name,
@@ -229,30 +228,6 @@ class ModelBuilder(
             } else {
                 duplicatedItems.first()
             }
-        }
-    }
-
-    private fun historicalValues(
-        elementDefinition: ElementDefinition,
-        ctx: ModelBuilderContext
-    ): List<HistoricalValue> {
-        val filteredFacts = ctx.facts
-            .filter {
-                        elementDefinition.name == it.elementName
-                        && it.formType == "10-K"
-            }
-
-        //
-        // now decide what is more relevant: Rolling LTM or Rolling YoY or Quarterly
-        //
-        return filteredFacts.map { fact ->
-            HistoricalValue(
-                factId = fact._id,
-                value = fact.doubleValue,
-                startDate = fact.period.startDate?.toString(),
-                endDate = fact.period.endDate?.toString(),
-                instant = fact.period.instant?.toString()
-            )
         }
     }
 
