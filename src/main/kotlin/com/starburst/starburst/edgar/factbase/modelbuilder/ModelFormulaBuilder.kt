@@ -46,9 +46,10 @@ class ModelFormulaBuilder(
                     formulateRevenueDrivenItem(item)
                 }
                 isTotalAssetDriven(item) -> {
+                    // income statement asset cannot be this
                     formulateTotalAssetDrivenItem(item)
                 }
-                isFixed(item) -> {
+                ! isRevenueDriven(item) -> {
                     formulateFixedCostItem(item)
                 }
                 isOneTime(item) -> {
@@ -173,6 +174,7 @@ class ModelFormulaBuilder(
         2. starts or ends with the correct keywords
          */
         return (balance == "credit"
+                // != true is not the same as == false, as abstract could also be null
                 && abstract != true
                 && periodType == "duration"
                 && type?.endsWith("monetaryItemType") == true)
@@ -205,26 +207,6 @@ class ModelFormulaBuilder(
         return item.copy(expression = "${item.historicalValue}")
     }
 
-    private fun isFixed(item: Item): Boolean {
-        /*
-        An item is considered a fixed expense if it does not appear to vary at all with revenue
-         */
-        val ts = alignItemToRevenue(item)
-        if (ts.size < 3) {
-            //
-            // to be safe, if there is not enough data points
-            // just assume this is not a fixed item
-            //
-            return false
-        } else {
-            //
-            // an item is considered fixed if it does not appear to vary with revenue at all
-            //
-            ts.map { it.first.value ?: 0.0 }
-        }
-        TODO("Not yet implemented")
-    }
-
     private fun formulateOneTimeItem(item: Item): Item {
         return item.copy(expression = "0.0")
     }
@@ -235,10 +217,7 @@ class ModelFormulaBuilder(
 
     private fun isRevenue(item: Item): Boolean {
         // for now assume that any balance=credit is a revenue item
-        val balance = ctx.elementDefinitionMap[item.name]?.balance
-        val periodType = ctx.elementDefinitionMap[item.name]?.periodType
-        val type = ctx.elementDefinitionMap[item.name]?.type ?: ""
-        return balance == "credit" && periodType == "duration" && type.endsWith("monetaryItemType")
+        return isCreditFlowItem(item)
     }
 
     /**
@@ -261,7 +240,24 @@ class ModelFormulaBuilder(
     }
 
     private fun isRevenueDriven(item: Item): Boolean {
-        TODO()
+        /*
+        An item is considered revenue driven if it correlates heuristically with
+        revenue
+         */
+        val ts = alignItemToRevenue(item)
+        if (ts.size < 3) {
+            //
+            // to be safe, if there is not enough data points
+            // just assume the item scales with revenue
+            //
+            return true
+        } else {
+            //
+            // an item is considered fixed if it does not appear to vary with revenue at all
+            //
+            ts.map { it.first.value ?: 0.0 }
+        }
+        TODO("Not yet implemented")
     }
 
     private fun formulateRevenueDrivenItem(item: Item): Item {
@@ -269,7 +265,8 @@ class ModelFormulaBuilder(
     }
 
     private fun isTotalAssetDriven(item: Item): Boolean {
-        TODO()
+        // TODO figure out what to do here, for now nothing happens
+        return false
     }
 
     private fun formulateTotalAssetDrivenItem(item: Item): Item {
