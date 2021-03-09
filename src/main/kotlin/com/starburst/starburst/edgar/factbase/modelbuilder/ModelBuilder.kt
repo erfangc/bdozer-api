@@ -176,10 +176,12 @@ class ModelBuilder(
                 explicitMembers = latestHistoricalFact?.explicitMembers ?: emptyList()
             )
 
+            val historicalValue = ctx.latestHistoricalValue(elementName)?.value ?: 0.0
+
             Item(
                 name = elementName,
                 description = latestHistoricalFact?.labelTerse,
-                historicalValue = ctx.latestHistoricalValue(elementName)?.value ?: 0.0,
+                historicalValue = historicalValue,
                 historicalValues = historicalValues,
                 expression = calculationArcLookup[locLabel]
                     ?.joinToString("+") { node ->
@@ -195,7 +197,7 @@ class ModelBuilder(
                         // we must look up the element definition to get it's name in the instance file
                         val weight = node.attributes.getNamedItem("weight").textContent
                         "$weight*$dependentElementName"
-                    } ?: "0.0"
+                    } ?: "$historicalValue"
             )
         }
 
