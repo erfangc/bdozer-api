@@ -1,5 +1,6 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder
 
+import com.starburst.starburst.edgar.dataclasses.ElementDefinition
 import com.starburst.starburst.edgar.dataclasses.Fact
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
@@ -8,11 +9,31 @@ import com.starburst.starburst.models.HistoricalValues
 import com.starburst.starburst.xml.XmlElement
 import kotlin.math.min
 
-data class ModelBuilderContext(
+class ModelBuilderContext(
     val calculationLinkbase: XmlElement,
     val schemaManager: SchemaManager,
     val facts: List<Fact>
 ) {
+
+    val elementDefinitionMap = mutableMapOf<String, ElementDefinition>()
+    val itemDependencyGraph = mutableMapOf<String, List<String>>()
+
+    fun putDependentItem(itemName: String, dependentItems: List<String>) {
+        itemDependencyGraph[itemName] = dependentItems
+    }
+
+    fun getDependentItems(itemName: String): List<String> {
+        return itemDependencyGraph[itemName] ?: emptyList()
+    }
+
+    fun putElementDefinition(itemName: String, elementDefinition: ElementDefinition) {
+        this.elementDefinitionMap[itemName] = elementDefinition
+    }
+
+    fun getElementDefinition(itemName: String): ElementDefinition? {
+        return elementDefinitionMap[itemName]
+    }
+
     fun allHistoricalValues(elementName: String, explicitMembers: List<XbrlExplicitMember> = emptyList()): HistoricalValues {
         return HistoricalValues(
             fiscalYear = fiscalYearHistoricalValues(elementName, explicitMembers),

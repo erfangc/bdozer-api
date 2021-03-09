@@ -24,7 +24,8 @@ import java.net.URI
 class SchemaManager(filingProvider: FilingProvider) {
 
     companion object {
-        const val XSD_NS = "http://www.w3.org/2001/XMLSchema"
+        const val xsd = "http://www.w3.org/2001/XMLSchema"
+        const val xbrli = "http://www.xbrl.org/2003/instance"
     }
 
     // TODO externalize this potentially
@@ -35,7 +36,7 @@ class SchemaManager(filingProvider: FilingProvider) {
     private val linksVisited = hashSetOf<String>()
     private val schema = filingProvider.schema()
     private val schemaFileName = filingProvider.schemaExtensionFilename()
-    private val prefix = schema.getShortNamespace(XSD_NS)?.let { "$it:" } ?: ""
+    private val prefix = schema.getShortNamespace(xsd)?.let { "$it:" } ?: ""
 
     init {
         /*
@@ -46,6 +47,22 @@ class SchemaManager(filingProvider: FilingProvider) {
         }
         linksVisited.add(schemaFileName)
         processNewSchemaIntoState(schema, schema.targetNamespace()!!, schemaFileName)
+    }
+
+    fun getElementDefinition(href: String): ElementDefinition? {
+        val uri = URI(href)
+        val link = if (uri.host == null) uri.path else "${uri.scheme}://${uri.host}${uri.path}"
+        if (!linksVisited.contains(link)) {
+            loadRemoteSchema(link)
+        }
+        return elementDefinitionsByHref[href]
+    }
+
+    fun getElementDefinition(namespace: String, nodeName: String): ElementDefinition? {
+        if (!elementDefinitionsByLongNamespace.contains(namespace)) {
+            loadRemoteSchemaByNamespace(namespace)
+        }
+        return elementDefinitionsByLongNamespace[namespace]?.get(nodeName)
     }
 
     private fun loadRemoteSchema(schemaLocation: String): Map<String, ElementDefinition> {
@@ -67,7 +84,7 @@ class SchemaManager(filingProvider: FilingProvider) {
         schemaLocation: String
     ): Map<String, ElementDefinition> {
         val newlyLoadedElementDefinitions = schema
-            .getElementsByTag(XSD_NS, "element")
+            .getElementsByTag(xsd, "element")
             .associateByElementName(namespace)
 
         linksVisited.add(schemaLocation)
@@ -78,40 +95,23 @@ class SchemaManager(filingProvider: FilingProvider) {
         return newlyLoadedElementDefinitions
     }
 
-    fun getElementDefinition(
-        namespace: String,
-        nodeName: String
-    ): ElementDefinition? {
-        if (!elementDefinitionsByLongNamespace.contains(namespace)) {
-            loadRemoteSchemaByNamespace(namespace)
-        }
-        return elementDefinitionsByLongNamespace[namespace]?.get(nodeName)
-    }
-
-    fun getElementDefinition(
-        href: String
-    ): ElementDefinition? {
-        val uri = URI(href)
-        val link = if (uri.host == null) uri.path else "${uri.scheme}://${uri.host}${uri.path}"
-        if (!linksVisited.contains(link)) {
-            loadRemoteSchema(link)
-        }
-        return elementDefinitionsByHref[href]
-    }
-
     private fun List<XmlNode>.associateByElementName(longNamespace: String): Map<String, ElementDefinition> {
         return this
             .toList()
-            .map {
-                val id = it.attr("id")
-                val name = it.attr("name") ?: error("name is not defined on $id in schema")
+            .map { node ->
+                val id = node.attr("id")
+                val name = node.attr("name") ?: error("name is not defined on $id in schema")
                 name to
                         ElementDefinition(
                             id = id ?: name,
                             longNamespace = longNamespace,
                             name = name,
-                            type = it.attr("type"),
-                            periodType = it.attr(":xbrli:periodType"),
+                            type = node.attr("type"),
+                            abstract = node.attr("abstract").toBoolean(),
+                            periodType = node.attr(xbrli, "periodType"),
+                            nillable = node.attr("nillable").toBoolean(),
+                            substitutionGroup = node.attr("substitutionGroup"),
+                            balance = node.attr(xbrli, "balance"),
                         )
             }
             .toMap()

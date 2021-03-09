@@ -23,8 +23,6 @@ data class Item(
 
     val expression: String = "0.0",
 
-    val segment: String? = null,
-
     val subscriptionRevenue: SubscriptionRevenue? = null,
 
     val percentOfTotalAsset: PercentOfTotalAsset? = null,

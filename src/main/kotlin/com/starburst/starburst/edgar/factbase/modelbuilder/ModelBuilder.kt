@@ -1,5 +1,6 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
@@ -7,12 +8,14 @@ import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.xml.XmlNode
 import org.springframework.stereotype.Service
+import java.io.File
 import java.net.URI
 
 @Service(value = "factBaseModelBuilder")
 class ModelBuilder(
     private val filingProviderFactory: FilingProviderFactory,
-    private val factBase: FactBase
+    private val factBase: FactBase,
+    private val objectMapper: ObjectMapper,
 ) {
 
     companion object {
@@ -69,7 +72,7 @@ class ModelBuilder(
         val name = ctx.entityRegistrantName()
         val symbol = ctx.tradingSymbol()
 
-        return Model(
+        val model = Model(
             name = name,
             symbol = symbol,
             incomeStatementItems = incomeStatementItems,
@@ -77,6 +80,38 @@ class ModelBuilder(
             cashFlowStatementItems = cashFlowStatementItems,
             otherItems = emptyList(),
         )
+
+        // serialize the ctx and model for unit test
+        val formulaBuilderContext = ModelFormulaBuilderContext(
+            facts = ctx.facts,
+            elementDefinitionMap = ctx.elementDefinitionMap,
+            itemDependencyGraph = ctx.itemDependencyGraph
+        )
+        if (true) {
+            objectMapper.writeValue(
+                File("src/test/resources/factbase/sample/${formulaBuilderContext.javaClass.simpleName}.json"),
+                formulaBuilderContext
+            )
+            objectMapper.writeValue(
+                File("src/test/resources/factbase/sample/${model.javaClass.simpleName}.json"),
+                model
+            )
+        }
+
+        //
+        // TODO remove duplicated items across the 3 statements, keep the one with linkage
+        //
+
+        //
+        // TODO if CF statement does not start with something from the income statement, then we need to manually fix the linkage
+        // ex: GS in CF statement uses us-gaap:ProfitLoss whereas the last line in income statement is NetIncomeLoss
+        //
+        val builder = ModelFormulaBuilder(
+            model,
+            formulaBuilderContext
+        ).buildModelFormula()
+
+        return model
     }
 
     private fun findCashFlowStatementRole(nodes: List<XmlNode>): String {
@@ -165,39 +200,57 @@ class ModelBuilder(
             //
             // the fragment is actually the id to look up by
             //
-            val elementName = elementDefinition.name
+            val itemName = elementDefinition.name
 
             //
             // populate the historical value of the item
             //
-            val latestHistoricalFact = ctx.latestFact(elementName)
+            val latestHistoricalFact = ctx.latestFact(itemName)
             val historicalValues = ctx.allHistoricalValues(
-                elementName = elementName,
+                elementName = itemName,
                 explicitMembers = latestHistoricalFact?.explicitMembers ?: emptyList()
             )
 
-            val historicalValue = ctx.latestHistoricalValue(elementName)?.value ?: 0.0
+            val historicalValue = ctx.latestHistoricalValue(itemName)?.value ?: 0.0
+
+            ctx.putElementDefinition(itemName, elementDefinition)
+
+            fun getItemNameFromNode(node: XmlNode): String {
+                val to = node.attr(xlink, "to")
+                val toHref = locsLookup[to]
+                    ?.attr(xlink, "href")
+                    ?: error("cannot find loc for $to")
+
+                // the fragment is actually the id to look up by
+                return (ctx.schemaManager.getElementDefinition(toHref)
+                    ?: error("unable to find a schema definition for $toHref")).name
+            }
+
+            val relatedCalcArcs = calculationArcLookup[locLabel]
+            val dependentItems = relatedCalcArcs?.map { node -> getItemNameFromNode(node) } ?: emptyList()
+            ctx.putDependentItem(itemName, dependentItems)
+
+            val expression = relatedCalcArcs
+                ?.joinToString("+") { node ->
+                    val dependentItemName = getItemNameFromNode(node)
+                    // we must look up the element definition to get it's name in the instance file
+                    val weight = node.attr("weight")
+                    "$weight*$dependentItemName"
+                }
+            // if there are no calculation arcs, leave the amount to be the most recent reported number
+                ?: "$historicalValue"
 
             Item(
-                name = elementName,
+                name = itemName,
                 description = latestHistoricalFact?.labelTerse,
                 historicalValue = historicalValue,
                 historicalValues = historicalValues,
-                expression = calculationArcLookup[locLabel]
-                    ?.joinToString("+") { node ->
-                        val to = node.attr(xlink, "to")
-                        val toHref = locsLookup[to]
-                            ?.attr(xlink, "href")
-                            ?: error("cannot find loc for $to")
 
-                        // the fragment is actually the id to look up by
-                        val dependentElementName = (ctx.schemaManager.getElementDefinition(toHref)
-                            ?: error("unable to find a schema definition for $toHref")).name
-
-                        // we must look up the element definition to get it's name in the instance file
-                        val weight = node.attributes.getNamedItem("weight").textContent
-                        "$weight*$dependentElementName"
-                    } ?: "$historicalValue"
+                /*
+                create formulas based on the calculationArcs define in the calculation linkbase
+                further: we should store all the dependencies in a map
+                 */
+                expression = expression
             )
         }
 
