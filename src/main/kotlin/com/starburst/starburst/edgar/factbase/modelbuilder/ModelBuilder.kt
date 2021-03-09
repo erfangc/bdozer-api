@@ -1,9 +1,6 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder
 
-import com.starburst.starburst.edgar.dataclasses.ElementDefinition
-import com.starburst.starburst.edgar.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.FactBase
-import com.starburst.starburst.edgar.factbase.FactBase.Companion.allHistoricalValues
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.models.Item
@@ -69,13 +66,12 @@ class ModelBuilder(
         their historical values are resolved via look up against the Instance document
         labels are resolved via the label document
          */
-        val name = ctx.latestNonDimensionalFacts["EntityRegistrantName"]
-        val symbol = ctx.latestNonDimensionalFacts["TradingSymbol"]
+        val name = ctx.entityRegistrantName()
+        val symbol = ctx.tradingSymbol()
 
         return Model(
-            name = name?.stringValue ?: "",
-            symbol = symbol?.stringValue ?: "",
-            tags = emptyList(),
+            name = name,
+            symbol = symbol,
             incomeStatementItems = incomeStatementItems,
             balanceSheetItems = balanceSheetItems,
             cashFlowStatementItems = cashFlowStatementItems,
@@ -103,7 +99,6 @@ class ModelBuilder(
         return ModelBuilderContext(
             calculationLinkbase = filingProvider.calculationLinkbase(),
             schemaManager = SchemaManager(filingProvider),
-            latestNonDimensionalFacts = factBase.latestNonDimensionalFacts(cik = filingProvider.cik()),
             facts = factBase.allFactsForCik(cik = filingProvider.cik())
         )
     }
@@ -170,21 +165,21 @@ class ModelBuilder(
             //
             // the fragment is actually the id to look up by
             //
-            val name = elementDefinition.name
+            val elementName = elementDefinition.name
 
             //
             // populate the historical value of the item
             //
-            val latestHistoricalFact = latestHistoricalValue(elementDefinition, ctx)
-            val historicalValues = ctx.facts.allHistoricalValues(
-                elmName = name,
+            val latestHistoricalFact = ctx.latestFact(elementName)
+            val historicalValues = ctx.allHistoricalValues(
+                elementName = elementName,
                 explicitMembers = latestHistoricalFact?.explicitMembers ?: emptyList()
             )
 
             Item(
-                name = name,
+                name = elementName,
                 description = latestHistoricalFact?.labelTerse,
-                historicalValue = latestHistoricalFact?.doubleValue ?: 0.0,
+                historicalValue = ctx.latestHistoricalValue(elementName)?.value ?: 0.0,
                 historicalValues = historicalValues,
                 expression = calculationArcLookup[locLabel]
                     ?.joinToString("+") { node ->
@@ -194,12 +189,12 @@ class ModelBuilder(
                             ?: error("cannot find loc for $to")
 
                         // the fragment is actually the id to look up by
-                        val elementName = (ctx.schemaManager.getElementDefinition(toHref)
+                        val dependentElementName = (ctx.schemaManager.getElementDefinition(toHref)
                             ?: error("unable to find a schema definition for $toHref")).name
 
                         // we must look up the element definition to get it's name in the instance file
                         val weight = node.attributes.getNamedItem("weight").textContent
-                        "$weight*$elementName"
+                        "$weight*$dependentElementName"
                     } ?: "0.0"
             )
         }
@@ -217,8 +212,4 @@ class ModelBuilder(
         }
     }
 
-    private fun latestHistoricalValue(elementDefinition: ElementDefinition, ctx: ModelBuilderContext): Fact? {
-        val nodeName = elementDefinition.name
-        return ctx.latestNonDimensionalFacts[nodeName]
-    }
 }
