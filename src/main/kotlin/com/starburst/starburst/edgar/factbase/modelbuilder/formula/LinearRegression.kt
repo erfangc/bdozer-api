@@ -15,7 +15,7 @@ package com.starburst.starburst.edgar.factbase.modelbuilder.formula
  * @author Robert Sedgewick
  * @author Kevin Wayne
  */
-class LinearRegression(x: DoubleArray, y: DoubleArray) {
+internal class LinearRegression(x: DoubleArray, y: DoubleArray) {
     private val intercept: Double
     private val slope: Double
     private val r2: Double

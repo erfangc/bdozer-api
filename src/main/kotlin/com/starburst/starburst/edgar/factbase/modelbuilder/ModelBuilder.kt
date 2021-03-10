@@ -61,19 +61,20 @@ class ModelBuilder(
             cashFlowStatementItems = helper.cashFlowStatementItems,
         )
 
-        val formulaBuilderContext = ModelFormulaBuilderContext(
+        val ctx = ModelFormulaBuilderContext(
             facts = helper.facts,
             elementDefinitionMap = helper.elementDefinitionMap,
-            itemDependencyGraph = helper.itemDependencyGraph
+            itemDependencyGraph = helper.itemDependencyGraph,
+            model = model
         )
 
         // serialize the ctx and model for unit test - comment out when not in use
-        val formulatedModel = ModelFormulaBuilder(model, formulaBuilderContext).buildModelFormula()
+        val formulatedModel = ModelFormulaBuilder(model, ctx).buildModelFormula()
 
         if (true) {
             objectMapper.writeValue(
-                File("src/test/resources/factbase/sample/${formulaBuilderContext.javaClass.simpleName}.json"),
-                formulaBuilderContext
+                File("src/test/resources/factbase/sample/${ctx.javaClass.simpleName}.json"),
+                ctx
             )
             objectMapper.writeValue(
                 File("src/test/resources/factbase/sample/${model.javaClass.simpleName}.json"),
