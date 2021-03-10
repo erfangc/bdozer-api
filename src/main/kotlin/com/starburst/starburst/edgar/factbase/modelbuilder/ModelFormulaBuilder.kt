@@ -1,7 +1,16 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder
 
-import com.starburst.starburst.edgar.factbase.Period
-import com.starburst.starburst.models.HistoricalValue
+import com.starburst.starburst.edgar.factbase.modelbuilder.ItemExtensions.nonCashChain
+import com.starburst.starburst.edgar.factbase.modelbuilder.ItemExtensions.stockBasedCompensationChain
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.formulateFixedCostItem
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.formulateOneTimeItem
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.formulateRevenueDrivenItem
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.formulateRevenueItem
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.formulateTotalAssetDrivenItem
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.isOneTime
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.isRevenue
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.isRevenueDriven
+import com.starburst.starburst.edgar.factbase.modelbuilder.ModelFormulaBuilderExtensions.isTotalAssetDriven
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
 
@@ -9,8 +18,8 @@ import com.starburst.starburst.models.Model
  * This is the brains of the automated valuation model
  */
 class ModelFormulaBuilder(
-    private val model: Model,
-    private val ctx: ModelFormulaBuilderContext
+    val model: Model,
+    val ctx: ModelFormulaBuilderContext
 ) {
 
     /**
@@ -21,13 +30,29 @@ class ModelFormulaBuilder(
      * simply 0.0 or repeating historical
      */
     fun buildModelFormula(): Model {
+        return model.copy(
+            incomeStatementItems = incomeStatement(),
+            balanceSheetItems = balanceSheet(),
+            cashFlowStatementItems = cashFlowStatement()
+        )
+    }
 
-        val formualtedIncomeStatementItems = model.incomeStatementItems.map { item ->
-            /*
-            for any items for which there exists an existing calculationArc specified
-            calculation return it without further processing
-             */
+    private fun cashFlowStatement(): List<Item> {
+        TODO("Not yet implemented")
+    }
+
+    private fun balanceSheet(): List<Item> {
+        TODO("Not yet implemented")
+    }
+
+    private fun incomeStatement(): List<Item> {
+
+        return model.incomeStatementItems.map { item ->
             val formulatedItem = when {
+                /*
+                for any items for which there exists an existing calculationArc specified
+                calculation return it without further processing
+                */
                 ctx.itemDependencyGraph[item.name]
                     ?.isNotEmpty() == true -> {
                     item
@@ -49,7 +74,7 @@ class ModelFormulaBuilder(
                     // income statement asset cannot be this
                     formulateTotalAssetDrivenItem(item)
                 }
-                ! isRevenueDriven(item) -> {
+                !isRevenueDriven(item) -> {
                     formulateFixedCostItem(item)
                 }
                 isOneTime(item) -> {
@@ -73,204 +98,10 @@ class ModelFormulaBuilder(
              */
             formulatedItem
                 .stockBasedCompensationChain()
-                .nonCashChain()
+                .nonCashChain(this)
         }
 
-        return model
     }
 
-    private fun Item.stockBasedCompensationChain(): Item {
-        return if (this.name == "ShareBasedCompensation") {
-            this.copy(stockBasedCompensation = true)
-        } else {
-            this
-        }
-    }
-
-    private fun extractTimeSeries(itemName: String, type: Period): List<HistoricalValue> {
-        val revenueItem = model.incomeStatementItems.find { it.name == itemName } ?: error("...")
-        return when (type) {
-            Period.ANNUAL -> {
-                revenueItem.historicalValues?.fiscalYear ?: emptyList()
-            }
-            Period.QUARTER -> {
-                revenueItem.historicalValues?.quarterly ?: emptyList()
-            }
-            Period.LTM -> {
-                revenueItem.historicalValues?.ltm?.let { listOf(it) } ?: emptyList()
-            }
-        }
-    }
-
-    /**
-     * helper to extract revenue time series and line up dates with some other time series
-     */
-    private fun alignItemToRevenue(item: Item, type: Period? = null): List<Pair<HistoricalValue, HistoricalValue>> {
-        return if (type == null) {
-            /*
-            in this case, lets try out each one in order, only produce something that seem to have reasonable number
-            of data points
-             */
-            val annual = alignItemToRevenueForPeriod(item, Period.ANNUAL)
-            if (annual.size > 2) {
-                annual
-            } else {
-                alignItemToRevenueForPeriod(item, Period.QUARTER)
-
-            }
-        } else {
-            alignItemToRevenueForPeriod(item, type)
-        }
-    }
-
-    /**
-     * helper to extract revenue time series and line up dates with some other time series
-     */
-    private fun alignItemToRevenueForPeriod(item: Item, type: Period): List<Pair<HistoricalValue, HistoricalValue>> {
-        val revenueTs = extractTimeSeries(itemName = expressionForTotalRevenue(), type = type)
-        val itemTs = extractTimeSeries(itemName = item.name, type = type)
-        val lookup = itemTs.associateBy { it.documentPeriodEndDate }
-        return revenueTs.mapNotNull { ts ->
-            val historicalValue = lookup[ts.endDate]
-            if (historicalValue == null) {
-                null
-            } else {
-                ts to historicalValue
-            }
-        }
-    }
-
-    private fun isDebtFlowItem(item: Item): Boolean {
-        // we find the element definition
-        val elementDefinition = ctx.elementDefinitionMap[item.name]
-        val balance = elementDefinition?.balance
-        val abstract = elementDefinition?.abstract
-        val periodType = elementDefinition?.periodType
-        val type = elementDefinition?.type
-
-        /*
-        A non cash expense is one that
-        1. is a non-abstract monetary debit item as defined by the company's XSD or us-gaap
-        2. starts or ends with the correct keywords
-         */
-        return (balance == "debit"
-                && abstract != true
-                && periodType == "duration"
-                && type?.endsWith("monetaryItemType") == true)
-    }
-
-
-    private fun isCreditFlowItem(item: Item): Boolean {
-        // we find the element definition
-        val elementDefinition = ctx.elementDefinitionMap[item.name]
-        val balance = elementDefinition?.balance
-        val abstract = elementDefinition?.abstract
-        val periodType = elementDefinition?.periodType
-        val type = elementDefinition?.type
-
-        /*
-        A non cash expense is one that
-        1. is a non-abstract monetary debit item as defined by the company's XSD or us-gaap
-        2. starts or ends with the correct keywords
-         */
-        return (balance == "credit"
-                // != true is not the same as == false, as abstract could also be null
-                && abstract != true
-                && periodType == "duration"
-                && type?.endsWith("monetaryItemType") == true)
-    }
-
-    private fun Item.nonCashChain(): Item {
-        val itemName = this.name
-        /*
-        A non cash expense is one that
-        1. is a non-abstract monetary debit item as defined by the company's XSD or us-gaap
-        2. starts or ends with the correct keywords
-         */
-        val isDebitFlowItem = isDebtFlowItem(this)
-
-        // next test whether it matches the right vocab
-        val keywords = listOf("amortization", "depreciation", "impairment")
-        val hasDesiredKeyword = keywords.any { keyword ->
-            itemName.toLowerCase().startsWith(keyword)
-                    || itemName.toLowerCase().endsWith(keyword)
-        }
-
-        return if (isDebitFlowItem && hasDesiredKeyword) {
-            this.copy(nonCashExpense = true)
-        } else {
-            this
-        }
-    }
-
-    private fun formulateFixedCostItem(item: Item): Item {
-        return item.copy(expression = "${item.historicalValue}")
-    }
-
-    private fun formulateOneTimeItem(item: Item): Item {
-        return item.copy(expression = "0.0")
-    }
-
-    private fun isOneTime(item: Item): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    private fun isRevenue(item: Item): Boolean {
-        // for now assume that any balance=credit is a revenue item
-        return isCreditFlowItem(item)
-    }
-
-    /**
-     * Figure out the correct [Item.expression] for total revenue for this company
-     * if a total revenue line is already defined, then use that otherwise create a summation expression
-     * of the individual components
-     */
-    private fun expressionForTotalRevenue(): String {
-        // see if the standard set of GAAP total revenue metrics are defined
-        return listOf(
-            "Revenues",
-            "RevenueFromContractWithCustomerExcludingAssessedTax",
-            "RevenuesNetOfInterestExpense",
-        ).find { itemName -> ctx.itemDependencyGraph.containsKey(itemName) && ctx.itemDependencyGraph[itemName]!!.isNotEmpty() }
-            ?: error("Unable to find a total revenue item")
-    }
-
-    private fun formulateRevenueItem(item: Item): Item {
-        TODO()
-    }
-
-    private fun isRevenueDriven(item: Item): Boolean {
-        /*
-        An item is considered revenue driven if it correlates heuristically with
-        revenue
-         */
-        val ts = alignItemToRevenue(item)
-        if (ts.size < 3) {
-            //
-            // to be safe, if there is not enough data points
-            // just assume the item scales with revenue
-            //
-            return true
-        } else {
-            //
-            // an item is considered fixed if it does not appear to vary with revenue at all
-            //
-            ts.map { it.first.value ?: 0.0 }
-        }
-        TODO("Not yet implemented")
-    }
-
-    private fun formulateRevenueDrivenItem(item: Item): Item {
-        TODO()
-    }
-
-    private fun isTotalAssetDriven(item: Item): Boolean {
-        // TODO figure out what to do here, for now nothing happens
-        return false
-    }
-
-    private fun formulateTotalAssetDrivenItem(item: Item): Item {
-        TODO()
-    }
 
 }
