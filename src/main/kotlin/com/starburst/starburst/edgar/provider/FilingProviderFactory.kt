@@ -1,5 +1,8 @@
 package com.starburst.starburst.edgar.provider
 
+import com.starburst.starburst.edgar.XbrlConstants.link
+import com.starburst.starburst.edgar.XbrlConstants.xlink
+import com.starburst.starburst.edgar.XbrlConstants.xsd
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
 import org.apache.http.client.HttpClient
@@ -9,12 +12,6 @@ import org.springframework.stereotype.Service
 class FilingProviderFactory(
     private val http: HttpClient
 ) {
-
-    companion object {
-        const val xlink = "http://www.w3.org/1999/xlink"
-        const val xsd = "http://www.w3.org/2001/XMLSchema"
-        const val link = "http://www.xbrl.org/2003/linkbase"
-    }
 
     fun createFilingProvider(cik: String, adsh: String): FilingProvider {
         val normalizedAdsh = adsh.replace("-", "")

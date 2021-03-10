@@ -1,5 +1,7 @@
 package com.starburst.starburst.edgar.factbase.support
 
+import com.starburst.starburst.edgar.XbrlConstants.xbrli
+import com.starburst.starburst.edgar.XbrlConstants.xsd
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
 import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
@@ -22,11 +24,6 @@ import java.net.URI
  * [SchemaManager] require full namespace
  */
 class SchemaManager(filingProvider: FilingProvider) {
-
-    companion object {
-        const val xsd = "http://www.w3.org/2001/XMLSchema"
-        const val xbrli = "http://www.xbrl.org/2003/instance"
-    }
 
     // TODO externalize this potentially
     private val http = HttpClientBuilder.create().build()
