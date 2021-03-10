@@ -113,6 +113,9 @@ object ModelFormulaBuilderExtensions {
 
     fun ModelFormulaBuilder.isOneTime(item: Item): Boolean {
         // all impairment charges are one time charges
+        if (item.name.toLowerCase().contains("impairment")) {
+
+        }
         TODO("Not yet implemented")
     }
 

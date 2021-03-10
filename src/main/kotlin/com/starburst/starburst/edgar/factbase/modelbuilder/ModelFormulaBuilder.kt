@@ -63,6 +63,9 @@ class ModelFormulaBuilder(
                 isRevenue(item) -> {
                     formulateRevenueItem(item)
                 }
+                isOneTime(item) -> {
+                    formulateOneTimeItem(item)
+                }
                 /*
                 if this is a cost item that should be revenue driven then
                 process it using [formulateRevenueDrivenItem]
@@ -71,14 +74,10 @@ class ModelFormulaBuilder(
                     formulateRevenueDrivenItem(item)
                 }
                 isTotalAssetDriven(item) -> {
-                    // income statement asset cannot be this
                     formulateTotalAssetDrivenItem(item)
                 }
                 !isRevenueDriven(item) -> {
                     formulateFixedCostItem(item)
-                }
-                isOneTime(item) -> {
-                    formulateOneTimeItem(item)
                 }
                 else -> {
                     item

@@ -34,6 +34,15 @@ class ModelBuilder(
         val ctx = buildContext(cik, adsh)
 
         /*
+         SEC require - XBRL
+            - XSD, term concept definition (ex: blk:AladdinRevenue)
+            - Instance Document (all the facts flattened out, Revenue, AladdinRevenue, ProvisionForLosses, NetIncome, OperatingCashFlow, BalanceSheet etc.)
+            - Def File -> define parent child relationships between concepts
+            - Pres File -> How to display (in which order to render - which one to bold or show as subtotal) (AladdinRevenue comes from Total Revenue, which comes before Gross Profit)
+            - Calculation File -> Income Statement / Balance Sheet / Cash Flow Statement (some times other misc.) -> which Concept add up to which one ....
+         */
+
+        /*
         step 1 - start with the calculation XML since
         from there we derive the structure of the `Model` to be created
         everything else serves as a reference (including "XBRL facts" such as actual historical values)
@@ -81,36 +90,34 @@ class ModelBuilder(
             otherItems = emptyList(),
         )
 
-        // serialize the ctx and model for unit test
         val formulaBuilderContext = ModelFormulaBuilderContext(
             facts = ctx.facts,
             elementDefinitionMap = ctx.elementDefinitionMap,
             itemDependencyGraph = ctx.itemDependencyGraph
         )
-        if (true) {
-            objectMapper.writeValue(
-                File("src/test/resources/factbase/sample/${formulaBuilderContext.javaClass.simpleName}.json"),
-                formulaBuilderContext
-            )
-            objectMapper.writeValue(
-                File("src/test/resources/factbase/sample/${model.javaClass.simpleName}.json"),
-                model
-            )
-        }
+
+        // serialize the ctx and model for unit test - comment out when not in use
+//        objectMapper.writeValue(
+//            File("src/test/resources/factbase/sample/${formulaBuilderContext.javaClass.simpleName}.json"),
+//            formulaBuilderContext
+//        )
+//        objectMapper.writeValue(
+//            File("src/test/resources/factbase/sample/${model.javaClass.simpleName}.json"),
+//            model
+//        )
 
         //
         // TODO remove duplicated items across the 3 statements, keep the one with linkage
+        // for example, NetIncomeLoss appears on both the income statement and cash flow statement
+        // remove it from places where it has no other dependencies
         //
 
         //
         // TODO if CF statement does not start with something from the income statement, then we need to manually fix the linkage
         // ex: GS in CF statement uses us-gaap:ProfitLoss whereas the last line in income statement is NetIncomeLoss
         //
-        val builder = ModelFormulaBuilder(
-            model,
-            formulaBuilderContext
-        ).buildModelFormula()
 
+        val builder = ModelFormulaBuilder(model, formulaBuilderContext).buildModelFormula()
         return model
     }
 
