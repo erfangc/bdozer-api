@@ -15,6 +15,7 @@ class ModelFormulaBuilder(
 
     private val incomeStatementFormulaGeneratorChain = listOf(
         InterestFormulaGenerator(),
+        CostOfGoodsSoldFormulaGenerator(),
         RevenueDrivenItemFormulaGenerator(),
         RevenueFormulaGenerator(),
         TaxExpenseFormulaGenerator(),

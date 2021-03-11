@@ -13,7 +13,7 @@ internal object ModelFormulaBuilderExtensions {
      * if a total revenue line is already defined, then use that otherwise create a summation expression
      * of the individual components
      */
-    fun ModelFormulaBuilderContext.expressionForTotalRevenue(): String {
+    fun ModelFormulaBuilderContext.totalRevenueExpression(): String {
         // see if the standard set of GAAP total revenue metrics are defined
         // TODO be more rigorous here
         return listOf(

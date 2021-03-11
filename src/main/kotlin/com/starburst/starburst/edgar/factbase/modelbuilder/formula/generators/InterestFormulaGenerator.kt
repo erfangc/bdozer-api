@@ -1,6 +1,5 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators
 
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.InterestExpense
 import com.starburst.starburst.models.Item
@@ -14,6 +13,6 @@ class InterestFormulaGenerator : FormulaGenerator {
     }
 
     override fun relevantForItem(item: Item, ctx: ModelFormulaBuilderContext): Boolean {
-        return item.name == InterestExpense && ctx.isDebtFlowItem(item)
+        return item.name == InterestExpense
     }
 }

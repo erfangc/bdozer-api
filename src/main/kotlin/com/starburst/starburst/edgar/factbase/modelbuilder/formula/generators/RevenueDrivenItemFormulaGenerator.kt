@@ -7,7 +7,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.Co
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.originalItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.itemTimeSeriesVsRevenue
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ModelFormulaBuilderExtensions.expressionForTotalRevenue
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ModelFormulaBuilderExtensions.totalRevenueExpression
 import com.starburst.starburst.models.Item
 
 class RevenueDrivenItemFormulaGenerator : FormulaGenerator {
@@ -38,7 +38,7 @@ class RevenueDrivenItemFormulaGenerator : FormulaGenerator {
                     This expense historically have been ${slope.fmtPct()} of revenue, on top of ${intercept.fmtRound()}
                 """.trimIndent()
                 Result(
-                    item = item.copy(expression = "$slope*(${ctx.expressionForTotalRevenue()})+$intercept"),
+                    item = item.copy(expression = "$slope*(${ctx.totalRevenueExpression()})+$intercept"),
                     commentary = commentary
                 )
             } else {
@@ -52,7 +52,7 @@ class RevenueDrivenItemFormulaGenerator : FormulaGenerator {
         this one is only relevant if the item has not been touched
          */
         val originalItem = ctx.originalItem(item.name)
-        return if (item != originalItem) {
+        return if (item.expression != originalItem?.expression) {
             false
         } else {
             ctx.isDebtFlowItem(item)

@@ -11,7 +11,7 @@ class AverageFormulaGenerator : FormulaGenerator {
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {
         val timeSeries = ctx.itemTimeSeries(itemName = item.name)
         val average = timeSeries.map { it.value ?: 0.0 }.average()
-        return if (average.isNaN() || average.isFinite()) {
+        return if (average.isNaN() || average.isInfinite()) {
             Result(item = item)
         } else{
             Result(
@@ -28,7 +28,7 @@ class AverageFormulaGenerator : FormulaGenerator {
         this one is only relevant if the item has not been touched
          */
         val originalItem = ctx.originalItem(item.name)
-        return if (item != originalItem) {
+        return if (item.expression != originalItem?.expression) {
             false
         } else {
             ctx.isDebtFlowItem(item)
