@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators
 
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ElementSemanticsExtensions.isDebtFlowItem
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.models.Item
 

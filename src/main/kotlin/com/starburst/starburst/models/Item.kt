@@ -37,9 +37,15 @@ data class Item(
 
     val nonCashExpense: Boolean? = null,
 
+    val generatorCommentary: GeneratorCommentary? = null,
+
     /**
      * [subtotal]
      */
-    val subtotal: Boolean? = null
+    val subtotal: Boolean? = null,
 )
 
+data class GeneratorCommentary(
+    val commentary: String?,
+    val generatorClass: String?,
+)

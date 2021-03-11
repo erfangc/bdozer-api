@@ -56,6 +56,7 @@ class ModelBuilder(
         val model = Model(
             name = name,
             symbol = symbol,
+            cik = cik,
             incomeStatementItems = helper.incomeStatementCalculationItems,
             balanceSheetItems = helper.balanceSheetCalculationItems,
             cashFlowStatementItems = helper.cashFlowStatementItems,
@@ -71,7 +72,7 @@ class ModelBuilder(
         // serialize the ctx and model for unit test - comment out when not in use
         val formulatedModel = ModelFormulaBuilder(model, ctx).buildModelFormula()
 
-        if (true) {
+        if (false) {
             objectMapper.writeValue(
                 File("src/test/resources/factbase/sample/${ctx.javaClass.simpleName}.json"),
                 ctx
@@ -88,20 +89,6 @@ class ModelBuilder(
         //
         log.info("Finished building model ${formulatedModel.cik} using FactBase facts")
         return formulatedModel
-    }
-
-    /**
-     * linkCalculations are grouping of calculation arcs that specifies the calculation
-     * of a single table on the financial statement report such as an income statement or balance-sheet
-     */
-    private fun linkCalculationToItems(calculationLinks: XmlNode, ctx: ModelBuilderHelper): List<Item> {
-        /*
-        to build the income statement, first find all the loc elements
-         */
-        val locs = calculationLinks.getElementsByTag(link, "loc")
-        val locsLookup = locs.associateBy { it.attr(xlink, "label") }
-        val calculationArcs = calculationLinks.getElementsByTag(link, "calculationArc")
-        TODO()
     }
 
 }

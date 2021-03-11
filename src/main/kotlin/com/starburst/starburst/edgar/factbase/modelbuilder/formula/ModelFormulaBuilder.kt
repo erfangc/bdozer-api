@@ -7,9 +7,12 @@ import com.starburst.starburst.models.Model
 /**
  * This is the brains of the automated valuation model
  */
-class ModelFormulaBuilder(val model: Model, val ctx: ModelFormulaBuilderContext) {
+class ModelFormulaBuilder(
+    val model: Model,
+    val ctx: ModelFormulaBuilderContext
+) {
 
-    private val incomeStatementGeneratorChain = listOf(
+    private val incomeStatementFormulaGeneratorChain = listOf(
         InterestFormulaGenerator(),
         NonCashExpenseGenerator(),
         OneTimeExpenseGenerator(),
@@ -17,6 +20,14 @@ class ModelFormulaBuilder(val model: Model, val ctx: ModelFormulaBuilderContext)
         RevenueFormulaGenerator(),
         StockBasedCompensationGenerator(),
         TaxExpenseFormulaGenerator(),
+    )
+
+    private val balanceSheetFormulaGeneratorChain = listOf<FormulaGenerator>(
+        AverageFormulaGenerator()
+    )
+
+    private val cashFlowStatementFormulaGeneratorChain = listOf<FormulaGenerator>(
+        AverageFormulaGenerator()
     )
 
     /**
@@ -35,21 +46,93 @@ class ModelFormulaBuilder(val model: Model, val ctx: ModelFormulaBuilderContext)
     }
 
     private fun cashFlowStatement(): List<Item> {
-        return model.cashFlowStatementItems
+        return model.cashFlowStatementItems.map { item ->
+            /*
+            skip processing for items that already have formulas
+             */
+            if (ctx.itemDependencyGraph[item.name].isNullOrEmpty()) {
+                /*
+                 this fold takes an item - and then run it through every
+                 generator in-order
+                 */
+                cashFlowStatementFormulaGeneratorChain.fold(item) { prev, generator ->
+                    /*
+                    once we encounter a generator that returned a different item than the one passed in
+                    then we stop further processing
+                     */
+                    if (prev == item) {
+                        generator.generate(prev, ctx)
+                    } else {
+                        prev
+                    }
+                }
+            } else {
+                /*
+                we do not put any items that has an existing formula through the chain
+                since their values are pre-determined
+                 */
+                item
+            }
+        }
     }
 
     private fun balanceSheet(): List<Item> {
-        return model.balanceSheetItems
+        return model.balanceSheetItems.map { item ->
+            /*
+            skip processing for items that already have formulas
+             */
+            if (ctx.itemDependencyGraph[item.name].isNullOrEmpty()) {
+                /*
+                 this fold takes an item - and then run it through every
+                 generator in-order
+                 */
+                balanceSheetFormulaGeneratorChain.fold(item) { prev, generator ->
+                    /*
+                    once we encounter a generator that returned a different item than the one passed in
+                    then we stop further processing
+                     */
+                    if (prev == item) {
+                        generator.generate(prev, ctx)
+                    } else {
+                        prev
+                    }
+                }
+            } else {
+                /*
+                we do not put any items that has an existing formula through the chain
+                since their values are pre-determined
+                 */
+                item
+            }
+        }
     }
 
     private fun incomeStatement(): List<Item> {
         return model.incomeStatementItems.map { item ->
-            // skip processing for items that already have formulas
+            /*
+            skip processing for items that already have formulas
+             */
             if (ctx.itemDependencyGraph[item.name].isNullOrEmpty()) {
-                incomeStatementGeneratorChain.fold(item) { accItem, generator ->
-                    generator.generate(accItem, ctx)
+                /*
+                 this fold takes an item - and then run it through every
+                 generator in-order
+                 */
+                incomeStatementFormulaGeneratorChain.fold(item) { prev, generator ->
+                    /*
+                    once we encounter a generator that returned a different item than the one passed in
+                    then we stop further processing
+                     */
+                    if (prev == item) {
+                        generator.generate(prev, ctx)
+                    } else {
+                        prev
+                    }
                 }
             } else {
+                /*
+                we do not put any items that has an existing formula through the chain
+                since their values are pre-determined
+                 */
                 item
             }
         }
