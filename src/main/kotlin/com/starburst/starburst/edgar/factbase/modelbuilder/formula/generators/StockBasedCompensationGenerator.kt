@@ -5,6 +5,10 @@ import com.starburst.starburst.models.Item
 
 class StockBasedCompensationGenerator: FormulaGenerator {
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Item {
-        TODO("Not yet implemented")
+        return if (item.name == "ShareBasedCompensation") {
+            item.copy(stockBasedCompensation = true)
+        } else {
+            item
+        }
     }
 }

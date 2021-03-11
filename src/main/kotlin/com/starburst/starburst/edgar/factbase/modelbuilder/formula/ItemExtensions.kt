@@ -1,7 +1,6 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula
 
 import com.starburst.starburst.edgar.factbase.Period
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderExtensions.expressionForTotalRevenue
 import com.starburst.starburst.models.HistoricalValue
 import com.starburst.starburst.models.Item
@@ -12,7 +11,7 @@ internal object ItemExtensions {
     /**
      * helper to extract revenue time series and line up dates with some other time series
      */
-    fun ModelFormulaBuilder.itemTimeSeriesVsRevenueForPeriod(
+    fun ModelFormulaBuilderContext.itemTimeSeriesVsRevenueForPeriod(
         item: Item,
         type: Period
     ): List<Pair<HistoricalValue, HistoricalValue>> {
@@ -29,7 +28,7 @@ internal object ItemExtensions {
         }
     }
 
-    fun ModelFormulaBuilder.itemTimeSeries(itemName: String, type: Period): List<HistoricalValue> {
+    fun ModelFormulaBuilderContext.itemTimeSeries(itemName: String, type: Period): List<HistoricalValue> {
         val revenueItem = model.incomeStatementItems.find { it.name == itemName } ?: error("...")
         return when (type) {
             Period.ANNUAL -> {
@@ -47,7 +46,7 @@ internal object ItemExtensions {
     /**
      * helper to extract revenue time series and line up dates with some other time series
      */
-    fun ModelFormulaBuilder.itemTimeSeriesVsRevenue(
+    fun ModelFormulaBuilderContext.itemTimeSeriesVsRevenue(
         item: Item,
         type: Period? = null
     ): List<Pair<HistoricalValue, HistoricalValue>> {
@@ -65,37 +64,6 @@ internal object ItemExtensions {
             }
         } else {
             itemTimeSeriesVsRevenueForPeriod(item, type)
-        }
-    }
-
-    fun Item.nonCashChain(builder: ModelFormulaBuilder): Item {
-        val itemName = this.name
-        /*
-        A non cash expense is one that
-        1. is a non-abstract monetary debit item as defined by the company's XSD or us-gaap
-        2. starts or ends with the correct keywords
-         */
-        val isDebitFlowItem = builder.isDebtFlowItem(this)
-
-        // next test whether it matches the right vocab
-        val keywords = listOf("amortization", "depreciation", "impairment")
-        val hasDesiredKeyword = keywords.any { keyword ->
-            itemName.toLowerCase().startsWith(keyword)
-                    || itemName.toLowerCase().endsWith(keyword)
-        }
-
-        return if (isDebitFlowItem && hasDesiredKeyword) {
-            this.copy(nonCashExpense = true)
-        } else {
-            this
-        }
-    }
-
-    fun Item.stockBasedCompensationChain(): Item {
-        return if (this.name == "ShareBasedCompensation") {
-            this.copy(stockBasedCompensation = true)
-        } else {
-            this
         }
     }
 

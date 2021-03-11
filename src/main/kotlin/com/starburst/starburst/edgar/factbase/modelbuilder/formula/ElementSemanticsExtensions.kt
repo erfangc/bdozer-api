@@ -6,9 +6,9 @@ object ElementSemanticsExtensions {
     /**
      * Debit flow items are costs / expenses (those that are typically expected to be outflows_
      */
-    fun ModelFormulaBuilder.isDebtFlowItem(item: Item): Boolean {
+    fun ModelFormulaBuilderContext.isDebtFlowItem(item: Item): Boolean {
         // we find the element definition
-        val elementDefinition = ctx.elementDefinitionMap[item.name]
+        val elementDefinition = elementDefinitionMap[item.name]
         val balance = elementDefinition?.balance
         val abstract = elementDefinition?.abstract
         val periodType = elementDefinition?.periodType
@@ -28,9 +28,9 @@ object ElementSemanticsExtensions {
     /**
      * Credit flow items are revenues / incomes (those that are typically expected to be inflows_
      */
-    fun ModelFormulaBuilder.isCreditFlowItem(item: Item): Boolean {
+    fun ModelFormulaBuilderContext.isCreditFlowItem(item: Item): Boolean {
         // we find the element definition
-        val elementDefinition = ctx.elementDefinitionMap[item.name]
+        val elementDefinition = elementDefinitionMap[item.name]
         val balance = elementDefinition?.balance
         val abstract = elementDefinition?.abstract
         val periodType = elementDefinition?.periodType
