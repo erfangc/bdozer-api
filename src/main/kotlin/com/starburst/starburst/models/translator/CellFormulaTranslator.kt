@@ -1,10 +1,10 @@
 package com.starburst.starburst.models.translator
 
-import com.starburst.starburst.spreadsheet.Cell
-import com.starburst.starburst.models.ResolverContext
 import com.starburst.starburst.models.ItemType
 import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.ResolverContext
 import com.starburst.starburst.models.translator.subtypes.*
+import com.starburst.starburst.spreadsheet.Cell
 
 /**
  * Takes cells and based on their driver resolves
@@ -33,9 +33,11 @@ class CellFormulaTranslator {
             and replace the cell's formula to be just it's historical value of the underlying item or
             driver (defaults to zero)
              */
-            if (period == 0) {
+            val translatedCell = if (period == 0) {
                 val historicalValue = item.historicalValue
-                cell.copy(formula = "$historicalValue")
+                cell.copy(
+                    formula = "$historicalValue"
+                )
             }
             /*
             Next, we find the correct formula for the cell depending on it's item and period
@@ -62,6 +64,7 @@ class CellFormulaTranslator {
                 }
             }
 
+            ExcelFormulaTranslator(ctx).translateFormula(translatedCell)
         }
     }
 }

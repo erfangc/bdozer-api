@@ -4,35 +4,39 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.*
 import com.starburst.starburst.models.GeneratorCommentary
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.slf4j.LoggerFactory
+import java.io.FileOutputStream
 
 /**
  * This is the brains of the automated valuation model
  */
-class ModelFormulaBuilder(
-    val model: Model,
-    val ctx: ModelFormulaBuilderContext
-) {
+class ModelFormulaBuilder(val model: Model, val ctx: ModelFormulaBuilderContext) {
+
+    private val log = LoggerFactory.getLogger(ModelFormulaBuilder::class.java)
 
     private val incomeStatementFormulaGeneratorChain = listOf(
-        InterestFormulaGenerator(),
-        CostOfGoodsSoldFormulaGenerator(),
-        RevenueDrivenItemFormulaGenerator(),
         RevenueFormulaGenerator(),
-        TaxExpenseFormulaGenerator(),
+        CostOfGoodsSoldFormulaGenerator(),
+        OperatingExpensesDriver(),
         OneTimeExpenseGenerator(),
-        NonCashExpenseGenerator(),
+        InterestFormulaGenerator(),
+        TaxExpenseFormulaGenerator(),
     )
 
     private val balanceSheetFormulaGeneratorChain = listOf(
+        // catch all
         AverageFormulaGenerator(),
     )
 
     private val cashFlowStatementFormulaGeneratorChain = listOf(
         OneTimeExpenseGenerator(),
         IncreaseDecreaseFormulaGenerator(),
-        AverageFormulaGenerator(),
-        NonCashExpenseGenerator(),
+        DepreciationAmortizationFormulaGenerator(),
         StockBasedCompensationGenerator(),
+        // catch all
+        AverageFormulaGenerator(),
     )
 
     /**
@@ -43,56 +47,97 @@ class ModelFormulaBuilder(
      * simply 0.0 or repeating historical
      */
     fun buildModelFormula(): Model {
+        /*
+        de-duplicate item by name,
+        the logic as follows: travel all the items arrays
+        if a repeat is found, discard it
+         */
+        val seenSoFar = hashSetOf<Item>()
+        fun removeDuplicates(items: List<Item>): List<Item> {
+            return items
+                .mapNotNull { item ->
+                    if (seenSoFar.contains(item)) {
+                        log.info("Removed duplicate item ${item.name}")
+                        null
+                    } else {
+                        seenSoFar.add(item)
+                        item
+                    }
+                }
+        }
+
+        val incomeStatementItems = removeDuplicates(model.incomeStatementItems)
+        val balanceSheetItems = removeDuplicates(model.balanceSheetItems)
+        val cashFlowItems = removeDuplicates(model.cashFlowStatementItems)
+
         return model.copy(
-            incomeStatementItems = incomeStatement(),
-            balanceSheetItems = balanceSheet(),
-            cashFlowStatementItems = cashFlowStatement()
+            incomeStatementItems = incomeStatementFormulaGeneratorChain.process(incomeStatementItems),
+            balanceSheetItems = balanceSheetFormulaGeneratorChain.process(balanceSheetItems),
+            cashFlowStatementItems = cashFlowStatementFormulaGeneratorChain.process(cashFlowItems)
         )
     }
 
     private fun List<FormulaGenerator>.process(items: List<Item>): List<Item> {
-        return items.map { originalItem ->
-            if (ctx.itemDependencyGraph[originalItem.name].isNullOrEmpty()) {
-                fold(originalItem) {
-                        prevItem, generator ->
-                    if (generator.relevantForItem(prevItem, ctx)) {
-                        val result = generator.generate(prevItem, ctx)
-                        /*
-                        if the next iteration differs from the previous
-                        then add any commentaries + append processor class info for
-                        debugging
-                         */
-                        if (result.item != prevItem || result.commentary != null) {
-                            result.item.copy(
-                                generatorCommentaries = prevItem.generatorCommentaries +
-                                        GeneratorCommentary(
-                                            commentary = result.commentary,
-                                            generatorClass = generator::class.java.simpleName
-                                        )
-                            )
-                        } else {
-                            prevItem
-                        }
-                    } else {
-                        prevItem
-                    }
-                }
+        return items.map { item ->
+            if (ctx.itemDependencyGraph[item.name].isNullOrEmpty()) {
+                /*
+                process a single item by going down the chain and finding the first formula generator
+                that would accept this item
+                */
+                val generator = find { generator -> generator.relevantForItem(item, ctx) }
+                generator?.generate(item, ctx)?.let { result ->
+                    log.info("Found generator ${className(generator)} for ${item.name}")
+                    result.item.copy(
+                        generatorCommentaries = listOf(generatorCommentary(result, generator))
+                    )
+                } ?: item
             } else {
-                originalItem
+                item
             }
         }
     }
 
-    private fun cashFlowStatement(): List<Item> {
-        return cashFlowStatementFormulaGeneratorChain.process(model.cashFlowStatementItems)
+    private fun generatorCommentary(
+        result: Result,
+        generator: FormulaGenerator
+    ) = GeneratorCommentary(
+        commentary = result.commentary,
+        generatorClass = className(generator)
+    )
+
+    private fun className(generator: FormulaGenerator) = generator::class.java.simpleName
+
+}
+
+fun main() {
+
+    val wb: Workbook = XSSFWorkbook()
+    val sheet1 = wb.createSheet()
+    val sheet2 = wb.createSheet()
+    val sheet3 = wb.createSheet()
+    val sheet4 = wb.createSheet()
+
+    val fileOut = FileOutputStream("workbook.xlsx")
+
+    val arr = arrayOf(
+        doubleArrayOf(1.0, 2.0, 3.0),
+        doubleArrayOf(4.0, 5.0, 6.0),
+        doubleArrayOf(7.0, 8.0, 9.0),
+    )
+
+    arr.forEachIndexed { row, doubles ->
+        doubles.forEachIndexed { column, value ->
+            val row = if (sheet1.getRow(row) == null) {
+                sheet1.createRow(row)
+            } else {
+                sheet1.getRow(row)
+            }
+            val cell = row.createCell(column)
+            cell.setCellValue(value)
+        }
     }
 
-    private fun balanceSheet(): List<Item> {
-        return balanceSheetFormulaGeneratorChain.process(model.balanceSheetItems)
-    }
-
-    private fun incomeStatement(): List<Item> {
-        return incomeStatementFormulaGeneratorChain.process(model.incomeStatementItems)
-    }
-
+    wb.write(fileOut)
+    fileOut.close()
+    wb.close()
 }

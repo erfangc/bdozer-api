@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 object CommentaryExtensions {
-    fun Double?.fmtRound(precision: Int = 1): String {
+    fun Double?.fmtRound(precision: Int = 0): String {
         return if (this == null) {
             "0%"
         } else {

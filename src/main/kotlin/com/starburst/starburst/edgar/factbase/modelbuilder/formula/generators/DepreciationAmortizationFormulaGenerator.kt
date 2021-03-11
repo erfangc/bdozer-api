@@ -4,7 +4,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaB
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.models.Item
 
-class NonCashExpenseGenerator : FormulaGenerator {
+class DepreciationAmortizationFormulaGenerator : FormulaGenerator {
 
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {
         return Result(

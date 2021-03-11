@@ -8,7 +8,7 @@ class IncreaseDecreaseFormulaGenerator : FormulaGenerator {
 
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {
         // first see if this item varies with revenue - if not then use an average
-        val result = RevenueDrivenItemFormulaGenerator()
+        val result = OperatingExpensesDriver()
             .generate(item, ctx)
         return if (result.item != item) {
             result

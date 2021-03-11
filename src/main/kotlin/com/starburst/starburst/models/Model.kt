@@ -38,6 +38,9 @@ data class Model(
      */
     val periods: Int = 5,
 
+    val excelColumnOffset: Int = 1,
+    val excelRowOffset: Int = 1,
+
     val updatedAt: Instant = Instant.now(),
     val updatedBy: String? = null
 )

@@ -8,6 +8,7 @@ data class Cell(
     val item: Item,
     val value: Double? = null,
     val formula: String? = null,
+    val excelFormula: String? = null,
     val address: Address? = null,
     val dependentCellNames: List<String> = emptyList()
 )

@@ -141,7 +141,7 @@ class ModelBuilderHelper(
         cashFlowStatementItems = cashFlowStatementCalculationLink.toItems()
 
         log.info(
-            "Finished initializing ${ModelBuilderHelper::class.java}, " +
+            "Finished initializing ${ModelBuilderHelper::class.java.simpleName}, " +
                     "calculationArcs=${calculationArcs.size}, " +
                     "locatorRefs=${effectiveLocatorLookup.size}, " +
                     "incomeStatementRole=$incomeStatementRole, " +
@@ -242,15 +242,25 @@ class ModelBuilderHelper(
 
         // if there are no calculation arcs
         // leave the amount to be the most recent reported number
-        val expression = relatedCalcArcs
-            ?.joinToString("+") { node ->
-                val dependentItemName = getItemNameFromNode(node)
-                // we must look up the element definition
-                // to get it's name in the instance file
-                val weight = node.attr("weight")
-                "$weight*$dependentItemName"
+        val expression = if (relatedCalcArcs == null) {
+            "$historicalValue"
+        } else {
+            val positives = relatedCalcArcs.filter { node -> node.attr("weight")?.toDouble() == 1.0 }
+                .joinToString("+") { node -> getItemNameFromNode(node) }
+            val negatives = relatedCalcArcs.filter { node -> node.attr("weight")?.toDouble() == -1.0 }
+                .joinToString("-") { node -> getItemNameFromNode(node) }
+            when {
+                negatives.isBlank() -> {
+                    positives
+                }
+                positives.isBlank() -> {
+                    negatives
+                }
+                else -> {
+                    "$positives-$negatives"
+                }
             }
-            ?: "$historicalValue"
+        }
 
         return Item(
             name = itemName,
