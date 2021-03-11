@@ -4,10 +4,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.*
 import com.starburst.starburst.models.GeneratorCommentary
 import com.starburst.starburst.models.Item
 import com.starburst.starburst.models.Model
-import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
-import java.io.FileOutputStream
 
 /**
  * This is the brains of the automated valuation model
@@ -97,10 +94,7 @@ class ModelFormulaBuilder(val model: Model, val ctx: ModelFormulaBuilderContext)
         }
     }
 
-    private fun generatorCommentary(
-        result: Result,
-        generator: FormulaGenerator
-    ) = GeneratorCommentary(
+    private fun generatorCommentary(result: Result, generator: FormulaGenerator) = GeneratorCommentary(
         commentary = result.commentary,
         generatorClass = className(generator)
     )
