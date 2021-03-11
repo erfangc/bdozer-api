@@ -29,7 +29,10 @@ internal object ItemValueExtractorsExtension {
         }
     }
 
-    fun ModelFormulaBuilderContext.item(name: String): Item? {
+    /**
+     * Return the original item before any formula generator could modify it
+     */
+    fun ModelFormulaBuilderContext.originalItem(name: String): Item? {
         val model = this.model
         return (model.incomeStatementItems +
                 model.balanceSheetItems +

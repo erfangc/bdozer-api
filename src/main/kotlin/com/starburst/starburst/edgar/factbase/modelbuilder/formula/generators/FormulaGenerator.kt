@@ -4,5 +4,6 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaB
 import com.starburst.starburst.models.Item
 
 interface FormulaGenerator {
-    fun generate(item: Item, ctx: ModelFormulaBuilderContext): Item
+    fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result
+    fun relevantForItem(item: Item, ctx: ModelFormulaBuilderContext): Boolean
 }
