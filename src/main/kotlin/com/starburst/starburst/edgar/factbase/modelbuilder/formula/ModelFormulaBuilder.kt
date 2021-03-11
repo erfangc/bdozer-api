@@ -9,7 +9,7 @@ import com.starburst.starburst.models.Model
  */
 class ModelFormulaBuilder(val model: Model, val ctx: ModelFormulaBuilderContext) {
 
-    val incomeStatementGeneratorChain = listOf(
+    private val incomeStatementGeneratorChain = listOf(
         InterestFormulaGenerator(),
         NonCashExpenseGenerator(),
         OneTimeExpenseGenerator(),
@@ -54,6 +54,5 @@ class ModelFormulaBuilder(val model: Model, val ctx: ModelFormulaBuilderContext)
             }
         }
     }
-
 
 }
