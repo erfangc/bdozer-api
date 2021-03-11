@@ -29,6 +29,7 @@ class ModelFormulaBuilder(
 
     private val cashFlowStatementFormulaGeneratorChain = listOf(
         OneTimeExpenseGenerator(),
+        IncreaseDecreaseFormulaGenerator(),
         AverageFormulaGenerator(),
         NonCashExpenseGenerator(),
         StockBasedCompensationGenerator(),

@@ -28,10 +28,6 @@ class AverageFormulaGenerator : FormulaGenerator {
         this one is only relevant if the item has not been touched
          */
         val originalItem = ctx.originalItem(item.name)
-        return if (item.expression != originalItem?.expression) {
-            false
-        } else {
-            ctx.isDebtFlowItem(item)
-        }
+        return item.expression != originalItem?.expression
     }
 }

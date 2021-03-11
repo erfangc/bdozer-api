@@ -4,6 +4,20 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaB
 import com.starburst.starburst.models.Item
 
 object ElementSemanticsExtensions {
+
+    /**
+     * Is flow item
+     */
+    fun ModelFormulaBuilderContext.isFlowItem(item: Item): Boolean {
+        val elementDefinition = elementDefinitionMap[item.name]
+        val type = elementDefinition?.type
+        val abstract = elementDefinition?.abstract
+        val periodType = elementDefinition?.periodType
+        return ( abstract != true
+                && periodType == "duration"
+                && type?.endsWith("monetaryItemType") == true)
+    }
+
     /**
      * Debit flow items are costs / expenses (those that are typically expected to be outflows_
      */
