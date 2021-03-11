@@ -108,36 +108,3 @@ class ModelFormulaBuilder(val model: Model, val ctx: ModelFormulaBuilderContext)
     private fun className(generator: FormulaGenerator) = generator::class.java.simpleName
 
 }
-
-fun main() {
-
-    val wb: Workbook = XSSFWorkbook()
-    val sheet1 = wb.createSheet()
-    val sheet2 = wb.createSheet()
-    val sheet3 = wb.createSheet()
-    val sheet4 = wb.createSheet()
-
-    val fileOut = FileOutputStream("workbook.xlsx")
-
-    val arr = arrayOf(
-        doubleArrayOf(1.0, 2.0, 3.0),
-        doubleArrayOf(4.0, 5.0, 6.0),
-        doubleArrayOf(7.0, 8.0, 9.0),
-    )
-
-    arr.forEachIndexed { row, doubles ->
-        doubles.forEachIndexed { column, value ->
-            val row = if (sheet1.getRow(row) == null) {
-                sheet1.createRow(row)
-            } else {
-                sheet1.getRow(row)
-            }
-            val cell = row.createCell(column)
-            cell.setCellValue(value)
-        }
-    }
-
-    wb.write(fileOut)
-    fileOut.close()
-    wb.close()
-}
