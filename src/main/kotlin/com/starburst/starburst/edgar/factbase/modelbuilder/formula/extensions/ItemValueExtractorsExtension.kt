@@ -3,8 +3,8 @@ package com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions
 import com.starburst.starburst.edgar.factbase.Period
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.NameExpressionExtensions.totalRevenueExpression
-import com.starburst.starburst.models.HistoricalValue
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.dataclasses.HistoricalValue
+import com.starburst.starburst.models.dataclasses.Item
 
 
 internal object ItemValueExtractorsExtension {

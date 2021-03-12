@@ -7,7 +7,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.Co
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.originalItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.dataclasses.Item
 import org.springframework.stereotype.Service
 import java.lang.Double.max
 import java.lang.Double.min

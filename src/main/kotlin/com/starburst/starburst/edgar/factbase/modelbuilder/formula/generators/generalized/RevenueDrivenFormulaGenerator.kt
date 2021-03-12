@@ -2,8 +2,6 @@ package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.g
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.LinearRegression
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeTaxExpenseBenefit
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.InterestExpense
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
@@ -11,7 +9,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.It
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.NameExpressionExtensions.totalRevenueExpression
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.dataclasses.Item
 import org.springframework.stereotype.Service
 
 @Service
@@ -59,9 +57,8 @@ class RevenueDrivenFormulaGenerator : FormulaGenerator {
      * this one is only relevant if the item has not been touched
      */
     override fun relevantForItem(item: Item, ctx: ModelFormulaBuilderContext): Boolean {
-        // TODO do this for all things that roll up to operating expenses
         return ctx.isDebtFlowItem(item)
-                && !listOf(InterestExpense, IncomeTaxExpenseBenefit).contains(item.name)
+                && ctx.isDependentOn(item.name, "OperatingIncomeLoss")
     }
 
 }

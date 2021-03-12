@@ -6,7 +6,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Fo
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized.AverageFormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized.RevenueDrivenFormulaGenerator
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.dataclasses.Item
 import org.springframework.stereotype.Service
 
 @Service

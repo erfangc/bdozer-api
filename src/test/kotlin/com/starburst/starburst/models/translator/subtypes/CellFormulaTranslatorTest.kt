@@ -1,8 +1,8 @@
 package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.translator.subtypes.ModelToCellTranslatorTest.Companion.pcCorp
+import com.starburst.starburst.models.translator.subtypes.CellGeneratorTest.Companion.pcCorp
 import com.starburst.starburst.models.translator.CellFormulaTranslator
-import com.starburst.starburst.models.translator.ModelToCellTranslator
+import com.starburst.starburst.models.translator.CellGenerator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -13,7 +13,7 @@ internal class CellFormulaTranslatorTest {
         val model = pcCorp()
         val results = CellFormulaTranslator().populateCellsWithFormulas(
             model,
-            ModelToCellTranslator().generateCells(model)
+            CellGenerator().generateCells(model)
         )
 
         Assertions.assertEquals(12, results.size)

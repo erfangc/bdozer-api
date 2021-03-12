@@ -1,48 +1,63 @@
-package com.starburst.starburst.edgar.factbase.modelbuilder.builder
+package com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator
 
 import com.starburst.starburst.edgar.XbrlConstants.link
 import com.starburst.starburst.edgar.XbrlConstants.xlink
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
 import com.starburst.starburst.edgar.dataclasses.Fact
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
-import com.starburst.starburst.edgar.factbase.modelbuilder.builder.HistoricalValueExtension.allHistoricalValues
-import com.starburst.starburst.edgar.factbase.modelbuilder.builder.HistoricalValueExtension.latestHistoricalValue
-import com.starburst.starburst.edgar.factbase.modelbuilder.builder.RoleRefsExtensions.findBalanceSheetRole
-import com.starburst.starburst.edgar.factbase.modelbuilder.builder.RoleRefsExtensions.findCashFlowStatementRole
-import com.starburst.starburst.edgar.factbase.modelbuilder.builder.RoleRefsExtensions.findIncomeStatementRole
+import com.starburst.starburst.edgar.factbase.modelbuilder.DependencyFlattener
+import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.HistoricalValueExtensions.allHistoricalValues
+import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.HistoricalValueExtensions.latestHistoricalValue
+import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findBalanceSheetRole
+import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findCashFlowStatementRole
+import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findIncomeStatementRole
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProvider
-import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.xml.XmlNode
 import org.slf4j.LoggerFactory
 
 /**
- * [FactBaseModelBuilder] performs the heavily lifting of
+ * [SkeletonGenerator] performs the heavily lifting of
  * parsing XMLs (most of it done in init {} block)
  */
-class FactBaseModelBuilder(
+class SkeletonGenerator(
     val filingProvider: FilingProvider,
     val schemaManager: SchemaManager,
     val facts: List<Fact>,
 ) {
 
-    private val log = LoggerFactory.getLogger(FactBaseModelBuilder::class.java)
-
-    private fun XmlNode.label() = this.attr(xlink, "label")
-    private fun XmlNode.href() = this.attr(xlink, "href")
-
-    private val calculationLinkbase: XmlElement = filingProvider.calculationLinkbase()
-
-    val elementDefinitionMap = mutableMapOf<String, ElementDefinition>()
-    val itemDependencyGraph = mutableMapOf<String, List<String>>()
-
-    val incomeStatementCalculationLink: XmlNode
-    val balanceSheetCalculationLink: XmlNode
-    val cashFlowStatementCalculationLink: XmlNode
+    private val log = LoggerFactory.getLogger(SkeletonGenerator::class.java)
 
     val model: Model
+
+    /**
+     * A lookup map from itemName (XML tag name) -> the XML [ElementDefinition] declared in either the
+     * GAAP or extension XSD, this faciliates lookup of an item to it's definition in the XSDs
+     * but in a type-safe manner
+     */
+    val elementDefinitionMap = mutableMapOf<String, ElementDefinition>()
+
+    /**
+     * This is a immediate item dependency graph, without flattening out
+     * transitive dependencies. This is directly populated from calculationArc(s)
+     * from the Edgar XBRL calculation link base XML files. To see transitive dependencies
+     * flattend out see [flattenedItemDependencyGraph]
+     */
+    val itemDependencyGraph = mutableMapOf<String, List<String>>()
+
+    /**
+     * This is a item dependency graph except flattened out
+     * via DFS algorithm
+     *
+     * Thus, if `Net Income = Revenue - Operating Expenses`
+     * and `Operating Expenses = R&D + Marketing`
+     * then in this graph, look up for Net Income will result in
+     * `["Revenue", "R&D", "Marketing"]`
+     */
+    val flattenedItemDependencyGraph: Map<String, Set<String>>
 
     /**
      * [items] hold a mapping between locator label -> [Item]
@@ -54,25 +69,33 @@ class FactBaseModelBuilder(
     val balanceSheetCalculationItems: List<Item>
     val cashFlowStatementItems: List<Item>
 
+    private fun XmlNode.label() = this.attr(xlink, "label")
+    private fun XmlNode.href() = this.attr(xlink, "href")
+    private val calculationLinkbase: XmlElement = filingProvider.calculationLinkbase()
+
+    private val incomeStatementCalculationLink: XmlNode
+    private val balanceSheetCalculationLink: XmlNode
+    private val cashFlowStatementCalculationLink: XmlNode
+
     /**
      * [effectiveLocatorLookup] is a mapping of locator labels to other locator labels
      * when duplicate locators are found, this mapping enable one to traverse
      * from the duplicate to the meaningful locator
      */
 
-    val effectiveLocatorLookup: Map<String?, String?>
+    private val effectiveLocatorLookup: Map<String?, String?>
 
     /**
      * [originalLocatorLookup] is a mapping of locator labels to their loc [XmlNode]
      * as it was declared in the calculation linkbase XML
      */
-    val originalLocatorLookup: Map<String?, XmlNode?>
+    private val originalLocatorLookup: Map<String?, XmlNode?>
 
     /**
      * [calculationArcs] is a mapping of locator labels to 'child'
      * labels as defined by xlink:to XML attr in any calculation arcs
      */
-    val calculationArcs: Map<String?, List<XmlNode>>
+    private val calculationArcs: Map<String?, List<XmlNode>>
 
     /**
      * Most of the heavy lifting of parsing calculation link base XML
@@ -80,7 +103,7 @@ class FactBaseModelBuilder(
      * as this is the point at which we collate and clean, map all the locator and arc data
      */
     init {
-        log.info("Initializing ${FactBaseModelBuilder::class.java.simpleName}")
+        log.info("Initializing ${SkeletonGenerator::class.java.simpleName}")
 
         /*
         start with the calculation XML since
@@ -155,16 +178,6 @@ class FactBaseModelBuilder(
         balanceSheetCalculationItems = balanceSheetCalculationLink.toItems()
         cashFlowStatementItems = cashFlowStatementCalculationLink.toItems()
 
-        log.info(
-            "Finished initializing ${FactBaseModelBuilder::class.java.simpleName}, " +
-                    "calculationArcs=${calculationArcs.size}, " +
-                    "locatorRefs=${effectiveLocatorLookup.size}, " +
-                    "incomeStatementRole=$incomeStatementRole, " +
-                    "balanceSheetRole=$balanceSheetRole, " +
-                    "cashFlowStatementRole=$cashFlowStatementRole"
-        )
-
-
         /*
         as we encounter "location"s we create placeholder for them as Item(s)
         their historical values are resolved via look up against the Instance document
@@ -172,14 +185,35 @@ class FactBaseModelBuilder(
          */
         val name = entityRegistrantName()
         val symbol = tradingSymbol()
+        val cik = filingProvider.cik()
 
         model = Model(
             name = name,
             symbol = symbol,
-            cik = filingProvider.cik(),
+            cik = cik,
             incomeStatementItems = incomeStatementCalculationItems,
             balanceSheetItems = balanceSheetCalculationItems,
             cashFlowStatementItems = cashFlowStatementItems,
+        )
+
+        /*
+        Create a flattened out dependency graph as well
+        this graph would flow from aggregate item to a list of items
+        dependent up on it TODO this will be used to determine if an item flows into OperatingExpense, Revenue etc.
+         */
+        flattenedItemDependencyGraph = DependencyFlattener(itemDependencyGraph).flatten()
+
+        log.info(
+            "Finished initializing " +
+                    "symbol=$symbol, " +
+                    "name=$name, " +
+                    "cik=$cik, " +
+                    "${SkeletonGenerator::class.java.simpleName}, " +
+                    "calculationArcs=${calculationArcs.size}, " +
+                    "locatorRefs=${effectiveLocatorLookup.size}, " +
+                    "incomeStatementRole=$incomeStatementRole, " +
+                    "balanceSheetRole=$balanceSheetRole, " +
+                    "cashFlowStatementRole=$cashFlowStatementRole"
         )
     }
 
@@ -271,7 +305,7 @@ class FactBaseModelBuilder(
         after figuring out dependent items from calculationArcs, store this dependency
         in the context's graph for downstream processor
         */
-        putDependentItem(itemName, dependentItems)
+        itemDependencyGraph[itemName] = dependentItems
 
         // if there are no calculation arcs
         // leave the amount to be the most recent reported number
@@ -309,24 +343,8 @@ class FactBaseModelBuilder(
         val elementDefinition = locHref?.let { href ->
             schemaManager.getElementDefinition(href)
         } ?: error("Unable to find element definition name for $locHref")
-        putElementDefinition(elementDefinition.name, elementDefinition)
+        elementDefinitionMap[elementDefinition.name] = elementDefinition
         return elementDefinition
-    }
-
-    fun putDependentItem(itemName: String, dependentItems: List<String>) {
-        itemDependencyGraph[itemName] = dependentItems
-    }
-
-    fun getDependentItems(itemName: String): List<String> {
-        return itemDependencyGraph[itemName] ?: emptyList()
-    }
-
-    fun putElementDefinition(itemName: String, elementDefinition: ElementDefinition) {
-        this.elementDefinitionMap[itemName] = elementDefinition
-    }
-
-    fun getElementDefinition(itemName: String): ElementDefinition? {
-        return elementDefinitionMap[itemName]
     }
 
     fun entityRegistrantName(): String {
@@ -343,7 +361,7 @@ class FactBaseModelBuilder(
             ?.stringValue ?: ""
     }
 
-    fun latestFact(elementName: String, explicitMembers: List<XbrlExplicitMember> = emptyList()): Fact? {
+    private fun latestFact(elementName: String, explicitMembers: List<XbrlExplicitMember> = emptyList()): Fact? {
         return facts
             .filter { it.elementName == elementName && it.explicitMembers == explicitMembers }
             .maxByOrNull { it.documentPeriodEndDate }

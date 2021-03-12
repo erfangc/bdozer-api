@@ -1,11 +1,11 @@
 package com.starburst.starburst.models.translator.subtypes
 
 import com.starburst.starburst.models.translator.CellFormulaTranslator
-import com.starburst.starburst.models.translator.ModelToCellTranslator
+import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.models.ResolverContext
-import com.starburst.starburst.models.ItemType
-import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.dataclasses.ItemType
+import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
 import org.junit.jupiter.api.Test
 
@@ -31,7 +31,7 @@ internal class GenericTranslatorTest {
         )
 
         val cells = CellFormulaTranslator()
-            .populateCellsWithFormulas(model, ModelToCellTranslator().generateCells(model = model))
+            .populateCellsWithFormulas(model, CellGenerator().generateCells(model = model))
 
         val ctx = ResolverContext(
             model = model,

@@ -1,5 +1,9 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions
 
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
+import com.starburst.starburst.models.dataclasses.GeneratorCommentary
+import com.starburst.starburst.models.dataclasses.Item
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -20,5 +24,12 @@ object CommentaryExtensions {
             val scaledAndRounded = BigDecimal(this * 100.0).setScale(precision, RoundingMode.HALF_EVEN)
             "$scaledAndRounded%"
         }
+    }
+
+    fun FormulaGenerator.withCommentary(result: Result): Item {
+        val clazz = this::class.java.simpleName
+        return result.item.copy(
+            generatorCommentaries = listOf(GeneratorCommentary(commentary = result.commentary, generatorClass = clazz))
+        )
     }
 }

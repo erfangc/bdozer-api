@@ -4,7 +4,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaB
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isCreditFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.Util.previous
 import org.springframework.stereotype.Service
 

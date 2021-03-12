@@ -2,8 +2,8 @@ package com.starburst.starburst.models.crud
 
 import com.mongodb.client.MongoClient
 import com.starburst.starburst.authn.AuthenticationFilter.Companion.decodeJWT
-import com.starburst.starburst.models.Model
-import com.starburst.starburst.models.ModelHistory
+import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.dataclasses.ModelHistory
 import com.starburst.starburst.models.builders.ModelBuilder
 import com.starburst.starburst.models.builders.SkeletonModel.dropbox
 import org.litote.kmongo.*

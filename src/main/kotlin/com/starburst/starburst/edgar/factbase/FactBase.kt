@@ -2,13 +2,9 @@ package com.starburst.starburst.edgar.factbase
 
 import com.mongodb.client.MongoClient
 import com.starburst.starburst.edgar.dataclasses.Fact
-import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
-import com.starburst.starburst.models.HistoricalValue
-import com.starburst.starburst.models.HistoricalValues
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.springframework.stereotype.Service
-import kotlin.math.min
 
 @Service
 class FactBase(mongoClient: MongoClient) {

@@ -1,7 +1,8 @@
 package com.starburst.starburst.models.translator
 
-import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.ExcelFormulaTranslator
+import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.spreadsheet.Address
 import com.starburst.starburst.spreadsheet.Cell
 import org.apache.poi.ss.usermodel.CellType
@@ -10,22 +11,25 @@ import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.OutputStream
 
 /**
  * Takes in a list of drivers + items
  * and creates a flat representation which cells at each period
  * thus forming a 2-dimensional sheet of cells similar to a spreadsheet
  *
- * [ModelToCellTranslator] does not resolve the dependencies in between cells or populate / validate the expressions
+ * [CellGenerator] does not resolve the dependencies in between cells or populate / validate the expressions
  * the cells will be created with the required references and names only - it's like a skeleton without any of the
  * math
  */
-class ModelToCellTranslator {
+class CellGenerator {
 
     companion object {
 
-        fun exportToXls(model: Model, evaluatedCells: List<Cell>): ByteArrayInputStream {
+        fun exportToXls(model: Model, cells: List<Cell>): ByteArrayInputStream {
+            val xlsFormulaTranslator = ExcelFormulaTranslator(cells)
+            val formulatedCells = cells.map { cell ->
+                xlsFormulaTranslator.convertCellFormulaToXlsFormula(cell)
+            }
 
             fun Sheet.writeHeader(items: List<Item>) {
                 val row1 = this.createRow(model.excelRowOffset - 1)
@@ -55,7 +59,7 @@ class ModelToCellTranslator {
             val sheet4 = wb.createSheet()
             sheet4.writeHeader(model.otherItems)
 
-            evaluatedCells.forEach { cell ->
+            formulatedCells.forEach { cell ->
                 val address = cell.address ?: error("...")
                 val sheet = wb.getSheetAt(address.sheet)
                 val targetRow = address.row - 1
@@ -78,9 +82,7 @@ class ModelToCellTranslator {
     }
 
     fun generateCells(model: Model): List<Cell> {
-
         val periods = model.periods
-
         return (0..periods).flatMap { period ->
 
             val column = period + model.excelColumnOffset
@@ -172,7 +174,12 @@ class ModelToCellTranslator {
             5 -> "F"
             6 -> "G"
             7 -> "H"
-            else -> "I"
+            8 -> "I"
+            9 -> "J"
+            10 -> "K"
+            11 -> "L"
+            12 -> "M"
+            else -> "N"
         }
     }
 

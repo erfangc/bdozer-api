@@ -3,7 +3,7 @@ package com.starburst.starburst.edgar.factbase
 import com.starburst.starburst.edgar.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.FilingIngestor
 import com.starburst.starburst.edgar.factbase.modelbuilder.factory.ModelFactory
-import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.dataclasses.Model
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.Executors
 

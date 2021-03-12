@@ -1,7 +1,7 @@
 package com.starburst.starburst.dcf
 
-import com.starburst.starburst.models.Model
-import com.starburst.starburst.models.ModelEvaluationOutput
+import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.dataclasses.ModelEvaluationOutput
 import com.starburst.starburst.models.ReservedItemNames.FreeCashFlow
 import com.starburst.starburst.models.ReservedItemNames.FreeCashFlowPerShare
 import com.starburst.starburst.spreadsheet.Cell

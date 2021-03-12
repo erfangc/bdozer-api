@@ -1,8 +1,8 @@
 package com.starburst.starburst.spreadsheet.evaluation
 
 import com.starburst.starburst.models.translator.CellFormulaTranslator
-import com.starburst.starburst.models.translator.ModelToCellTranslator
-import com.starburst.starburst.models.translator.subtypes.ModelToCellTranslatorTest
+import com.starburst.starburst.models.translator.CellGenerator
+import com.starburst.starburst.models.translator.subtypes.CellGeneratorTest
 import com.starburst.starburst.models.translator.subtypes.CustomDriverFormulaTranslatorTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -13,11 +13,11 @@ internal class CellEvaluatorTest {
 
     @Test
     fun evaluate() {
-        val model = ModelToCellTranslatorTest.pcCorp()
+        val model = CellGeneratorTest.pcCorp()
         val results = CellEvaluator().evaluate(
             cells = CellFormulaTranslator().populateCellsWithFormulas(
                 model = model,
-                cells = ModelToCellTranslator().generateCells(model)
+                cells = CellGenerator().generateCells(model)
             )
         )
 
@@ -40,7 +40,7 @@ internal class CellEvaluatorTest {
         val results = CellEvaluator().evaluate(
             cells = CellFormulaTranslator().populateCellsWithFormulas(
                 model = model,
-                cells = ModelToCellTranslator().generateCells(model)
+                cells = CellGenerator().generateCells(model)
             )
         )
         Assertions.assertEquals(9, results.size)
@@ -54,7 +54,7 @@ internal class CellEvaluatorTest {
             CellEvaluator().evaluate(
                 cells = CellFormulaTranslator().populateCellsWithFormulas(
                     model = model,
-                    cells = ModelToCellTranslator().generateCells(model)
+                    cells = CellGenerator().generateCells(model)
                 )
             )
         }

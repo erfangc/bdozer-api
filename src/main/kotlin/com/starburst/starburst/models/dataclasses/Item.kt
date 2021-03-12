@@ -1,4 +1,4 @@
-package com.starburst.starburst.models
+package com.starburst.starburst.models.dataclasses
 
 import com.starburst.starburst.models.translator.subtypes.dataclasses.*
 
@@ -45,7 +45,3 @@ data class Item(
     val subtotal: Boolean? = null,
 )
 
-data class GeneratorCommentary(
-    val commentary: String?,
-    val generatorClass: String?,
-)

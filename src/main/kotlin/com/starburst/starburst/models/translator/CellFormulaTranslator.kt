@@ -1,8 +1,8 @@
 package com.starburst.starburst.models.translator
 
-import com.starburst.starburst.models.ItemType
-import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.ResolverContext
+import com.starburst.starburst.models.dataclasses.ItemType
+import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.translator.subtypes.*
 import com.starburst.starburst.spreadsheet.Cell
 
@@ -22,10 +22,8 @@ class CellFormulaTranslator {
         val ctx = ResolverContext(model = model, cells = cells)
 
         return cells.map { cell ->
-
             val item = cell.item
             val period = cell.period
-
 
             /*
             First, handle the initial case where the cell represents an Item at period = 0
@@ -33,7 +31,7 @@ class CellFormulaTranslator {
             and replace the cell's formula to be just it's historical value of the underlying item or
             driver (defaults to zero)
              */
-            val translatedCell = if (period == 0) {
+            val updatedCell = if (period == 0) {
                 val historicalValue = item.historicalValue
                 cell.copy(
                     formula = "$historicalValue"
@@ -63,8 +61,7 @@ class CellFormulaTranslator {
                         .translateFormula(cell)
                 }
             }
-
-            ExcelFormulaTranslator(ctx).translateFormula(translatedCell)
+            updatedCell
         }
     }
 }

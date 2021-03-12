@@ -1,13 +1,13 @@
-package com.starburst.starburst.edgar.factbase.modelbuilder.builder
+package com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator
 
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
-import com.starburst.starburst.models.HistoricalValue
-import com.starburst.starburst.models.HistoricalValues
+import com.starburst.starburst.models.dataclasses.HistoricalValue
+import com.starburst.starburst.models.dataclasses.HistoricalValues
 import kotlin.math.min
 
-object HistoricalValueExtension {
+object HistoricalValueExtensions {
 
-    fun FactBaseModelBuilder.allHistoricalValues(
+    fun SkeletonGenerator.allHistoricalValues(
         elementName: String,
         explicitMembers: List<XbrlExplicitMember> = emptyList()
     ): HistoricalValues {
@@ -18,7 +18,7 @@ object HistoricalValueExtension {
         )
     }
 
-    fun FactBaseModelBuilder.latestHistoricalValue(
+    fun SkeletonGenerator.latestHistoricalValue(
         elementName: String,
         explicitMembers: List<XbrlExplicitMember> = emptyList()
     ): HistoricalValue? {
@@ -48,7 +48,7 @@ object HistoricalValueExtension {
         }
     }
 
-    fun FactBaseModelBuilder.ltm(
+    fun SkeletonGenerator.ltm(
         elementName: String,
         explicitMembers: List<XbrlExplicitMember> = emptyList()
     ): HistoricalValue? {
@@ -107,7 +107,7 @@ object HistoricalValueExtension {
         }
     }
 
-    fun FactBaseModelBuilder.fiscalYearHistoricalValues(
+    fun SkeletonGenerator.fiscalYearHistoricalValues(
         elementName: String,
         explicitMembers: List<XbrlExplicitMember> = emptyList()
     ): List<HistoricalValue> {
@@ -135,7 +135,7 @@ object HistoricalValueExtension {
             }
     }
 
-    fun FactBaseModelBuilder.quarterlyHistoricalValues(
+    fun SkeletonGenerator.quarterlyHistoricalValues(
         elementName: String,
         explicitMembers: List<XbrlExplicitMember> = emptyList()
     ): List<HistoricalValue> {

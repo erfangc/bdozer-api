@@ -2,7 +2,7 @@ package com.starburst.starburst.models.builders
 
 import com.starburst.starburst.Provier.fictitiousSaaSCompany
 import com.starburst.starburst.models.ReservedItemNames
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.dataclasses.Item
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

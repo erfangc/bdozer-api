@@ -1,202 +1,224 @@
+package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.itemized
+
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized.AverageFormulaGenerator
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized.OneTimeExpenseGenerator
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized.PercentOfRevenueFormulaGenerator
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized.RevenueDrivenFormulaGenerator
+import com.starburst.starburst.models.dataclasses.Item
 import org.springframework.stereotype.Service
 
 @Service
-class ItemizedFormulaGenerator : FormulaGenerator {
+class ItemizedFormulaGenerator(
+    /*
+    Itemized formula generators
+     */
+    private val revenueFormulaGenerator: RevenueFormulaGenerator,
+    private val interestFormulaGenerator: InterestFormulaGenerator,
+    private val taxExpenseFormulaGenerator: TaxExpenseFormulaGenerator,
+    private val stockBasedCompensationGenerator: StockBasedCompensationGenerator,
+
+    /*
+    Generalized formula generators
+     */
+    private val averageFormulaGenerator: AverageFormulaGenerator,
+    private val oneTimeExpenseGenerator: OneTimeExpenseGenerator,
+    private val percentOfRevenueFormulaGenerator: PercentOfRevenueFormulaGenerator,
+    private val revenueDrivenFormulaGenerator: RevenueDrivenFormulaGenerator,
+) : FormulaGenerator {
 
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {
         return when (item.name) {
             "AccountsPayableCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "AccountsReceivableNetCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "AccruedLiabilitiesandOtherLiabilitiesCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "AccumulatedOtherComprehensiveIncomeLossNetOfTax" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "AdditionalPaidInCapital" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "AssetImpairmentCharges" -> {
-                Result(item = item, commentary = "")
+                oneTimeExpenseGenerator.generate(item, ctx)
             }
             "AvailableForSaleSecuritiesDebtSecuritiesCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "CapitalizedContractCostAmortization" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "CashAndCashEquivalentsAtCarryingValue" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "CommitmentsAndContingencies" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "CommonStockValue" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "ContractWithCustomerLiabilityCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "CostOfGoodsAndServicesSold" -> {
-                Result(item = item, commentary = "")
+                percentOfRevenueFormulaGenerator.generate(item, ctx)
             }
             "DeprecationDepletionAndAmortizationExcludingAmortizationOfDeferredSalesCommissions" -> {
-                Result(item = item, commentary = "")
+                percentOfRevenueFormulaGenerator.generate(item, ctx)
             }
             "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "EmployeeRelatedLiabilitiesCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "EquitySecuritiesFvNiGainLoss" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "FinanceLeaseLiabilityCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "FinanceLeaseLiabilityNoncurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "FinanceLeasePrincipalPayments" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "GeneralAndAdministrativeExpense" -> {
-                Result(item = item, commentary = "")
+                revenueDrivenFormulaGenerator.generate(item, ctx)
             }
             "Goodwill" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncomeTaxExpenseBenefit" -> {
-                Result(item = item, commentary = "")
+                taxExpenseFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseInAccountsAndOtherReceivables" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseInAccountsPayable" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseInAccruedLiabilitiesAndOtherLiabilities" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseInContractWithCustomerLiability" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseInEmployeeRelatedLiabilities" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseInOtherNoncurrentLiabilities" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseInOtherOperatingAssets" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IncreaseDecreaseTenantImprovementAllowanceReimbursement" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "IntangibleAssetsNetExcludingGoodwill" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "InterestExpense" -> {
-                Result(item = item, commentary = "")
+                interestFormulaGenerator.generate(item, ctx)
             }
             "InterestIncomeExpenseNonoperatingNet" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "OperatingLeaseLiabilityCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "OperatingLeaseLiabilityNoncurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "OperatingLeaseRightOfUseAsset" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "OtherAssetsNoncurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "OtherLiabilitiesNoncurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "OtherNoncashIncomeExpense" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "OtherNonoperatingIncomeExpense" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PaymentsForProceedsFromOtherInvestingActivities" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PaymentsForRepurchaseOfCommonStock" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PaymentsOfStockIssuanceCosts" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PaymentsRelatedToTaxWithholdingForShareBasedCompensation" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PaymentsToAcquireAvailableForSaleSecuritiesDebt" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PaymentsToAcquireBusinessesNetOfCashAcquired" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PaymentsToAcquireIntangibleAssets" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PaymentsToAcquirePropertyPlantAndEquipment" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PreferredStockValue" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "PrepaidExpenseAndOtherAssetsCurrent" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "ProceedsFromIssuanceInitialPublicOffering" -> {
-                Result(item = item, commentary = "")
+                oneTimeExpenseGenerator.generate(item, ctx)
             }
             "ProceedsFromIssuanceOfCommonStock" -> {
-                Result(item = item, commentary = "")
+                oneTimeExpenseGenerator.generate(item, ctx)
             }
             "ProceedsFromMaturitiesPrepaymentsAndCallsOfShorttermInvestments" -> {
-                Result(item = item, commentary = "")
+                oneTimeExpenseGenerator.generate(item, ctx)
             }
             "ProceedsFromPaymentsForOtherFinancingActivities" -> {
-                Result(item = item, commentary = "")
+                oneTimeExpenseGenerator.generate(item, ctx)
             }
             "ProceedsFromSaleOfShortTermInvestments" -> {
-                Result(item = item, commentary = "")
+                oneTimeExpenseGenerator.generate(item, ctx)
             }
             "PropertyPlantAndEquipmentNet" -> {
-                Result(item = item, commentary = "")
+                revenueDrivenFormulaGenerator.generate(item, ctx)
             }
             "ResearchAndDevelopmentExpense" -> {
-                Result(item = item, commentary = "")
+                revenueDrivenFormulaGenerator.generate(item, ctx)
             }
             "RetainedEarningsAccumulatedDeficit" -> {
-                Result(item = item, commentary = "")
+                averageFormulaGenerator.generate(item, ctx)
             }
             "RevenueFromContractWithCustomerExcludingAssessedTax" -> {
-                Result(item = item, commentary = "")
+                revenueFormulaGenerator.generate(item, ctx)
             }
             "SellingAndMarketingExpense" -> {
-                Result(item = item, commentary = "")
+                revenueDrivenFormulaGenerator.generate(item, ctx)
             }
             "ShareBasedCompensation" -> {
-                Result(item = item, commentary = "")
+                stockBasedCompensationGenerator.generate(item, ctx)
             }
             else -> Result(item = item)
         }
@@ -204,6 +226,6 @@ class ItemizedFormulaGenerator : FormulaGenerator {
     }
 
     override fun relevantForItem(item: Item, ctx: ModelFormulaBuilderContext): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 }

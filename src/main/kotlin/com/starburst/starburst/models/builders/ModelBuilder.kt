@@ -1,9 +1,9 @@
 package com.starburst.starburst.models.builders
 
 import com.starburst.starburst.dcf.DCFCalculator
-import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.Model
-import com.starburst.starburst.models.ModelEvaluationOutput
+import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.dataclasses.ModelEvaluationOutput
 import com.starburst.starburst.models.ReservedItemNames.CapitalExpenditure
 import com.starburst.starburst.models.ReservedItemNames.ChangeInWorkingCapital
 import com.starburst.starburst.models.ReservedItemNames.CostOfGoodsSold
@@ -30,7 +30,7 @@ import com.starburst.starburst.models.ReservedItemNames.TotalLiability
 import com.starburst.starburst.models.Util.previous
 import com.starburst.starburst.models.builders.SkeletonModel.dropbox
 import com.starburst.starburst.models.translator.CellFormulaTranslator
-import com.starburst.starburst.models.translator.ModelToCellTranslator
+import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import org.springframework.stereotype.Service
 import java.util.*
@@ -38,7 +38,7 @@ import java.util.*
 @Service
 class ModelBuilder {
 
-    private val modelToCellTranslator = ModelToCellTranslator()
+    private val modelToCellTranslator = CellGenerator()
 
     private fun sanitize(formula: String): String {
         // if the formula is empty then return 0

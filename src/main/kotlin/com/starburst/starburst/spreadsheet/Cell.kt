@@ -1,6 +1,6 @@
 package com.starburst.starburst.spreadsheet
 
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.dataclasses.Item
 
 data class Cell(
     val period: Int,

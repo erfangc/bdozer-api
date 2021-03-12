@@ -1,4 +1,4 @@
-package com.starburst.starburst.models
+package com.starburst.starburst.models.dataclasses
 
 import java.time.Instant
 import java.util.*
@@ -38,6 +38,9 @@ data class Model(
      */
     val periods: Int = 5,
 
+    /**
+     * Excel metadata
+     */
     val excelColumnOffset: Int = 1,
     val excelRowOffset: Int = 1,
 

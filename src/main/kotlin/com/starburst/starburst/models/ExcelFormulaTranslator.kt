@@ -1,32 +1,24 @@
-package com.starburst.starburst.models.translator
+package com.starburst.starburst.models
 
-import com.starburst.starburst.models.ResolverContext
-import com.starburst.starburst.models.translator.subtypes.FormulaTranslator
 import com.starburst.starburst.spreadsheet.Cell
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token
 
-
-/**
- * [GenericTranslator] resolves a [Cell] whose value is linked to an [Item] with [Item.expression] populated.
- * Normally [Item]'s expression is the sum of drivers - [Item] may take on value specified by [Item.expression]. This resolver
- * populates such expression with real cells
- *
- */
-class ExcelFormulaTranslator(ctx: ResolverContext) : FormulaTranslator {
-
-    //
-    // create a lookup dictionary of item/driver names -> cell names
-    // the first layer of the lookup is by period, the second layer of the map
-    // is by name
-    //
-    private val lookup = ctx.cells.associateBy { it.name }
+class ExcelFormulaTranslator(private val cells:List<Cell>) {
 
     /**
      * The primary job is to tokenize the expression of a given [Item] and replace
      * the generic tokens with actual cell names as well as populate the dependency tree
      */
-    override fun translateFormula(cell: Cell): Cell {
+    fun convertCellFormulaToXlsFormula(cell: Cell): Cell {
+
+        //
+        // create a lookup dictionary of item/driver names -> cell names
+        // the first layer of the lookup is by period, the second layer of the map
+        // is by name
+        //
+        val lookup = cells.associateBy { it.name }
+
         val origEl = Expression(cell.formula)
 
         val tokens = mutableListOf<String>()

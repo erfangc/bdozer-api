@@ -1,12 +1,14 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.itemTimeSeriesVsRevenue
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.NameExpressionExtensions.totalRevenueExpression
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
-import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.dataclasses.Item
 import org.springframework.stereotype.Service
 
 @Service
@@ -27,6 +29,7 @@ class PercentOfRevenueFormulaGenerator : FormulaGenerator {
     }
 
     override fun relevantForItem(item: Item, ctx: ModelFormulaBuilderContext): Boolean {
-        TODO("Not yet implemented")
+        val isCogsMember = ctx.isDependentOn(item.name, USGaapConstants.CostOfGoodsAndServicesSold)
+        return ctx.isDebtFlowItem(item) && isCogsMember
     }
 }

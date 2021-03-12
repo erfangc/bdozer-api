@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.filingentity.dataclasses
 
-import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.dataclasses.Model
 
 data class FilingEntity(
     val _id: String,

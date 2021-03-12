@@ -1,8 +1,8 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.models.Item
-import com.starburst.starburst.models.ItemType
-import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.ItemType
+import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.ReservedItemNames
 import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfRevenue
 import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue

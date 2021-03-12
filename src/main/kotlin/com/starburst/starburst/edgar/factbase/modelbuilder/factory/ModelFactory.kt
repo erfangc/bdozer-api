@@ -3,10 +3,10 @@ package com.starburst.starburst.edgar.factbase.modelbuilder.factory
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilder
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
-import com.starburst.starburst.edgar.factbase.modelbuilder.builder.FactBaseModelBuilder
+import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.SkeletonGenerator
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
-import com.starburst.starburst.models.Model
+import com.starburst.starburst.models.dataclasses.Model
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -19,9 +19,9 @@ class ModelFactory(
 
     private val log = LoggerFactory.getLogger(ModelFactory::class.java)
 
-    private fun createBuilder(cik: String, adsh: String): FactBaseModelBuilder {
+    private fun skeletonGenerator(cik: String, adsh: String): SkeletonGenerator {
         val filingProvider = filingProviderFactory.createFilingProvider(cik, adsh)
-        return FactBaseModelBuilder(
+        return SkeletonGenerator(
             filingProvider = filingProvider,
             schemaManager = SchemaManager(filingProvider),
             facts = factBase.allFactsForCik(cik = filingProvider.cik())
@@ -36,20 +36,19 @@ class ModelFactory(
         /*
         high levels overview
          */
-        val builder = createBuilder(cik, adsh)
+        val skeletonGenerator = skeletonGenerator(cik, adsh)
 
         val ctx = ModelFormulaBuilderContext(
-            facts = builder.facts,
-            elementDefinitionMap = builder.elementDefinitionMap,
-            itemDependencyGraph = builder.itemDependencyGraph,
-            model = builder.model
+            facts = skeletonGenerator.facts,
+            elementDefinitionMap = skeletonGenerator.elementDefinitionMap,
+            itemDependencyGraph = skeletonGenerator.itemDependencyGraph,
+            flattenedItemDependencyGraph = skeletonGenerator.flattenedItemDependencyGraph,
+            model = skeletonGenerator.model
         )
 
-        // serialize the ctx and model for unit test - comment out when not in use
-        val formulatedModel = modelFormulaBuilder.buildModelFormula(ctx)
-
-        log.info("Finished building model ${formulatedModel.cik} using FactBase facts")
-        return formulatedModel
+        val model = modelFormulaBuilder.buildModel(ctx)
+        log.info("Finished building model ${model.cik} using FactBase facts")
+        return model
     }
 
 }
