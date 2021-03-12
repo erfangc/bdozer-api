@@ -43,32 +43,59 @@ class CellGenerator {
             val moneyStyle = moneyStyle(wb)
 
             fun Sheet.writeHeader(items: List<Item>) {
-                val row1 = this.createRow(model.excelRowOffset - 1)
+
+                val yearRow = this.createRow(model.excelRowOffset - 1)
                 for (period in 0..periods) {
                     val year = LocalDate.now().year + period
-                    val cell = row1
+                    val cell = yearRow
                         .createCell(period + model.excelColumnOffset)
                     cell.setCellValue("FY$year")
                     cell.cellStyle = yearStyle
                 }
-                items.forEachIndexed { row, item ->
-                    this
-                        .createRow(row + model.excelRowOffset)
-                        .createCell(model.excelColumnOffset - 1)
-                        .setCellValue(item.description ?: item.name)
+                items.forEachIndexed { rowNumber, item ->
+                    val row = this.createRow(rowNumber + model.excelRowOffset)
+                    val labelCell = row.createCell(model.excelColumnOffset - 1)
+                    labelCell.setCellValue(item.description ?: item.name)
+                    val itemCommentary = item.generatorCommentaries.joinToString("\n") {
+                        it.commentary ?: ""
+                    }
+                    if (itemCommentary.isNotBlank()) {
+                        /*
+                        apparently all of this idiocy is needed for
+                        XLS comments, as comments are stored as rich text objects separate from the cell
+                        see: http://poi.apache.org/components/spreadsheet/quick-guide.html#CellComments
+                         */
+                        val factory = wb.creationHelper
+                        val anchor = factory.createClientAnchor()
+
+                        anchor.setCol1(labelCell.columnIndex)
+                        anchor.setCol2(labelCell.columnIndex + 1)
+                        anchor.row1 = row.rowNum
+                        anchor.row2 = row.rowNum + 3
+
+                        val drawing = createDrawingPatriarch()
+                        val comment = drawing.createCellComment(anchor)
+                        comment.string = factory.createRichTextString(itemCommentary)
+                        comment.author = "Bot"
+                        labelCell.cellComment = comment
+                    }
                 }
             }
 
             val sheet1 = wb.createSheet(incomeStatementSheetName)
+            sheet1.defaultColumnWidth = 17
             sheet1.writeHeader(model.incomeStatementItems)
 
             val sheet2 = wb.createSheet(balanceSheetName)
+            sheet2.defaultColumnWidth = 17
             sheet2.writeHeader(model.balanceSheetItems)
 
             val sheet3 = wb.createSheet(cashFlowSheetName)
+            sheet3.defaultColumnWidth = 17
             sheet3.writeHeader(model.cashFlowStatementItems)
 
             val sheet4 = wb.createSheet(otherSheetName)
+            sheet4.defaultColumnWidth = 17
             sheet4.writeHeader(model.otherItems)
 
             formulatedCells.forEach { cell ->

@@ -124,10 +124,9 @@ class FilingEntityManager(
                     statusMessage = "Completed"
                 )
                 col.save(updated)
-
-                log.error("Completed bootstrapping and initial model building cik=${entity.cik}")
+                log.info("Completed bootstrapping and initial model building cik=${entity.cik}")
             } catch (e: Exception) {
-                log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}")
+                log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}", e)
             }
         }
 

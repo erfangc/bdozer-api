@@ -1,14 +1,13 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
-import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.edgar.dataclasses.*
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.utils.LocalDateExtensions.toLocalDate
+import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.xml.XmlNode
 import org.slf4j.LoggerFactory
-import org.threeten.extra.YearQuarter
 import org.w3c.dom.Node
 import java.time.Instant
 import java.time.LocalDate
@@ -179,9 +178,9 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 .minusYears(1)
                 .plusDays(1)
         } else {
-            YearQuarter
-                .from(endDate)
-                .atDay(1)
+            endDate
+                .minusMonths(3)
+                .plusDays(1)
         }
 
         val period = context.period

@@ -54,7 +54,6 @@ internal object ItemValueExtractorsExtension {
                 annual
             } else {
                 itemTimeSeriesVsRevenueForPeriod(item, Period.QUARTER)
-
             }
         } else {
             itemTimeSeriesVsRevenueForPeriod(item, type)
