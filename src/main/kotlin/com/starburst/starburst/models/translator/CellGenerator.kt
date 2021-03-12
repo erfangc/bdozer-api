@@ -6,8 +6,7 @@ import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.spreadsheet.Address
 import com.starburst.starburst.spreadsheet.Cell
 import org.apache.poi.ss.usermodel.*
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import java.io.ByteArrayInputStream
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 
@@ -39,7 +38,7 @@ class CellGenerator {
             val periods = model.periods
             val formulatedCells = addXlsFormulaToCells(cells)
 
-            val wb: Workbook = XSSFWorkbook()
+            val wb = SXSSFWorkbook()
             val yearStyle = yearStyle(wb)
             val moneyStyle = moneyStyle(wb)
 
