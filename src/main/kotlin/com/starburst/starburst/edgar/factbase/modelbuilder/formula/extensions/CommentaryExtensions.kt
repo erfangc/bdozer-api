@@ -6,7 +6,7 @@ import java.math.RoundingMode
 object CommentaryExtensions {
     fun Double?.fmtRound(precision: Int = 0): String {
         return if (this == null) {
-            "0%"
+            "0"
         } else {
             val scaledAndRounded = BigDecimal(this).setScale(precision, RoundingMode.HALF_EVEN)
             "$scaledAndRounded"

@@ -1,12 +1,15 @@
-package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators
+package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.itemTimeSeries
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.originalItem
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
 import com.starburst.starburst.models.Item
+import org.springframework.stereotype.Service
 
+@Service
 class AverageFormulaGenerator : FormulaGenerator {
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {
         val timeSeries = ctx.itemTimeSeries(itemName = item.name)

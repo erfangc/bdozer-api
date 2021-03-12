@@ -1,31 +1,39 @@
-package com.starburst.starburst.edgar.factbase.modelbuilder.helper
+package com.starburst.starburst.edgar.factbase.modelbuilder.builder
 
 import com.starburst.starburst.edgar.XbrlConstants.link
 import com.starburst.starburst.edgar.XbrlConstants.xlink
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
 import com.starburst.starburst.edgar.dataclasses.Fact
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
-import com.starburst.starburst.edgar.factbase.modelbuilder.helper.HistoricalValueExtension.allHistoricalValues
-import com.starburst.starburst.edgar.factbase.modelbuilder.helper.HistoricalValueExtension.latestHistoricalValue
-import com.starburst.starburst.edgar.factbase.modelbuilder.helper.RoleRefsExtensions.findBalanceSheetRole
-import com.starburst.starburst.edgar.factbase.modelbuilder.helper.RoleRefsExtensions.findCashFlowStatementRole
-import com.starburst.starburst.edgar.factbase.modelbuilder.helper.RoleRefsExtensions.findIncomeStatementRole
+import com.starburst.starburst.edgar.factbase.modelbuilder.builder.HistoricalValueExtension.allHistoricalValues
+import com.starburst.starburst.edgar.factbase.modelbuilder.builder.HistoricalValueExtension.latestHistoricalValue
+import com.starburst.starburst.edgar.factbase.modelbuilder.builder.RoleRefsExtensions.findBalanceSheetRole
+import com.starburst.starburst.edgar.factbase.modelbuilder.builder.RoleRefsExtensions.findCashFlowStatementRole
+import com.starburst.starburst.edgar.factbase.modelbuilder.builder.RoleRefsExtensions.findIncomeStatementRole
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
+import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.models.Item
+import com.starburst.starburst.models.Model
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.xml.XmlNode
 import org.slf4j.LoggerFactory
 
-class ModelBuilderHelper(
-    val calculationLinkbase: XmlElement,
+/**
+ * [FactBaseModelBuilder] performs the heavily lifting of
+ * parsing XMLs (most of it done in init {} block)
+ */
+class FactBaseModelBuilder(
+    val filingProvider: FilingProvider,
     val schemaManager: SchemaManager,
     val facts: List<Fact>,
 ) {
 
-    private val log = LoggerFactory.getLogger(ModelBuilderHelper::class.java)
+    private val log = LoggerFactory.getLogger(FactBaseModelBuilder::class.java)
 
     private fun XmlNode.label() = this.attr(xlink, "label")
     private fun XmlNode.href() = this.attr(xlink, "href")
+
+    private val calculationLinkbase: XmlElement = filingProvider.calculationLinkbase()
 
     val elementDefinitionMap = mutableMapOf<String, ElementDefinition>()
     val itemDependencyGraph = mutableMapOf<String, List<String>>()
@@ -33,6 +41,8 @@ class ModelBuilderHelper(
     val incomeStatementCalculationLink: XmlNode
     val balanceSheetCalculationLink: XmlNode
     val cashFlowStatementCalculationLink: XmlNode
+
+    val model: Model
 
     /**
      * [items] hold a mapping between locator label -> [Item]
@@ -64,8 +74,13 @@ class ModelBuilderHelper(
      */
     val calculationArcs: Map<String?, List<XmlNode>>
 
+    /**
+     * Most of the heavy lifting of parsing calculation link base XML
+     * is actually done in here in the initialization of the helper
+     * as this is the point at which we collate and clean, map all the locator and arc data
+     */
     init {
-        log.info("Initializing ${ModelBuilderHelper::class.java.simpleName}")
+        log.info("Initializing ${FactBaseModelBuilder::class.java.simpleName}")
 
         /*
         start with the calculation XML since
@@ -141,12 +156,30 @@ class ModelBuilderHelper(
         cashFlowStatementItems = cashFlowStatementCalculationLink.toItems()
 
         log.info(
-            "Finished initializing ${ModelBuilderHelper::class.java.simpleName}, " +
+            "Finished initializing ${FactBaseModelBuilder::class.java.simpleName}, " +
                     "calculationArcs=${calculationArcs.size}, " +
                     "locatorRefs=${effectiveLocatorLookup.size}, " +
                     "incomeStatementRole=$incomeStatementRole, " +
                     "balanceSheetRole=$balanceSheetRole, " +
                     "cashFlowStatementRole=$cashFlowStatementRole"
+        )
+
+
+        /*
+        as we encounter "location"s we create placeholder for them as Item(s)
+        their historical values are resolved via look up against the Instance document
+        labels are resolved via the label document
+         */
+        val name = entityRegistrantName()
+        val symbol = tradingSymbol()
+
+        model = Model(
+            name = name,
+            symbol = symbol,
+            cik = filingProvider.cik(),
+            incomeStatementItems = incomeStatementCalculationItems,
+            balanceSheetItems = balanceSheetCalculationItems,
+            cashFlowStatementItems = cashFlowStatementItems,
         )
     }
 

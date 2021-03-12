@@ -1,12 +1,16 @@
-package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators
+package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.patternbased
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.itemTimeSeriesVsRevenue
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ModelFormulaBuilderExtensions.totalRevenueExpression
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.NameExpressionExtensions.totalRevenueExpression
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
 import com.starburst.starburst.models.Item
+import org.springframework.stereotype.Service
 
+@Service
 class CostOfGoodsSoldFormulaGenerator : FormulaGenerator {
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {
         val revenueExpression = ctx.totalRevenueExpression()

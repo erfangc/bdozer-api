@@ -6,7 +6,7 @@ import com.starburst.starburst.models.Item
 /**
  * This is the brains of the automated valuation model
  */
-internal object ModelFormulaBuilderExtensions {
+internal object NameExpressionExtensions {
 
     /**
      * Figure out the correct [Item.expression] for total revenue for this company

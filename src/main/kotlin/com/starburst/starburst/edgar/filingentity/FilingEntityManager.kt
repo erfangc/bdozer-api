@@ -5,7 +5,7 @@ import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.filingentity.dataclasses.Address
 import com.starburst.starburst.edgar.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.edgar.filingentity.internal.SECEntity
-import com.starburst.starburst.edgar.factbase.modelbuilder.ModelBuilder
+import com.starburst.starburst.edgar.factbase.modelbuilder.factory.ModelFactory
 import com.starburst.starburst.edgar.utils.HttpClientExtensions.readEntity
 import com.starburst.starburst.models.Model
 import com.starburst.starburst.models.translator.CellFormulaTranslator
@@ -17,7 +17,6 @@ import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.io.FileOutputStream
 import java.time.Instant
 import java.util.concurrent.Executors
 
@@ -26,7 +25,7 @@ class FilingEntityManager(
     mongoClient: MongoClient,
     private val bootstrapper: Bootstrapper,
     private val httpClient: HttpClient,
-    private val modelBuilder: ModelBuilder,
+    private val modelFactory: ModelFactory,
     private val edgarExplorer: EdgarExplorer
 ) {
 
@@ -62,7 +61,7 @@ class FilingEntityManager(
             .sortedByDescending { it.period_ending }
             .find { it.form == "10-K" }
             ?.adsh ?: error("no 10-K filings found for $cik")
-        return modelBuilder.buildModelForFiling(cik, adsh)
+        return modelFactory.buildModelForFiling(cik, adsh)
     }
 
     fun rerunModel(cik: String): Model {

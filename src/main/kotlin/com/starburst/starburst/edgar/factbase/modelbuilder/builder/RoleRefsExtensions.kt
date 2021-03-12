@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.modelbuilder.helper
+package com.starburst.starburst.edgar.factbase.modelbuilder.builder
 
 import com.starburst.starburst.xml.XmlNode
 import java.net.URI

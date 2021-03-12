@@ -6,7 +6,7 @@ import com.starburst.starburst.models.Item
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class ModelBuilderTest {
+internal class ModelFactoryTest {
 
     /**
      * Full unit test of a fictitious
