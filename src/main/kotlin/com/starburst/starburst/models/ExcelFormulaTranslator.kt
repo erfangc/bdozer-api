@@ -40,7 +40,7 @@ class ExcelFormulaTranslator(private val cells:List<Cell>) {
                     // figure out the Excel cell address of the dependent cell
                     //
                     val address = dependentCell.address ?: error("...")
-                    val cellAddressStr = "Sheet${address.sheet}!${address.columnLetter}${address.row}"
+                    val cellAddressStr = "'${address.sheetName}'!${address.columnLetter}${address.row}"
                     tokens.add(cellAddressStr)
                 } else {
                     // we've encountered an argument that isn't a cell value, so do not transform it

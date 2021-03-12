@@ -5,12 +5,11 @@ import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.spreadsheet.Address
 import com.starburst.starburst.spreadsheet.Cell
-import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.time.LocalDate
 
 /**
  * Takes in a list of drivers + items
@@ -25,18 +24,33 @@ class CellGenerator {
 
     companion object {
 
-        fun exportToXls(model: Model, cells: List<Cell>): ByteArrayInputStream {
-            val xlsFormulaTranslator = ExcelFormulaTranslator(cells)
-            val formulatedCells = cells.map { cell ->
-                xlsFormulaTranslator.convertCellFormulaToXlsFormula(cell)
-            }
+        const val incomeStatementSheetName = "Income Statement"
+        const val balanceSheetName = "Balance Sheet"
+        const val cashFlowSheetName = "Cash Flow"
+        const val otherSheetName = "Other"
+
+        /**
+         * Take an financial model and a set of evaluated
+         * cells - turn them into XLS based formulas and return the results as
+         * a byte array stream
+         */
+        fun exportToXls(model: Model, cells: List<Cell>): ByteArray {
+
+            val periods = model.periods
+            val formulatedCells = addXlsFormulaToCells(cells)
+
+            val wb: Workbook = XSSFWorkbook()
+            val yearStyle = yearStyle(wb)
+            val moneyStyle = moneyStyle(wb)
 
             fun Sheet.writeHeader(items: List<Item>) {
                 val row1 = this.createRow(model.excelRowOffset - 1)
-                for (column in 0..model.periods) {
-                    row1
-                        .createCell(column + model.excelColumnOffset)
-                        .setCellValue("Year $column")
+                for (period in 0..periods) {
+                    val year = LocalDate.now().year + period
+                    val cell = row1
+                        .createCell(period + model.excelColumnOffset)
+                    cell.setCellValue("FY$year")
+                    cell.cellStyle = yearStyle
                 }
                 items.forEachIndexed { row, item ->
                     this
@@ -46,21 +60,20 @@ class CellGenerator {
                 }
             }
 
-            val wb: Workbook = XSSFWorkbook()
-            val sheet1 = wb.createSheet()
+            val sheet1 = wb.createSheet(incomeStatementSheetName)
             sheet1.writeHeader(model.incomeStatementItems)
 
-            val sheet2 = wb.createSheet()
+            val sheet2 = wb.createSheet(balanceSheetName)
             sheet2.writeHeader(model.balanceSheetItems)
 
-            val sheet3 = wb.createSheet()
+            val sheet3 = wb.createSheet(cashFlowSheetName)
             sheet3.writeHeader(model.cashFlowStatementItems)
 
-            val sheet4 = wb.createSheet()
+            val sheet4 = wb.createSheet(otherSheetName)
             sheet4.writeHeader(model.otherItems)
 
             formulatedCells.forEach { cell ->
-                val address = cell.address ?: error("...")
+                val address = cell.address ?: error("${cell.name}'s address is not found or formulated")
                 val sheet = wb.getSheetAt(address.sheet)
                 val targetRow = address.row - 1
                 val row = if (sheet.getRow(targetRow) == null) {
@@ -70,14 +83,42 @@ class CellGenerator {
                 }
                 val xlsCell = row.createCell(address.column, CellType.FORMULA)
                 xlsCell.cellFormula = cell.excelFormula
+                xlsCell.cellStyle = moneyStyle
             }
 
+            return writeWorkbook(wb)
+        }
+
+        private fun addXlsFormulaToCells(cells: List<Cell>): List<Cell> {
+            val xlsFormulaTranslator = ExcelFormulaTranslator(cells)
+            return cells.map { cell ->
+                xlsFormulaTranslator.convertCellFormulaToXlsFormula(cell)
+            }
+        }
+
+        private fun yearStyle(wb: Workbook): CellStyle? {
+            val style = wb.createCellStyle()
+            val font = wb.createFont()
+            font.bold = true
+            style.setFont(font)
+            style.alignment = HorizontalAlignment.RIGHT
+            return style
+        }
+
+        private fun writeWorkbook(wb: Workbook): ByteArray {
             val outputStream = ByteArrayOutputStream()
             wb.write(outputStream)
             outputStream.close()
             wb.close()
+            return outputStream.toByteArray()
+        }
 
-            return outputStream.toByteArray().inputStream()
+        private fun moneyStyle(wb: Workbook): CellStyle {
+            val style = wb.createCellStyle()
+            val dataFormat = wb.createDataFormat()
+            style.dataFormat = dataFormat.getFormat("_(\$* #,##0.00_);_(\$* (#,##0.00);_(\$* \"-\"??_);_(@_)")
+            style.alignment = HorizontalAlignment.RIGHT
+            return style
         }
     }
 
@@ -99,6 +140,7 @@ class CellGenerator {
                     name = "${item.name}_Period$period",
                     address = Address(
                         sheet = 0,
+                        sheetName = incomeStatementSheetName,
                         row = idxToRow(idx),
                         column = column,
                         columnLetter = columnLetter,
@@ -117,6 +159,7 @@ class CellGenerator {
                     period = period,
                     address = Address(
                         sheet = 1,
+                        sheetName = balanceSheetName,
                         row = idxToRow(idx),
                         column = column,
                         columnLetter = columnLetter,
@@ -135,6 +178,7 @@ class CellGenerator {
                     period = period,
                     address = Address(
                         sheet = 2,
+                        sheetName = cashFlowSheetName,
                         row = idxToRow(idx),
                         column = column,
                         columnLetter = columnLetter,
@@ -153,6 +197,7 @@ class CellGenerator {
                     period = period,
                     address = Address(
                         sheet = 3,
+                        sheetName = otherSheetName,
                         row = idxToRow(idx),
                         column = column,
                         columnLetter = columnLetter,

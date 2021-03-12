@@ -2,10 +2,10 @@ package com.starburst.starburst.edgar.filingentity
 
 import com.mongodb.client.MongoClient
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
+import com.starburst.starburst.edgar.factbase.modelbuilder.factory.ModelFactory
 import com.starburst.starburst.edgar.filingentity.dataclasses.Address
 import com.starburst.starburst.edgar.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.edgar.filingentity.internal.SECEntity
-import com.starburst.starburst.edgar.factbase.modelbuilder.factory.ModelFactory
 import com.starburst.starburst.edgar.utils.HttpClientExtensions.readEntity
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.translator.CellFormulaTranslator
@@ -44,7 +44,7 @@ class FilingEntityManager(
         val generateCells = CellGenerator().generateCells(model)
         val cells = CellFormulaTranslator().populateCellsWithFormulas(model, generateCells)
         val evaluatedCells = CellEvaluator().evaluate(cells)
-        val bytes = CellGenerator.exportToXls(model, evaluatedCells).readAllBytes()
+        val bytes = CellGenerator.exportToXls(model, evaluatedCells)
         log.info("Excel file ready for $cik")
         return bytes
     }
