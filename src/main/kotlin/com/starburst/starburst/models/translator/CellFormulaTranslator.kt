@@ -1,6 +1,5 @@
 package com.starburst.starburst.models.translator
 
-import com.starburst.starburst.models.ResolverContext
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.translator.subtypes.*

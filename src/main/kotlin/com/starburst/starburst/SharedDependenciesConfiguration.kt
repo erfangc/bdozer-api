@@ -11,11 +11,11 @@ import java.lang.System.getenv
 @Configuration
 class SharedDependenciesConfiguration {
     @Bean
-    fun http(): HttpClient {
+    fun httpClient(): HttpClient {
         return HttpClientBuilder.create().build()
     }
     @Bean
-    fun mongo(): MongoClient {
+    fun mongoClient(): MongoClient {
         val connectionString = getenv("MONGO_URI")
         return KMongo.createClient(connectionString)
     }

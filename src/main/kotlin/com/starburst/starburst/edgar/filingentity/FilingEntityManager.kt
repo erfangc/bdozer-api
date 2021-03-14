@@ -113,7 +113,6 @@ class FilingEntityManager(
         col.save(entity)
 
         executor.execute {
-
             try {
                 bootstrapper.bootstrapFilingEntity(cik)
                 val model = viewLatest10kModel(cik)

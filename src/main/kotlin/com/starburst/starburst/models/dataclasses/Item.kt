@@ -37,7 +37,7 @@ data class Item(
 
     val nonCashExpense: Boolean? = null,
 
-    val generatorCommentaries: List<GeneratorCommentary> = emptyList(),
+    val commentaries: Commentary? = null,
 
     /**
      * [subtotal]

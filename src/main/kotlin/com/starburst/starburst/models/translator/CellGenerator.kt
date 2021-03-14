@@ -56,10 +56,8 @@ class CellGenerator {
                     val row = this.createRow(rowNumber + model.excelRowOffset)
                     val labelCell = row.createCell(model.excelColumnOffset - 1)
                     labelCell.setCellValue(item.description ?: item.name)
-                    val itemCommentary = item.generatorCommentaries.joinToString("\n") {
-                        it.commentary ?: ""
-                    }
-                    if (itemCommentary.isNotBlank()) {
+                    val itemCommentary = item.commentaries?.commentary
+                    if (!itemCommentary.isNullOrBlank()) {
                         /*
                         apparently all of this idiocy is needed for
                         XLS comments, as comments are stored as rich text objects separate from the cell
@@ -152,6 +150,10 @@ class CellGenerator {
         val periods = model.periods
         return (0..periods).flatMap { period ->
 
+            /*
+            XLS address components preparation based on the current period
+            and the item we are working with
+             */
             val column = period + model.excelColumnOffset
             val columnLetter = columnOf(column)
             fun idxToRow(idx: Int) = idx + model.excelRowOffset + 1
@@ -173,6 +175,25 @@ class CellGenerator {
                     )
                 )
             }
+
+            /*
+            this is a special cell inserted at the end of the income statement
+            cell groups to provide the ability for cells to reference
+            "period"
+             */
+            val periodCell = Cell(
+                period = period,
+                item = Item(name = "period", expression = "$period"),
+                name = "period_$period",
+                value = period.toDouble(),
+                address = Address(
+                    sheet = 0,
+                    sheetName = incomeStatementSheetName,
+                    row = idxToRow(incomeStatementCells.size),
+                    column = column,
+                    columnLetter = columnLetter
+                )
+            )
 
             /*
             create the balance sheet cells
@@ -231,7 +252,7 @@ class CellGenerator {
                 )
             }
 
-            incomeStatementCells + balanceSheetCells + cashFlowStatementItems + otherCells
+            listOf(periodCell) + incomeStatementCells + balanceSheetCells + cashFlowStatementItems + otherCells
         }
     }
 

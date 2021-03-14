@@ -1,7 +1,7 @@
 package com.starburst.starburst.models.translator.subtypes
 
 import com.starburst.starburst.spreadsheet.Cell
-import com.starburst.starburst.models.ResolverContext
+import com.starburst.starburst.models.translator.ResolverContext
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.Util.previous
 import org.mariuszgromada.math.mxparser.Expression

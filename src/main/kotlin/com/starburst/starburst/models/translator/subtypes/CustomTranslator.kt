@@ -1,6 +1,6 @@
 package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.ResolverContext
+import com.starburst.starburst.models.translator.ResolverContext
 import com.starburst.starburst.spreadsheet.Cell
 
 class CustomTranslator(private val ctx: ResolverContext): FormulaTranslator {

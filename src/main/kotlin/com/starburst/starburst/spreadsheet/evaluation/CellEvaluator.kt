@@ -99,9 +99,9 @@ class CellEvaluator {
                 } else {
                     // push dependencies into the stack, so they will now be evaluated
                     unmetDependencies.forEach { dependentCell ->
-                        // circular dependency handling code
-                        checkCircularReference(stack, dependentCell)
                         stack.push(dependentCell)
+                        // circular dependency handling code
+                        checkCircularReference(stack, headCell)
                     }
                 }
             }
@@ -109,19 +109,23 @@ class CellEvaluator {
         return cells.map { cell -> cellLookupByName[cell.name] ?: error("...") }
     }
 
-    private fun checkCircularReference(stack: Stack<Cell>, dependentCell: Cell) {
-        if (stack.contains(dependentCell)) {
+    private fun checkCircularReference(stack: Stack<Cell>, headCell: Cell) {
+        // TODO get this to become better
+        val lst = stack.toList()
+        val withoutHeadCell = lst.subList(1, lst.size)
+        val circularReferenceDetected = withoutHeadCell.contains(headCell)
+
+        if (circularReferenceDetected) {
             // we trace the circular reference back to it's source
             // and print this chain - by traversing the stack as if it's a list in reverse
-            val chain = mutableListOf(dependentCell)
+            val chain = mutableListOf(headCell)
             var currCell = stack.pop()
-            while (currCell != dependentCell) {
+            while (currCell != headCell) {
                 chain.add(currCell)
                 currCell = stack.pop()
             }
             val chainStr = chain.joinToString(" -> ") { it.name }
-            // TODO figure out the correct way to find circular dependency
-            // error("Circular dependency found, $chainStr")
+             error("Circular dependency found, $chainStr")
         }
     }
 

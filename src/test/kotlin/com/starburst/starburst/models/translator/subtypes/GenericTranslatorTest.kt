@@ -2,7 +2,7 @@ package com.starburst.starburst.models.translator.subtypes
 
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.CellGenerator
-import com.starburst.starburst.models.ResolverContext
+import com.starburst.starburst.models.translator.ResolverContext
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model

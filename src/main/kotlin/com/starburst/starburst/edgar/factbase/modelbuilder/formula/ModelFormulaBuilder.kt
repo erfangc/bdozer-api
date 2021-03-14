@@ -7,7 +7,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.ge
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized.PercentOfRevenueFormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized.RevenueDrivenFormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.itemized.ItemizedFormulaGenerator
-import com.starburst.starburst.models.dataclasses.GeneratorCommentary
+import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import org.slf4j.LoggerFactory
@@ -34,9 +34,7 @@ class ModelFormulaBuilder(
         return result
             .item
             .copy(
-                generatorCommentaries = listOf(
-                    GeneratorCommentary(commentary = result.commentary, generatorClass = clazz.simpleName)
-                )
+                commentaries = Commentary(commentary = result.commentary, generatorClass = clazz.simpleName)
             )
     }
 
