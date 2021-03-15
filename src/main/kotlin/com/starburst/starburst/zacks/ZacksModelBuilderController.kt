@@ -22,9 +22,6 @@ class ZacksModelBuilderController(
         val model = zacksModelBuilder.buildModel(ticker)
         val result = ModelEvaluator().evaluate(model)
         val bytes = CellGenerator.exportToXls(model, result.cells)
-        return HttpEntity(
-            bytes,
-            headers
-        )
+        return HttpEntity(bytes,headers)
     }
 }
