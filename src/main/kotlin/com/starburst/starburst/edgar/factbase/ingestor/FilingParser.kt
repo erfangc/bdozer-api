@@ -2,6 +2,7 @@ package com.starburst.starburst.edgar.factbase.ingestor
 
 import com.starburst.starburst.edgar.dataclasses.*
 import com.starburst.starburst.edgar.factbase.Fact
+import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProvider

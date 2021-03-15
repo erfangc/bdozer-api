@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.ingestor
+package com.starburst.starburst.edgar.factbase.ingestor.dataclasses
 
 data class FilingIngestionResponse(
     val documentFiscalPeriodFocus: String,

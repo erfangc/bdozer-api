@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.ingestor
+package com.starburst.starburst.edgar.factbase.ingestor.dataclasses
 
 import com.starburst.starburst.edgar.factbase.Fact
 

@@ -1,4 +1,4 @@
-package com.starburst.starburst.dcf
+package com.starburst.starburst.models.evaluator.dcf
 
 import com.starburst.starburst.Provier.fictitiousSaaSCompany
 import com.starburst.starburst.models.builders.ModelBuilder

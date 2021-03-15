@@ -1,4 +1,4 @@
-package com.starburst.starburst.dcf
+package com.starburst.starburst.models.evaluator.dcf
 
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.dataclasses.ModelEvaluationOutput
@@ -7,6 +7,10 @@ import com.starburst.starburst.models.Utility.FreeCashFlowPerShare
 import com.starburst.starburst.spreadsheet.Cell
 import kotlin.math.pow
 
+/**
+ * [DCFCalculator] was a temporary experiment
+ */
+@Deprecated("should use the cells instead")
 class DCFCalculator(private val model: Model) {
 
     fun calcPv(cells: List<Cell>): ModelEvaluationOutput {

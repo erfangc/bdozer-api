@@ -1,6 +1,6 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.dcf.DCFCalculator
+import com.starburst.starburst.models.evaluator.dcf.DCFCalculator
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.dataclasses.ModelEvaluationOutput
