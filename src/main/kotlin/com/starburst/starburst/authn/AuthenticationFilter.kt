@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse
 class AuthenticationFilter(
     private val jwtValidator: JwtValidator,
     private val objectMapper: ObjectMapper
-): OncePerRequestFilter() {
+) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
         servletRequest: HttpServletRequest,
@@ -38,7 +38,7 @@ class AuthenticationFilter(
     private fun allowedByDefault(servletRequest: HttpServletRequest) =
         servletRequest.method == "OPTIONS" || !servletRequest.requestURI.startsWith("/api")
 
-    fun error(resp: HttpServletResponse, e:Exception) {
+    fun error(resp: HttpServletResponse, e: Exception) {
         resp.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         resp.addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString())
         resp.status = 401

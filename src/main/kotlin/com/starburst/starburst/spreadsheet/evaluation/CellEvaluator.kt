@@ -83,7 +83,7 @@ class CellEvaluator {
                         expression.missingUserDefinedArguments.forEach { argName ->
                             val argValue = cellLookupByName[argName]?.value ?: error("unable to resolve $argName")
                             expression.addArguments(
-                                Argument(argName, argValue )
+                                Argument(argName, argValue)
                             )
                         }
                         expression.calculate()
@@ -125,7 +125,7 @@ class CellEvaluator {
                 currCell = stack.pop()
             }
             val chainStr = chain.joinToString(" -> ") { it.name }
-             error("Circular dependency found, $chainStr")
+            error("Circular dependency found, $chainStr")
         }
     }
 

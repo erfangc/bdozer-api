@@ -2,10 +2,8 @@ package com.starburst.starburst.edgar.filingentity
 
 import com.starburst.starburst.edgar.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.models.dataclasses.Model
-import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 
 @RestController

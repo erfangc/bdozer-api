@@ -1,7 +1,7 @@
 package com.starburst.starburst.edgar.explorer
 
-import com.starburst.starburst.edgar.explorer.dataclasses.EdgarFilingMetadata
 import com.starburst.starburst.edgar.explorer.dataclasses.EdgarEntity
+import com.starburst.starburst.edgar.explorer.dataclasses.EdgarFilingMetadata
 import org.springframework.web.bind.annotation.*
 
 /**

@@ -1,8 +1,8 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized
 
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.itemTimeSeries
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.itemTimeSeries
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
 import com.starburst.starburst.models.dataclasses.Item
@@ -18,7 +18,7 @@ class AverageFormulaGenerator : FormulaGenerator {
         val average = timeSeries.map { it.value ?: 0.0 }.average()
         return if (average.isNaN() || average.isInfinite()) {
             Result(item = item)
-        } else{
+        } else {
             Result(
                 item = item.copy(
                     expression = "$average"

@@ -1,9 +1,5 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.models.evaluator.dcf.DCFCalculator
-import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.dataclasses.ModelEvaluationOutput
 import com.starburst.starburst.models.Utility.CapitalExpenditure
 import com.starburst.starburst.models.Utility.ChangeInWorkingCapital
 import com.starburst.starburst.models.Utility.CostOfGoodsSold
@@ -29,7 +25,10 @@ import com.starburst.starburst.models.Utility.TotalAsset
 import com.starburst.starburst.models.Utility.TotalLiability
 import com.starburst.starburst.models.Utility.previous
 import com.starburst.starburst.models.builders.SkeletonModel.dropbox
-import com.starburst.starburst.models.translator.CellFormulaTranslator
+import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.dataclasses.ModelEvaluationOutput
+import com.starburst.starburst.models.evaluator.dcf.DCFCalculator
 import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import org.springframework.stereotype.Service
@@ -344,8 +343,7 @@ class ModelBuilder {
      */
     fun evaluateModel(model: Model): ModelEvaluationOutput {
         val fullyFormedModel = reformulateModel(model)
-        val generateCells = modelToCellTranslator.generateCells(fullyFormedModel)
-        val cells = CellFormulaTranslator().populateCellsWithFormulas(fullyFormedModel, generateCells)
+        val cells = modelToCellTranslator.generateCells(fullyFormedModel)
         val evaluatedCells = CellEvaluator().evaluate(cells)
         return DCFCalculator(fullyFormedModel).calcPv(evaluatedCells)
     }

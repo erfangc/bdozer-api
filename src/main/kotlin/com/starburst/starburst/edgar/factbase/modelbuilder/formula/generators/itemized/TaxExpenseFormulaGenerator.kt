@@ -11,6 +11,7 @@ import com.starburst.starburst.models.dataclasses.Item
 import org.springframework.stereotype.Service
 import java.lang.Double.max
 import java.lang.Double.min
+
 @Service
 class TaxExpenseFormulaGenerator : FormulaGenerator {
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {

@@ -1,7 +1,8 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula
 
 object USGaapConstants {
-    const val IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest ="IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+    const val IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest =
+        "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
     const val AccountsPayableCurrent = "AccountsPayableCurrent"
     const val AccountsReceivableNetCurrent = "AccountsReceivableNetCurrent"
     const val AccruedLiabilitiesandOtherLiabilitiesCurrent = "AccruedLiabilitiesandOtherLiabilitiesCurrent"

@@ -1,9 +1,9 @@
 package com.starburst.starburst.models.translator.subtypes
 
 import com.starburst.starburst.models.Utility.previous
-import com.starburst.starburst.spreadsheet.Cell
-import com.starburst.starburst.models.translator.FormulaTranslationContext
 import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.translator.FormulaTranslationContext
+import com.starburst.starburst.spreadsheet.Cell
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token.NOT_MATCHED
 
@@ -55,7 +55,7 @@ class GenericTranslator(ctx: FormulaTranslationContext) : FormulaTranslator {
                     }
                     ?.toMap() ?: emptyMap()
 
-                val cellLibrary =  currentPeriodCells + previousPeriodCells
+                val cellLibrary = currentPeriodCells + previousPeriodCells
 
                 val dependentCell = cellLibrary[tokenStr]
                 if (dependentCell != null) {

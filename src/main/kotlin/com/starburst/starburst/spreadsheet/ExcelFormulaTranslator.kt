@@ -1,10 +1,9 @@
-package com.starburst.starburst.models
+package com.starburst.starburst.spreadsheet
 
-import com.starburst.starburst.spreadsheet.Cell
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token
 
-class ExcelFormulaTranslator(private val cells:List<Cell>) {
+class ExcelFormulaTranslator(private val cells: List<Cell>) {
 
     /**
      * The primary job is to tokenize the expression of a given [Item] and replace

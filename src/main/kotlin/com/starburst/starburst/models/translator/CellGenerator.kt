@@ -1,10 +1,12 @@
 package com.starburst.starburst.models.translator
 
-import com.starburst.starburst.models.ExcelFormulaTranslator
 import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.translator.subtypes.*
 import com.starburst.starburst.spreadsheet.Address
 import com.starburst.starburst.spreadsheet.Cell
+import com.starburst.starburst.spreadsheet.ExcelFormulaTranslator
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import java.io.ByteArrayOutputStream
@@ -147,8 +149,66 @@ class CellGenerator {
     }
 
     fun generateCells(model: Model): List<Cell> {
+        return populateCellsWithFormulas(
+            cells = generateEmptyCells(model),
+            model = model
+        )
+    }
+
+    fun populateCellsWithFormulas(model: Model, cells: List<Cell>): List<Cell> {
+
+        val ctx = FormulaTranslationContext(model = model, cells = cells)
+
+        return cells.map { cell ->
+            val item = cell.item
+            val period = cell.period
+
+            /*
+            First, handle the initial case where the cell represents an Item at period = 0
+            in this case, we actually short circuit the formula specified by the item or driver
+            and replace the cell's formula to be just it's historical value of the underlying item or
+            driver (defaults to zero)
+             */
+            val updatedCell = if (period == 0) {
+                val historicalValue = item.historicalValue
+                cell.copy(
+                    formula = "$historicalValue"
+                )
+            }
+            /*
+            Next, we find the correct formula for the cell depending on it's item and period
+             */
+            else {
+                when (item.type) {
+                    ItemType.SubscriptionRevenue -> SubscriptionRevenueTranslator(ctx)
+                        .resolveExpression(cell)
+
+                    ItemType.PercentOfRevenue -> PercentOfRevenueTranslator()
+                        .translateFormula(cell)
+
+                    ItemType.PercentOfTotalAsset -> PercentOfTotalAssetTranslator(ctx)
+                        .translateFormula(cell)
+
+                    ItemType.FixedCost -> FixedCostTranslator()
+                        .translateFormula(cell)
+
+                    ItemType.UnitSalesRevenue -> UnitSalesRevenueTranslator(ctx)
+                        .translateFormula(cell)
+
+                    ItemType.Discrete -> DiscreteTranslator(ctx)
+                        .translateFormula(cell)
+
+                    ItemType.Custom -> CustomTranslator(ctx)
+                        .translateFormula(cell)
+                }
+            }
+            updatedCell
+        }
+    }
+
+    private fun generateEmptyCells(model: Model): List<Cell> {
         val periods = model.periods
-        return (0..periods).flatMap { period ->
+        val cells = (0..periods).flatMap { period ->
 
             /*
             XLS address components preparation based on the current period
@@ -254,6 +314,7 @@ class CellGenerator {
 
             listOf(periodCell) + incomeStatementCells + balanceSheetCells + cashFlowStatementItems + otherCells
         }
+        return cells
     }
 
     private fun columnOf(period: Int): String {

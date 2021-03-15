@@ -13,7 +13,7 @@ object ElementSemanticsExtensions {
         val type = elementDefinition?.type
         val abstract = elementDefinition?.abstract
         val periodType = elementDefinition?.periodType
-        return ( abstract != true
+        return (abstract != true
                 && periodType == "duration"
                 && type?.endsWith("monetaryItemType") == true)
     }

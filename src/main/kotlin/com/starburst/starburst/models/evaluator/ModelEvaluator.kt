@@ -2,7 +2,6 @@ package com.starburst.starburst.models.evaluator
 
 import com.starburst.starburst.models.Utility.PresentValuePerShare
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import org.slf4j.LoggerFactory
@@ -21,8 +20,7 @@ class ModelEvaluator {
     fun evaluate(model: Model): EvaluateModelResult {
         log.info("Building Excel file for ${model.symbol}")
 
-        val generateCells = CellGenerator().generateCells(model)
-        val cells = CellFormulaTranslator().populateCellsWithFormulas(model, generateCells)
+        val cells = CellGenerator().generateCells(model)
         val evaluatedCells = CellEvaluator().evaluate(cells)
         val targetPrice = evaluatedCells
             .filter { cell -> cell.item.name == PresentValuePerShare }

@@ -7,7 +7,8 @@ import com.starburst.starburst.spreadsheet.Cell
 
 class PercentOfTotalAssetTranslator(private val ctx: FormulaTranslationContext) : FormulaTranslator {
     override fun translateFormula(cell: Cell): Cell {
-        val percentOfTotalAsset = cell.item.percentOfTotalAsset?.percentOfTotalAsset ?: error("percentOfTotalAsset must be populated")
+        val percentOfTotalAsset =
+            cell.item.percentOfTotalAsset?.percentOfTotalAsset ?: error("percentOfTotalAsset must be populated")
         return cell.copy(formula = "${previous(TotalAsset)}*$percentOfTotalAsset")
     }
 }

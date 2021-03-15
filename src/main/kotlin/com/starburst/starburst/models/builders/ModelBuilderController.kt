@@ -2,7 +2,6 @@ package com.starburst.starburst.models.builders
 
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.dataclasses.ModelEvaluationOutput
-import com.starburst.starburst.models.builders.ModelBuilder
 import org.springframework.web.bind.annotation.*
 
 @CrossOrigin

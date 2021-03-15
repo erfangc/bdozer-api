@@ -3,8 +3,8 @@ package com.starburst.starburst.edgar.explorer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import com.starburst.starburst.edgar.explorer.dataclasses.EdgarFilingMetadata
 import com.starburst.starburst.edgar.explorer.dataclasses.EdgarEntity
+import com.starburst.starburst.edgar.explorer.dataclasses.EdgarFilingMetadata
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.BasicHttpEntity
@@ -25,9 +25,11 @@ class EdgarExplorer(
         httpPost.releaseConnection()
         return (jsonNode.at("/hits/hits") as ArrayNode).map { node ->
             objectMapper.treeToValue<EdgarEntity>(node)
-        }.filter { it?._source?.tickers != null }.map { it?.copy(
-            _source = it._source.copy(tickers = it._source.tickers?.split(",")?.first()?.trim())
-        ) }
+        }.filter { it?._source?.tickers != null }.map {
+            it?.copy(
+                _source = it._source.copy(tickers = it._source.tickers?.split(",")?.first()?.trim())
+            )
+        }
     }
 
     fun searchFilings(cik: String): List<EdgarFilingMetadata> {

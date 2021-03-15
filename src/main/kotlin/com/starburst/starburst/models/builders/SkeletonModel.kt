@@ -1,11 +1,7 @@
 package com.starburst.starburst.models.builders
 
-import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.models.dataclasses.ItemType
-import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.Utility
-import com.starburst.starburst.models.dataclasses.PercentOfRevenue
-import com.starburst.starburst.models.dataclasses.SubscriptionRevenue
+import com.starburst.starburst.models.dataclasses.*
 
 object SkeletonModel {
     val dropbox = Model(

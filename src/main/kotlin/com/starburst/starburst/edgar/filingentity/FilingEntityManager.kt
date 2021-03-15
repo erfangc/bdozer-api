@@ -6,11 +6,10 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.factory.ModelFactory
 import com.starburst.starburst.edgar.filingentity.dataclasses.Address
 import com.starburst.starburst.edgar.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.edgar.filingentity.internal.SECEntity
-import com.starburst.starburst.xml.HttpClientExtensions.readEntity
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
+import com.starburst.starburst.xml.HttpClientExtensions.readEntity
 import org.apache.http.client.HttpClient
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
@@ -41,8 +40,7 @@ class FilingEntityManager(
          */
         log.info("Building Excel file for $cik")
         val model = rerunModel(cik)
-        val generateCells = CellGenerator().generateCells(model)
-        val cells = CellFormulaTranslator().populateCellsWithFormulas(model, generateCells)
+        val cells = CellGenerator().generateCells(model)
         val evaluatedCells = CellEvaluator().evaluate(cells)
         val bytes = CellGenerator.exportToXls(model, evaluatedCells)
         log.info("Excel file ready for $cik")

@@ -2,7 +2,6 @@ package com.starburst.starburst.edgar.factbase.ingestor
 
 import com.google.common.hash.Hashing
 import com.starburst.starburst.edgar.dataclasses.XbrlContext
-import org.w3c.dom.Element
 import java.nio.charset.StandardCharsets
 
 
