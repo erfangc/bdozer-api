@@ -1,6 +1,7 @@
 package com.starburst.starburst.zacks
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import com.starburst.starburst.zacks.dataclasses.ZacksSalesEstimates
 import com.vhl.blackmo.grass.dsl.grass
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -16,7 +17,7 @@ class ZacksEstimatesService {
 
     init {
         val csvContents = csvReader().readAllWithHeader(File(fileName))
-        zacksSalesEstimates = grass<ZacksSalesEstimates> { dateFormat = "M/d/yy" }.harvest(csvContents)
+        zacksSalesEstimates = grass<ZacksSalesEstimates>().harvest(csvContents)
         log.info("Loaded ${zacksSalesEstimates.size} ${zacksSalesEstimates.javaClass.simpleName} from $fileName")
     }
 

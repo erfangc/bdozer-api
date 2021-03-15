@@ -1,4 +1,4 @@
-package com.starburst.starburst.zacks
+package com.starburst.starburst.zacks.dataclasses
 
 import java.time.LocalDate
 

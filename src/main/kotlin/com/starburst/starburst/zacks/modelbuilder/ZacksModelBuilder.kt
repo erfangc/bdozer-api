@@ -17,9 +17,9 @@ import java.io.File
 
 @ExperimentalStdlibApi
 @Service
-class ZacksModelBuilder {
+class ZacksModelBuilder(keyInputsProvider: KeyInputsProvider) {
 
-    private val incomeStatementItemsBuilder = IncomeStatementItemsBuilder()
+    private val incomeStatementItemsBuilder = IncomeStatementItemsBuilder(keyInputsProvider)
     private val balanceSheetItemsBuilder = BalanceSheetItemsBuilder()
     private val zacksFundamentalAs: List<ZacksFundamentalA>
     private val fileName = "/Users/erfangchen/Downloads/ZACKS_FC_addc6c96afcc63aaedeb3dae8c933d5a.csv"
