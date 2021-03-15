@@ -25,6 +25,8 @@ data class Item(
 
     val subscriptionRevenue: SubscriptionRevenue? = null,
 
+    val discrete: Discrete? = null,
+
     val percentOfTotalAsset: PercentOfTotalAsset? = null,
 
     val percentOfRevenue: PercentOfRevenue? = null,

@@ -1,10 +1,10 @@
 package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.translator.ResolverContext
+import com.starburst.starburst.models.translator.FormulaTranslationContext
 import com.starburst.starburst.spreadsheet.Cell
 
 class UnitSalesRevenueTranslator(
-    private val ctx: ResolverContext
+    private val ctx: FormulaTranslationContext
 ) : FormulaTranslator {
     override fun translateFormula(cell: Cell): Cell {
         val periods = ctx.model.periods

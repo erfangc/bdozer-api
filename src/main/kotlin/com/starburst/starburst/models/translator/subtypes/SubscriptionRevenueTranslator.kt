@@ -1,13 +1,13 @@
 package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.translator.ResolverContext
+import com.starburst.starburst.models.translator.FormulaTranslationContext
 import com.starburst.starburst.spreadsheet.Cell
 
 /**
  * [SubscriptionRevenueTranslator] takes assumptions from [SaaSRevenue] and
  * turns them into expressions that expects growth toward a terminal subscription rate
  */
-class SubscriptionRevenueTranslator(private val ctx: ResolverContext) {
+class SubscriptionRevenueTranslator(private val ctx: FormulaTranslationContext) {
     fun resolveExpression(cell: Cell): Cell {
         val periods = ctx.model.periods
         val period = cell.period

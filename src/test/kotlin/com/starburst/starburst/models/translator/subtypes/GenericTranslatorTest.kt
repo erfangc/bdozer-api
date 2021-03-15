@@ -2,7 +2,7 @@ package com.starburst.starburst.models.translator.subtypes
 
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.CellGenerator
-import com.starburst.starburst.models.translator.ResolverContext
+import com.starburst.starburst.models.translator.FormulaTranslationContext
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
@@ -33,7 +33,7 @@ internal class GenericTranslatorTest {
         val cells = CellFormulaTranslator()
             .populateCellsWithFormulas(model, CellGenerator().generateCells(model = model))
 
-        val ctx = ResolverContext(
+        val ctx = FormulaTranslationContext(
             model = model,
             cells = cells
         )

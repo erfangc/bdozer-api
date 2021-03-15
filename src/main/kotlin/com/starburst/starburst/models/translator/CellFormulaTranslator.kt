@@ -18,7 +18,7 @@ class CellFormulaTranslator {
         cells: List<Cell>
     ): List<Cell> {
 
-        val ctx = ResolverContext(model = model, cells = cells)
+        val ctx = FormulaTranslationContext(model = model, cells = cells)
 
         return cells.map { cell ->
             val item = cell.item
@@ -56,6 +56,9 @@ class CellFormulaTranslator {
                     ItemType.UnitSalesRevenue -> UnitSalesRevenueTranslator(ctx)
                         .translateFormula(cell)
 
+                    ItemType.Discrete -> DiscreteTranslator(ctx)
+                        .translateFormula(cell)
+
                     ItemType.Custom -> CustomTranslator(ctx)
                         .translateFormula(cell)
                 }
@@ -64,3 +67,4 @@ class CellFormulaTranslator {
         }
     }
 }
+

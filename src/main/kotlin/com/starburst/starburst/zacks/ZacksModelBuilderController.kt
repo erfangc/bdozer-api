@@ -2,6 +2,7 @@ package com.starburst.starburst.zacks
 
 import com.starburst.starburst.models.evaluator.ModelEvaluator
 import com.starburst.starburst.models.translator.CellGenerator
+import com.starburst.starburst.zacks.modelbuilder.ZacksModelBuilder
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.web.bind.annotation.*
