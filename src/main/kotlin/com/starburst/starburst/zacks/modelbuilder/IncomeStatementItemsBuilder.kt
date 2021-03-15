@@ -65,7 +65,10 @@ class IncomeStatementItemsBuilder(
          */
         val cogsPctOfRevenue = costGoodSold / totRevnu
         val taxesPaid = preTaxIncome - netIncomeLossShareHolder
-        val taxRate = 0.1.coerceAtLeast(taxesPaid / preTaxIncome)
+        val taxRate = (taxesPaid / preTaxIncome)
+            .coerceAtLeast(0.08)
+            .coerceAtMost(0.15)
+
         val revenue = keyInputsToRevenue(model, latest)
 
         return listOf(

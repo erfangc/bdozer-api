@@ -28,7 +28,8 @@ class ZacksModelBuilder(
         val fundamentalAs = findZacksFundamentalA(ticker)
         val latestFundamentalA = fundamentalAs
             .filter { it.per_type == "A" }
-            .maxByOrNull { it.per_end_date!! } ?: error("...")
+            .maxByOrNull { it.per_end_date!! }
+            ?: error("unable to find an annual fundamental for $ticker, found total fundamentals ${fundamentalAs.size}")
 
         val skeletonModel = Model(
             symbol = ticker,
