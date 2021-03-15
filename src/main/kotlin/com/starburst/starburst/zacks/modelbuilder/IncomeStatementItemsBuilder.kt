@@ -65,6 +65,8 @@ class IncomeStatementItemsBuilder(private val keyInputsProvider: KeyInputsProvid
 
         val revenue = keyInputsToRevenue(fundamentalA)
 
+        val totalOperExp = fundamentalA.tot_oper_exp ?: 0.0
+
         return listOf(
             revenue,
             Item(
@@ -83,9 +85,9 @@ class IncomeStatementItemsBuilder(private val keyInputsProvider: KeyInputsProvid
             Item(
                 name = OperatingExpense,
                 description = "Operating Expense",
-                historicalValue = fundamentalA.tot_oper_exp ?: 0.0,
+                historicalValue = totalOperExp,
                 // TODO these need to be regressed against historical to determine variable vs. fixed component
-                expression = "${fundamentalA.tot_oper_exp ?: 0.0}",
+                expression = "${totalOperExp - costGoodSold}",
             ),
             Item(
                 name = OperatingIncome,
