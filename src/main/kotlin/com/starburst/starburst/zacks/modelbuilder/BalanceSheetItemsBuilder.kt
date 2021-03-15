@@ -5,10 +5,15 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.Co
 import com.starburst.starburst.models.Utility
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.zacks.dataclasses.ZacksFundamentalA
+import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.zacks.fa.ZacksFundamentalA
+import org.springframework.stereotype.Service
 
+@Service
 class BalanceSheetItemsBuilder {
-    fun balanceSheetItems(fundamentalA: ZacksFundamentalA): List<Item> {
+
+    fun balanceSheetItems(model: Model, fundamentalA: ZacksFundamentalA): List<Item> {
+
         val totRevnu = fundamentalA.tot_revnu ?: 0.0
         val totCurrAsset = fundamentalA.tot_curr_asset ?: 0.0
         val netPropPlantEquip = fundamentalA.net_prop_plant_equip ?: 0.0

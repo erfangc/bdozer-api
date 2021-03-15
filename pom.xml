@@ -43,18 +43,6 @@
             <version>1.6.0</version>
         </dependency>
 
-        <!--	CSV processing	-->
-        <dependency>
-            <groupId>com.github.doyaaaaaken</groupId>
-            <artifactId>kotlin-csv-jvm</artifactId>
-            <version>0.15.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vhl.blackmo</groupId>
-            <artifactId>kotlin-grass-jvm</artifactId>
-            <version>0.3.0</version>
-        </dependency>
-
         <!--	poi	-->
         <dependency>
             <groupId>org.apache.poi</groupId>

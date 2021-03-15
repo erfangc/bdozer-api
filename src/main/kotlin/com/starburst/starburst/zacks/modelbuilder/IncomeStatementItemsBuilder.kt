@@ -11,13 +11,18 @@ import com.starburst.starburst.models.Utility.PretaxIncome
 import com.starburst.starburst.models.Utility.Revenue
 import com.starburst.starburst.models.Utility.TaxExpense
 import com.starburst.starburst.models.dataclasses.Commentary
+import com.starburst.starburst.models.dataclasses.Discrete
 import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.models.dataclasses.ItemType
-import com.starburst.starburst.zacks.dataclasses.KeyInputs
-import com.starburst.starburst.zacks.dataclasses.ZacksFundamentalA
+import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.zacks.fa.ZacksFundamentalA
+import com.starburst.starburst.zacks.modelbuilder.keyinputs.KeyInputsProvider
+import org.springframework.stereotype.Service
 
-@ExperimentalStdlibApi
-class IncomeStatementItemsBuilder(private val keyInputsProvider: KeyInputsProvider) {
+@Service
+class IncomeStatementItemsBuilder(
+    private val keyInputsProvider: KeyInputsProvider,
+    private val salesEstimateToRevenueConverter: SalesEstimateToRevenueConverter,
+) {
 
     /**
      * Convert a [KeyInputs] into a [Revenue] [Item], this means
@@ -27,45 +32,41 @@ class IncomeStatementItemsBuilder(private val keyInputsProvider: KeyInputsProvid
      *
      * Or else, pre-saved revenue drivers such as [Discrete] might be used
      */
-    private fun keyInputsToRevenue(fundamentalA: ZacksFundamentalA): Item {
-        val ticker = fundamentalA.ticker
-        val keyInputs = keyInputsProvider.getKeyInputs(ticker ?: error("..."))
-        val totRevnu = fundamentalA.tot_revnu ?: 0.0
-
-        val base = Item(
-            name = Revenue,
-            description = "Revenue",
-            historicalValue = totRevnu,
-        )
-
-        return if (keyInputs.discrete != null) {
-            base.copy(
-                type = ItemType.Discrete,
-                discrete = keyInputs.discrete
-            )
+    private fun keyInputsToRevenue(model: Model, latest: ZacksFundamentalA): Item {
+        val ticker = latest.ticker ?: error("...")
+        val keyInputs = keyInputsProvider.getKeyInputs(ticker)
+        val totRevnu = latest.tot_revnu ?: 0.0
+        return if (keyInputs == null) {
+            salesEstimateToRevenueConverter.convert(model, totRevnu)
         } else {
-            // TODO parse the formula of keyInput(s) and replace them with the list of actual inputs
-            base
+            Item(
+                name = Revenue,
+                description = "Revenue",
+                historicalValue = totRevnu,
+            )
         }
     }
 
-    fun incomeStatementItems(fundamentalA: ZacksFundamentalA): List<Item> {
+    fun incomeStatementItems(model: Model, latest: ZacksFundamentalA): List<Item> {
 
-        val totRevnu = fundamentalA.tot_revnu ?: 0.0
-        val costGoodSold = fundamentalA.cost_good_sold ?: 0.0
-        val preTaxIncome = fundamentalA.pre_tax_income ?: 0.0
+        /*
+        Extract and prepare some basic inputs
+         */
+        val totRevnu = latest.tot_revnu ?: 0.0
+        val costGoodSold = latest.cost_good_sold ?: 0.0
+        val preTaxIncome = latest.pre_tax_income ?: 0.0
+        val netIncomeLossShareHolder = latest.net_income_loss_share_holder ?: 0.0
+        val totNonOperIncomeExp = latest.tot_non_oper_income_exp ?: 0.0
+        val totalOperExp = latest.tot_oper_exp ?: 0.0
 
+        /*
+        Compute some basic metrics that will be used
+        to drive balance sheet items
+         */
         val cogsPctOfRevenue = costGoodSold / totRevnu
-
-        val netIncomeLossShareHolder = fundamentalA.net_income_loss_share_holder ?: 0.0
-        val totNonOperIncomeExp = fundamentalA.tot_non_oper_income_exp ?: 0.0
-
         val taxesPaid = preTaxIncome - netIncomeLossShareHolder
         val taxRate = 0.1.coerceAtLeast(taxesPaid / preTaxIncome)
-
-        val revenue = keyInputsToRevenue(fundamentalA)
-
-        val totalOperExp = fundamentalA.tot_oper_exp ?: 0.0
+        val revenue = keyInputsToRevenue(model, latest)
 
         return listOf(
             revenue,
@@ -79,7 +80,7 @@ class IncomeStatementItemsBuilder(private val keyInputsProvider: KeyInputsProvid
             Item(
                 name = GrossProfit,
                 description = "Gross Profit",
-                historicalValue = fundamentalA.gross_profit ?: 0.0,
+                historicalValue = latest.gross_profit ?: 0.0,
                 expression = "$Revenue - $CostOfGoodsSold",
             ),
             Item(
@@ -92,13 +93,13 @@ class IncomeStatementItemsBuilder(private val keyInputsProvider: KeyInputsProvid
             Item(
                 name = OperatingIncome,
                 description = "Operating Income",
-                historicalValue = fundamentalA.oper_income ?: 0.0,
+                historicalValue = latest.oper_income ?: 0.0,
                 expression = "$GrossProfit-$OperatingExpense",
             ),
             Item(
                 name = NonOperatingExpense,
                 description = "Non-Operating Expense",
-                historicalValue = fundamentalA.tot_non_oper_income_exp ?: 0.0,
+                historicalValue = latest.tot_non_oper_income_exp ?: 0.0,
                 // TODO based on historical data determine whether to use average or mark them as one time
                 expression = "$totNonOperIncomeExp",
             ),
@@ -118,7 +119,7 @@ class IncomeStatementItemsBuilder(private val keyInputsProvider: KeyInputsProvid
             Item(
                 name = NetIncome,
                 description = "Net Income",
-                historicalValue = fundamentalA.net_income_loss_share_holder ?: 0.0,
+                historicalValue = latest.net_income_loss_share_holder ?: 0.0,
                 expression = "$PretaxIncome-$TaxExpense"
             ),
         )

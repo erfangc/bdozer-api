@@ -1,6 +1,5 @@
 package com.starburst.starburst.zacks.modelbuilder
 
-import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.starburst.starburst.models.Utility.DiscountFactor
 import com.starburst.starburst.models.Utility.EarningsPerShare
 import com.starburst.starburst.models.Utility.NetIncome
@@ -9,27 +8,16 @@ import com.starburst.starburst.models.Utility.SharesOutstanding
 import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.zacks.dataclasses.ZacksFundamentalA
-import com.vhl.blackmo.grass.dsl.grass
-import org.slf4j.LoggerFactory
+import com.starburst.starburst.zacks.fa.ZacksFundamentalA
+import com.starburst.starburst.zacks.fa.ZacksFundamentalAService
 import org.springframework.stereotype.Service
-import java.io.File
 
-@ExperimentalStdlibApi
 @Service
-class ZacksModelBuilder(keyInputsProvider: KeyInputsProvider) {
-
-    private val incomeStatementItemsBuilder = IncomeStatementItemsBuilder(keyInputsProvider)
-    private val balanceSheetItemsBuilder = BalanceSheetItemsBuilder()
-    private val zacksFundamentalAs: List<ZacksFundamentalA>
-    private val fileName = "/Users/erfangchen/Downloads/ZACKS_FC_addc6c96afcc63aaedeb3dae8c933d5a.csv"
-    private val log = LoggerFactory.getLogger(ZacksModelBuilder::class.java)
-
-    init {
-        val csvContents = csvReader().readAllWithHeader(File(fileName))
-        zacksFundamentalAs = grass<ZacksFundamentalA> { dateFormat = "M/d/yy" }.harvest(csvContents)
-        log.info("Loaded ${zacksFundamentalAs.size} ${zacksFundamentalAs.javaClass.simpleName} from $fileName")
-    }
+class ZacksModelBuilder(
+    private val incomeStatementItemsBuilder: IncomeStatementItemsBuilder,
+    private val balanceSheetItemsBuilder: BalanceSheetItemsBuilder,
+    private val zacksFundamentalAService: ZacksFundamentalAService,
+) {
 
     /**
      * Build a model using Zacks Fundamental A data
@@ -37,13 +25,18 @@ class ZacksModelBuilder(keyInputsProvider: KeyInputsProvider) {
      */
     fun buildModel(ticker: String): Model {
 
-        val fundamentalA = findZacksFundamentalA(ticker)
-        val incomeStatementItems = incomeStatementItemsBuilder.incomeStatementItems(fundamentalA)
-        val balanceSheetItems = balanceSheetItemsBuilder.balanceSheetItems(fundamentalA)
+        val fundamentalAs = findZacksFundamentalA(ticker)
+        val latest = fundamentalAs.filter { it.per_type == "A" }.maxByOrNull { it.per_end_date!! } ?: error("...")
 
-        val model = Model(
+        val skeletonModel = Model(
             symbol = ticker,
-            name = fundamentalA.comp_name ?: "N/A",
+            name = latest.comp_name ?: "N/A",
+        )
+
+        val incomeStatementItems = incomeStatementItemsBuilder.incomeStatementItems(skeletonModel, latest)
+        val balanceSheetItems = balanceSheetItemsBuilder.balanceSheetItems(skeletonModel, latest)
+
+        val model = skeletonModel.copy(
             incomeStatementItems = incomeStatementItems,
             balanceSheetItems = balanceSheetItems,
             cashFlowStatementItems = listOf(),
@@ -72,14 +65,13 @@ class ZacksModelBuilder(keyInputsProvider: KeyInputsProvider) {
             ),
             Item(
                 name = PresentValuePerShare,
-                // TODO figure out the correct numerator if we can actually derive FCF
                 expression = "$DiscountFactor * ($EarningsPerShare + $TerminalValuePerShare)"
             )
         )
     }
 
-    private fun findZacksFundamentalA(ticker: String) = (zacksFundamentalAs
-        .find { it.ticker == ticker }
-        ?: error("Zacks fundamentals for $ticker not found"))
+    private fun findZacksFundamentalA(ticker: String): List<ZacksFundamentalA> {
+        return zacksFundamentalAService.getZacksFundamentalAs(ticker)
+    }
 
 }
