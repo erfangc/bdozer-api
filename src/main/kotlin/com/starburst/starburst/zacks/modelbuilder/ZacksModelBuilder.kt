@@ -26,15 +26,17 @@ class ZacksModelBuilder(
     fun buildModel(ticker: String): Model {
 
         val fundamentalAs = findZacksFundamentalA(ticker)
-        val latest = fundamentalAs.filter { it.per_type == "A" }.maxByOrNull { it.per_end_date!! } ?: error("...")
+        val latestFundamentalA = fundamentalAs
+            .filter { it.per_type == "A" }
+            .maxByOrNull { it.per_end_date!! } ?: error("...")
 
         val skeletonModel = Model(
             symbol = ticker,
-            name = latest.comp_name ?: "N/A",
+            name = latestFundamentalA.comp_name ?: "N/A",
         )
 
-        val incomeStatementItems = incomeStatementItemsBuilder.incomeStatementItems(skeletonModel, latest)
-        val balanceSheetItems = balanceSheetItemsBuilder.balanceSheetItems(skeletonModel, latest)
+        val incomeStatementItems = incomeStatementItemsBuilder.incomeStatementItems(skeletonModel, latestFundamentalA)
+        val balanceSheetItems = balanceSheetItemsBuilder.balanceSheetItems(skeletonModel, latestFundamentalA)
 
         val model = skeletonModel.copy(
             incomeStatementItems = incomeStatementItems,
