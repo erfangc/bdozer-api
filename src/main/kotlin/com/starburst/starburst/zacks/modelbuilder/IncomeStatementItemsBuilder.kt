@@ -1,15 +1,15 @@
 package com.starburst.starburst.zacks.modelbuilder
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
-import com.starburst.starburst.models.ReservedItemNames.CostOfGoodsSold
-import com.starburst.starburst.models.ReservedItemNames.GrossProfit
-import com.starburst.starburst.models.ReservedItemNames.NetIncome
-import com.starburst.starburst.models.ReservedItemNames.NonOperatingExpense
-import com.starburst.starburst.models.ReservedItemNames.OperatingExpense
-import com.starburst.starburst.models.ReservedItemNames.OperatingIncome
-import com.starburst.starburst.models.ReservedItemNames.PretaxIncome
-import com.starburst.starburst.models.ReservedItemNames.Revenue
-import com.starburst.starburst.models.ReservedItemNames.TaxExpense
+import com.starburst.starburst.models.Utility.CostOfGoodsSold
+import com.starburst.starburst.models.Utility.GrossProfit
+import com.starburst.starburst.models.Utility.NetIncome
+import com.starburst.starburst.models.Utility.NonOperatingExpense
+import com.starburst.starburst.models.Utility.OperatingExpense
+import com.starburst.starburst.models.Utility.OperatingIncome
+import com.starburst.starburst.models.Utility.PretaxIncome
+import com.starburst.starburst.models.Utility.Revenue
+import com.starburst.starburst.models.Utility.TaxExpense
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType

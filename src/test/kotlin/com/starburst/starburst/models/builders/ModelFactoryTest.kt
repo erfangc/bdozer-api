@@ -1,7 +1,7 @@
 package com.starburst.starburst.models.builders
 
 import com.starburst.starburst.Provier.fictitiousSaaSCompany
-import com.starburst.starburst.models.ReservedItemNames
+import com.starburst.starburst.models.Utility
 import com.starburst.starburst.models.dataclasses.Item
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -49,7 +49,7 @@ internal class ModelFactoryTest {
                     expression = "200.0"
                 ),
                 Item(
-                    name = ReservedItemNames.Revenue,
+                    name = Utility.Revenue,
                     expression = "0.0"
                 ),
                 Item(
@@ -61,12 +61,12 @@ internal class ModelFactoryTest {
                     expression = "300.0"
                 ),
                 Item(
-                    name = ReservedItemNames.CostOfGoodsSold,
+                    name = Utility.CostOfGoodsSold,
                     expression = "0.0"
                 ),
                 Item(
-                    name = ReservedItemNames.GrossProfit,
-                    expression = "${ReservedItemNames.Revenue} - ${ReservedItemNames.CostOfGoodsSold}"
+                    name = Utility.GrossProfit,
+                    expression = "${Utility.Revenue} - ${Utility.CostOfGoodsSold}"
                 ),
                 Item(
                     name = "ResearchAndDevelopment",
@@ -77,32 +77,32 @@ internal class ModelFactoryTest {
                     expression = "100"
                 ),
                 Item(
-                    name = ReservedItemNames.OperatingExpense,
+                    name = Utility.OperatingExpense,
                     expression = "0.0"
                 ),
                 Item(
-                    name = ReservedItemNames.OperatingIncome,
-                    expression = "${ReservedItemNames.GrossProfit} - ${ReservedItemNames.OperatingExpense}"
+                    name = Utility.OperatingIncome,
+                    expression = "${Utility.GrossProfit} - ${Utility.OperatingExpense}"
                 ),
                 Item(
                     name = "LitigationWriteOff",
                     expression = "200"
                 ),
                 Item(
-                    name = ReservedItemNames.NonOperatingExpense,
+                    name = Utility.NonOperatingExpense,
                     expression = "0.0"
                 ),
                 Item(
-                    name = ReservedItemNames.InterestExpense,
+                    name = Utility.InterestExpense,
                     expression = "0.0"
                 ),
                 Item(
-                    name = ReservedItemNames.TaxExpense,
+                    name = Utility.TaxExpense,
                     expression = "0.0"
                 ),
                 Item(
-                    name = ReservedItemNames.NetIncome,
-                    expression = "${ReservedItemNames.OperatingIncome} - ${ReservedItemNames.NonOperatingExpense} - ${ReservedItemNames.InterestExpense} - ${ReservedItemNames.TaxExpense}"
+                    name = Utility.NetIncome,
+                    expression = "${Utility.OperatingIncome} - ${Utility.NonOperatingExpense} - ${Utility.InterestExpense} - ${Utility.TaxExpense}"
                 )
             )
         )

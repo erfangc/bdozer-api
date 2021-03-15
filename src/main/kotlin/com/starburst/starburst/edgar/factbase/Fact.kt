@@ -1,4 +1,7 @@
-package com.starburst.starburst.edgar.dataclasses
+package com.starburst.starburst.edgar.factbase
+
+import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
+import com.starburst.starburst.edgar.dataclasses.XbrlPeriod
 
 /**
  * [Fact] is essentially a normalized version of a fact you find in XBRL

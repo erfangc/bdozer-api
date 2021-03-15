@@ -1,4 +1,4 @@
-package com.starburst.starburst.misc
+package com.starburst.starburst.unrelated
 
 import java.time.Instant
 import java.util.*

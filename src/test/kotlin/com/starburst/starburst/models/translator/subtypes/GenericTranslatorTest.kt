@@ -6,7 +6,7 @@ import com.starburst.starburst.models.translator.FormulaTranslationContext
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
+import com.starburst.starburst.models.dataclasses.FixedCost
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*

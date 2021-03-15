@@ -1,17 +1,23 @@
-package com.starburst.starburst.edgar.utils
+package com.starburst.starburst.xml
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.starburst.starburst.xml.XbrlUtils
-import com.starburst.starburst.xml.XmlElement
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
 import org.slf4j.LoggerFactory
+import java.io.InputStream
+import javax.xml.parsers.DocumentBuilderFactory
 
 object HttpClientExtensions {
 
     private val log = LoggerFactory.getLogger(HttpClientExtensions::class.java)
+
+    fun readXml(source: InputStream): XmlElement {
+        val factory = DocumentBuilderFactory.newInstance()
+        val builder = factory.newDocumentBuilder()
+        return XmlElement(builder.parse(source).documentElement)
+    }
 
     fun HttpClient.readLink(link: String): ByteArray? {
         val get = HttpGet(link)
@@ -25,7 +31,7 @@ object HttpClientExtensions {
 
     fun HttpClient.readXml(link: String): XmlElement {
         val inputStream = this.readLink(link)?.inputStream() ?: error("$link not found")
-        return XbrlUtils.readXml(inputStream)
+        return readXml(inputStream)
     }
 
     inline fun <reified T> HttpClient.readEntity(link: String): T {

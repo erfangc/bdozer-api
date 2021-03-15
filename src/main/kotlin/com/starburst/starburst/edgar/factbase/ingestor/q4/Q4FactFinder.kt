@@ -2,6 +2,7 @@ package com.starburst.starburst.edgar.factbase.ingestor.q4
 
 import com.mongodb.client.MongoClient
 import com.starburst.starburst.edgar.dataclasses.*
+import com.starburst.starburst.edgar.factbase.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.FactIdGenerator
 import org.litote.kmongo.*
 import org.slf4j.LoggerFactory

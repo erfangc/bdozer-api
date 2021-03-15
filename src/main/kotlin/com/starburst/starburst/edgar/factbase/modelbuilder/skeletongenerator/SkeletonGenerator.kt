@@ -3,7 +3,7 @@ package com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator
 import com.starburst.starburst.edgar.XbrlConstants.link
 import com.starburst.starburst.edgar.XbrlConstants.xlink
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
-import com.starburst.starburst.edgar.dataclasses.Fact
+import com.starburst.starburst.edgar.factbase.Fact
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
 import com.starburst.starburst.edgar.factbase.modelbuilder.DependencyFlattener
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.HistoricalValueExtensions.allHistoricalValues

@@ -1,4 +1,4 @@
-package com.starburst.starburst.models.translator.subtypes.dataclasses
+package com.starburst.starburst.models.dataclasses
 
 data class UnitSalesRevenue(
     val steadyStateUnitsSold: Double = 0.0,

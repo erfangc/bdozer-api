@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.utils
+package com.starburst.starburst.xml
 
 import org.w3c.dom.Node
 import java.time.LocalDate

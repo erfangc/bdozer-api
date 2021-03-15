@@ -1,6 +1,6 @@
 package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.ReservedItemNames.Revenue
+import com.starburst.starburst.models.Utility.Revenue
 import com.starburst.starburst.models.translator.FormulaTranslationContext
 import com.starburst.starburst.spreadsheet.Cell
 

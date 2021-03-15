@@ -1,4 +1,4 @@
-package com.starburst.starburst.misc
+package com.starburst.starburst.unrelated
 
 import com.mongodb.client.MongoClient
 import org.litote.kmongo.getCollection

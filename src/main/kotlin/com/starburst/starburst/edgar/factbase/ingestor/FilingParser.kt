@@ -1,10 +1,11 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
 import com.starburst.starburst.edgar.dataclasses.*
+import com.starburst.starburst.edgar.factbase.Fact
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.provider.FilingProvider
-import com.starburst.starburst.edgar.utils.LocalDateExtensions.toLocalDate
+import com.starburst.starburst.xml.LocalDateExtensions.toLocalDate
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.xml.XmlNode
 import org.slf4j.LoggerFactory

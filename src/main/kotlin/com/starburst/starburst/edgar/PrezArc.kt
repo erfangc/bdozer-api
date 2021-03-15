@@ -3,7 +3,7 @@
 //import com.starburst.starburst.edgar.XbrlConstants.link
 //import com.starburst.starburst.edgar.XbrlConstants.xlink
 //import com.starburst.starburst.edgar.filingentity.FilingEntityManager
-//import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
+//import com.starburst.starburst.xml.HttpClientExtensions.readXml
 //import com.starburst.starburst.xml.XmlNode
 //import org.apache.http.impl.client.HttpClientBuilder
 //import java.net.URI

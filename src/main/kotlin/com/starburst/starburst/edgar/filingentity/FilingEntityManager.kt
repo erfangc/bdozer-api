@@ -6,7 +6,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.factory.ModelFactory
 import com.starburst.starburst.edgar.filingentity.dataclasses.Address
 import com.starburst.starburst.edgar.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.edgar.filingentity.internal.SECEntity
-import com.starburst.starburst.edgar.utils.HttpClientExtensions.readEntity
+import com.starburst.starburst.xml.HttpClientExtensions.readEntity
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.translator.CellFormulaTranslator
 import com.starburst.starburst.models.translator.CellGenerator

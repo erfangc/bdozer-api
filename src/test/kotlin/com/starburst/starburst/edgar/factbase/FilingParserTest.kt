@@ -2,8 +2,8 @@ package com.starburst.starburst.edgar.factbase
 
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.edgar.provider.FilingProvider
-import com.starburst.starburst.xml.XbrlUtils
 import com.starburst.starburst.edgar.factbase.ingestor.FilingParser
+import com.starburst.starburst.xml.HttpClientExtensions.readXml
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
@@ -38,7 +38,7 @@ internal class FilingParserTest {
         fun readFile(name: String): XmlElement {
             println("reading $name")
             val istream = ClassPathResource(name).inputStream.readAllBytes().inputStream()
-            return XbrlUtils.readXml(istream)
+            return readXml(istream)
         }
 
         private val schemaExtension = readFile("factbase/dbx-20201231.xsd")

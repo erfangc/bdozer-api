@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
-import com.starburst.starburst.edgar.dataclasses.Fact
+import com.starburst.starburst.edgar.factbase.Fact
 
 data class ParseFactsResponse(
     val facts: List<Fact>,

@@ -1,13 +1,13 @@
 package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.ReservedItemNames.Revenue
+import com.starburst.starburst.models.Utility.Revenue
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.translator.CellGenerator
-import com.starburst.starburst.models.translator.subtypes.dataclasses.FixedCost
-import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
-import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfRevenue
+import com.starburst.starburst.models.dataclasses.FixedCost
+import com.starburst.starburst.models.dataclasses.SubscriptionRevenue
+import com.starburst.starburst.models.dataclasses.PercentOfRevenue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

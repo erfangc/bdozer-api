@@ -1,6 +1,6 @@
 package com.starburst.starburst.models
 
-object ReservedItemNames {
+object Utility {
     const val Period = "Period"
 
     // Income Statement
@@ -40,4 +40,7 @@ object ReservedItemNames {
     const val PresentValuePerShare = "PresentValuePerShare"
     const val EarningsPerShare = "EarningsPerShare"
 
+    fun previous(name: String): String {
+        return "Previous_$name"
+    }
 }

@@ -1,7 +1,5 @@
 package com.starburst.starburst.models.dataclasses
 
-import com.starburst.starburst.models.translator.subtypes.dataclasses.*
-
 data class Item(
     /**
      * [name] of this item, this is akin to an identifier

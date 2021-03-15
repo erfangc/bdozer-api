@@ -4,7 +4,7 @@ import com.starburst.starburst.edgar.XbrlConstants.link
 import com.starburst.starburst.edgar.XbrlConstants.xlink
 import com.starburst.starburst.edgar.XbrlConstants.xsd
 import com.starburst.starburst.xml.XmlElement
-import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
+import com.starburst.starburst.xml.HttpClientExtensions.readXml
 import org.apache.http.client.HttpClient
 import org.springframework.stereotype.Service
 

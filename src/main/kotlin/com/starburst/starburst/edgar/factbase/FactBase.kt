@@ -1,7 +1,6 @@
 package com.starburst.starburst.edgar.factbase
 
 import com.mongodb.client.MongoClient
-import com.starburst.starburst.edgar.dataclasses.Fact
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.springframework.stereotype.Service

@@ -2,7 +2,7 @@ package com.starburst.starburst.zacks.modelbuilder
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
-import com.starburst.starburst.models.ReservedItemNames
+import com.starburst.starburst.models.Utility
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.zacks.dataclasses.ZacksFundamentalA
@@ -39,68 +39,68 @@ class BalanceSheetItemsBuilder {
             Assets
              */
             Item(
-                name = ReservedItemNames.CurrentAsset,
+                name = Utility.CurrentAsset,
                 commentaries = Commentary("Current asset is ${caRatio.fmtPct()} of total asset"),
                 historicalValue = totCurrAsset,
-                expression = "$caRatio * ${ReservedItemNames.TotalAsset}",
+                expression = "$caRatio * ${Utility.TotalAsset}",
             ),
             Item(
-                name = ReservedItemNames.PropertyPlanetAndEquipement,
+                name = Utility.PropertyPlanetAndEquipement,
                 commentaries = Commentary("PP&E is ${ppeRatio.fmtPct()} of total asset"),
                 historicalValue = netPropPlantEquip,
-                expression = "$ppeRatio * ${ReservedItemNames.TotalAsset}",
+                expression = "$ppeRatio * ${Utility.TotalAsset}",
             ),
             Item(
-                name = ReservedItemNames.LongTermAsset,
+                name = Utility.LongTermAsset,
                 commentaries = Commentary("LT Asset is ${ltaRatio.fmtPct()}% of total asset"),
                 // y = px / (1-p); p = target % of total asset, x = everything except long-term asset
                 // avoid circular reference
                 historicalValue = totLtermAsset,
-                expression = "$ltaRatio * ${ReservedItemNames.TotalAsset} + ${ReservedItemNames.PropertyPlanetAndEquipement}",
+                expression = "$ltaRatio * ${Utility.TotalAsset} + ${Utility.PropertyPlanetAndEquipement}",
             ),
             Item(
-                name = ReservedItemNames.TotalAsset,
+                name = Utility.TotalAsset,
                 commentaries = Commentary("Total asset is ${totalAssetOverRevenue.fmtRound()}x of revenue"),
                 historicalValue = totAsset,
-                expression = "$totalAssetOverRevenue * ${ReservedItemNames.Revenue}"
+                expression = "$totalAssetOverRevenue * ${Utility.Revenue}"
             ),
             /*
             Liabilities
              */
             Item(
-                name = ReservedItemNames.CurrentLiability,
+                name = Utility.CurrentLiability,
                 historicalValue = totCurrLiab,
                 commentaries = Commentary("Current liability is ${clRatio.fmtPct()} of total liability"),
-                expression = "$clRatio*${ReservedItemNames.TotalLiability}",
+                expression = "$clRatio*${Utility.TotalLiability}",
             ),
             Item(
-                name = ReservedItemNames.LongTermDebt,
+                name = Utility.LongTermDebt,
                 historicalValue = totLtermDebt,
                 commentaries = Commentary("Long-term debt liability is ${ltdRatio.fmtPct()} of total liability"),
-                expression = "$ltdRatio*${ReservedItemNames.TotalLiability}",
+                expression = "$ltdRatio*${Utility.TotalLiability}",
             ),
             Item(
-                name = ReservedItemNames.LongTermLiability,
+                name = Utility.LongTermLiability,
                 historicalValue = totLtermLiab,
                 commentaries = Commentary("Long-term liability is ${ltlRatio.fmtPct()} of total liability"),
-                expression = "$ltlRatio*${ReservedItemNames.TotalLiability} + ${ReservedItemNames.LongTermDebt}",
+                expression = "$ltlRatio*${Utility.TotalLiability} + ${Utility.LongTermDebt}",
             ),
             Item(
-                name = ReservedItemNames.TotalLiability,
+                name = Utility.TotalLiability,
                 historicalValue = totLiab,
                 commentaries = Commentary("Total liability is ${totalLiabilityOverRevenue.fmtRound()}x of revenue"),
-                expression = "$totalLiabilityOverRevenue * ${ReservedItemNames.Revenue}"
+                expression = "$totalLiabilityOverRevenue * ${Utility.Revenue}"
             ),
             /*
             Shareholders Equity
              */
             Item(
-                name = ReservedItemNames.ShareholdersEquity,
+                name = Utility.ShareholdersEquity,
                 historicalValue = totShareHolderEquity,
-                expression = "${ReservedItemNames.TotalAsset} - ${ReservedItemNames.TotalLiability}"
+                expression = "${Utility.TotalAsset} - ${Utility.TotalLiability}"
             ),
             Item(
-                name = ReservedItemNames.SharesOutstanding,
+                name = Utility.SharesOutstanding,
                 historicalValue = avgBShares,
                 expression = "$avgBShares"
             ),

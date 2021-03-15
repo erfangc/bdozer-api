@@ -1,8 +1,8 @@
 package com.starburst.starburst.models.translator.subtypes
 
-import com.starburst.starburst.models.ReservedItemNames.TotalAsset
+import com.starburst.starburst.models.Utility.TotalAsset
+import com.starburst.starburst.models.Utility.previous
 import com.starburst.starburst.models.translator.FormulaTranslationContext
-import com.starburst.starburst.models.Util.previous
 import com.starburst.starburst.spreadsheet.Cell
 
 class PercentOfTotalAssetTranslator(private val ctx: FormulaTranslationContext) : FormulaTranslator {

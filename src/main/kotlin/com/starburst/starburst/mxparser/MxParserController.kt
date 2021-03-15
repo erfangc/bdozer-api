@@ -1,4 +1,4 @@
-package com.starburst.starburst.models.mxparser
+package com.starburst.starburst.mxparser
 
 import org.mariuszgromada.math.mxparser.Expression
 import org.springframework.web.bind.annotation.*

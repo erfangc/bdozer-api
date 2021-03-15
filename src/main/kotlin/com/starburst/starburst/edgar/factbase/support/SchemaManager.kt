@@ -4,7 +4,7 @@ import com.starburst.starburst.edgar.XbrlConstants.xbrli
 import com.starburst.starburst.edgar.XbrlConstants.xsd
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
 import com.starburst.starburst.edgar.provider.FilingProvider
-import com.starburst.starburst.edgar.utils.HttpClientExtensions.readXml
+import com.starburst.starburst.xml.HttpClientExtensions.readXml
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.xml.XmlNode
 import org.apache.http.impl.client.HttpClientBuilder

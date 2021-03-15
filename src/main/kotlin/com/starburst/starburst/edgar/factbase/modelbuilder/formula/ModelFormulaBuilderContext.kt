@@ -1,7 +1,7 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula
 
 import com.starburst.starburst.edgar.dataclasses.ElementDefinition
-import com.starburst.starburst.edgar.dataclasses.Fact
+import com.starburst.starburst.edgar.factbase.Fact
 import com.starburst.starburst.models.dataclasses.Model
 
 data class ModelFormulaBuilderContext(

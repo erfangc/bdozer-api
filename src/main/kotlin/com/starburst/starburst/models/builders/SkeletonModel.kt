@@ -3,9 +3,9 @@ package com.starburst.starburst.models.builders
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.ReservedItemNames
-import com.starburst.starburst.models.translator.subtypes.dataclasses.PercentOfRevenue
-import com.starburst.starburst.models.translator.subtypes.dataclasses.SubscriptionRevenue
+import com.starburst.starburst.models.Utility
+import com.starburst.starburst.models.dataclasses.PercentOfRevenue
+import com.starburst.starburst.models.dataclasses.SubscriptionRevenue
 
 object SkeletonModel {
     val dropbox = Model(
@@ -29,7 +29,7 @@ object SkeletonModel {
                 historicalValue = 1913.9
             ),
             Item(
-                name = ReservedItemNames.Revenue,
+                name = Utility.Revenue,
                 description = "Revenue"
             ),
             Item(
@@ -52,11 +52,11 @@ object SkeletonModel {
                 stockBasedCompensation = true
             ),
             Item(
-                name = ReservedItemNames.CostOfGoodsSold,
+                name = Utility.CostOfGoodsSold,
                 description = "Cost of Goods Sold"
             ),
             Item(
-                name = ReservedItemNames.GrossProfit,
+                name = Utility.GrossProfit,
                 description = "Gross Profit"
             ),
             Item(
@@ -92,11 +92,11 @@ object SkeletonModel {
                 nonCashExpense = true
             ),
             Item(
-                name = ReservedItemNames.OperatingExpense,
+                name = Utility.OperatingExpense,
                 description = "Operating Expense"
             ),
             Item(
-                name = ReservedItemNames.OperatingIncome,
+                name = Utility.OperatingIncome,
                 description = "Operating Income"
             ),
             Item(
@@ -106,55 +106,55 @@ object SkeletonModel {
                 historicalValue = -26.8
             ),
             Item(
-                name = ReservedItemNames.NonOperatingExpense,
+                name = Utility.NonOperatingExpense,
                 description = "NonOperating Expense"
             ),
             Item(
-                name = ReservedItemNames.InterestExpense,
+                name = Utility.InterestExpense,
                 expression = "0.0",
                 description = "Interest Expense"
             ),
             Item(
-                name = ReservedItemNames.TaxExpense,
+                name = Utility.TaxExpense,
                 description = "Tax Expense",
                 historicalValue = 6.1
             ),
             Item(
-                name = ReservedItemNames.NetIncome,
+                name = Utility.NetIncome,
                 description = "Net Income"
             )
         ),
         balanceSheetItems = listOf(
             Item(
-                name = ReservedItemNames.CurrentAsset,
+                name = Utility.CurrentAsset,
                 historicalValue = 0.0
             ),
             Item(
-                name = ReservedItemNames.LongTermAsset,
+                name = Utility.LongTermAsset,
                 historicalValue = 0.0
             ),
             Item(
-                name = ReservedItemNames.TotalAsset,
+                name = Utility.TotalAsset,
                 historicalValue = 0.0,
-                expression = "${ReservedItemNames.CurrentAsset}+${ReservedItemNames.LongTermAsset}"
+                expression = "${Utility.CurrentAsset}+${Utility.LongTermAsset}"
             ),
             Item(
-                name = ReservedItemNames.CurrentLiability,
+                name = Utility.CurrentLiability,
                 historicalValue = 0.0
             ),
             Item(
-                name = ReservedItemNames.LongTermLiability,
+                name = Utility.LongTermLiability,
                 historicalValue = 0.0
             ),
             Item(
-                name = ReservedItemNames.TotalLiability,
+                name = Utility.TotalLiability,
                 historicalValue = 0.0,
-                expression = "${ReservedItemNames.CurrentLiability}+${ReservedItemNames.LongTermLiability}"
+                expression = "${Utility.CurrentLiability}+${Utility.LongTermLiability}"
             ),
             Item(
-                name = ReservedItemNames.ShareholdersEquity,
+                name = Utility.ShareholdersEquity,
                 historicalValue = 0.0,
-                expression = "${ReservedItemNames.TotalAsset}-${ReservedItemNames.TotalLiability}"
+                expression = "${Utility.TotalAsset}-${Utility.TotalLiability}"
             )
         )
     )

@@ -1,12 +1,12 @@
 package com.starburst.starburst.zacks.modelbuilder
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import com.starburst.starburst.models.ReservedItemNames.DiscountFactor
-import com.starburst.starburst.models.ReservedItemNames.EarningsPerShare
-import com.starburst.starburst.models.ReservedItemNames.NetIncome
-import com.starburst.starburst.models.ReservedItemNames.PresentValuePerShare
-import com.starburst.starburst.models.ReservedItemNames.SharesOutstanding
-import com.starburst.starburst.models.ReservedItemNames.TerminalValuePerShare
+import com.starburst.starburst.models.Utility.DiscountFactor
+import com.starburst.starburst.models.Utility.EarningsPerShare
+import com.starburst.starburst.models.Utility.NetIncome
+import com.starburst.starburst.models.Utility.PresentValuePerShare
+import com.starburst.starburst.models.Utility.SharesOutstanding
+import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.zacks.dataclasses.ZacksFundamentalA
