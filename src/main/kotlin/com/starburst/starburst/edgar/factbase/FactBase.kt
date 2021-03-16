@@ -1,16 +1,14 @@
 package com.starburst.starburst.edgar.factbase
 
-import com.mongodb.client.MongoClient
+import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.springframework.stereotype.Service
 
 @Service
-class FactBase(mongoClient: MongoClient) {
+class FactBase(mongoDatabase: MongoDatabase) {
 
-    private val col = mongoClient
-        .getDatabase("starburst")
-        .getCollection<Fact>()
+    private val col = mongoDatabase.getCollection<Fact>()
 
     fun deleteAll(cik: String) {
         col.deleteMany(Fact::cik eq cik)

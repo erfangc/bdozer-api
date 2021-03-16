@@ -2,7 +2,17 @@ package com.starburst.starburst.zacks.modelbuilder
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
-import com.starburst.starburst.models.Utility
+import com.starburst.starburst.models.Utility.CurrentAsset
+import com.starburst.starburst.models.Utility.CurrentLiability
+import com.starburst.starburst.models.Utility.LongTermAsset
+import com.starburst.starburst.models.Utility.LongTermDebt
+import com.starburst.starburst.models.Utility.LongTermLiability
+import com.starburst.starburst.models.Utility.PropertyPlanetAndEquipement
+import com.starburst.starburst.models.Utility.Revenue
+import com.starburst.starburst.models.Utility.ShareholdersEquity
+import com.starburst.starburst.models.Utility.SharesOutstanding
+import com.starburst.starburst.models.Utility.TotalAsset
+import com.starburst.starburst.models.Utility.TotalLiability
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
@@ -44,68 +54,68 @@ class BalanceSheetItemsBuilder {
             Assets
              */
             Item(
-                name = Utility.CurrentAsset,
+                name = CurrentAsset,
                 commentaries = Commentary("Current asset is ${caRatio.fmtPct()} of total asset"),
                 historicalValue = totCurrAsset,
-                expression = "$caRatio * ${Utility.TotalAsset}",
+                expression = "$caRatio * $TotalAsset",
             ),
             Item(
-                name = Utility.PropertyPlanetAndEquipement,
+                name = PropertyPlanetAndEquipement,
                 commentaries = Commentary("PP&E is ${ppeRatio.fmtPct()} of total asset"),
                 historicalValue = netPropPlantEquip,
-                expression = "$ppeRatio * ${Utility.TotalAsset}",
+                expression = "$ppeRatio * $TotalAsset",
             ),
             Item(
-                name = Utility.LongTermAsset,
+                name = LongTermAsset,
                 commentaries = Commentary("LT Asset is ${ltaRatio.fmtPct()}% of total asset"),
                 // y = px / (1-p); p = target % of total asset, x = everything except long-term asset
                 // avoid circular reference
                 historicalValue = totLtermAsset,
-                expression = "$ltaRatio * ${Utility.TotalAsset} + ${Utility.PropertyPlanetAndEquipement}",
+                expression = "$ltaRatio * $TotalAsset + $PropertyPlanetAndEquipement",
             ),
             Item(
-                name = Utility.TotalAsset,
+                name = TotalAsset,
                 commentaries = Commentary("Total asset is ${totalAssetOverRevenue.fmtRound()}x of revenue"),
                 historicalValue = totAsset,
-                expression = "$totalAssetOverRevenue * ${Utility.Revenue}"
+                expression = "$totalAssetOverRevenue * $Revenue"
             ),
             /*
             Liabilities
              */
             Item(
-                name = Utility.CurrentLiability,
+                name = CurrentLiability,
                 historicalValue = totCurrLiab,
                 commentaries = Commentary("Current liability is ${clRatio.fmtPct()} of total liability"),
-                expression = "$clRatio*${Utility.TotalLiability}",
+                expression = "$clRatio*${TotalLiability}",
             ),
             Item(
-                name = Utility.LongTermDebt,
+                name = LongTermDebt,
                 historicalValue = totLtermDebt,
                 commentaries = Commentary("Long-term debt liability is ${ltdRatio.fmtPct()} of total liability"),
-                expression = "$ltdRatio*${Utility.TotalLiability}",
+                expression = "$ltdRatio*${TotalLiability}",
             ),
             Item(
-                name = Utility.LongTermLiability,
+                name = LongTermLiability,
                 historicalValue = totLtermLiab,
                 commentaries = Commentary("Long-term liability is ${ltlRatio.fmtPct()} of total liability"),
-                expression = "$ltlRatio*${Utility.TotalLiability} + ${Utility.LongTermDebt}",
+                expression = "$ltlRatio*${TotalLiability} + $LongTermDebt",
             ),
             Item(
-                name = Utility.TotalLiability,
+                name = TotalLiability,
                 historicalValue = totLiab,
                 commentaries = Commentary("Total liability is ${totalLiabilityOverRevenue.fmtRound()}x of revenue"),
-                expression = "$totalLiabilityOverRevenue * ${Utility.Revenue}"
+                expression = "$totalLiabilityOverRevenue * $Revenue"
             ),
             /*
             Shareholders Equity
              */
             Item(
-                name = Utility.ShareholdersEquity,
+                name = ShareholdersEquity,
                 historicalValue = totShareHolderEquity,
-                expression = "${Utility.TotalAsset} - ${Utility.TotalLiability}"
+                expression = "$TotalAsset - $TotalLiability"
             ),
             Item(
-                name = Utility.SharesOutstanding,
+                name = SharesOutstanding,
                 historicalValue = avgBShares,
                 expression = "$avgBShares"
             ),
