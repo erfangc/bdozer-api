@@ -30,7 +30,7 @@ data class Model(
     val costOfDebt: Double = 0.04,
     val riskFreeRate: Double = 0.005,
     val equityRiskPremium: Double = 0.07,
-    val terminalFcfMultiple: Double = 10.0,
+    val terminalFcfMultiple: Double = 15.0,
     val terminalFcfGrowthRate: Double = 0.035,
 
     /**

@@ -1,7 +1,7 @@
 package com.starburst.starburst.zacks.modelbuilder.support
 
-import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
+import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.models.Utility.CostOfGoodsSold
 import com.starburst.starburst.models.Utility.GrossProfit
 import com.starburst.starburst.models.Utility.NetIncome
@@ -17,6 +17,7 @@ import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.zacks.fa.ZacksFundamentalA
 import com.starburst.starburst.zacks.fa.ZacksFundamentalAService
+import com.starburst.starburst.zacks.modelbuilder.keyinputs.KeyInputs
 import com.starburst.starburst.zacks.modelbuilder.keyinputs.KeyInputsProvider
 import org.springframework.stereotype.Service
 
@@ -78,16 +79,25 @@ class IncomeStatementItemsBuilder(
             ?: findFwrdCogsPCt(quarterly)
             ?: error("unable to determine forward going COGS pct of revenue for $ticker")
 
+        val cogsHist = quarterly.sortedBy { it.per_end_date }.map { it.cost_good_sold }
+        val earliestCogs = cogsHist.first() ?: 0.0
+        val latestCogs = cogsHist.last() ?: 0.0
+        val verb = if (latestCogs > earliestCogs) {
+            "up"
+        } else {
+            "down"
+        }
+
         return Item(
             name = CostOfGoodsSold,
             description = "Cost of Goods",
             historicalValue = latest.cost_good_sold.orZ(),
-            commentaries = Commentary(commentary = "Cost of goods sold has been ${fwrdCogsPct.fmtPct()}"),
+            commentaries = Commentary(commentary = "Cost of goods sold has historically been ${fwrdCogsPct.fmtPct()} of revenue. It's been trending $verb. Out of conservatism, We will assume ${fwrdCogsPct.fmtPct()} going forward"),
             expression = "$fwrdCogsPct * $Revenue",
         )
     }
 
-    fun incomeStatementItems(model: Model, latest: ZacksFundamentalA): List<Item> {
+    fun incomeStatementItems(model: Model, latest: ZacksFundamentalA, keyInputs: KeyInputs? = null): List<Item> {
 
         /*
         Extract and prepare some basic inputs
@@ -106,7 +116,7 @@ class IncomeStatementItemsBuilder(
             .coerceAtLeast(0.08)
             .coerceAtMost(0.15)
 
-        val revenue = keyInputsToRevenue(model, latest)
+        val revenue = keyInputsToRevenue(model, latest, keyInputs)
         val operatingExpenses = operatingExpenses(model, latest)
 
         return listOf(
@@ -161,17 +171,24 @@ class IncomeStatementItemsBuilder(
      *
      * Or else, pre-saved revenue drivers such as [Discrete] might be used
      */
-    private fun keyInputsToRevenue(model: Model, latest: ZacksFundamentalA): Item {
+    private fun keyInputsToRevenue(
+        model: Model,
+        latest: ZacksFundamentalA,
+        keyInputs: KeyInputs? = null
+    ): Item {
         val ticker = latest.ticker ?: error("...")
-        val keyInputs = keyInputsProvider.getKeyInputs(ticker)
+        val keyInputs = keyInputs ?: keyInputsProvider.getKeyInputs(ticker)
         val totRevnu = latest.tot_revnu ?: 0.0
         return if (keyInputs == null) {
             salesEstimateToRevenueConverter.convert(model, totRevnu)
         } else {
+            // TODO resolve the formula Key inputs
+            val formula = keyInputs.formula
             Item(
                 name = Revenue,
                 description = "Revenue",
                 historicalValue = totRevnu,
+                expression = formula
             )
         }
     }

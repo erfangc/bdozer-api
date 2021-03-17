@@ -12,6 +12,7 @@ import com.starburst.starburst.models.evaluator.ModelEvaluator
 import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.zacks.fa.ZacksFundamentalA
 import com.starburst.starburst.zacks.fa.ZacksFundamentalAService
+import com.starburst.starburst.zacks.modelbuilder.keyinputs.KeyInputs
 import com.starburst.starburst.zacks.modelbuilder.support.BalanceSheetItemsBuilder
 import com.starburst.starburst.zacks.modelbuilder.support.IncomeStatementItemsBuilder
 import org.springframework.stereotype.Service
@@ -29,7 +30,7 @@ class ZacksModelBuilder(
      * Build a model using Zacks Fundamental A data
      * for the given ticker - this model will be supplemented by data we ingest from the SEC
      */
-    fun buildModel(ticker: String): BuildModelResponse {
+    fun buildModel(ticker: String, keyInputs: KeyInputs? = null): BuildModelResponse {
         val fundamentalAs = findZacksFundamentalA(ticker)
         val latestFundamentalA = fundamentalAs
             .filter { it.per_type == "A" }
@@ -41,7 +42,8 @@ class ZacksModelBuilder(
             name = latestFundamentalA.comp_name ?: "N/A",
         )
 
-        val incomeStatementItems = incomeStatementItemsBuilder.incomeStatementItems(skeletonModel, latestFundamentalA)
+        val incomeStatementItems =
+            incomeStatementItemsBuilder.incomeStatementItems(skeletonModel, latestFundamentalA, keyInputs)
         val balanceSheetItems = balanceSheetItemsBuilder.balanceSheetItems(skeletonModel, latestFundamentalA)
 
         val modelItemized = skeletonModel.copy(
