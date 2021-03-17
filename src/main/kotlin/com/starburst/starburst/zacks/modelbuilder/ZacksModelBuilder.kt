@@ -12,6 +12,8 @@ import com.starburst.starburst.models.evaluator.ModelEvaluator
 import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.zacks.fa.ZacksFundamentalA
 import com.starburst.starburst.zacks.fa.ZacksFundamentalAService
+import com.starburst.starburst.zacks.modelbuilder.support.BalanceSheetItemsBuilder
+import com.starburst.starburst.zacks.modelbuilder.support.IncomeStatementItemsBuilder
 import org.springframework.stereotype.Service
 
 @Service
@@ -25,7 +27,7 @@ class ZacksModelBuilder(
 
     /**
      * Build a model using Zacks Fundamental A data
-     * for the given ticker
+     * for the given ticker - this model will be supplemented by data we ingest from the SEC
      */
     fun buildModel(ticker: String): BuildModelResponse {
         val fundamentalAs = findZacksFundamentalA(ticker)

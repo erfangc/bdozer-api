@@ -1,4 +1,4 @@
-package com.starburst.starburst.zacks.modelbuilder
+package com.starburst.starburst.zacks.modelbuilder.support
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
