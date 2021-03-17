@@ -1,6 +1,7 @@
 package com.starburst.starburst.zacks.modelbuilder.support
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
 import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.models.Utility.CostOfGoodsSold
 import com.starburst.starburst.models.Utility.GrossProfit
@@ -92,7 +93,13 @@ class IncomeStatementItemsBuilder(
             name = CostOfGoodsSold,
             description = "Cost of Goods",
             historicalValue = latest.cost_good_sold.orZ(),
-            commentaries = Commentary(commentary = "Cost of goods sold has historically been ${fwrdCogsPct.fmtPct()} of revenue. It's been trending $verb. Out of conservatism, We will assume ${fwrdCogsPct.fmtPct()} going forward"),
+            commentaries = Commentary(
+                commentary = """
+                |Cost of goods sold has historically been ${fwrdCogsPct.fmtPct()} of revenue. 
+                |It's been trending $verb. 
+                |Out of conservatism, We will assume ${fwrdCogsPct.fmtPct()} going forward
+                |""".trimMargin()
+            ),
             expression = "$fwrdCogsPct * $Revenue",
         )
     }
@@ -218,12 +225,18 @@ class IncomeStatementItemsBuilder(
 
         return if (oneTimeCharges.isNotEmpty()) {
             val totalOneTime = oneTimeCharges.sumByDouble { (it.doubleValue ?: 0.0) / 1_000_000.0 }
+            val fwrdOperatingExp = operatingExpenses - totalOneTime
             Item(
                 name = OperatingExpense,
                 description = "Operating Expense",
                 historicalValue = operatingExpenses,
-                expression = "$operatingExpenses - $totalOneTime",
-                commentaries = Commentary("Going forward operating expense exclude one time charges of $totalOneTime")
+                expression = "$fwrdOperatingExp",
+                commentaries = Commentary(
+                    """
+                    |Going forward operating expense will be ${'$'}${fwrdOperatingExp.fmtRound()} million,
+                    |which excludes one time charges of ${'$'}${totalOneTime.fmtRound()} million
+                """.trimMargin()
+                )
             )
         } else {
             Item(
