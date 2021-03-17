@@ -22,6 +22,11 @@ import org.springframework.stereotype.Service
 class NarrativeBuilder(
     private val modelBuilder: ZacksModelBuilder,
 ) {
+
+    fun exportExcel(ticker: String): ByteArray {
+        return modelBuilder.buildModel(ticker).excel
+    }
+
     fun buildNarrative(ticker: String): Narrative {
 
         val resp = modelBuilder.buildModel(ticker)
