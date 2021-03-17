@@ -1,5 +1,7 @@
 package com.starburst.starburst.edgar.factbase.support
 
+import com.starburst.starburst.edgar.XbrlConstants.link
+import com.starburst.starburst.edgar.XbrlConstants.xlink
 import com.starburst.starburst.edgar.dataclasses.Labels
 import com.starburst.starburst.edgar.provider.FilingProvider
 import java.net.URI
@@ -10,20 +12,9 @@ import java.net.URI
  */
 class LabelManager(filingProvider: FilingProvider) {
 
-    companion object {
-        const val LINK_BASE_NS = "http://www.xbrl.org/2003/linkbase"
-    }
-
     private val labelElement = filingProvider.labelLinkbase()
 
-    private val linkNs = labelElement.getShortNamespace(LINK_BASE_NS)
-
-    private val labelLink = linkNs?.let { "$it:labelLink" } ?: "labelLink"
-    private val labelArc = linkNs?.let { "$it:labelArc" } ?: "labelArc"
-    private val label = linkNs?.let { "$it:label" } ?: "label"
-    private val loc = linkNs?.let { "$it:loc" } ?: "loc"
-
-    private val node = labelElement.getElementByTag(labelLink) ?: error("...")
+    private val node = labelElement.getElementByTag(link, "labelLink") ?: error("...")
 
     //
     // we have loc = locators, label (which is what we want) and labelArc
@@ -34,18 +25,20 @@ class LabelManager(filingProvider: FilingProvider) {
     // 1 - build a map of locator(s), from schema definition Ids (the hrefs) -> xlink:label
     //
     private val locs = node
-        .getElementsByTag(loc)
+        .getElementsByTag(link,"loc")
         .map {
-            URI(it.attr("xlink:href")).fragment to it.attr("xlink:label")
+            val href = it.attr(xlink, "href") ?: error("href not defined on label locator")
+            val label = it.attr(xlink, "label")
+            URI(href).fragment to label
         }.toMap()
 
     //
     // 2 - build a map of labelArcs, from locator xlink:label -> labelArc
     //
     private val labelArcs = node
-        .getElementsByTag(labelArc)
+        .getElementsByTag(link, "labelArc")
         .map {
-            it.attr("xlink:from") to it.attr("xlink:to")
+            it.attr(xlink,"from") to it.attr(xlink,"to")
         }
         .toMap()
 
@@ -53,13 +46,13 @@ class LabelManager(filingProvider: FilingProvider) {
     // 3 - build a map of labelArcs -> label(s)
     //
     private val labels = node
-        .getElementsByTag(label)
+        .getElementsByTag(link,"label")
         .groupBy {
-            it.attr("xlink:label")
+            it.attr(xlink,"label")
         }.map { (label, nodes) ->
             // process each node into a map of role -> text
             label to nodes.map {
-                it.attr("xlink:role") to it.textContent
+                it.attr(xlink,"role") to it.textContent
             }.toMap()
         }.toMap()
 
@@ -69,9 +62,10 @@ class LabelManager(filingProvider: FilingProvider) {
         val labels = labels[arcLabel] ?: emptyMap()
 
         val label = labels["http://www.xbrl.org/2003/role/label"]
-        val terseLabel = labels["http://www.xbrl.org/2003/role/terseLabel"] ?: label
-        val verboseLabel = labels["http://www.xbrl.org/2003/role/verboseLabel"] ?: terseLabel
+        val terseLabel = labels["http://www.xbrl.org/2003/role/terseLabel"]
+        val verboseLabel = labels["http://www.xbrl.org/2003/role/verboseLabel"]
         val documentation = labels["http://www.xbrl.org/2003/role/documentation"]
+
         return Labels(
             label = label,
             terseLabel = terseLabel,

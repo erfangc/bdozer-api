@@ -41,5 +41,6 @@ class FilingEntityManagerController(private val filingEntityManager: FilingEntit
     fun bootstrapFilingEntity(@PathVariable cik: String): FilingEntity {
         return filingEntityManager.bootstrapFilingEntity(cik)
     }
+
 }
 

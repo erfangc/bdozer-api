@@ -40,7 +40,7 @@ class ModelFactory(
 
         val ctx = ModelFormulaBuilderContext(
             facts = skeletonGenerator.facts,
-            elementDefinitionMap = skeletonGenerator.elementDefinitionMap,
+            conceptDefinitionMap = skeletonGenerator.elementDefinitionMap,
             itemDependencyGraph = skeletonGenerator.itemDependencyGraph,
             flattenedItemDependencyGraph = skeletonGenerator.flattenedItemDependencyGraph,
             model = skeletonGenerator.model

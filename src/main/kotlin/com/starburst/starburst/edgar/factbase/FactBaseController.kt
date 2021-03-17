@@ -32,7 +32,6 @@ class FactBaseController(
         }
     }
 
-
     /**
      * Why? b/c we only have 3 10-Qs and 1 10-K
      * thus standalone Q4 info is missing

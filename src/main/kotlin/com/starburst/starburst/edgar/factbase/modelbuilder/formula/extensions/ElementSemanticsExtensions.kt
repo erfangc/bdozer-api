@@ -9,7 +9,7 @@ object ElementSemanticsExtensions {
      * Is flow item
      */
     fun ModelFormulaBuilderContext.isFlowItem(item: Item): Boolean {
-        val elementDefinition = elementDefinitionMap[item.name]
+        val elementDefinition = conceptDefinitionMap[item.name]
         val type = elementDefinition?.type
         val abstract = elementDefinition?.abstract
         val periodType = elementDefinition?.periodType
@@ -23,7 +23,7 @@ object ElementSemanticsExtensions {
      */
     fun ModelFormulaBuilderContext.isDebtFlowItem(item: Item): Boolean {
         // we find the element definition
-        val elementDefinition = elementDefinitionMap[item.name]
+        val elementDefinition = conceptDefinitionMap[item.name]
         val balance = elementDefinition?.balance
         val abstract = elementDefinition?.abstract
         val periodType = elementDefinition?.periodType
@@ -45,7 +45,7 @@ object ElementSemanticsExtensions {
      */
     fun ModelFormulaBuilderContext.isCreditFlowItem(item: Item): Boolean {
         // we find the element definition
-        val elementDefinition = elementDefinitionMap[item.name]
+        val elementDefinition = conceptDefinitionMap[item.name]
         val balance = elementDefinition?.balance
         val abstract = elementDefinition?.abstract
         val periodType = elementDefinition?.periodType

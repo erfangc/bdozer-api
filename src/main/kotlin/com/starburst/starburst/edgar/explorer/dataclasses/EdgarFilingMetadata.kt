@@ -1,7 +1,9 @@
 package com.starburst.starburst.edgar.explorer.dataclasses
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class EdgarFilingMetadata(
     val ciks: List<String> = emptyList(),
     val period_ending: LocalDate,

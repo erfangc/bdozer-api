@@ -11,8 +11,6 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 object HttpClientExtensions {
 
-    private val log = LoggerFactory.getLogger(HttpClientExtensions::class.java)
-
     fun readXml(source: InputStream): XmlElement {
         val factory = DocumentBuilderFactory.newInstance()
         val builder = factory.newDocumentBuilder()
@@ -25,7 +23,6 @@ object HttpClientExtensions {
         val entity = httpResponse.entity
         val allBytes = entity.content.readAllBytes()
         get.releaseConnection()
-        log.info("Read remote link $link")
         return allBytes
     }
 

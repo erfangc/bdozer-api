@@ -1,6 +1,7 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
 import com.starburst.starburst.edgar.dataclasses.*
+import com.starburst.starburst.edgar.factbase.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
 import com.starburst.starburst.edgar.factbase.support.LabelManager
@@ -67,7 +68,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
          */
         val facts = instanceDocument.childNodes().mapNotNull { node ->
             val context = getContext(node.attr("contextRef"))
-            val elementDefinition = lookupElementDefinition(node.nodeName)
+            val conceptDefinition = lookupElementDefinition(node.nodeName)
             val adsh = filingProvider.adsh()
 
             /*
@@ -79,17 +80,16 @@ class FilingParser(private val filingProvider: FilingProvider) {
             } else if (!isFactInPeriod(context)) {
                 irrelevantPeriod++
                 null // return null to skip
-            } else if (elementDefinition == null) {
+            } else if (conceptDefinition == null) {
                 elementDefinitionNotFound++
                 null // return null to skip
             } else {
                 relevant++
                 val content = node.textContent
-                val labels = getLabels(elementDefinition.id)
+                val labels = getLabels(conceptDefinition.id)
 
-                val symbols = symbols(instanceDocument)
                 val explicitMembers = context.entity.segment?.explicitMembers ?: emptyList()
-                val elementName = elementDefinition.name
+                val conceptName = conceptDefinition.conceptName
 
                 /*
                 generate idempotent identifiers if the same information
@@ -97,7 +97,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 */
                 val factIdGenerator = FactIdGenerator()
                 val id = factIdGenerator.generateId(
-                    elementName = elementName,
+                    elementName = conceptName,
                     context = context,
                     documentPeriodEndDate = documentPeriodEndDate
                 )
@@ -111,22 +111,24 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 Fact(
                     _id = id,
                     instanceDocumentElementId = instanceDocumentElementId,
+                    instanceDocumentElementName = node.nodeName,
                     cik = cik,
                     adsh = adsh,
                     entityName = entityName,
                     primarySymbol = primarySymbol,
-                    symbols = symbols,
                     formType = formType,
 
-                    documentFiscalPeriodFocus = documentFiscalPeriodFocus,
+                    documentFiscalPeriodFocus = DocumentFiscalPeriodFocus.valueOf(documentFiscalPeriodFocus),
                     documentFiscalYearFocus = documentFiscalYearFocus,
                     documentPeriodEndDate = documentPeriodEndDate,
 
-                    elementName = elementName,
-                    rawElementName = node.nodeName,
-                    longNamespace = elementDefinition.longNamespace,
+                    conceptName = conceptName,
+                    conceptHref = conceptDefinition.conceptHref,
+                    namespace = conceptDefinition.targetNamespace,
 
-                    period = context.period,
+                    startDate = context.period.startDate,
+                    endDate = context.period.endDate,
+                    instant = context.period.instant,
                     explicitMembers = explicitMembers,
 
                     sourceDocument = sourceDocument(node),
@@ -134,6 +136,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
                     label = labels.label,
                     labelTerse = labels.terseLabel,
                     verboseLabel = labels.verboseLabel,
+                    documentation = labels.documentation,
 
                     stringValue = content,
                     doubleValue = content.toDoubleOrNull(),
@@ -168,7 +171,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
      */
     private fun isFactInPeriod(context: XbrlContext): Boolean {
 
-        val endDate = LocalDate.parse(documentPeriodEndDate(instanceDocument))
+        val endDate = documentPeriodEndDate(instanceDocument)
 
         /*
         figure out the correct period start date
@@ -192,15 +195,17 @@ class FilingParser(private val filingProvider: FilingProvider) {
 
     }
 
-    private fun documentPeriodEndDate(instanceDocument: XmlElement): String {
+    private fun documentPeriodEndDate(instanceDocument: XmlElement): LocalDate {
         val found = instanceDocument
             .getElementsByTag("dei:DocumentPeriodEndDate")
         if (found.isEmpty()) {
-            return "N/A"
+            error("Unable to find DocumentPeriodEndDate for cik=${filingProvider.cik()} adsh=${filingProvider.adsh()}")
         }
         return found
             .first()
-            .textContent ?: "N/A"
+            .textContent
+            ?.let { date -> LocalDate.parse(date) }
+            ?: error("Unable to parse DocumentPeriodEndDate for cik=${filingProvider.cik()} adsh=${filingProvider.adsh()}")
     }
 
     private fun documentFiscalYearFocus(instanceDocument: XmlElement): Int {
@@ -244,10 +249,6 @@ class FilingParser(private val filingProvider: FilingProvider) {
         }
     }
 
-    private fun symbols(instanceDocument: XmlElement): List<String> {
-        return listOf(primarySymbol(instanceDocument))
-    }
-
     private fun primarySymbol(instanceDocument: XmlElement): String {
         val found = instanceDocument
             .getElementsByTag("dei:TradingSymbol")
@@ -289,12 +290,12 @@ class FilingParser(private val filingProvider: FilingProvider) {
         }
     }
 
-    private fun lookupElementDefinition(nodeName: String): ElementDefinition? {
+    private fun lookupElementDefinition(nodeName: String): ConceptDefinition? {
         val (namespace, tag) = parseInstanceNodeName(nodeName)
         return if (namespace.isEmpty()) {
             null
         } else {
-            schemaManager.getElementDefinition(namespace, tag)
+            schemaManager.getConceptDefinition(namespace, tag)
         }
     }
 

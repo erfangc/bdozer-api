@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
-import com.mongodb.client.MongoClient
+import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.edgar.factbase.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
 import com.starburst.starburst.edgar.factbase.ingestor.q4.Q4FactFinder
@@ -12,13 +12,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class FilingIngestor(
-    private val mongoClient: MongoClient,
-    private val filingProviderFactory: FilingProviderFactory
+    mongoDatabase: MongoDatabase,
+    private val filingProviderFactory: FilingProviderFactory,
+    private val q4FactFinder: Q4FactFinder,
 ) {
     private val log = LoggerFactory.getLogger(FilingIngestor::class.java)
-    private val col = mongoClient
-        .getDatabase("starburst")
-        .getCollection<Fact>()
+    private val col = mongoDatabase.getCollection<Fact>()
 
     /**
      * Parse and save to database a given SEC EDGAR filing's XBRL files
@@ -49,7 +48,7 @@ class FilingIngestor(
      * reconstruct
      */
     fun ingestQ4Facts(cik: String, year: Int) {
-        return Q4FactFinder(mongoClient = mongoClient).run(cik, year)
+        return q4FactFinder.run(cik, year)
     }
 
 }

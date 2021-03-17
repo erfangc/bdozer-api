@@ -9,9 +9,7 @@ import org.w3c.dom.Element
  */
 class XmlElement(element: Element) : Element by element {
 
-    private val shortNamespaces = this.getShortNamespaces()
     private val longNamespaceToShortNamespaceMap = this.longNamespaceToShortNamespaceMap()
-    private val shortNamespaceToLongNamespaceMap = this.shortNamespaceToLongNamespaceMap()
     private val defaultLongNamespace = this.defaultLongNamespace()
 
     fun childNodes(): List<XmlNode> {

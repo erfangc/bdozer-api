@@ -1,11 +1,13 @@
 package com.starburst.starburst.edgar.factbase.ingestor.q4
 
-import com.mongodb.client.MongoClient
+import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.edgar.dataclasses.*
+import com.starburst.starburst.edgar.factbase.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.FactIdGenerator
 import org.litote.kmongo.*
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import org.threeten.extra.YearQuarter
 import java.time.Instant
 
@@ -14,13 +16,12 @@ import java.time.Instant
  * missing the pure Q4 figures - for that we must actually retrieve
  * the 10-K figure and the past 3 10-Qs
  */
+@Service
 class Q4FactFinder(
-    mongoClient: MongoClient
+    mongoDatabase: MongoDatabase
 ) {
 
-    private val col = mongoClient
-        .getDatabase("starburst")
-        .getCollection<Fact>()
+    private val col = mongoDatabase.getCollection<Fact>()
     private val log = LoggerFactory.getLogger(Q4FactFinder::class.java)
 
     /**
@@ -35,7 +36,7 @@ class Q4FactFinder(
             and(
                 Fact::documentFiscalYearFocus eq fiscalYear,
                 Fact::cik eq cik,
-                Fact::documentFiscalPeriodFocus ne "Q4"
+                Fact::documentFiscalPeriodFocus ne DocumentFiscalPeriodFocus.Q4
             )
         )
 
@@ -81,24 +82,32 @@ class Q4FactFinder(
                 val valuesByQ = quarters[identityContext] ?: emptyMap()
 
                 try {
-                    //
-                    // try to sum over the past 3 quarter's data and then subtract them from the 10-K
-                    //
-                    val value = fyFact.doubleValue - listOf("Q1", "Q2", "Q3").sumByDouble { quarter ->
-                        valuesByQ[quarter]?.doubleValue
-                            ?: error("unable to find $quarter for FY element ${fyFact.elementName}")
+                    /*
+                    try to sum over the past 3 quarter's data and then subtract them from the 10-K
+                     */
+                    val value = fyFact.doubleValue - listOf(
+                        DocumentFiscalPeriodFocus.Q1,
+                        DocumentFiscalPeriodFocus.Q2,
+                        DocumentFiscalPeriodFocus.Q3,
+                    ).sumByDouble { quarter ->
+                        valuesByQ[quarter]
+                            ?.doubleValue
+                            ?: error("unable to find $quarter for FY element ${fyFact.conceptName}")
                     }
+
                     fyFact.copy(
                         _id = generateId(fyFact),
                         formType = "10-Q",
-                        documentFiscalPeriodFocus = "Q4",
-                        period = q4Context.period,
+                        documentFiscalPeriodFocus = DocumentFiscalPeriodFocus.Q4,
+                        startDate = q4Context.period.startDate,
+                        endDate = q4Context.period.endDate,
+                        instant = q4Context.period.instant,
                         stringValue = value.toString(),
                         doubleValue = value,
                         lastUpdated = Instant.now().toString(),
                     )
                 } catch (e: Exception) {
-                    errors.add("${fyFact.elementName} ${fyContext.entity.segment?.explicitMembers?.joinToString(",")}")
+                    errors.add("${fyFact.conceptName} ${fyContext.entity.segment?.explicitMembers?.joinToString(",")}")
                     null
                 }
             } else {
@@ -108,29 +117,28 @@ class Q4FactFinder(
                 fyFact.copy(
                     _id = generateId(fyFact),
                     formType = "10-Q",
-                    documentFiscalPeriodFocus = "Q4",
-                    period = q4Context.period,
+                    documentFiscalPeriodFocus = DocumentFiscalPeriodFocus.Q4,
+                    startDate = q4Context.period.startDate,
+                    endDate = q4Context.period.endDate,
+                    instant = q4Context.period.instant,
                     lastUpdated = Instant.now().toString(),
                 )
             }
         }
         log.info("Unable to infer Q4 items for fiscalYear=$fiscalYear for ${errors.joinToString(";")}")
         log.info("Found ${q4Facts.size} Q4 facts, saving them now")
-        q4Facts.forEach { q4Fact ->
-            col.save(q4Fact)
-        }
-
+        q4Facts.forEach { q4Fact -> col.save(q4Fact) }
         log.info("Saved ${q4Facts.size} Q4 facts")
     }
 
     private fun generateId(fyFact: Fact): String {
-        //
-        // copy the context of fyFact but change the start date
-        //
+        /*
+        copy the context of fyFact but change the start date
+         */
         val fyCtx = toFyContext(fyFact)
         return FactIdGenerator()
             .generateId(
-                fyFact.elementName,
+                fyFact.conceptName,
                 q4Context(fyCtx),
                 fyFact.documentPeriodEndDate
             )
@@ -146,11 +154,7 @@ class Q4FactFinder(
         val startDate = fyCtx.period.endDate?.let { endDate ->
             YearQuarter.from(endDate).atDay(1)
         }
-        return fyCtx.copy(
-            period = XbrlPeriod(
-                startDate = startDate,
-            )
-        )
+        return fyCtx.copy(period = XbrlPeriod(startDate = startDate))
     }
 
     /**
@@ -167,7 +171,11 @@ class Q4FactFinder(
                 ),
                 segment = XbrlSegment(fyFact.explicitMembers)
             ),
-            period = fyFact.period
+            period = XbrlPeriod(
+                instant = fyFact.instant,
+                startDate = fyFact.startDate,
+                endDate = fyFact.endDate,
+            )
         )
     }
 
@@ -181,7 +189,7 @@ class Q4FactFinder(
     private fun toIdentityContext(fact: Fact): XbrlContext {
         return XbrlContext(
             // this is a temporary hijacking of the XbrlContext object to assist identity based lookup
-            id = fact.elementName,
+            id = fact.conceptName,
             entity = XbrlEntity(
                 identifier = XbrlIdentifier(
                     scheme = "CIK",

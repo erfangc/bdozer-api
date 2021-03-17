@@ -1,6 +1,7 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator
 
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
+import com.starburst.starburst.edgar.factbase.DocumentFiscalPeriodFocus
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.HistoricalValues
 import kotlin.math.min
@@ -23,22 +24,22 @@ object HistoricalValueExtensions {
         explicitMembers: List<XbrlExplicitMember> = emptyList()
     ): HistoricalValue? {
         val latest = facts
-            .filter { it.elementName == elementName && it.explicitMembers == explicitMembers }
+            .filter { it.conceptName == elementName && it.explicitMembers == explicitMembers }
             .maxByOrNull { it.documentPeriodEndDate }
         when {
             latest == null -> {
                 return null
             }
-            latest.documentFiscalPeriodFocus == "FY" -> {
+            latest.documentFiscalPeriodFocus == DocumentFiscalPeriodFocus.FY -> {
                 return HistoricalValue(
                     factId = latest._id,
                     documentFiscalYearFocus = latest.documentFiscalYearFocus,
-                    documentFiscalPeriodFocus = latest.documentFiscalPeriodFocus,
-                    documentPeriodEndDate = latest.documentPeriodEndDate,
+                    documentFiscalPeriodFocus = latest.documentFiscalPeriodFocus.toString(),
+                    documentPeriodEndDate = latest.documentPeriodEndDate.toString(),
                     value = latest.doubleValue,
-                    startDate = latest.period.startDate?.toString(),
-                    endDate = latest.period.endDate?.toString(),
-                    instant = latest.period.instant?.toString(),
+                    startDate = latest.startDate?.toString(),
+                    endDate = latest.endDate?.toString(),
+                    instant = latest.instant?.toString(),
                 )
             }
             else -> {
@@ -56,38 +57,35 @@ object HistoricalValueExtensions {
         1 - figure out the latest date for which there is data
          */
         val latestFact = facts
-            .filter { fact -> fact.elementName == elementName && fact.explicitMembers == explicitMembers }
+            .filter { fact -> fact.conceptName == elementName && fact.explicitMembers == explicitMembers }
             .maxByOrNull { fact ->
                 fact.documentPeriodEndDate
             } ?: return null
 
         // instant facts do not require summation
         if (
-            latestFact.documentFiscalPeriodFocus == "FY"
+            latestFact.documentFiscalPeriodFocus == DocumentFiscalPeriodFocus.FY
             ||
-            latestFact.period.instant != null
+            latestFact.instant != null
         ) {
             /*
             return the latest FY figure
              */
-            val period = latestFact.period
-
             return HistoricalValue(
                 factId = latestFact._id,
                 documentFiscalYearFocus = latestFact.documentFiscalYearFocus,
-                documentFiscalPeriodFocus = latestFact.documentFiscalPeriodFocus,
-                documentPeriodEndDate = latestFact.documentPeriodEndDate,
+                documentFiscalPeriodFocus = latestFact.documentFiscalPeriodFocus.toString(),
+                documentPeriodEndDate = latestFact.documentPeriodEndDate.toString(),
                 value = latestFact.doubleValue,
-                startDate = period.startDate?.toString(),
-                endDate = period.endDate?.toString(),
-                instant = period.instant?.toString(),
+                startDate = latestFact.startDate?.toString(),
+                endDate = latestFact.endDate?.toString(),
+                instant = latestFact.instant?.toString(),
             )
 
         } else {
             /*
             sum up the previous 4 quarters
              */
-            val period = latestFact.period
             val quarters = this.quarterlyHistoricalValues(elementName, explicitMembers)
             val ltm = quarters
                 .sortedByDescending { it.documentPeriodEndDate }
@@ -97,12 +95,12 @@ object HistoricalValueExtensions {
             return HistoricalValue(
                 factId = latestFact._id,
                 documentFiscalYearFocus = latestFact.documentFiscalYearFocus,
-                documentFiscalPeriodFocus = latestFact.documentFiscalPeriodFocus,
-                documentPeriodEndDate = latestFact.documentPeriodEndDate,
+                documentFiscalPeriodFocus = latestFact.documentFiscalPeriodFocus.toString(),
+                documentPeriodEndDate = latestFact.documentPeriodEndDate.toString(),
                 value = ltm,
-                startDate = period.startDate?.toString(),
-                endDate = period.endDate?.toString(),
-                instant = period.instant?.toString(),
+                startDate = latestFact.startDate?.toString(),
+                endDate = latestFact.endDate?.toString(),
+                instant = latestFact.instant?.toString(),
             )
         }
     }
@@ -114,20 +112,19 @@ object HistoricalValueExtensions {
         return facts
             .filter { fact ->
                 fact.explicitMembers == explicitMembers
-                        && fact.elementName == elementName
-                        && fact.documentFiscalPeriodFocus == "FY"
+                        && fact.conceptName == elementName
+                        && fact.documentFiscalPeriodFocus == DocumentFiscalPeriodFocus.FY
             }
             .map { fact ->
-                val period = fact.period
                 HistoricalValue(
                     factId = fact._id,
                     documentFiscalYearFocus = fact.documentFiscalYearFocus,
-                    documentFiscalPeriodFocus = fact.documentFiscalPeriodFocus,
-                    documentPeriodEndDate = fact.documentPeriodEndDate,
+                    documentFiscalPeriodFocus = fact.documentFiscalPeriodFocus.toString(),
+                    documentPeriodEndDate = fact.documentPeriodEndDate.toString(),
                     value = fact.doubleValue,
-                    startDate = period.startDate?.toString(),
-                    endDate = period.endDate?.toString(),
-                    instant = period.instant?.toString(),
+                    startDate = fact.startDate?.toString(),
+                    endDate = fact.endDate?.toString(),
+                    instant = fact.instant?.toString(),
                 )
             }
             .sortedByDescending { fact ->
@@ -142,21 +139,20 @@ object HistoricalValueExtensions {
         val filter = facts
             .filter { fact ->
                 fact.explicitMembers == explicitMembers
-                        && fact.elementName == elementName
-                        && fact.documentFiscalPeriodFocus.startsWith("Q")
+                        && fact.conceptName == elementName
+                        && fact.documentFiscalPeriodFocus.name.startsWith("Q")
             }
         return filter
             .map { fact ->
-                val period = fact.period
                 HistoricalValue(
                     factId = fact._id,
                     documentFiscalYearFocus = fact.documentFiscalYearFocus,
-                    documentFiscalPeriodFocus = fact.documentFiscalPeriodFocus,
-                    documentPeriodEndDate = fact.documentPeriodEndDate,
+                    documentFiscalPeriodFocus = fact.documentFiscalPeriodFocus.toString(),
+                    documentPeriodEndDate = fact.documentPeriodEndDate.toString(),
                     value = fact.doubleValue,
-                    startDate = period.startDate?.toString(),
-                    endDate = period.endDate?.toString(),
-                    instant = period.instant?.toString(),
+                    startDate = fact.startDate?.toString(),
+                    endDate = fact.endDate?.toString(),
+                    instant = fact.instant?.toString(),
                 )
             }
             .sortedByDescending { fact ->

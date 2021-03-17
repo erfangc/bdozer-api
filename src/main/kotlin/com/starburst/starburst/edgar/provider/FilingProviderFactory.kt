@@ -39,7 +39,9 @@ class FilingProviderFactory(
             ?.find { file -> file.textContent.endsWith(".xsd") }
             ?.textContent ?: error("no schema files can be found for cik=$cik adsh=$adsh")
 
-        // find the XML instance document name
+        /*
+        find the XML instance document name
+         */
         val instanceFileNode = files.find { file ->
             // in this case - we are working with more iXBRL filings with inline XBRL embedded into htm
             !file.attr("doctype").isNullOrBlank() && file.textContent.endsWith(".htm")
@@ -53,11 +55,15 @@ class FilingProviderFactory(
         val instanceDocument: XmlElement = http.readXml("$baseUrl/$instanceFilename")
         instanceHtmlFilename = instanceFileNode?.textContent ?: ""
 
-        // lets now read the schema XSD file
-        // and go ahead and derive the other files
+        /*
+        lets now read the schema XSD file
+        and go ahead and derive the other files
+         */
         val schema: XmlElement = http.readXml("$baseUrl/$schemaFilename")
-        // for some reason this sometimes gets declared at the attribute level
 
+        /*
+        for some reason this sometimes gets declared at the attribute level
+         */
         val linkbaseRefs = schema
             .getElementByTag(xsd, "annotation")
             ?.getElementByTag(xsd, "appinfo")

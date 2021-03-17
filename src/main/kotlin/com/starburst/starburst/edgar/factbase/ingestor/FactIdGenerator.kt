@@ -3,6 +3,7 @@ package com.starburst.starburst.edgar.factbase.ingestor
 import com.google.common.hash.Hashing
 import com.starburst.starburst.edgar.dataclasses.XbrlContext
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 
 
 class FactIdGenerator {
@@ -10,7 +11,7 @@ class FactIdGenerator {
     fun generateId(
         elementName: String,
         context: XbrlContext,
-        documentPeriodEndDate: String
+        documentPeriodEndDate: LocalDate
     ): String {
 
         val entityId = context.entity.identifier.value

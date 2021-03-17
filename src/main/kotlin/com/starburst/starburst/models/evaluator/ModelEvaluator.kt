@@ -12,21 +12,15 @@ import org.springframework.stereotype.Service
  */
 @Service
 class ModelEvaluator {
-    private val log = LoggerFactory.getLogger(ModelEvaluator::class.java)
-
     /*
     Run the model
      */
     fun evaluate(model: Model): EvaluateModelResult {
-        log.info("Building Excel file for ${model.symbol}")
-
         val cells = CellGenerator().generateCells(model)
         val evaluatedCells = CellEvaluator().evaluate(cells)
         val targetPrice = evaluatedCells
             .filter { cell -> cell.item.name == PresentValuePerShare }
             .sumByDouble { it.value ?: 0.0 }
-
-        log.info("Excel file ready for ${model.symbol}")
         return EvaluateModelResult(
             model = model,
             cells = cells,

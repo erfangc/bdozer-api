@@ -1,7 +1,7 @@
 package com.starburst.starburst.edgar.factbase
 
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
-import com.starburst.starburst.edgar.dataclasses.XbrlPeriod
+import java.time.LocalDate
 
 /**
  * [Fact] is essentially a normalized version of a fact you find in XBRL
@@ -10,25 +10,25 @@ import com.starburst.starburst.edgar.dataclasses.XbrlPeriod
 data class Fact(
     val _id: String,
     val instanceDocumentElementId: String,
+    val instanceDocumentElementName: String,
 
     val cik: String,
+    val adsh: String,
     val entityName: String,
     val primarySymbol: String,
-    val symbols: List<String>,
     val formType: String,
 
-    val elementName: String,
-    val longNamespace: String,
-    val rawElementName: String,
+    val conceptName: String,
+    val conceptHref: String,
+    val namespace: String,
 
-    val period: XbrlPeriod,
+    val instant: LocalDate? = null,
+    val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
 
-    /**
-     * This can be Q1, Q2, Q3, Q4
-     */
-    val documentFiscalPeriodFocus: String,
+    val documentFiscalPeriodFocus: DocumentFiscalPeriodFocus,
     val documentFiscalYearFocus: Int,
-    val documentPeriodEndDate: String,
+    val documentPeriodEndDate: LocalDate,
     val explicitMembers: List<XbrlExplicitMember>,
 
     val sourceDocument: String,
@@ -36,10 +36,10 @@ data class Fact(
     val label: String? = null,
     val verboseLabel: String? = null,
     val labelTerse: String? = null,
+    val documentation: String? = null,
 
     val stringValue: String,
     val doubleValue: Double? = null,
 
     val lastUpdated: String,
-    val adsh: String
 )

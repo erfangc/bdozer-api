@@ -8,6 +8,8 @@ import com.starburst.starburst.models.Utility.SharesOutstanding
 import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.evaluator.ModelEvaluator
+import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.zacks.fa.ZacksFundamentalA
 import com.starburst.starburst.zacks.fa.ZacksFundamentalAService
 import org.springframework.stereotype.Service
@@ -23,8 +25,7 @@ class ZacksModelBuilder(
      * Build a model using Zacks Fundamental A data
      * for the given ticker
      */
-    fun buildModel(ticker: String): Model {
-
+    fun buildModel(ticker: String): BuildModelResponse {
         val fundamentalAs = findZacksFundamentalA(ticker)
         val latestFundamentalA = fundamentalAs
             .filter { it.per_type == "A" }
@@ -39,14 +40,26 @@ class ZacksModelBuilder(
         val incomeStatementItems = incomeStatementItemsBuilder.incomeStatementItems(skeletonModel, latestFundamentalA)
         val balanceSheetItems = balanceSheetItemsBuilder.balanceSheetItems(skeletonModel, latestFundamentalA)
 
-        val model = skeletonModel.copy(
+        val modelItemized = skeletonModel.copy(
             incomeStatementItems = incomeStatementItems,
             balanceSheetItems = balanceSheetItems,
             cashFlowStatementItems = listOf(),
             otherItems = listOf(),
         )
 
-        return model.copy(otherItems = deriveOtherItems(model))
+        val finalModel = modelItemized.copy(
+            otherItems = deriveOtherItems(modelItemized)
+        )
+
+        val evaluateModelResult = ModelEvaluator().evaluate(finalModel)
+        val bytes = CellGenerator.exportToXls(finalModel, evaluateModelResult.cells)
+
+        return BuildModelResponse(
+            model = evaluateModelResult.model,
+            targetPrice = evaluateModelResult.targetPrice,
+            cells = evaluateModelResult.cells,
+            excel = bytes
+        )
 
     }
 

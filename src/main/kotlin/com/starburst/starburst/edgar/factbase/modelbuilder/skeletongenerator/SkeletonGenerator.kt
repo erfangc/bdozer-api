@@ -2,7 +2,7 @@ package com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator
 
 import com.starburst.starburst.edgar.XbrlConstants.link
 import com.starburst.starburst.edgar.XbrlConstants.xlink
-import com.starburst.starburst.edgar.dataclasses.ElementDefinition
+import com.starburst.starburst.edgar.dataclasses.ConceptDefinition
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
 import com.starburst.starburst.edgar.factbase.Fact
 import com.starburst.starburst.edgar.factbase.modelbuilder.DependencyFlattener
@@ -34,11 +34,11 @@ class SkeletonGenerator(
     val model: Model
 
     /**
-     * A lookup map from itemName (XML tag name) -> the XML [ElementDefinition] declared in either the
+     * A lookup map from itemName (XML tag name) -> the XML [ConceptDefinition] declared in either the
      * GAAP or extension XSD, this faciliates lookup of an item to it's definition in the XSDs
      * but in a type-safe manner
      */
-    val elementDefinitionMap = mutableMapOf<String, ElementDefinition>()
+    val elementDefinitionMap = mutableMapOf<String, ConceptDefinition>()
 
     /**
      * This is a immediate item dependency graph, without flattening out
@@ -269,7 +269,7 @@ class SkeletonGenerator(
         /*
         the fragment is actually the id to look up by
          */
-        val itemName = elementDefinition.name
+        val itemName = elementDefinition.conceptName
 
         /*
         populate the historical value of the item
@@ -289,8 +289,8 @@ class SkeletonGenerator(
             /*
             the fragment is actually the id to look up by
              */
-            return (schemaManager.getElementDefinition(toHref)
-                ?: error("unable to find a schema definition for $toHref")).name
+            return (schemaManager.getConceptDefinition(toHref)
+                ?: error("unable to find a schema definition for $toHref")).conceptName
         }
 
         /*
@@ -338,32 +338,32 @@ class SkeletonGenerator(
         )
     }
 
-    private fun retrieveElementDefinition(loc: XmlNode): ElementDefinition {
+    private fun retrieveElementDefinition(loc: XmlNode): ConceptDefinition {
         val locHref = loc.href()
         val elementDefinition = locHref?.let { href ->
-            schemaManager.getElementDefinition(href)
+            schemaManager.getConceptDefinition(href)
         } ?: error("Unable to find element definition name for $locHref")
-        elementDefinitionMap[elementDefinition.name] = elementDefinition
+        elementDefinitionMap[elementDefinition.conceptName] = elementDefinition
         return elementDefinition
     }
 
     fun entityRegistrantName(): String {
         return facts
-            .filter { it.elementName == "EntityRegistrantName" && it.explicitMembers.isEmpty() }
+            .filter { it.conceptName == "EntityRegistrantName" && it.explicitMembers.isEmpty() }
             .maxByOrNull { it.documentPeriodEndDate }
             ?.stringValue ?: ""
     }
 
     fun tradingSymbol(): String {
         return facts
-            .filter { it.elementName == "TradingSymbol" && it.explicitMembers.isEmpty() }
+            .filter { it.conceptName == "TradingSymbol" && it.explicitMembers.isEmpty() }
             .maxByOrNull { it.documentPeriodEndDate }
             ?.stringValue ?: ""
     }
 
     private fun latestFact(elementName: String, explicitMembers: List<XbrlExplicitMember> = emptyList()): Fact? {
         return facts
-            .filter { it.elementName == elementName && it.explicitMembers == explicitMembers }
+            .filter { it.conceptName == elementName && it.explicitMembers == explicitMembers }
             .maxByOrNull { it.documentPeriodEndDate }
     }
 

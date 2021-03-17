@@ -1,5 +1,6 @@
 package com.starburst.starburst.zacks.modelbuilder
 
+import com.starburst.starburst.edgar.factbase.FactComponentFinder
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
 import com.starburst.starburst.models.Utility.CostOfGoodsSold
 import com.starburst.starburst.models.Utility.GrossProfit
@@ -24,17 +25,35 @@ class IncomeStatementItemsBuilder(
     private val keyInputsProvider: KeyInputsProvider,
     private val zacksFundamentalAService: ZacksFundamentalAService,
     private val salesEstimateToRevenueConverter: SalesEstimateToRevenueConverter,
+    private val factComponentFinder: FactComponentFinder,
 ) {
 
-    fun Double?.orZ(): Double {
+    private fun Double?.orZ(): Double {
         return this ?: 0.0
+    }
+
+    private fun findFwrdCogsPCt(fundamentalAs: List<ZacksFundamentalA>): Double? {
+        if (fundamentalAs.isEmpty()) {
+            return null
+        }
+        val annualCogsPct = fundamentalAs.map { row ->
+            row.cost_good_sold.orZ() / row.tot_revnu.orZ()
+        }
+        val latestCogsPct = annualCogsPct.first()
+
+        return if (latestCogsPct > 1.0) {
+            // go back to last time where it was not > 1.0
+            annualCogsPct.subList(1, annualCogsPct.size).find { it < 1.0 }
+        } else {
+            latestCogsPct
+        }
     }
 
     /**
      * Model Cost of Goods sold by looking at historical
      * relationship between COGS and Revenue
      */
-    fun modelCostOfGoods(latest: ZacksFundamentalA): Item {
+    private fun modelCostOfGoods(latest: ZacksFundamentalA): Item {
         val ticker = latest.ticker!!
         val fundamentalAs = zacksFundamentalAService.getZacksFundamentalAs(ticker)
 
@@ -68,56 +87,14 @@ class IncomeStatementItemsBuilder(
         )
     }
 
-    private fun findFwrdCogsPCt(fundamentalAs: List<ZacksFundamentalA>): Double? {
-        if (fundamentalAs.isEmpty()) {
-            return null
-        }
-        val annualCogsPct = fundamentalAs.map { row ->
-            row.cost_good_sold.orZ() / row.tot_revnu.orZ()
-        }
-        val latestCogsPct = annualCogsPct.first()
-
-        return if (latestCogsPct > 1.0) {
-            // go back to last time where it was not > 1.0
-            annualCogsPct.subList(1, annualCogsPct.size).find { it < 1.0 }
-        } else {
-            latestCogsPct
-        }
-    }
-
-    /**
-     * Convert a [KeyInputs] into a [Revenue] [Item], this means
-     * if custom key inputs exist on the [KeyInputs] under this ticker
-     * it will be translated into a the correct formula and placed on the resulting
-     * [Item]
-     *
-     * Or else, pre-saved revenue drivers such as [Discrete] might be used
-     */
-    private fun keyInputsToRevenue(model: Model, latest: ZacksFundamentalA): Item {
-        val ticker = latest.ticker ?: error("...")
-        val keyInputs = keyInputsProvider.getKeyInputs(ticker)
-        val totRevnu = latest.tot_revnu ?: 0.0
-        return if (keyInputs == null) {
-            salesEstimateToRevenueConverter.convert(model, totRevnu)
-        } else {
-            Item(
-                name = Revenue,
-                description = "Revenue",
-                historicalValue = totRevnu,
-            )
-        }
-    }
-
     fun incomeStatementItems(model: Model, latest: ZacksFundamentalA): List<Item> {
 
         /*
         Extract and prepare some basic inputs
          */
-        val costGoodSold = latest.cost_good_sold ?: 0.0
         val preTaxIncome = latest.pre_tax_income ?: 0.0
         val netIncomeLossShareHolder = latest.net_income_loss_share_holder ?: 0.0
         val totNonOperIncomeExp = latest.tot_non_oper_income_exp ?: 0.0
-        val totalOperExp = latest.tot_oper_exp ?: 0.0
 
         /*
         Compute some basic metrics that will be used
@@ -130,6 +107,7 @@ class IncomeStatementItemsBuilder(
             .coerceAtMost(0.15)
 
         val revenue = keyInputsToRevenue(model, latest)
+        val operatingExpenses = operatingExpenses(model, latest)
 
         return listOf(
             revenue,
@@ -140,12 +118,7 @@ class IncomeStatementItemsBuilder(
                 historicalValue = latest.gross_profit ?: 0.0,
                 expression = "$Revenue - $CostOfGoodsSold",
             ),
-            Item(
-                name = OperatingExpense,
-                description = "Operating Expense",
-                historicalValue = totalOperExp - costGoodSold,
-                expression = "${totalOperExp - costGoodSold}",
-            ),
+            operatingExpenses,
             Item(
                 name = OperatingIncome,
                 description = "Operating Income",
@@ -178,6 +151,71 @@ class IncomeStatementItemsBuilder(
                 expression = "$PretaxIncome-$TaxExpense"
             ),
         )
+    }
+
+    /**
+     * Convert a [KeyInputs] into a [Revenue] [Item], this means
+     * if custom key inputs exist on the [KeyInputs] under this ticker
+     * it will be translated into a the correct formula and placed on the resulting
+     * [Item]
+     *
+     * Or else, pre-saved revenue drivers such as [Discrete] might be used
+     */
+    private fun keyInputsToRevenue(model: Model, latest: ZacksFundamentalA): Item {
+        val ticker = latest.ticker ?: error("...")
+        val keyInputs = keyInputsProvider.getKeyInputs(ticker)
+        val totRevnu = latest.tot_revnu ?: 0.0
+        return if (keyInputs == null) {
+            salesEstimateToRevenueConverter.convert(model, totRevnu)
+        } else {
+            Item(
+                name = Revenue,
+                description = "Revenue",
+                historicalValue = totRevnu,
+            )
+        }
+    }
+
+    /**
+     * Derive the going forward operating expenses in this model
+     */
+    private fun operatingExpenses(model: Model, latest: ZacksFundamentalA): Item {
+        val costGoodSold = latest.cost_good_sold ?: 0.0
+        val totalOperExp = latest.tot_oper_exp ?: 0.0
+
+        val cik = latest.comp_cik ?: error("company CIK cannot be found for ${model.symbol} on Zacks")
+        val components = factComponentFinder.components(
+            cik = cik,
+            conceptId = "us-gaap_OperatingExpenses"
+        )
+        val operatingExpenses = totalOperExp - costGoodSold
+
+        /*
+        find the one time facts
+         */
+        val oneTimeCharges = components
+            .latestAnnualFacts
+            .filter { fact ->
+                fact.explicitMembers.isEmpty() && fact.conceptName == "AssetImpairmentCharges"
+            }
+
+        return if (oneTimeCharges.isNotEmpty()) {
+            val totalOneTime = oneTimeCharges.sumByDouble { (it.doubleValue ?: 0.0) / 1_000_000.0 }
+            Item(
+                name = OperatingExpense,
+                description = "Operating Expense",
+                historicalValue = operatingExpenses,
+                expression = "$operatingExpenses - $totalOneTime",
+                commentaries = Commentary("Going forward operating expense exclude one time charges of $totalOneTime")
+            )
+        } else {
+            Item(
+                name = OperatingExpense,
+                description = "Operating Expense",
+                historicalValue = operatingExpenses,
+                expression = "$operatingExpenses",
+            )
+        }
     }
 
 }
