@@ -1,9 +1,11 @@
-package com.starburst.starburst.edgar.factbase
+package com.starburst.starburst.edgar.factbase.support
 
 import com.mongodb.client.MongoDatabase
-import com.starburst.starburst.edgar.XbrlConstants.link
-import com.starburst.starburst.edgar.XbrlConstants.xlink
+import com.starburst.starburst.edgar.XbrlNamespaces.link
+import com.starburst.starburst.edgar.XbrlNamespaces.xlink
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
+import com.starburst.starburst.edgar.factbase.dataclasses.Fact
+import com.starburst.starburst.edgar.factbase.dataclasses.FactComponentsResponse
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findIncomeStatementRole
 import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
@@ -34,7 +36,7 @@ class FactComponentFinder(
     private val root = "http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd#us-gaap_IncomeStatementAbstract"
     private val col = mongoDatabase.getCollection<Fact>()
 
-    fun components(cik: String, conceptId: String): FactComponentsResponse {
+    fun factComponents(cik: String, conceptId: String): FactComponentsResponse {
 
         val adsh = adsh(cik)
         val filingProvider = filingProviderFactory.createFilingProvider(cik, adsh)

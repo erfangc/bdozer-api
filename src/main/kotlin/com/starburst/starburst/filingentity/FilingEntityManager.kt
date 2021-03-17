@@ -1,16 +1,13 @@
-package com.starburst.starburst.edgar.filingentity
+package com.starburst.starburst.filingentity
 
-import com.mongodb.client.MongoClient
-import com.starburst.starburst.edgar.explorer.EdgarExplorer
-import com.starburst.starburst.edgar.factbase.modelbuilder.factory.ModelFactory
-import com.starburst.starburst.edgar.filingentity.dataclasses.Address
-import com.starburst.starburst.edgar.filingentity.dataclasses.FilingEntity
-import com.starburst.starburst.edgar.filingentity.internal.SECEntity
-import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.translator.CellGenerator
-import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
+import com.mongodb.client.MongoDatabase
+import com.starburst.starburst.edgar.factbase.FactBase
+import com.starburst.starburst.filingentity.dataclasses.Address
+import com.starburst.starburst.filingentity.dataclasses.FilingEntity
+import com.starburst.starburst.filingentity.internal.SECEntity
 import com.starburst.starburst.xml.HttpClientExtensions.readEntity
 import org.apache.http.client.HttpClient
+import org.litote.kmongo.eq
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
@@ -21,59 +18,24 @@ import java.util.concurrent.Executors
 
 @Service
 class FilingEntityManager(
-    mongoClient: MongoClient,
-    private val bootstrapper: Bootstrapper,
+    mongoDatabase: MongoDatabase,
+    private val factBase: FactBase,
     private val httpClient: HttpClient,
-    private val modelFactory: ModelFactory,
-    private val edgarExplorer: EdgarExplorer
 ) {
 
     private val log = LoggerFactory.getLogger(FilingEntityManager::class.java)
     private val executor = Executors.newCachedThreadPool()
-    private val col = mongoClient
-        .getDatabase("starburst")
-        .getCollection<FilingEntity>()
-
-    fun downloadProformaExcelModel(cik: String): ByteArray {
-        /*
-        Run the model
-         */
-        log.info("Building Excel file for $cik")
-        val model = rerunModel(cik)
-        val cells = CellGenerator().generateCells(model)
-        val evaluatedCells = CellEvaluator().evaluate(cells)
-        val bytes = CellGenerator.exportToXls(model, evaluatedCells)
-        log.info("Excel file ready for $cik")
-        return bytes
-    }
+    private val col = mongoDatabase.getCollection<FilingEntity>()
 
     fun getFilingEntity(cik: String): FilingEntity {
         val savedEntity = col.findOneById(cik)
-        return savedEntity ?: // initiate the sequence of actions to build this entity
-        bootstrapFilingEntity(cik)
-    }
-
-    fun viewLatest10kModel(cik: String): Model {
-        val adsh = edgarExplorer
-            .searchFilings(cik)
-            .sortedByDescending { it.period_ending }
-            .find { it.form == "10-K" }
-            ?.adsh ?: error("no 10-K filings found for $cik")
-        return modelFactory.buildModelForFiling(cik, adsh)
-    }
-
-    fun rerunModel(cik: String): Model {
-        val entity = getFilingEntity(cik)
-        val model = viewLatest10kModel(cik)
-        col.save(entity.copy(proFormaModel = model))
-        return model
+        return savedEntity ?: bootstrapFilingEntity(cik)
     }
 
     fun bootstrapFilingEntity(cik: String): FilingEntity {
-
+        deleteFilingEntity(cik)
         val paddedCik = (0 until (10 - cik.length)).joinToString("") { "0" } + cik
         val secEntity = httpClient.readEntity<SECEntity>("https://data.sec.gov/submissions/CIK$paddedCik.json")
-
         val entity = FilingEntity(
             _id = cik,
             cik = secEntity.cik,
@@ -85,7 +47,6 @@ class FilingEntityManager(
             name = secEntity.name ?: "Unknown",
             tickers = secEntity.tickers,
             exchanges = secEntity.exchanges,
-
             ein = secEntity.ein,
             description = secEntity.description,
             website = secEntity.website,
@@ -107,27 +68,27 @@ class FilingEntityManager(
             lastUpdated = Instant.now().toString(),
             statusMessage = "Analysis for this entity is underway, we are parsing the internet for data",
         )
-
         col.save(entity)
-
         executor.execute {
             try {
-                bootstrapper.bootstrapFilingEntity(cik)
-                val model = viewLatest10kModel(cik)
-
-                val updated = entity.copy(
-                    proFormaModel = model,
-                    lastUpdated = Instant.now().toString(),
-                    statusMessage = "Completed"
-                )
-                col.save(updated)
+                factBase.bootstrapFacts(cik)
+                col.save(entity.copy(lastUpdated = Instant.now().toString(), statusMessage = "Completed"))
                 log.info("Completed bootstrapping and initial model building cik=${entity.cik}")
             } catch (e: Exception) {
                 log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}", e)
+                col.save(entity.copy(lastUpdated = Instant.now().toString(), statusMessage = e.message))
             }
         }
 
         return entity
+    }
+
+    private fun deleteFilingEntity(cik: String) {
+        /*
+        delete any existing data on this entity
+         */
+        col.deleteMany(FilingEntity::cik eq cik)
+        factBase.deleteAll(cik)
     }
 }
 

@@ -3,6 +3,7 @@ package com.starburst.starburst.edgar.factbase
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.starburst.starburst.AppConfiguration
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
+import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import org.junit.jupiter.api.Test
 
@@ -20,7 +21,7 @@ internal class FactComponentFinderTest {
             filingProviderFactory = FilingProviderFactory(http)
         )
 
-        val components = obj.components(cik = "0001467623", conceptId = "us-gaap_OperatingExpenses")
+        val components = obj.factComponents(cik = "0001467623", conceptId = "us-gaap_OperatingExpenses")
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(components))
     }
 }

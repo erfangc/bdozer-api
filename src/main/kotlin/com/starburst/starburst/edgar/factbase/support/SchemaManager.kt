@@ -1,10 +1,10 @@
 package com.starburst.starburst.edgar.factbase.support
 
-import com.starburst.starburst.edgar.XbrlConstants.xsd
+import com.starburst.starburst.edgar.XbrlNamespaces.xsd
 import com.starburst.starburst.edgar.dataclasses.ConceptDefinition
-import com.starburst.starburst.edgar.filingentity.GlobalConceptDefinitionManager
-import com.starburst.starburst.edgar.filingentity.GlobalConceptDefinitionManager.getBySchemaLocationAndName
-import com.starburst.starburst.edgar.filingentity.GlobalConceptDefinitionManager.putSchemaDocument
+import com.starburst.starburst.edgar.GlobalConceptDefinitionManager
+import com.starburst.starburst.edgar.GlobalConceptDefinitionManager.getBySchemaLocationAndName
+import com.starburst.starburst.edgar.GlobalConceptDefinitionManager.putSchemaDocument
 import com.starburst.starburst.edgar.provider.FilingProvider
 
 /**

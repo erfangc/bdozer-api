@@ -1,10 +1,10 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator
 
-import com.starburst.starburst.edgar.XbrlConstants.link
-import com.starburst.starburst.edgar.XbrlConstants.xlink
+import com.starburst.starburst.edgar.XbrlNamespaces.link
+import com.starburst.starburst.edgar.XbrlNamespaces.xlink
 import com.starburst.starburst.edgar.dataclasses.ConceptDefinition
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
-import com.starburst.starburst.edgar.factbase.Fact
+import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.modelbuilder.DependencyFlattener
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.HistoricalValueExtensions.allHistoricalValues
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.HistoricalValueExtensions.latestHistoricalValue

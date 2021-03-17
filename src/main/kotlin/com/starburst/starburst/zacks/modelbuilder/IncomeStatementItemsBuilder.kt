@@ -1,6 +1,6 @@
 package com.starburst.starburst.zacks.modelbuilder
 
-import com.starburst.starburst.edgar.factbase.FactComponentFinder
+import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
 import com.starburst.starburst.models.Utility.CostOfGoodsSold
 import com.starburst.starburst.models.Utility.GrossProfit
@@ -184,7 +184,7 @@ class IncomeStatementItemsBuilder(
         val totalOperExp = latest.tot_oper_exp ?: 0.0
 
         val cik = latest.comp_cik ?: error("company CIK cannot be found for ${model.symbol} on Zacks")
-        val components = factComponentFinder.components(
+        val components = factComponentFinder.factComponents(
             cik = cik,
             conceptId = "us-gaap_OperatingExpenses"
         )

@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.factbase.ingestor.dataclasses
 
-import com.starburst.starburst.edgar.factbase.Fact
+import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import java.time.LocalDate
 
 data class ParseFactsResponse(

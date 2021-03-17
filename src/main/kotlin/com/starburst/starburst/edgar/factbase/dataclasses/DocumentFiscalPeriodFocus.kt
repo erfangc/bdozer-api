@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase
+package com.starburst.starburst.edgar.factbase.dataclasses
 
 enum class DocumentFiscalPeriodFocus {
     FY,

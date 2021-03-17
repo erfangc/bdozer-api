@@ -1,7 +1,7 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
 import com.mongodb.client.MongoDatabase
-import com.starburst.starburst.edgar.factbase.Fact
+import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
 import com.starburst.starburst.edgar.factbase.ingestor.q4.Q4FactFinder
 import com.starburst.starburst.edgar.provider.FilingProviderFactory

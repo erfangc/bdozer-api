@@ -1,7 +1,7 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator
 
 import com.starburst.starburst.edgar.dataclasses.XbrlExplicitMember
-import com.starburst.starburst.edgar.factbase.DocumentFiscalPeriodFocus
+import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.HistoricalValues
 import kotlin.math.min

@@ -1,6 +1,6 @@
-package com.starburst.starburst.edgar.filingentity.dataclasses
+package com.starburst.starburst.filingentity.internal
 
-data class Address(
+data class SECEntityAddress(
     val street1: String? = null,
     val street2: String? = null,
     val city: String? = null,

@@ -1,25 +1,37 @@
 package com.starburst.starburst.edgar.factbase
 
 import com.mongodb.client.MongoDatabase
+import com.starburst.starburst.edgar.factbase.dataclasses.Fact
+import com.starburst.starburst.edgar.factbase.dataclasses.FactComponentsResponse
+import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
+import com.starburst.starburst.edgar.factbase.support.FactsBootstrapper
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.springframework.stereotype.Service
 
 @Service
-class FactBase(mongoDatabase: MongoDatabase) {
+class FactBase(
+    mongoDatabase: MongoDatabase,
+    private val factComponentFinder: FactComponentFinder,
+    private val factsBootstrapper: FactsBootstrapper,
+) {
 
     private val col = mongoDatabase.getCollection<Fact>()
 
-    fun deleteAll(cik: String) {
-        col.deleteMany(Fact::cik eq cik)
+    fun bootstrapFacts(cik: String) {
+        factsBootstrapper.bootstrapFacts(cik)
     }
 
-    /**
-     * Query all the facts (across dimension and time) for a given entity
-     * designated by the CIK
-     */
-    fun allFactsForCik(cik: String): List<Fact> {
+    fun factComponents(cik: String, conceptId: String): FactComponentsResponse {
+        return factComponentFinder.factComponents(cik, conceptId)
+    }
+
+    fun getFacts(cik: String): List<Fact> {
         return col.find(Fact::cik eq cik).toList()
+    }
+
+    fun deleteAll(cik: String) {
+        col.deleteMany(Fact::cik eq cik)
     }
 
 }

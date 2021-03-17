@@ -24,7 +24,7 @@ class ModelFactory(
         return SkeletonGenerator(
             filingProvider = filingProvider,
             schemaManager = SchemaManager(filingProvider),
-            facts = factBase.allFactsForCik(cik = filingProvider.cik())
+            facts = factBase.getFacts(cik = filingProvider.cik())
         )
     }
 

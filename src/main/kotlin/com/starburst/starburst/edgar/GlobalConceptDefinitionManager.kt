@@ -1,7 +1,6 @@
-package com.starburst.starburst.edgar.filingentity
+package com.starburst.starburst.edgar
 
-import com.starburst.starburst.edgar.XbrlConstants
-import com.starburst.starburst.edgar.XbrlConstants.xsd
+import com.starburst.starburst.edgar.XbrlNamespaces.xsd
 import com.starburst.starburst.edgar.dataclasses.ConceptDefinition
 import com.starburst.starburst.xml.HttpClientExtensions.readXml
 import com.starburst.starburst.xml.XmlElement
@@ -60,10 +59,10 @@ object GlobalConceptDefinitionManager {
                     conceptName = name,
                     type = element.attr("type"),
                     abstract = element.attr("abstract").toBoolean(),
-                    periodType = element.attr(XbrlConstants.xbrli, "periodType"),
+                    periodType = element.attr(XbrlNamespaces.xbrli, "periodType"),
                     nillable = element.attr("nillable").toBoolean(),
                     substitutionGroup = element.attr("substitutionGroup"),
-                    balance = element.attr(XbrlConstants.xbrli, "balance"),
+                    balance = element.attr(XbrlNamespaces.xbrli, "balance"),
                 )
             }
         concepts[schemaLocation] = conceptDefinitions.associateBy { it.id }

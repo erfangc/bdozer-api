@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.filingentity
+package com.starburst.starburst.edgar.factbase.support
 
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.FactBase
@@ -7,18 +7,17 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class Bootstrapper(
+class FactsBootstrapper(
     private val filingIngestor: FilingIngestor,
     private val edgarExplorer: EdgarExplorer,
-    private val factBase: FactBase,
 ) {
 
-    private val log = LoggerFactory.getLogger(Bootstrapper::class.java)
+    private val log = LoggerFactory.getLogger(FactsBootstrapper::class.java)
 
-    fun bootstrapFilingEntity(cik: String) {
-        //
-        // Find the most recent 4 10-Qs and the most recent 10K and ingest those
-        //
+    fun bootstrapFacts(cik: String) {
+        /*
+        Find the most recent 4 10-Qs and the most recent 10K and ingest those
+         */
         val hits = edgarExplorer.searchFilings(cik)
         val tenKs = hits.filter { it.form == "10-K" }.sortedByDescending { it.period_ending }
         val tenQs = hits.filter { it.form == "10-Q" }.sortedByDescending { it.period_ending }
@@ -26,8 +25,9 @@ class Bootstrapper(
         val recent10Ks = tenKs.subList(0, 4.coerceAtMost(tenKs.size))
         val recent10Qs = tenQs.subList(0, 4.coerceAtMost(tenQs.size))
 
+        log.info("Bootstrapping cik=$cik, recent10Ks.size=${recent10Ks.size}, recent10Qs.size=${recent10Qs.size}")
+
         try {
-            factBase.deleteAll(cik)
 
             val tenKResults = recent10Ks.map { recent10K ->
                 filingIngestor.ingestFiling(
