@@ -3,10 +3,29 @@ package com.starburst.starburst.spreadsheet
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token
 
+/**
+ * This class can take in a list of cells (which may or may not be renderable across multiple Sheet(s) within the same work book)
+ * and replace their in-memory JVM computation formula with Excel formula using Excel addresses
+ *
+ * For example:
+ *
+ * `Revenue_Period1 - CostOfGoods_Period1`
+ *
+ * becomes
+ *
+ * `'IncomeStatement'!B2 - 'IncomeStatement'!B3`
+ *
+ * The way this is done is that: we re-tokenize each formula expression. For any symbol we encounter
+ * that are unknown - i.e. not a built-in operator like +/-/if() etc. - instead of replacing this unknown token
+ * with the name of the referenced [Cell], we simply replace the token with the referenced cell's
+ * Excel address instead
+ *
+ * Excel cell address is specified on the referenced [Cell]
+ */
 class ExcelFormulaTranslator(private val cells: List<Cell>) {
 
     /**
-     * The primary job is to tokenize the expression of a given [Item] and replace
+     * The primary job is to tokenize the expression of a given [Cell] and replace
      * the generic tokens with actual cell names as well as populate the dependency tree
      */
     fun convertCellFormulaToXlsFormula(cell: Cell): Cell {

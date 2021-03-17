@@ -21,6 +21,8 @@ class ZacksModelBuilder(
     private val zacksFundamentalAService: ZacksFundamentalAService,
 ) {
 
+    private val modelEvaluator = ModelEvaluator()
+
     /**
      * Build a model using Zacks Fundamental A data
      * for the given ticker
@@ -51,7 +53,7 @@ class ZacksModelBuilder(
             otherItems = deriveOtherItems(modelItemized)
         )
 
-        val evaluateModelResult = ModelEvaluator().evaluate(finalModel)
+        val evaluateModelResult = modelEvaluator.evaluate(finalModel)
         val bytes = CellGenerator.exportToXls(finalModel, evaluateModelResult.cells)
 
         return BuildModelResponse(

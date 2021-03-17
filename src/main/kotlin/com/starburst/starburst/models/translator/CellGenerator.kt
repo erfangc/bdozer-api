@@ -25,10 +25,10 @@ class CellGenerator {
 
     companion object {
 
-        const val incomeStatementSheetName = "Income Statement"
-        const val balanceSheetName = "Balance Sheet"
-        const val cashFlowSheetName = "Cash Flow"
-        const val otherSheetName = "Other"
+        private const val incomeStatementSheetName = "Income Statement"
+        private const val balanceSheetName = "Balance Sheet"
+        private const val cashFlowSheetName = "Cash Flow"
+        private const val otherSheetName = "Other"
 
         /**
          * Take an financial model and a set of evaluated
@@ -41,11 +41,17 @@ class CellGenerator {
             val formulatedCells = addXlsFormulaToCells(cells)
 
             val wb = SXSSFWorkbook()
-            val yearStyle = yearStyle(wb)
+            /*
+            These styles will be reused
+             */
             val moneyStyle = moneyStyle(wb)
 
+            /**
+             * Helper function to write the non-data cells (i.e. date and item name cells)
+             * for each worksheet given it's list of associated items
+             */
             fun Sheet.writeHeader(items: List<Item>) {
-
+                val yearStyle = yearStyle(wb)
                 val yearRow = this.createRow(model.excelRowOffset - 1)
                 for (period in 0..periods) {
                     val year = LocalDate.now().year + period
@@ -59,6 +65,10 @@ class CellGenerator {
                     val labelCell = row.createCell(model.excelColumnOffset - 1)
                     labelCell.setCellValue(item.description ?: item.name)
                     val itemCommentary = item.commentaries?.commentary
+                    /*
+                    Create a cell comment if the Item being written to the worksheet
+                    has a comment stored
+                     */
                     if (!itemCommentary.isNullOrBlank()) {
                         /*
                         apparently all of this idiocy is needed for
@@ -71,7 +81,7 @@ class CellGenerator {
                         anchor.setCol1(labelCell.columnIndex)
                         anchor.setCol2(labelCell.columnIndex + 1)
                         anchor.row1 = row.rowNum
-                        anchor.row2 = row.rowNum + 3
+                        anchor.row2 = row.rowNum + 4
 
                         val drawing = createDrawingPatriarch()
                         val comment = drawing.createCellComment(anchor)
@@ -82,6 +92,9 @@ class CellGenerator {
                 }
             }
 
+            /*
+            create the worksheets for all the statements and the DCF model itself
+             */
             val sheet1 = wb.createSheet(incomeStatementSheetName)
             sheet1.defaultColumnWidth = 17
             sheet1.writeHeader(model.incomeStatementItems)
@@ -98,6 +111,9 @@ class CellGenerator {
             sheet4.defaultColumnWidth = 17
             sheet4.writeHeader(model.otherItems)
 
+            /*
+            write the formula of each cell
+             */
             formulatedCells.forEach { cell ->
                 val address = cell.address ?: error("${cell.name}'s address is not found or formulated")
                 val sheet = wb.getSheetAt(address.sheet)
@@ -155,7 +171,7 @@ class CellGenerator {
         )
     }
 
-    fun populateCellsWithFormulas(model: Model, cells: List<Cell>): List<Cell> {
+    private fun populateCellsWithFormulas(model: Model, cells: List<Cell>): List<Cell> {
 
         val ctx = FormulaTranslationContext(model = model, cells = cells)
 
@@ -208,7 +224,7 @@ class CellGenerator {
 
     private fun generateEmptyCells(model: Model): List<Cell> {
         val periods = model.periods
-        val cells = (0..periods).flatMap { period ->
+        return (0..periods).flatMap { period ->
 
             /*
             XLS address components preparation based on the current period
@@ -314,7 +330,6 @@ class CellGenerator {
 
             listOf(periodCell) + incomeStatementCells + balanceSheetCells + cashFlowStatementItems + otherCells
         }
-        return cells
     }
 
     private fun columnOf(period: Int): String {
