@@ -23,13 +23,14 @@ data class Item(
 
     val subscriptionRevenue: SubscriptionRevenue? = null,
 
+    val unitSalesRevenue: UnitSalesRevenue? = null,
+
     val discrete: Discrete? = null,
 
     val percentOfTotalAsset: PercentOfTotalAsset? = null,
 
     val percentOfRevenue: PercentOfRevenue? = null,
 
-    val unitSalesRevenue: UnitSalesRevenue? = null,
 
     val fixedCost: FixedCost? = null,
 

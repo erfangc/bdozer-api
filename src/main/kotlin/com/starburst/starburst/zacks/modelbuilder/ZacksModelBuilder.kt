@@ -60,7 +60,6 @@ class ZacksModelBuilder(
         val modelWithItems = skeletonModel.copy(
             incomeStatementItems = incomeStatement.items,
             balanceSheetItems = balanceSheet.items,
-            cashFlowStatementItems = listOf(),
         )
 
         val otherItems = deriveOtherItems(modelWithItems)
