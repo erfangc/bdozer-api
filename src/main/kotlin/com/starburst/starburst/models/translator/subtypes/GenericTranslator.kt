@@ -15,11 +15,11 @@ import org.mariuszgromada.math.mxparser.parsertokens.Token.NOT_MATCHED
  */
 class GenericTranslator(ctx: FormulaTranslationContext) : FormulaTranslator {
 
-    //
-    // create a lookup dictionary of item/driver names -> cell names
-    // the first layer of the lookup is by period, the second layer of the map
-    // is by name
-    //
+    /**
+     * Create a lookup dictionary of item/driver names -> cell names
+     * the first layer of the lookup is by period, the second layer of the map
+     * is by name
+     */
     private val lookup = ctx.cells.groupBy { it.period }
         .mapValues { entry -> entry.value.associateBy { it.item.name } }
 
@@ -33,24 +33,26 @@ class GenericTranslator(ctx: FormulaTranslationContext) : FormulaTranslator {
         val tokens = mutableListOf<String>()
         val dependentCellNames = mutableListOf<String>()
 
-        //
-        // for every token, if its unmatched, then try to match it with a cell name
-        //
+        /*
+        For every token, if its unmatched, then try to match it with a cell name
+         */
         origEl.copyOfInitialTokens.forEach { token ->
             val tokenStr = token.tokenStr
             if (token.tokenTypeId == NOT_MATCHED) {
-                //
-                // create a library of cells that can be referenced by the current cell
-                //
+                /*
+                Create a library of cells that can be referenced by the current cell
+                 */
                 val period = cell.period
 
                 val currentPeriodCells = lookup[period] ?: emptyMap()
                 val previousPeriodCells = lookup[period - 1]
                     ?.map { (key, value) ->
-                        // this steps enable formulas to reference Previous_<ItemName>
-                        // to be possible
-                        // note that - for the case where 'period = 1' we must use historical value
-                        // which means the cell generator must've created these
+                        /*
+                        This steps enable formulas to reference Previous_<ItemName>
+                        to be possible
+                        note that - for the case where 'period = 1' we must use historical value
+                        which means the cell generator must've created these
+                         */
                         previous(key) to value
                     }
                     ?.toMap() ?: emptyMap()

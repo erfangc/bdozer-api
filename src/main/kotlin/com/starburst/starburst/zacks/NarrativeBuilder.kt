@@ -38,7 +38,7 @@ class NarrativeBuilder(
         val revenueTalkingPoint = TalkingPoint(
             data = revenueItem?.historicalValue,
             commentary = revenueItem?.commentaries?.commentary,
-            forwardCommentary = "Zack's investment research estimates revenue growth to be ${revCAGR.fmtPct()}. We will use their projection to derive the target stock price",
+            forwardCommentary = "Zack's research estimates revenue growth to be ${revCAGR.fmtPct()}. We will use this projection to derive the target stock price",
         )
 
         val cogsItem = incomeStatementItems.find { it.name == CostOfGoodsSold }
@@ -110,7 +110,7 @@ class NarrativeBuilder(
             ?.discrete
             ?.formulas
             ?.entries
-            ?.sortedBy { it.key }
+            ?.sortedBy { it -> it.key }
         val last = revs?.last()?.value?.toDouble() ?: error("...")
         val first = revs.first().value.toDouble()
         return last / first - 1.0

@@ -25,7 +25,7 @@ class LabelManager(filingProvider: FilingProvider) {
     // 1 - build a map of locator(s), from schema definition Ids (the hrefs) -> xlink:label
     //
     private val locs = node
-        .getElementsByTag(link,"loc")
+        .getElementsByTag(link, "loc")
         .map {
             val href = it.attr(xlink, "href") ?: error("href not defined on label locator")
             val label = it.attr(xlink, "label")
@@ -38,7 +38,7 @@ class LabelManager(filingProvider: FilingProvider) {
     private val labelArcs = node
         .getElementsByTag(link, "labelArc")
         .map {
-            it.attr(xlink,"from") to it.attr(xlink,"to")
+            it.attr(xlink, "from") to it.attr(xlink, "to")
         }
         .toMap()
 
@@ -46,13 +46,13 @@ class LabelManager(filingProvider: FilingProvider) {
     // 3 - build a map of labelArcs -> label(s)
     //
     private val labels = node
-        .getElementsByTag(link,"label")
+        .getElementsByTag(link, "label")
         .groupBy {
-            it.attr(xlink,"label")
+            it.attr(xlink, "label")
         }.map { (label, nodes) ->
             // process each node into a map of role -> text
             label to nodes.map {
-                it.attr(xlink,"role") to it.textContent
+                it.attr(xlink, "role") to it.textContent
             }.toMap()
         }.toMap()
 

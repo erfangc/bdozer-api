@@ -1,7 +1,6 @@
 package com.starburst.starburst.edgar.factbase.support
 
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
-import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.ingestor.FilingIngestor
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

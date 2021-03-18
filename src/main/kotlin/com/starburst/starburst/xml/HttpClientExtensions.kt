@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
-import org.slf4j.LoggerFactory
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
