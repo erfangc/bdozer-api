@@ -1,9 +1,9 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized
 
+import com.starburst.starburst.DoubleExtensions.fmtPct
+import com.starburst.starburst.DoubleExtensions.fmtRound
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.LinearRegression
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.itemTimeSeriesVsRevenue
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.NameExpressionExtensions.totalRevenueExpression

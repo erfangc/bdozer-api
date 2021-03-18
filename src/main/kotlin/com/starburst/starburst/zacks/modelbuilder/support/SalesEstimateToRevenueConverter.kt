@@ -1,31 +1,28 @@
 package com.starburst.starburst.zacks.modelbuilder.support
 
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
+import com.starburst.starburst.DoubleExtensions.fmtPct
 import com.starburst.starburst.models.Utility
 import com.starburst.starburst.models.dataclasses.Discrete
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
-import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.zacks.se.ZacksEstimatesService
+import com.starburst.starburst.zacks.dataclasses.Context
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
 import java.time.LocalDate
 
-@Service
 class SalesEstimateToRevenueConverter(
-    private val zacksEstimatesService: ZacksEstimatesService,
+    private val ctx: Context
 ) {
 
     private val log = LoggerFactory.getLogger(SalesEstimateToRevenueConverter::class.java)
 
-    fun convert(model: Model, latestActualRevenue: Double): Item {
-
+    fun convert(latestActualRevenue: Double): Item {
+        val model = ctx.model
         /*
         turn sales estimates into revenue assumptions
          */
         val totalPeriod = model.periods
         val ticker = model.symbol ?: error("...")
-        val estimates = zacksEstimatesService.getZacksSaleEstimates(ticker)
+        val estimates = ctx.zacksSalesEstimates
 
         /*
         we find the first estimate with a time > today

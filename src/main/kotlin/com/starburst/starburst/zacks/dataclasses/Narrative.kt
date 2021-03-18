@@ -12,4 +12,5 @@ data class Narrative(
     val noGrowthValueTalkingPoint: TalkingPoint,
     val growthTalkingPoint: TalkingPoint,
     val targetPriceTalkingPoint: TalkingPoint,
+    val netIncomeTalkingPoint: TalkingPoint,
 )

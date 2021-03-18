@@ -1,7 +1,7 @@
 package com.starburst.starburst.zacks.modelbuilder.support
 
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
+import com.starburst.starburst.DoubleExtensions.fmtPct
+import com.starburst.starburst.DoubleExtensions.fmtRound
 import com.starburst.starburst.models.Utility.CurrentAsset
 import com.starburst.starburst.models.Utility.CurrentLiability
 import com.starburst.starburst.models.Utility.LongTermAsset
@@ -15,20 +15,20 @@ import com.starburst.starburst.models.Utility.TotalAsset
 import com.starburst.starburst.models.Utility.TotalLiability
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.zacks.fa.ZacksFundamentalA
+import com.starburst.starburst.zacks.dataclasses.BalanceSheet
+import com.starburst.starburst.zacks.dataclasses.Context
 import org.springframework.stereotype.Service
 
 @Service
-class BalanceSheetItemsBuilder {
+class BalanceSheetBuilder {
 
-    fun balanceSheetItems(model: Model, fundamentalA: ZacksFundamentalA): List<Item> {
-
-        val totRevnu = fundamentalA.tot_revnu ?: 0.0
-        val totCurrAsset = fundamentalA.tot_curr_asset ?: 0.0
-        val netPropPlantEquip = fundamentalA.net_prop_plant_equip ?: 0.0
-        val totLtermAsset = fundamentalA.tot_lterm_asset ?: 0.0
-        val totAsset = fundamentalA.tot_asset ?: 0.0
+    fun balanceSheetItems(ctx: Context): BalanceSheet {
+        val latest = ctx.latestAnnual()
+        val totRevnu = latest.tot_revnu ?: 0.0
+        val totCurrAsset = latest.tot_curr_asset ?: 0.0
+        val netPropPlantEquip = latest.net_prop_plant_equip ?: 0.0
+        val totLtermAsset = latest.tot_lterm_asset ?: 0.0
+        val totAsset = latest.tot_asset ?: 0.0
 
         val caRatio = totCurrAsset / totAsset
         val ppeRatio = netPropPlantEquip / totAsset
@@ -36,20 +36,20 @@ class BalanceSheetItemsBuilder {
 
         val totalAssetOverRevenue = totAsset / totRevnu
 
-        val totCurrLiab = fundamentalA.tot_curr_liab ?: 0.0
-        val totLiab = fundamentalA.tot_liab ?: 0.0
-        val totLtermDebt = fundamentalA.tot_lterm_debt ?: 0.0
-        val totLtermLiab = fundamentalA.tot_lterm_liab ?: 0.0
-        val totShareHolderEquity = fundamentalA.tot_share_holder_equity ?: 0.0
+        val totCurrLiab = latest.tot_curr_liab ?: 0.0
+        val totLiab = latest.tot_liab ?: 0.0
+        val totLtermDebt = latest.tot_lterm_debt ?: 0.0
+        val totLtermLiab = latest.tot_lterm_liab ?: 0.0
+        val totShareHolderEquity = latest.tot_share_holder_equity ?: 0.0
 
         val clRatio = totCurrLiab / totLiab
         val ltdRatio = totLtermDebt / totLiab
         val ltlRatio = (totLtermLiab - totLtermDebt) / totLiab
 
         val totalLiabilityOverRevenue = totRevnu / totLiab
-        val avgBShares = fundamentalA.avg_b_shares ?: 0.0
+        val avgBShares = latest.avg_b_shares ?: 0.0
 
-        return listOf(
+        val items = listOf(
             /*
             Assets
              */
@@ -120,6 +120,7 @@ class BalanceSheetItemsBuilder {
                 expression = "$avgBShares"
             ),
         )
+        return BalanceSheet(items = items)
     }
 
 }

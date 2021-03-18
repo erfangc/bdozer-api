@@ -1,6 +1,7 @@
-package com.starburst.starburst.zacks.modelbuilder.keyinputs
+package com.starburst.starburst.zacks.modelbuilder.support
 
 import com.mongodb.client.MongoDatabase
+import com.starburst.starburst.zacks.dataclasses.KeyInputs
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save

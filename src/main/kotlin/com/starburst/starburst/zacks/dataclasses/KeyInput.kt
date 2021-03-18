@@ -1,4 +1,4 @@
-package com.starburst.starburst.zacks.modelbuilder.keyinputs
+package com.starburst.starburst.zacks.dataclasses
 
 data class KeyInput(
     val label: String,

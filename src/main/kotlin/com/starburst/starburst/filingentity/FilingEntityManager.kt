@@ -85,7 +85,7 @@ class FilingEntityManager(
                 val updatedEntity = entity.copy(
                     lastUpdated = Instant.now().toString(),
                     statusMessage = "Completed",
-                    model = response.model,
+                    model = response.evaluateModelResult.model,
                 )
 
                 col.save(updatedEntity)

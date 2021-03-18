@@ -22,7 +22,7 @@ class ModelEvaluator {
             .sumByDouble { it.value ?: 0.0 }
         return EvaluateModelResult(
             model = model,
-            cells = cells,
+            cells = evaluatedCells,
             targetPrice = targetPrice
         )
     }

@@ -1,6 +1,7 @@
 package com.starburst.starburst.zacks
 
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtPct
+import com.starburst.starburst.DoubleExtensions.fmtPct
+import com.starburst.starburst.DoubleExtensions.orZero
 import com.starburst.starburst.models.Utility.CostOfGoodsSold
 import com.starburst.starburst.models.Utility.InterestExpense
 import com.starburst.starburst.models.Utility.NetIncome
@@ -12,65 +13,102 @@ import com.starburst.starburst.models.Utility.TaxExpense
 import com.starburst.starburst.models.Utility.previous
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.translator.CellGenerator
+import com.starburst.starburst.spreadsheet.Cell
+import com.starburst.starburst.zacks.dataclasses.KeyInputs
 import com.starburst.starburst.zacks.dataclasses.Narrative
+import com.starburst.starburst.zacks.dataclasses.Projection
 import com.starburst.starburst.zacks.dataclasses.TalkingPoint
 import com.starburst.starburst.zacks.modelbuilder.ZacksModelBuilder
-import com.starburst.starburst.zacks.modelbuilder.keyinputs.KeyInputs
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class NarrativeBuilder(
     private val modelBuilder: ZacksModelBuilder,
 ) {
 
-    fun exportExcel(ticker: String): ByteArray {
-        return modelBuilder.buildModel(ticker).excel
+    private fun Model.valueOf(itemName: String) =
+        (incomeStatementItems + cashFlowStatementItems + balanceSheetItems + otherItems)
+            .find { item -> item.name == itemName }?.historicalValue.orZero()
+
+    private fun Model.item(itemName: String) =
+        (incomeStatementItems + cashFlowStatementItems + balanceSheetItems + otherItems)
+            .find { item -> item.name == itemName }
+
+    private fun List<Cell>.projectionsFor(itemName: String): List<Projection> {
+        val year = LocalDate.now().year
+        return this
+            .filter { cell ->
+                cell.item.name == itemName && cell.period > 0
+            }
+            .map { cell ->
+                val period = cell.period
+                Projection(year = year + period, value = cell.value.orZero())
+            }
     }
 
-    fun buildNarrative(ticker: String): Narrative {
+    /**
+     * Run the model and export it's Excel workbook representation as bytes
+     */
+    fun exportExcel(ticker: String): ByteArray {
+        val results = modelBuilder.buildModel(ticker)
+        return CellGenerator.exportToXls(results.evaluateModelResult.model, results.evaluateModelResult.cells)
+    }
 
+    /**
+     * Creates a narrative from models
+     */
+    fun buildNarrative(ticker: String): Narrative {
         val resp = modelBuilder.buildModel(ticker)
-        val model = resp.model
+        val model = resp.evaluateModelResult.model
+        val cells = resp.evaluateModelResult.cells
+
         val incomeStatementItems = model.incomeStatementItems
 
-        val revenueItem = incomeStatementItems.find { it.name == Revenue }
+        val revenueItem = model.item(Revenue)
         val revCAGR = revCAGRComputation(revenueItem)
         val revenueTalkingPoint = TalkingPoint(
             data = revenueItem?.historicalValue,
             commentary = revenueItem?.commentaries?.commentary,
-            forwardCommentary = "Zack's research estimates revenue growth to be ${revCAGR.fmtPct()}. We will use this projection to derive the target stock price",
+            forwardCommentary = """
+            |Zack's research estimates revenue growth to be ${revCAGR.fmtPct()}. 
+            |We will use this projection to derive the target stock price
+            """.trimMargin(),
+            projections = cells.projectionsFor(Revenue)
         )
 
-        val cogsItem = incomeStatementItems.find { it.name == CostOfGoodsSold }
+        val cogsItem = model.item(CostOfGoodsSold)
         val variableCostTalkingPoint = TalkingPoint(
-            data = cogsItem?.historicalValue,
+            data = cogsItem?.historicalValue?.orZero(),
             forwardCommentary = cogsItem?.commentaries?.commentary,
         )
-
-        val opExp = incomeStatementItems.find { it.name == OperatingExpense }
+        val operatingExpense = incomeStatementItems.find { it.name == OperatingExpense }
         val fixedCostTalkingPoint = TalkingPoint(
-            data = opExp?.historicalValue,
-            forwardCommentary = opExp?.commentaries?.commentary,
+            data = operatingExpense?.historicalValue,
+            forwardCommentary = operatingExpense?.commentaries?.commentary,
         )
 
         val otherExpensesTalkingPoint = otherExpensesTalkingPt(incomeStatementItems)
+        val netIncomeTalkingPoint = TalkingPoint(
+            data = model.valueOf(NetIncome),
+            projections = cells.projectionsFor(NetIncome)
+        )
+
         val epsTalkingPoint = epsTalkingPt(incomeStatementItems, model)
         val noGrowthValueTalkingPoint = noGrowthValueTalkingPt(ticker)
-
-        val growthTalkingPoint = TalkingPoint(
-            data = revCAGR,
-        )
+        val growthTalkingPoint = TalkingPoint(data = revCAGR)
 
         val targetPriceTalkingPoint = TalkingPoint(
-            data = resp.targetPrice,
+            data = resp.evaluateModelResult.targetPrice,
         )
-
         return Narrative(
             model = model,
             revenueTalkingPoint = revenueTalkingPoint,
             variableCostTalkingPoint = variableCostTalkingPoint,
             fixedCostTalkingPoint = fixedCostTalkingPoint,
             otherExpensesTalkingPoint = otherExpensesTalkingPoint,
+            netIncomeTalkingPoint = netIncomeTalkingPoint,
             epsTalkingPoint = epsTalkingPoint,
             noGrowthValueTalkingPoint = noGrowthValueTalkingPoint,
             growthTalkingPoint = growthTalkingPoint,
@@ -78,10 +116,20 @@ class NarrativeBuilder(
         )
     }
 
+    /**
+     * Rerun the model with 0 revenue growth by submitting [KeyInputs] that
+     * holds revenue constant
+     */
     private fun noGrowthValueTalkingPt(ticker: String): TalkingPoint {
-        val noGrowthResp = modelBuilder.buildModel(ticker, keyInputs = KeyInputs(_id = "", formula = previous(Revenue)))
+        val noGrowthResp = modelBuilder.buildModel(
+            ticker = ticker,
+            revenueKeyInputs = KeyInputs(
+                _id = "",
+                formula = previous(Revenue)
+            )
+        )
         return TalkingPoint(
-            data = noGrowthResp.targetPrice,
+            data = noGrowthResp.evaluateModelResult.targetPrice,
         )
     }
 

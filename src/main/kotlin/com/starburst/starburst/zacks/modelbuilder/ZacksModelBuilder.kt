@@ -9,19 +9,21 @@ import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.evaluator.ModelEvaluator
-import com.starburst.starburst.models.translator.CellGenerator
-import com.starburst.starburst.zacks.fa.ZacksFundamentalA
+import com.starburst.starburst.zacks.dataclasses.BuildModelResponse
+import com.starburst.starburst.zacks.dataclasses.Context
+import com.starburst.starburst.zacks.dataclasses.KeyInputs
 import com.starburst.starburst.zacks.fa.ZacksFundamentalAService
-import com.starburst.starburst.zacks.modelbuilder.keyinputs.KeyInputs
-import com.starburst.starburst.zacks.modelbuilder.support.BalanceSheetItemsBuilder
-import com.starburst.starburst.zacks.modelbuilder.support.IncomeStatementItemsBuilder
+import com.starburst.starburst.zacks.modelbuilder.support.BalanceSheetBuilder
+import com.starburst.starburst.zacks.modelbuilder.support.IncomeStatementBuilder
+import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import org.springframework.stereotype.Service
 
 @Service
 class ZacksModelBuilder(
-    private val incomeStatementItemsBuilder: IncomeStatementItemsBuilder,
-    private val balanceSheetItemsBuilder: BalanceSheetItemsBuilder,
+    private val incomeStatementBuilder: IncomeStatementBuilder,
+    private val balanceSheetBuilder: BalanceSheetBuilder,
     private val zacksFundamentalAService: ZacksFundamentalAService,
+    private val zacksEstimatesService: ZacksEstimatesService,
 ) {
 
     private val modelEvaluator = ModelEvaluator()
@@ -30,41 +32,46 @@ class ZacksModelBuilder(
      * Build a model using Zacks Fundamental A data
      * for the given ticker - this model will be supplemented by data we ingest from the SEC
      */
-    fun buildModel(ticker: String, keyInputs: KeyInputs? = null): BuildModelResponse {
-        val fundamentalAs = findZacksFundamentalA(ticker)
-        val latestFundamentalA = fundamentalAs
-            .filter { it.per_type == "A" }
-            .maxByOrNull { it.per_end_date!! }
-            ?: error("unable to find an annual fundamental for $ticker, found total fundamentals ${fundamentalAs.size}")
+    fun buildModel(ticker: String, revenueKeyInputs: KeyInputs? = null): BuildModelResponse {
+
+        val zacksFundamentalA = zacksFundamentalAService.getZacksFundamentalAs(ticker)
+        val zacksSalesEstimates = zacksEstimatesService.getZacksSaleEstimates(ticker)
 
         val skeletonModel = Model(
             symbol = ticker,
-            name = latestFundamentalA.comp_name ?: "N/A",
         )
 
-        val incomeStatementItems =
-            incomeStatementItemsBuilder.incomeStatementItems(skeletonModel, latestFundamentalA, keyInputs)
-        val balanceSheetItems = balanceSheetItemsBuilder.balanceSheetItems(skeletonModel, latestFundamentalA)
+        val ctx = Context(
+            ticker = ticker,
+            model = skeletonModel,
+            zacksFundamentalA = zacksFundamentalA,
+            zacksSalesEstimates = zacksSalesEstimates
+        )
 
-        val modelItemized = skeletonModel.copy(
-            incomeStatementItems = incomeStatementItems,
-            balanceSheetItems = balanceSheetItems,
+        /*
+        Use helper classes to construct IncomeStatement and BalanceSheet [Item]s
+         */
+        val incomeStatement = incomeStatementBuilder.incomeStatementItems(ctx, revenueKeyInputs)
+        val balanceSheet = balanceSheetBuilder.balanceSheetItems(ctx)
+
+        /*
+        Attach the newly built income statement/balance-sheet items
+         */
+        val modelWithItems = skeletonModel.copy(
+            incomeStatementItems = incomeStatement.items,
+            balanceSheetItems = balanceSheet.items,
             cashFlowStatementItems = listOf(),
-            otherItems = listOf(),
         )
 
-        val finalModel = modelItemized.copy(
-            otherItems = deriveOtherItems(modelItemized)
-        )
+        val otherItems = deriveOtherItems(modelWithItems)
+        val finalModel = modelWithItems.copy(otherItems = otherItems)
 
         val evaluateModelResult = modelEvaluator.evaluate(finalModel)
-        val bytes = CellGenerator.exportToXls(finalModel, evaluateModelResult.cells)
 
         return BuildModelResponse(
-            model = evaluateModelResult.model,
-            targetPrice = evaluateModelResult.targetPrice,
-            cells = evaluateModelResult.cells,
-            excel = bytes
+            evaluateModelResult = evaluateModelResult,
+            incomeStatement = incomeStatement,
+            balanceSheet = balanceSheet,
         )
 
     }
@@ -91,10 +98,6 @@ class ZacksModelBuilder(
                 expression = "$DiscountFactor * ($EarningsPerShare + $TerminalValuePerShare)"
             )
         )
-    }
-
-    private fun findZacksFundamentalA(ticker: String): List<ZacksFundamentalA> {
-        return zacksFundamentalAService.getZacksFundamentalAs(ticker)
     }
 
 }

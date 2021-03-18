@@ -1,7 +1,7 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized
 
+import com.starburst.starburst.DoubleExtensions.fmtRound
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.CommentaryExtensions.fmtRound
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ItemValueExtractorsExtension.itemTimeSeries
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.FormulaGenerator
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.Result
