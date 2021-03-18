@@ -72,6 +72,7 @@ class ZacksModelBuilder(
     private fun deriveOtherItems(model: Model): List<Item> {
         val periods = model.periods
         val discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate
+        val terminalPeMultiple = 1.0 / (discountRate - model.terminalFcfGrowthRate)
         return listOf(
             Item(
                 name = DiscountFactor,
@@ -83,7 +84,7 @@ class ZacksModelBuilder(
             ),
             Item(
                 name = TerminalValuePerShare,
-                expression = "if(period=$periods,$EarningsPerShare * ${model.terminalFcfMultiple},0.0)"
+                expression = "if(period=$periods,$EarningsPerShare * ${terminalPeMultiple},0.0)"
             ),
             Item(
                 name = PresentValuePerShare,

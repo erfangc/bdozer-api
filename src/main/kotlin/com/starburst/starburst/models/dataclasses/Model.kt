@@ -29,9 +29,9 @@ data class Model(
     val corporateTaxRate: Double = 0.1,
     val costOfDebt: Double = 0.04,
     val riskFreeRate: Double = 0.005,
-    val equityRiskPremium: Double = 0.07,
+    val equityRiskPremium: Double = 0.075,
     val terminalFcfMultiple: Double = 15.0,
-    val terminalFcfGrowthRate: Double = 0.035,
+    val terminalFcfGrowthRate: Double = 0.03,
 
     /**
      * Projection period
