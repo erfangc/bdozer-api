@@ -3,6 +3,7 @@ package com.starburst.starburst.edgar.factbase.ingestor
 import com.starburst.starburst.edgar.factbase.ingestor.q4.Q4FactFinder
 import com.starburst.starburst.xml.HttpClientExtensions.readXml
 import org.apache.http.client.HttpClient
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -13,6 +14,8 @@ class RssFilingIngestor(
     private val ingestor: FilingIngestor,
     private val q4FactFinder: Q4FactFinder,
 ) {
+
+    private val log = LoggerFactory.getLogger(RssFilingIngestor::class.java)
 
     internal data class XbrlItem(
         val companyName: String? = null,
@@ -78,6 +81,7 @@ class RssFilingIngestor(
             try {
                 val accessionNumber = item.accessionNumber
                 val cikNumber = item.cikNumber
+                log.info("Ingesting cikNumber=$cikNumber, accessionNumber=$accessionNumber")
                 ingestor.ingestFiling(cik = cikNumber!!, adsh = accessionNumber!!)
             } catch (e: Exception) {
                 e.printStackTrace()
