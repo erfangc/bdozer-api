@@ -5,7 +5,7 @@ import com.starburst.starburst.edgar.GlobalConceptDefinitionManager.getBySchemaL
 import com.starburst.starburst.edgar.GlobalConceptDefinitionManager.putSchemaDocument
 import com.starburst.starburst.edgar.XbrlNamespaces.xsd
 import com.starburst.starburst.edgar.dataclasses.ConceptDefinition
-import com.starburst.starburst.edgar.provider.FilingProvider
+import com.starburst.starburst.edgar.FilingProvider
 
 /**
  * The goal is to take the standard and extension XSDs of the filing

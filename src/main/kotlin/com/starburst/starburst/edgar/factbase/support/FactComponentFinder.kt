@@ -7,7 +7,7 @@ import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.dataclasses.FactComponentsResponse
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findIncomeStatementRole
-import com.starburst.starburst.edgar.provider.FilingProvider
+import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.xml.XmlNode
 import org.litote.kmongo.eq

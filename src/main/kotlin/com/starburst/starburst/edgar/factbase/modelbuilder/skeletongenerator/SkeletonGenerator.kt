@@ -12,7 +12,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.Rol
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findCashFlowStatementRole
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findIncomeStatementRole
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
-import com.starburst.starburst.edgar.provider.FilingProvider
+import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.xml.XmlElement

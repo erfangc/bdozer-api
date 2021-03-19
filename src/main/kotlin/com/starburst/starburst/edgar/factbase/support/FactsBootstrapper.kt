@@ -21,8 +21,8 @@ class FactsBootstrapper(
         val tenKs = hits.filter { it.form == "10-K" }.sortedByDescending { it.period_ending }
         val tenQs = hits.filter { it.form == "10-Q" }.sortedByDescending { it.period_ending }
 
-        val recent10Ks = tenKs.subList(0, 4.coerceAtMost(tenKs.size))
-        val recent10Qs = tenQs.subList(0, 4.coerceAtMost(tenQs.size))
+        val recent10Ks = tenKs.subList(0, 6.coerceAtMost(tenKs.size))
+        val recent10Qs = tenQs.subList(0, 6.coerceAtMost(tenQs.size))
 
         log.info("Bootstrapping cik=$cik, recent10Ks.size=${recent10Ks.size}, recent10Qs.size=${recent10Qs.size}")
 
@@ -50,7 +50,7 @@ class FactsBootstrapper(
                 val numTenQsInYear =
                     tenQResults.filter { tenQResult -> tenQResult.documentFiscalYearFocus == year }.size
                 if (numTenQsInYear >= 3) {
-                    log.info("Ingesting Q-4 filing for cik=$cik year=$year")
+                    log.info("Ingesting Q-4 filing for cik=$cik, year=$year")
                     filingIngestor.ingestQ4Facts(cik, year)
                 }
             }

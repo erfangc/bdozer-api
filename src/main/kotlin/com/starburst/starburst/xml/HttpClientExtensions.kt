@@ -10,10 +10,10 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 object HttpClientExtensions {
 
-    fun readXml(source: InputStream): XmlElement {
+    fun InputStream.readXml(): XmlElement {
         val factory = DocumentBuilderFactory.newInstance()
         val builder = factory.newDocumentBuilder()
-        return XmlElement(builder.parse(source).documentElement)
+        return XmlElement(builder.parse(this).documentElement)
     }
 
     fun HttpClient.readLink(link: String): ByteArray? {
@@ -27,7 +27,7 @@ object HttpClientExtensions {
 
     fun HttpClient.readXml(link: String): XmlElement {
         val inputStream = this.readLink(link)?.inputStream() ?: error("$link not found")
-        return readXml(inputStream)
+        return inputStream.readXml()
     }
 
     inline fun <reified T> HttpClient.readEntity(link: String): T {

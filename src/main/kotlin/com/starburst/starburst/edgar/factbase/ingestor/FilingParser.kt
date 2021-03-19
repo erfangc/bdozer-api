@@ -1,12 +1,14 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
+import com.starburst.starburst.edgar.FilingProvider
+import com.starburst.starburst.edgar.XbrlNamespaces.xbrl
+import com.starburst.starburst.edgar.XbrlNamespaces.xbrldi
 import com.starburst.starburst.edgar.dataclasses.*
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
-import com.starburst.starburst.edgar.provider.FilingProvider
 import com.starburst.starburst.xml.LocalDateExtensions.toLocalDate
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.xml.XmlNode
@@ -20,11 +22,6 @@ import java.time.LocalDate
  * and returns the list of [Fact]s contained within
  */
 class FilingParser(private val filingProvider: FilingProvider) {
-
-    companion object {
-        const val xbrl = "http://www.xbrl.org/2003/instance"
-        const val xbrldi = "http://xbrl.org/2006/xbrldi"
-    }
 
     private val schemaManager = SchemaManager(filingProvider)
     private val labelManager = LabelManager(filingProvider)
@@ -48,7 +45,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
         val instanceDocument = filingProvider.instanceDocument()
 
         val instanceDocumentFilename = filingProvider.instanceDocumentFilename()
-        log.info("Parsing instance document $instanceDocumentFilename")
+        log.info("Parsing instance document $instanceDocumentFilename for facts")
 
         /*
         create counters for the different types of facts we will encounter along the way
@@ -108,6 +105,9 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 val primarySymbol = primarySymbol(instanceDocument)
                 val formType = formType(instanceDocument)
 
+                /*
+                Create the Fact instance we just parsed
+                 */
                 Fact(
                     _id = id,
                     instanceDocumentElementId = instanceDocumentElementId,
@@ -309,11 +309,10 @@ class FilingParser(private val filingProvider: FilingProvider) {
 
     private fun isNodeRelevant(node: Node): Boolean {
         val (namespace, _) = parseInstanceNodeName(node.nodeName)
-
-        //
-        // this node is a fact if it's
-        // namespace is one of the ones that matter
-        //
+        /*
+        this node is a fact if it's
+        namespace is one of the ones that matter
+         */
         val isExternalNamespace = namespace == filingProvider.schema().targetNamespace()
         val lookup = instanceDocument.longNamespaceToShortNamespaceMap()
         return isRelevantElementDefinition(isExternalNamespace, lookup, namespace)

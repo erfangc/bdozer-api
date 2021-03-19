@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.provider
+package com.starburst.starburst.edgar
 
 import com.starburst.starburst.xml.XmlElement
 

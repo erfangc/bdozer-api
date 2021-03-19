@@ -1,5 +1,6 @@
 package com.starburst.starburst.edgar.provider
 
+import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.XbrlNamespaces.link
 import com.starburst.starburst.edgar.XbrlNamespaces.xlink
 import com.starburst.starburst.edgar.XbrlNamespaces.xsd

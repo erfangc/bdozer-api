@@ -3,7 +3,7 @@ package com.starburst.starburst.edgar.factbase.support
 import com.starburst.starburst.edgar.XbrlNamespaces.link
 import com.starburst.starburst.edgar.XbrlNamespaces.xlink
 import com.starburst.starburst.edgar.dataclasses.Labels
-import com.starburst.starburst.edgar.provider.FilingProvider
+import com.starburst.starburst.edgar.FilingProvider
 import java.net.URI
 
 /**
