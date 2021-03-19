@@ -36,7 +36,11 @@ class FilingEntityManager(
     private val executor = Executors.newCachedThreadPool()
     private val col = mongoDatabase.getCollection<FilingEntity>()
 
-    fun getFilingEntity(cik: String): FilingEntity {
+    fun getFilingEntity(cik:String):FilingEntity? {
+        return col.findOneById(cik)
+    }
+
+    fun getOrBootstrapFilingEntity(cik: String): FilingEntity {
         val savedEntity = col.findOneById(cik)
         return savedEntity ?: bootstrapFilingEntity(cik)
     }
@@ -100,9 +104,10 @@ class FilingEntityManager(
             ),
             phone = secEntity.phone,
             lastUpdated = Instant.now().toString(),
-            statusMessage = "Analysis for this entity is underway, we are parsing the internet for data",
+            statusMessage = "Created",
         )
         col.save(entity)
+        log.info("Created filing entity cik=${entity.cik}")
         return entity
     }
 
@@ -113,4 +118,5 @@ class FilingEntityManager(
         col.deleteMany(FilingEntity::cik eq cik)
         factBase.deleteAll(cik)
     }
+
 }

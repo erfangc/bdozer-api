@@ -10,7 +10,7 @@ class FilingEntityManagerController(private val filingEntityManager: FilingEntit
 
     @GetMapping("{cik}")
     fun getFilingEntity(@PathVariable cik: String): FilingEntity {
-        return filingEntityManager.getFilingEntity(cik)
+        return filingEntityManager.getOrBootstrapFilingEntity(cik)
     }
 
     @PostMapping("{cik}")

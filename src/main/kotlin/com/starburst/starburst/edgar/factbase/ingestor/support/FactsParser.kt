@@ -132,10 +132,10 @@ class FactsParser(private val filingProvider: FilingProvider) {
 
                     sourceDocument = sourceDocument(node),
 
-                    label = labels.label,
-                    labelTerse = labels.terseLabel,
-                    verboseLabel = labels.verboseLabel,
-                    documentation = labels.documentation,
+                    label = labels?.label,
+                    labelTerse = labels?.terseLabel,
+                    verboseLabel = labels?.verboseLabel,
+                    documentation = labels?.documentation,
 
                     stringValue = content,
                     doubleValue = content.toDoubleOrNull(),
@@ -256,7 +256,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
         }
     }
 
-    private fun getLabels(elementId: String): Labels {
+    private fun getLabels(elementId: String): Labels? {
         return labelManager.getLabel(elementId)
     }
 

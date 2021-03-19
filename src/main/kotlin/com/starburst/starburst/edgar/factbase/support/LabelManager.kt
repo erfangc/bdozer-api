@@ -56,9 +56,9 @@ class LabelManager(filingProvider: FilingProvider) {
             }.toMap()
         }.toMap()
 
-    fun getLabel(schemaElementId: String): Labels {
-        val loc = locs[schemaElementId] ?: error("no loc found for $schemaElementId")
-        val arcLabel = labelArcs[loc] ?: error("no labelArc found for $loc, derived from $schemaElementId")
+    fun getLabel(schemaElementId: String): Labels? {
+        val loc = locs[schemaElementId] ?: return null
+        val arcLabel = labelArcs[loc] ?: return null
         val labels = labels[arcLabel] ?: emptyMap()
 
         val label = labels["http://www.xbrl.org/2003/role/label"]

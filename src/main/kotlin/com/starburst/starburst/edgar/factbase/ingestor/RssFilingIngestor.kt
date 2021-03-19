@@ -1,8 +1,13 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
+import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.edgar.factbase.ingestor.q4.Q4FactFinder
+import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.xml.HttpClientExtensions.readXml
 import org.apache.http.client.HttpClient
+import org.litote.kmongo.findOneById
+import org.litote.kmongo.getCollection
+import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -13,16 +18,26 @@ class RssFilingIngestor(
     private val httpClient: HttpClient,
     private val ingestor: FilingIngestor,
     private val q4FactFinder: Q4FactFinder,
+    private val filingEntityManager: FilingEntityManager,
+    mongoDatabase: MongoDatabase,
 ) {
 
     private val log = LoggerFactory.getLogger(RssFilingIngestor::class.java)
+    private val col = mongoDatabase.getCollection<XbrlItem>()
 
-    internal data class XbrlItem(
+    enum class Status {
+        Processed, Pending, Error
+    }
+
+    data class XbrlItem(
+        val _id: String,
         val companyName: String? = null,
         val formType: String? = null,
-        val cikNumber: String? = null,
-        val accessionNumber: String? = null,
+        val cikNumber: String,
+        val accessionNumber: String,
         val period: LocalDate? = null,
+        val status: Status,
+        val message: String? = null,
     )
 
     private fun pad(input: Int, total: Int = 2): String {
@@ -47,7 +62,7 @@ class RssFilingIngestor(
                 val prefix = "https://www.sec.gov/Archives/edgar/monthly"
                 val filename = "xbrlrss-$year-$month.xml"
                 val url = "$prefix/$filename"
-
+                log.info("Reading XBRL RSS $url")
                 val xml = httpClient.readXml(url)
                 val items = xml
                     .getElementByTag("channel")
@@ -64,27 +79,42 @@ class RssFilingIngestor(
                                 DateTimeFormatter.ofPattern("yyyyMMdd")
                             )
                         }
-                        XbrlItem(
+                        val item = XbrlItem(
+                            _id = "$cikNumber$accessionNumber",
                             companyName = companyName,
                             formType = formType,
-                            cikNumber = cikNumber,
-                            accessionNumber = accessionNumber,
+                            cikNumber = cikNumber!!,
+                            accessionNumber = accessionNumber!!,
                             period = period,
+                            status = Status.Pending,
                         )
+                        item
                     }
                     ?.filter { item -> item.formType == "10-K" || item.formType == "10-Q" } ?: emptyList()
                 items
             }
         }
 
+        items.distinctBy { it.cikNumber }.map { item ->
+            // create the filing entity if it does not already exist
+            filingEntityManager.getFilingEntity(item.cikNumber)
+                ?: filingEntityManager.createFilingEntity(item.cikNumber)
+        }
+
         for (item in items) {
             try {
-                val accessionNumber = item.accessionNumber
-                val cikNumber = item.cikNumber
-                log.info("Ingesting cikNumber=$cikNumber, accessionNumber=$accessionNumber")
-                ingestor.ingestFiling(cik = cikNumber!!, adsh = accessionNumber!!)
+                if (col.findOneById(item._id)?.status != Status.Processed) {
+                    col.save(item.copy(status = Status.Pending))
+                    val accessionNumber = item.accessionNumber
+                    val cikNumber = item.cikNumber
+                    ingestor.ingestFiling(cik = cikNumber, adsh = accessionNumber)
+                    col.save(item.copy(status = Status.Processed))
+                } else {
+                    log.info("Skipping processing cikNumber=${item.cikNumber}, item.accessionNumber=${item.accessionNumber}, status=${item.status}")
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
+                col.save(item.copy(status = Status.Error, message = e.message))
             }
         }
 
@@ -99,7 +129,7 @@ class RssFilingIngestor(
                     .forEach { (year, items) ->
                         try {
                             if (items.size > 3) {
-                                q4FactFinder.run(cik!!, year!!)
+                                q4FactFinder.run(cik, year!!)
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()

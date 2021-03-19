@@ -1,6 +1,7 @@
 package com.starburst.starburst.edgar.factbase.ingestor
 
 import com.mongodb.client.MongoDatabase
+import com.mongodb.client.model.ReplaceOptions
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
@@ -8,11 +9,12 @@ import com.starburst.starburst.edgar.factbase.ingestor.q4.Q4FactFinder
 import com.starburst.starburst.edgar.factbase.ingestor.support.CalculationsParser
 import com.starburst.starburst.edgar.factbase.ingestor.support.FactsParser
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
+import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
+import org.litote.kmongo.replaceOne
 import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.lang.Exception
 
 @Service
 class FilingIngestor(
@@ -40,9 +42,9 @@ class FilingIngestor(
         val facts = resp.facts
         val distinctIds = facts.distinctBy { it._id }.size
         log.info("Saving ${facts.size} facts, ($distinctIds distinct) parsed for cik=$cik and adsh=$adsh")
-        // try to leverage bulk write somehow here
-        for (fact in facts) {
-            factsCol.save(fact)
+        facts.chunked(55).forEach { chunk ->
+            val bulk = chunk.map { replaceOne(Fact::_id eq it._id, it, ReplaceOptions().upsert(true)) }
+            factsCol.bulkWrite(bulk)
         }
         log.info("Saved ${facts.size} facts parsed for cik=$cik and adsh=$adsh")
 
@@ -54,7 +56,7 @@ class FilingIngestor(
             val calculations = calculationsParser.parseCalculations()
             calculationsCol.save(calculations)
         } catch (e: Exception) {
-            log.error("Unable to parse and save calculations for cik=$cik, adsh=$adsh",e)
+            log.error("Unable to parse and save calculations for cik=$cik, adsh=$adsh", e)
         }
 
         return FilingIngestionResponse(

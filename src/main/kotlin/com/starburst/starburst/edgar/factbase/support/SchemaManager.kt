@@ -53,7 +53,7 @@ class SchemaManager(
     }
 
     fun getConceptDefinition(namespace: String, conceptName: String): ConceptDefinition? {
-        val schemaLocation = schemaLocations[namespace] ?: error("namespace $namespace has no schema location defined")
+        val schemaLocation = schemaLocations[namespace] ?: return null
         return getBySchemaLocationAndName(schemaLocation, conceptName)
     }
 
