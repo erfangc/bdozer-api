@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.ingestor
+package com.starburst.starburst.edgar.factbase.ingestor.support
 
 import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.XbrlNamespaces

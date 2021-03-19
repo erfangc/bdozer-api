@@ -4,7 +4,7 @@ import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.edgar.dataclasses.*
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
-import com.starburst.starburst.edgar.factbase.ingestor.FactIdGenerator
+import com.starburst.starburst.edgar.factbase.ingestor.support.FactIdGenerator
 import org.litote.kmongo.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

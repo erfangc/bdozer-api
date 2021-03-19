@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.ingestor
+package com.starburst.starburst.edgar.factbase.ingestor.support
 
 import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.XbrlNamespaces.xbrl
@@ -64,7 +64,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
          */
         val facts = instanceDocument.childNodes().mapNotNull { node ->
             val context = getContext(node.attr("contextRef"))
-            val conceptDefinition = lookupElementDefinition(node.nodeName)
+            val conceptDefinition = lookupConceptDefinition(node.nodeName)
             val adsh = filingProvider.adsh()
 
             /*
@@ -247,7 +247,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
         }
     }
 
-    private fun lookupElementDefinition(nodeName: String): ConceptDefinition? {
+    private fun lookupConceptDefinition(nodeName: String): ConceptDefinition? {
         val (namespace, tag) = parseInstanceNodeName(nodeName)
         return if (namespace.isEmpty()) {
             null
