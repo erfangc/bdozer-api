@@ -22,11 +22,15 @@ import com.starburst.starburst.zacks.dataclasses.TalkingPoint
 import com.starburst.starburst.zacks.modelbuilder.ZacksModelBuilder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 @Service
 class NarrativeBuilder(
     private val modelBuilder: ZacksModelBuilder,
 ) {
+
+    private val executor = Executors.newCachedThreadPool()
 
     private fun Model.valueOf(itemName: String) =
         (incomeStatementItems + cashFlowStatementItems + balanceSheetItems + otherItems)
@@ -66,6 +70,8 @@ class NarrativeBuilder(
 
         val incomeStatementItems = model.incomeStatementItems
 
+        val noGrowthValueTalkingPoint = executor.submit(Callable{ noGrowthValueTalkingPt(ticker) })
+
         val revenueItem = model.item(Revenue)
         val revCAGR = revCAGRComputation(revenueItem)
         val revenueTalkingPoint = TalkingPoint(
@@ -96,12 +102,12 @@ class NarrativeBuilder(
         )
 
         val epsTalkingPoint = epsTalkingPt(incomeStatementItems, model)
-        val noGrowthValueTalkingPoint = noGrowthValueTalkingPt(ticker)
         val growthTalkingPoint = TalkingPoint(data = revCAGR)
 
         val targetPriceTalkingPoint = TalkingPoint(
             data = resp.evaluateModelResult.targetPrice,
         )
+
         return Narrative(
             model = model,
             revenueTalkingPoint = revenueTalkingPoint,
@@ -110,7 +116,7 @@ class NarrativeBuilder(
             otherExpensesTalkingPoint = otherExpensesTalkingPoint,
             netIncomeTalkingPoint = netIncomeTalkingPoint,
             epsTalkingPoint = epsTalkingPoint,
-            noGrowthValueTalkingPoint = noGrowthValueTalkingPoint,
+            noGrowthValueTalkingPoint = noGrowthValueTalkingPoint.get(),
             growthTalkingPoint = growthTalkingPoint,
             targetPriceTalkingPoint = targetPriceTalkingPoint,
         )

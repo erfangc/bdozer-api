@@ -16,6 +16,7 @@ import com.starburst.starburst.zacks.fa.ZacksFundamentalAService
 import com.starburst.starburst.zacks.modelbuilder.support.BalanceSheetBuilder
 import com.starburst.starburst.zacks.modelbuilder.support.IncomeStatementBuilder
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -27,20 +28,21 @@ class ZacksModelBuilder(
 ) {
 
     private val modelEvaluator = ModelEvaluator()
+    private val log = LoggerFactory.getLogger(ZacksModelBuilder::class.java)
 
     /**
      * Build a model using Zacks Fundamental A data
      * for the given ticker - this model will be supplemented by data we ingest from the SEC
      */
     fun buildModel(ticker: String, revenueKeyInputs: KeyInputs? = null): BuildModelResponse {
-
+        val start = System.currentTimeMillis()
         val zacksFundamentalA = zacksFundamentalAService.getZacksFundamentalAs(ticker)
         val zacksSalesEstimates = zacksEstimatesService.getZacksSaleEstimates(ticker)
+        val zacksDataFetchEnd = System.currentTimeMillis()
 
         val skeletonModel = Model(
             symbol = ticker,
         )
-
         val ctx = Context(
             ticker = ticker,
             model = skeletonModel,
@@ -65,7 +67,10 @@ class ZacksModelBuilder(
         val otherItems = deriveOtherItems(modelWithItems)
         val finalModel = modelWithItems.copy(otherItems = otherItems)
 
+        val evalStart = System.currentTimeMillis()
         val evaluateModelResult = modelEvaluator.evaluate(finalModel)
+        val end = System.currentTimeMillis()
+        log.info("Evaluating model $ticker took ${end - evalStart}ms, fetching Zacks data took ${zacksDataFetchEnd - start}ms")
 
         return BuildModelResponse(
             evaluateModelResult = evaluateModelResult,
