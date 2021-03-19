@@ -33,11 +33,15 @@ class EdgarExplorer(
     }
 
     fun searchFilings(cik: String): List<EdgarFilingMetadata> {
-        // just query the SEC's Elasticsearch servers for the latest filing
+        /*
+        Just query the SEC's Elasticsearch servers for the latest filing
+         */
         val httpPost = HttpPost("https://efts.sec.gov/LATEST/search-index")
         val entity = BasicHttpEntity()
 
-        // pad with leading 0 to make 10 digits
+        /*
+        Pad with leading 0 to make 10 digits
+         */
         val paddedCik = (0 until (10 - cik.length)).joinToString("") { "0" } + cik
 
         entity.content = """
@@ -61,7 +65,8 @@ class EdgarExplorer(
         }
         httpPost.releaseConnection()
 
-        return (jsonNode.at("/hits/hits") as ArrayNode).map {
+        val arrayNode = jsonNode.at("/hits/hits") as ArrayNode
+        return arrayNode.map {
             objectMapper.treeToValue<EdgarFilingMetadata>(
                 it.at("/_source")
             )!!
