@@ -1,8 +1,8 @@
 package com.starburst.starburst.edgar.factbase.support
 
-import com.starburst.starburst.edgar.GlobalConceptDefinitionManager
-import com.starburst.starburst.edgar.GlobalConceptDefinitionManager.getBySchemaLocationAndName
-import com.starburst.starburst.edgar.GlobalConceptDefinitionManager.putSchemaDocument
+import com.starburst.starburst.edgar.ConceptDefinitions
+import com.starburst.starburst.edgar.ConceptDefinitions.getBySchemaLocationAndName
+import com.starburst.starburst.edgar.ConceptDefinitions.putSchemaDocument
 import com.starburst.starburst.edgar.XbrlNamespaces.xsd
 import com.starburst.starburst.edgar.dataclasses.ConceptDefinition
 import com.starburst.starburst.edgar.FilingProvider
@@ -49,7 +49,7 @@ class SchemaManager(
     }
 
     fun getConceptDefinition(href: String): ConceptDefinition? {
-        return GlobalConceptDefinitionManager.getConceptDefinition(href)
+        return ConceptDefinitions.getConceptDefinition(href)
     }
 
     fun getConceptDefinition(namespace: String, conceptName: String): ConceptDefinition? {

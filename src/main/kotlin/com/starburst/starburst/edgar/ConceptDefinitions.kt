@@ -13,14 +13,14 @@ import java.net.URI
  * that allows a clean interface for retrieving concept definitions
  * by their `href`
  */
-object GlobalConceptDefinitionManager {
+object ConceptDefinitions {
 
     private val schemaLocations = mutableMapOf<String, String>()
     private val concepts = mutableMapOf<String, Map<String, ConceptDefinition>>()
     private val conceptsByName = mutableMapOf<String, Map<String, ConceptDefinition>>()
     private val http = HttpClientBuilder.create().build()
     private val visitedSchemaLocations = hashSetOf<String>()
-    private val log = LoggerFactory.getLogger(GlobalConceptDefinitionManager::class.java)
+    private val log = LoggerFactory.getLogger(ConceptDefinitions::class.java)
 
     fun getConceptDefinition(href: String): ConceptDefinition? {
         val uri = URI(href)

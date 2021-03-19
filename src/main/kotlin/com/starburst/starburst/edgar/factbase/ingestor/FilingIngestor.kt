@@ -25,7 +25,7 @@ class FilingIngestor(
      */
     fun ingestFiling(cik: String, adsh: String): FilingIngestionResponse {
         log.info("Parsing facts from cik=$cik and adsh=$adsh")
-        val parser = FilingParser(filingProviderFactory.createFilingProvider(cik, adsh))
+        val parser = FactsParser(filingProviderFactory.createFilingProvider(cik, adsh))
         val resp = parser.parseFacts()
         val facts = resp.facts
         val distinctIds = facts.distinctBy { it._id }.size

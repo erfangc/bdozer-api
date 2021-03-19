@@ -6,4 +6,5 @@ enum class DocumentFiscalPeriodFocus {
     Q2,
     Q3,
     Q4,
+    NA
 }

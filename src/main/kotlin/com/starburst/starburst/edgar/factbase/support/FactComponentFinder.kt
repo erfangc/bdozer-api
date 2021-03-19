@@ -1,15 +1,19 @@
 package com.starburst.starburst.edgar.factbase.support
 
 import com.mongodb.client.MongoDatabase
+import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.XbrlNamespaces.link
 import com.starburst.starburst.edgar.XbrlNamespaces.xlink
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
+import com.starburst.starburst.edgar.factbase.XLinkExtentions.from
+import com.starburst.starburst.edgar.factbase.XLinkExtentions.href
+import com.starburst.starburst.edgar.factbase.XLinkExtentions.label
+import com.starburst.starburst.edgar.factbase.XLinkExtentions.role
+import com.starburst.starburst.edgar.factbase.XLinkExtentions.to
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.dataclasses.FactComponentsResponse
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findIncomeStatementRole
-import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
-import com.starburst.starburst.xml.XmlNode
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.springframework.stereotype.Service
@@ -165,26 +169,6 @@ class FactComponentFinder(
             .associate { (from, nodes) ->
                 calculationLocs[from] to nodes.map { calculationLocs[it.to()] }
             }
-    }
-
-    private fun XmlNode?.label(): String? {
-        return this?.attr(xlink, "label")
-    }
-
-    private fun XmlNode?.href(): String? {
-        return this?.attr(xlink, "href")
-    }
-
-    private fun XmlNode?.role(): String? {
-        return this?.attr(xlink, "role")
-    }
-
-    private fun XmlNode?.from(): String? {
-        return this?.attr(xlink, "from")
-    }
-
-    private fun XmlNode?.to(): String? {
-        return this?.attr(xlink, "to")
     }
 
 }

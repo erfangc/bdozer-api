@@ -4,8 +4,11 @@ import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.XbrlNamespaces.xbrl
 import com.starburst.starburst.edgar.XbrlNamespaces.xbrldi
 import com.starburst.starburst.edgar.dataclasses.*
-import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
+import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
+import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalYearFocus
+import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
+import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
@@ -15,17 +18,17 @@ import com.starburst.starburst.xml.XmlNode
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Node
 import java.time.Instant
-import java.time.LocalDate
 
 /**
  * Goes through a single filing as provided by the [FilingProvider]
  * and returns the list of [Fact]s contained within
  */
-class FilingParser(private val filingProvider: FilingProvider) {
+class FactsParser(private val filingProvider: FilingProvider) {
 
     private val schemaManager = SchemaManager(filingProvider)
     private val labelManager = LabelManager(filingProvider)
     private val instanceDocument = filingProvider.instanceDocument()
+    private val log = LoggerFactory.getLogger(FactsParser::class.java)
 
     /*
     create a look up of the Xbrl context objects for each fact to refer back to
@@ -34,16 +37,12 @@ class FilingParser(private val filingProvider: FilingProvider) {
         .getElementsByTag(xbrl, "context")
         .associate { it.attr("id") to toContext(it) }
 
-    private val log = LoggerFactory.getLogger(FilingParser::class.java)
-
     fun parseFacts(): ParseFactsResponse {
 
         /*
         go through the instance document and
         reverse lookup everything else
          */
-        val instanceDocument = filingProvider.instanceDocument()
-
         val instanceDocumentFilename = filingProvider.instanceDocumentFilename()
         log.info("Parsing instance document $instanceDocumentFilename for facts")
 
@@ -56,9 +55,9 @@ class FilingParser(private val filingProvider: FilingProvider) {
         var elementDefinitionNotFound = 0 // ex: other misc problems
 
         // get some document level information
-        val documentFiscalPeriodFocus = documentFiscalPeriodFocus(instanceDocument)
-        val documentFiscalYearFocus = documentFiscalYearFocus(instanceDocument)
-        val documentPeriodEndDate = documentPeriodEndDate(instanceDocument)
+        val documentFiscalPeriodFocus = instanceDocument.documentFiscalPeriodFocus()
+        val documentFiscalYearFocus = instanceDocument.documentFiscalYearFocus()
+        val documentPeriodEndDate = instanceDocument.documentPeriodEndDate() ?: error("...")
 
         /*
         now begin processing each element as a potential fact we can create and store
@@ -103,7 +102,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
                 val cik = cik()
                 val entityName = entityRegistrantName(instanceDocument)
                 val primarySymbol = primarySymbol(instanceDocument)
-                val formType = formType(instanceDocument)
+                val formType = instanceDocument.formType()
 
                 /*
                 Create the Fact instance we just parsed
@@ -118,7 +117,7 @@ class FilingParser(private val filingProvider: FilingProvider) {
                     primarySymbol = primarySymbol,
                     formType = formType,
 
-                    documentFiscalPeriodFocus = DocumentFiscalPeriodFocus.valueOf(documentFiscalPeriodFocus),
+                    documentFiscalPeriodFocus = documentFiscalPeriodFocus,
                     documentFiscalYearFocus = documentFiscalYearFocus,
                     documentPeriodEndDate = documentPeriodEndDate,
 
@@ -171,13 +170,13 @@ class FilingParser(private val filingProvider: FilingProvider) {
      */
     private fun isFactInPeriod(context: XbrlContext): Boolean {
 
-        val endDate = documentPeriodEndDate(instanceDocument)
+        val endDate = instanceDocument.documentPeriodEndDate() ?: error("...")
 
         /*
         figure out the correct period start date
         a canonical must be for this period
          */
-        val formType = formType(instanceDocument)
+        val formType = instanceDocument.formType()
         val startDate = if (formType == "10-K") {
             endDate
                 .minusYears(1)
@@ -193,48 +192,6 @@ class FilingParser(private val filingProvider: FilingProvider) {
         return period.instant == endDate
                 || (period.startDate == startDate && period.endDate == endDate)
 
-    }
-
-    private fun documentPeriodEndDate(instanceDocument: XmlElement): LocalDate {
-        val found = instanceDocument
-            .getElementsByTag("dei:DocumentPeriodEndDate")
-        if (found.isEmpty()) {
-            error("Unable to find DocumentPeriodEndDate for cik=${filingProvider.cik()} adsh=${filingProvider.adsh()}")
-        }
-        return found
-            .first()
-            .textContent
-            ?.let { date -> LocalDate.parse(date) }
-            ?: error("Unable to parse DocumentPeriodEndDate for cik=${filingProvider.cik()} adsh=${filingProvider.adsh()}")
-    }
-
-    private fun documentFiscalYearFocus(instanceDocument: XmlElement): Int {
-        val found = instanceDocument
-            .getElementsByTag("dei:DocumentFiscalYearFocus")
-        if (found.isEmpty()) {
-            return 0
-        }
-        return found
-            .first()
-            .textContent
-            .toIntOrNull() ?: 0
-    }
-
-    private fun documentFiscalPeriodFocus(instanceDocument: XmlElement): String {
-        val found = instanceDocument
-            .getElementsByTag("dei:DocumentFiscalPeriodFocus")
-        if (found.isEmpty()) {
-            return "N/A"
-        }
-        return found
-            .first()
-            .textContent ?: "N/A"
-    }
-
-    private fun formType(instanceDocument: XmlElement): String {
-        return instanceDocument
-            .getElementByTag("dei:DocumentType")
-            ?.textContent ?: "Unknown"
     }
 
     private fun sourceDocument(node: XmlNode): String {
