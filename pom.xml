@@ -20,19 +20,17 @@
         <jwks-rsa.version>0.15.0</jwks-rsa.version>
         <java-jwt.version>3.13.0</java-jwt.version>
         <guava.version>30.0-jre</guava.version>
-        <json.version>20201115</json.version>
         <httpclient.version>4.5.12</httpclient.version>
         <kmongo.version>4.2.4</kmongo.version>
         <MathParser.org-mXparser.version>4.4.2</MathParser.org-mXparser.version>
-        <iextrading4j-all.version>3.4.2</iextrading4j-all.version>
     </properties>
 
-	<repositories>
+    <repositories>
         <repository>
-			<id>jcentral</id>
-			<name>jcentral</name>
-			<url>https://jcenter.bintray.com</url>
-		</repository>
+            <id>jcentral</id>
+            <name>jcentral</name>
+            <url>https://jcenter.bintray.com</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -60,12 +58,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>${json.version}</version>
         </dependency>
 
         <dependency>

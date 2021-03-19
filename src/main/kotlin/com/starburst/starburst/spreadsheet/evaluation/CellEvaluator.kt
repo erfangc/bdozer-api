@@ -12,13 +12,18 @@ import java.util.*
  */
 class CellEvaluator {
 
-    private val logger = LoggerFactory.getLogger(CellEvaluator::class.java)
+    private val log = LoggerFactory.getLogger(CellEvaluator::class.java)
 
     /**
      * Takes as input a list of cells that is pure formula
      * and output those same cells with values populated
      */
     fun evaluate(cells: List<Cell>): List<Cell> {
+
+        var countCalculate = 0
+        val start = System.currentTimeMillis()
+        var timeSpentCalculating = 0L
+        var timeSpentCheckingCircularDependency = 0L
 
         // we cannot reference in this method Item/Driver - because domain specific business logic
         // must be handled prior to this step, otherwise it becomes very easy to conflate
@@ -66,13 +71,11 @@ class CellEvaluator {
                 val headCell = stack.peek()
 
                 // if the cell is already evaluated, skip this iteration of the loop
-                if (headCell.value !== null) {
+                if (headCell.value != null) {
                     stack.pop()
                     continue
                 }
-
                 val unmetDependencies = unmetDependencies(headCell)
-
                 if (unmetDependencies.isEmpty()) {
                     // evaluate the cell
                     // using mXparser
@@ -86,9 +89,14 @@ class CellEvaluator {
                                 Argument(argName, argValue)
                             )
                         }
-                        expression.calculate()
+                        countCalculate++
+                        val s = System.currentTimeMillis()
+                        val result = expression.calculate()
+                        val e = System.currentTimeMillis()
+                        timeSpentCalculating += e - s
+                        result
                     } catch (e: Exception) {
-                        logger.error("Unable to evaluate cell ${cell.name}", e)
+                        log.error("Unable to evaluate cell ${cell.name}", e)
                         0.0
                     }
                     //
@@ -101,11 +109,21 @@ class CellEvaluator {
                     unmetDependencies.forEach { dependentCell ->
                         stack.push(dependentCell)
                         // circular dependency handling code
+                        val s = System.currentTimeMillis()
                         checkCircularReference(stack, headCell)
+                        val e = System.currentTimeMillis()
+                        timeSpentCheckingCircularDependency += e - s
                     }
                 }
             }
         }
+        log.info(
+            "numberOfCalculations=$countCalculate, " +
+                    "cells.size=${cells.size}, " +
+                    "totalCalculationTime=${System.currentTimeMillis() - start}ms, " +
+                    "timeSpentCalculating=${timeSpentCalculating}ms, " +
+                    "timeSpentCheckingCircularDependency=${timeSpentCheckingCircularDependency}ms, "
+        )
         return cells.map { cell -> cellLookupByName[cell.name] ?: error("...") }
     }
 
