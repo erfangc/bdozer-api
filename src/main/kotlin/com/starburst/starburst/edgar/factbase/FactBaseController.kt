@@ -2,8 +2,6 @@ package com.starburst.starburst.edgar.factbase
 
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.FilingIngestor
-import com.starburst.starburst.edgar.factbase.modelbuilder.factory.ModelFactory
-import com.starburst.starburst.models.dataclasses.Model
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.Executors
 
@@ -12,8 +10,7 @@ import java.util.concurrent.Executors
 @CrossOrigin
 class FactBaseController(
     private val factBase: FactBase,
-    private val filingIngestor: FilingIngestor,
-    private val modelFactory: ModelFactory
+    private val filingIngestor: FilingIngestor
 ) {
 
     private val executor = Executors.newCachedThreadPool()
@@ -51,8 +48,4 @@ class FactBaseController(
         }
     }
 
-    @GetMapping("model-factory/{cik}/{adsh}")
-    fun buildModelForFiling(@PathVariable adsh: String, @PathVariable cik: String): Model {
-        return modelFactory.buildModelForFiling(cik, adsh)
-    }
 }

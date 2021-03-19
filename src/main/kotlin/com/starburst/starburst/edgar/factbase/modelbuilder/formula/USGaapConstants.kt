@@ -1,5 +1,6 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula
 
+
 object USGaapConstants {
     const val IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest =
         "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
