@@ -1,6 +1,7 @@
 package com.starburst.starburst.edgar.factbase.ingestor.q4
 
 import com.mongodb.client.MongoDatabase
+import com.mongodb.client.model.ReplaceOptions
 import com.starburst.starburst.edgar.dataclasses.*
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
@@ -126,8 +127,10 @@ class Q4FactFinder(
             }
         }
         log.info("Unable to infer Q4 items for fiscalYear=$fiscalYear for ${errors.joinToString(";")}")
-        log.info("Found ${q4Facts.size} Q4 facts, saving them now")
-        q4Facts.forEach { q4Fact -> col.save(q4Fact) }
+        q4Facts.chunked(55).forEach { chunk ->
+            val bulk = chunk.map { replaceOne(Fact::_id eq it._id, it, ReplaceOptions().upsert(true)) }
+            col.bulkWrite(bulk)
+        }
         log.info("Saved ${q4Facts.size} Q4 facts")
     }
 
