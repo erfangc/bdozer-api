@@ -5,6 +5,7 @@ import java.time.Instant
 import java.time.LocalDate
 
 data class FilingCalculations(
+    val _id: String,
     val cik: String,
     val adsh: String,
     val formType: String,

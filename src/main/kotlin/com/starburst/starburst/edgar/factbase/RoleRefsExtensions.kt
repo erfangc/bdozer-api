@@ -1,4 +1,4 @@
-package com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator
+package com.starburst.starburst.edgar.factbase
 
 import com.starburst.starburst.xml.XmlNode
 import java.net.URI

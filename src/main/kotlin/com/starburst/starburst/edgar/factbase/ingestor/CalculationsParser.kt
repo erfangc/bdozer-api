@@ -16,24 +16,23 @@ import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtension
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.SectionNode
-import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findBalanceSheetRole
-import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findCashFlowStatementRole
-import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findIncomeStatementRole
+import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findBalanceSheetRole
+import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findCashFlowStatementRole
+import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findIncomeStatementRole
+import java.net.URI
 import java.util.*
 
 class CalculationsParser(private val filingProvider: FilingProvider) {
 
-    private val incomeStatementRootHref =
-        "http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd#us-gaap_IncomeStatementAbstract"
+    private val incomeStatementRootHref = "us-gaap_IncomeStatementAbstract"
 
-    private val cashFlowStatementRootHref =
-        "http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd#us-gaap_StatementOfCashFlowsAbstract"
+    private val cashFlowStatementRootHref = "us-gaap_StatementOfCashFlowsAbstract"
 
-    private val balanceSheetRootHref =
-        "http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd#us-gaap_StatementOfFinancialPositionAbstract"
+    private val balanceSheetRootHref = "us-gaap_StatementOfFinancialPositionAbstract"
 
     fun parseCalculations(): FilingCalculations {
         val presentationLinkbase = filingProvider.presentationLinkbase()
+
         val roleRefs = presentationLinkbase.getElementsByTag(link, "roleRef")
 
         val incomeStatementRole = roleRefs.findIncomeStatementRole()
@@ -46,12 +45,16 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
         val balanceSheetNodes = traversePresentation(balanceSheetRootHref, balanceSheetRole)
 
         val instanceDocument = filingProvider.instanceDocument()
+        val cik = filingProvider.cik()
+        val adsh = filingProvider.adsh()
+
         return FilingCalculations(
-            cik = filingProvider.cik(),
-            adsh = filingProvider.adsh(),
+            _id = "$cik:$adsh",
+            cik = cik,
+            adsh = adsh,
             formType = instanceDocument.formType(),
             documentFiscalPeriodFocus = instanceDocument.documentFiscalPeriodFocus(),
-            documentPeriodEndDate = instanceDocument.documentPeriodEndDate() ?: error("..."),
+            documentPeriodEndDate = instanceDocument.documentPeriodEndDate() ?: error("documentPeriodEndDate not in document"),
             documentFiscalYearFocus = instanceDocument.documentFiscalYearFocus(),
             incomeStatement = incomeStatementNodes,
             balanceSheet = balanceSheetNodes,
@@ -88,7 +91,7 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
         val calculationArcs = parseCalculationArcs(role)
 
         val rootLocatorLabel = locators
-            .find { it.href() == rootLocator }
+            .find { loc -> loc.href()?.let { URI(it).fragment } == rootLocator }
             .label()
 
         val stack = Stack<String>()
@@ -114,8 +117,8 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
         we derive the corresponding concept's calculation shallowly
          */
         while (stack.isNotEmpty()) {
-            val node = stack.pop()
-            val conceptHref = locatorHrefs[node] ?: error("...")
+            val currLocLabel = stack.pop()
+            val conceptHref = locatorHrefs[currLocLabel] ?: error("cannot find $currLocLabel in locators")
 
             /*
             Add the graph node into it's appropriate place in the final
@@ -132,19 +135,19 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
             /*
             We've processed all the children for the current parent
              */
-            if (lastSiblings.peek() == node) {
+            if (lastSiblings.peek() == currLocLabel) {
                 lastSiblings.pop()
                 if (parents.isNotEmpty()) {
                     parents.pop()
                 }
             }
 
-            val children = arcs[node]
+            val children = arcs[currLocLabel]
             if (!children.isNullOrEmpty()) {
                 val elements = children.map { it.attr(XbrlNamespaces.xlink, "to") }.reversed()
                 stack.addAll(elements)
                 val lastSibling = elements.first()
-                parents.add(node)
+                parents.add(currLocLabel)
                 lastSiblings.add(lastSibling)
             }
         }

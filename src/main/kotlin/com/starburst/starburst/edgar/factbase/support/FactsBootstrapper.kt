@@ -24,40 +24,34 @@ class FactsBootstrapper(
         val recent10Ks = tenKs.subList(0, 6.coerceAtMost(tenKs.size))
         val recent10Qs = tenQs.subList(0, 6.coerceAtMost(tenQs.size))
 
-        log.info("Bootstrapping cik=$cik, recent10Ks.size=${recent10Ks.size}, recent10Qs.size=${recent10Qs.size}")
+        log.info("Bootstrapping facts cik=$cik, recent10Ks.size=${recent10Ks.size}, recent10Qs.size=${recent10Qs.size}")
 
-        try {
-
-            val tenKResults = recent10Ks.map { recent10K ->
-                filingIngestor.ingestFiling(
-                    cik = cik,
-                    adsh = recent10K.adsh
-                )
-            }
-
-            val tenQResults = recent10Qs.map { recent10Q ->
-                filingIngestor.ingestFiling(
-                    cik = cik,
-                    adsh = recent10Q.adsh
-                )
-            }
-
-            /*
-            for every 10-K that has at least 3 10Qs backing it, back-fill Q4 data
-             */
-            for (tenK in tenKResults) {
-                val year = tenK.documentFiscalYearFocus
-                val numTenQsInYear =
-                    tenQResults.filter { tenQResult -> tenQResult.documentFiscalYearFocus == year }.size
-                if (numTenQsInYear >= 3) {
-                    log.info("Ingesting Q-4 filing for cik=$cik, year=$year")
-                    filingIngestor.ingestQ4Facts(cik, year)
-                }
-            }
-
-            log.info("Completed bootstrapping cik=$cik")
-        } catch (e: Exception) {
-            log.error("Unable to complete bootstrapping cik=$cik", e)
+        val tenKResults = recent10Ks.map { recent10K ->
+            filingIngestor.ingestFiling(
+                cik = cik,
+                adsh = recent10K.adsh
+            )
         }
+
+        val tenQResults = recent10Qs.map { recent10Q ->
+            filingIngestor.ingestFiling(
+                cik = cik,
+                adsh = recent10Q.adsh
+            )
+        }
+
+        /*
+        for every 10-K that has at least 3 10Qs backing it, back-fill Q4 data
+         */
+        for (tenK in tenKResults) {
+            val year = tenK.documentFiscalYearFocus
+            val numTenQsInYear =
+                tenQResults.filter { tenQResult -> tenQResult.documentFiscalYearFocus == year }.size
+            if (numTenQsInYear >= 3) {
+                log.info("Ingesting Q-4 filing for cik=$cik, year=$year")
+                filingIngestor.ingestQ4Facts(cik, year)
+            }
+        }
+
     }
 }

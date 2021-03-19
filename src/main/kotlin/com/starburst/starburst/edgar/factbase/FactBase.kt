@@ -2,7 +2,7 @@ package com.starburst.starburst.edgar.factbase
 
 import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
-import com.starburst.starburst.edgar.factbase.dataclasses.FactComponentsResponse
+import com.starburst.starburst.edgar.factbase.dataclasses.FindFactComponentsResponse
 import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.edgar.factbase.support.FactsBootstrapper
 import org.litote.kmongo.eq
@@ -22,8 +22,8 @@ class FactBase(
         factsBootstrapper.bootstrapFacts(cik)
     }
 
-    fun factComponents(cik: String, conceptId: String): FactComponentsResponse {
-        return factComponentFinder.factComponents(cik, conceptId)
+    fun factComponents(cik: String, conceptId: String): FindFactComponentsResponse {
+        return factComponentFinder.findFactComponents(cik, conceptId)
     }
 
     fun getFacts(cik: String): List<Fact> {

@@ -217,7 +217,7 @@ class IncomeStatementBuilder(
         val totalOperExp = latest.tot_oper_exp.orZero()
 
         val cik = latest.comp_cik ?: error("company CIK cannot be found for ${model.symbol} on Zacks")
-        val components = factComponentFinder.factComponents(
+        val components = factComponentFinder.findFactComponents(
             cik = cik,
             conceptId = "us-gaap_OperatingExpenses"
         )
@@ -227,7 +227,7 @@ class IncomeStatementBuilder(
         find the one time facts
          */
         val oneTimeCharges = components
-            .latestAnnualFacts
+            .latestAnnual
             .filter { fact ->
                 fact.explicitMembers.isEmpty() && fact.conceptName == "AssetImpairmentCharges"
             }

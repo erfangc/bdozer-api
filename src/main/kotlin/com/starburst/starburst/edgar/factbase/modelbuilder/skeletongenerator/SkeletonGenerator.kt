@@ -8,9 +8,9 @@ import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.modelbuilder.DependencyFlattener
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.HistoricalValueExtensions.allHistoricalValues
 import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.HistoricalValueExtensions.latestHistoricalValue
-import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findBalanceSheetRole
-import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findCashFlowStatementRole
-import com.starburst.starburst.edgar.factbase.modelbuilder.skeletongenerator.RoleRefsExtensions.findIncomeStatementRole
+import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findBalanceSheetRole
+import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findCashFlowStatementRole
+import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findIncomeStatementRole
 import com.starburst.starburst.edgar.factbase.support.SchemaManager
 import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.models.dataclasses.Item
