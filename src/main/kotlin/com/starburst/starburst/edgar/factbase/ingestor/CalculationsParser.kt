@@ -16,33 +16,19 @@ import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtension
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.SectionNode
-import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findBalanceSheetRole
-import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findCashFlowStatementRole
-import com.starburst.starburst.edgar.factbase.RoleRefsExtensions.findIncomeStatementRole
 import java.net.URI
 import java.util.*
 
 class CalculationsParser(private val filingProvider: FilingProvider) {
 
     private val incomeStatementRootHref = "us-gaap_IncomeStatementAbstract"
-
     private val cashFlowStatementRootHref = "us-gaap_StatementOfCashFlowsAbstract"
-
     private val balanceSheetRootHref = "us-gaap_StatementOfFinancialPositionAbstract"
 
     fun parseCalculations(): FilingCalculations {
-        val presentationLinkbase = filingProvider.presentationLinkbase()
-
-        val roleRefs = presentationLinkbase.getElementsByTag(link, "roleRef")
-
-        val incomeStatementRole = roleRefs.findIncomeStatementRole()
-        val incomeStatementNodes = traversePresentation(incomeStatementRootHref, incomeStatementRole)
-
-        val cashFlowStatementRole = roleRefs.findCashFlowStatementRole()
-        val cashFlowStatementNodes = traversePresentation(cashFlowStatementRootHref, cashFlowStatementRole)
-
-        val balanceSheetRole = roleRefs.findBalanceSheetRole()
-        val balanceSheetNodes = traversePresentation(balanceSheetRootHref, balanceSheetRole)
+        val incomeStatement = traversePresentation(incomeStatementRootHref)
+        val cashFlowStatement = traversePresentation(cashFlowStatementRootHref)
+        val balanceSheet = traversePresentation(balanceSheetRootHref)
 
         val instanceDocument = filingProvider.instanceDocument()
         val cik = filingProvider.cik()
@@ -54,25 +40,41 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
             adsh = adsh,
             formType = instanceDocument.formType(),
             documentFiscalPeriodFocus = instanceDocument.documentFiscalPeriodFocus(),
-            documentPeriodEndDate = instanceDocument.documentPeriodEndDate() ?: error("documentPeriodEndDate not in document"),
+            documentPeriodEndDate = instanceDocument.documentPeriodEndDate()
+                ?: error("documentPeriodEndDate not in document"),
             documentFiscalYearFocus = instanceDocument.documentFiscalYearFocus(),
-            incomeStatement = incomeStatementNodes,
-            balanceSheet = balanceSheetNodes,
-            cashFlowStatement = cashFlowStatementNodes
+            incomeStatement = incomeStatement,
+            balanceSheet = balanceSheet,
+            cashFlowStatement = cashFlowStatement
         )
     }
 
     /**
      * Traverse presentation XMLs and construct [SectionNode]
      */
-    private fun traversePresentation(rootLocator: String, role: String): List<SectionNode> {
+    private fun traversePresentation(rootLocator: String): List<SectionNode> {
 
         val presentation = filingProvider.presentationLinkbase()
         val graphNodes = mutableListOf<SectionNode>()
 
+        /*
+        Find the presentationLink that contains the given root locator
+         */
         val presentationLink = presentation
             .getElementsByTag(link, "presentationLink")
-            .find { it.role() == role }!!
+            .find { plink ->
+                /*
+                The correct presentationLink to use is the one
+                that contains our rootLocator and is not a parenthetical
+                 */
+                plink
+                    .getElementsByTag(link, "loc")
+                    .any { loc ->
+                        val href = loc.href() ?: error("...")
+                        URI(href).fragment == rootLocator && !href.toLowerCase().endsWith("parenthetical")
+                    }
+            } ?: error("unable to find a presentation link with root locator $rootLocator")
+        val role = presentationLink.role() ?: error("presentationLink $rootLocator has no role attribute")
         val arcs = presentationLink
             .getElementsByTag(link, "presentationArc")
             .groupBy { it.from() }
