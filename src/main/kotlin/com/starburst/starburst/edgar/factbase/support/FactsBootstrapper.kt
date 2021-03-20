@@ -51,7 +51,6 @@ class FactsBootstrapper(
             val numTenQsInYear =
                 tenQResults.filter { tenQResult -> tenQResult.documentFiscalYearFocus == year }.size
             if (numTenQsInYear >= 3) {
-                log.info("Ingesting Q-4 filing for cik=$paddedCik, year=$year")
                 filingIngestor.ingestQ4Facts(paddedCik, year)
             }
         }

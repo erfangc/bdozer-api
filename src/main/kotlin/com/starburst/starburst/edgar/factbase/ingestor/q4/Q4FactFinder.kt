@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.threeten.extra.YearQuarter
 import java.time.Instant
+import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 /**
  * After parsing 3 10-Qs per fiscal year and 1 10-K - we are now
@@ -61,7 +63,6 @@ class Q4FactFinder(
                 }
             }
 
-        val errors = mutableListOf<String>()
         /*
         go through each fact from the 10-K and try to replicate it
          */
@@ -78,13 +79,13 @@ class Q4FactFinder(
              */
             if (fyFact.doubleValue != null && fyContext.period.instant == null) {
                 /*
-                derive q4 value
+                Derive q4 value
                  */
                 val valuesByQ = quarters[identityContext] ?: emptyMap()
 
                 try {
                     /*
-                    try to sum over the past 3 quarter's data and then subtract them from the 10-K
+                    Try to sum over the past 3 quarter's data and then subtract them from the 10-K
                      */
                     val value = fyFact.doubleValue - listOf(
                         DocumentFiscalPeriodFocus.Q1,
@@ -111,7 +112,7 @@ class Q4FactFinder(
                 }
             } else {
                 /*
-                no need to derive Q4 values
+                No need to derive Q4 values
                  */
                 fyFact.copy(
                     _id = generateId(fyFact),
@@ -124,12 +125,11 @@ class Q4FactFinder(
                 )
             }
         }
-        log.info("Unable to infer Q4 items for fiscalYear=$fiscalYear for ${errors.joinToString(";")}")
         q4Facts.chunked(55).forEach { chunk ->
             val bulk = chunk.map { replaceOne(Fact::_id eq it._id, it, ReplaceOptions().upsert(true)) }
             col.bulkWrite(bulk)
         }
-        log.info("Saved ${q4Facts.size} Q4 facts")
+        log.info("Saved ${q4Facts.size} Q4 facts for cik=$cik, fiscalYear=$fiscalYear")
     }
 
     private fun generateId(fyFact: Fact): String {
@@ -152,10 +152,11 @@ class Q4FactFinder(
      * otherwise nothing about this context changes
      */
     private fun q4Context(fyCtx: XbrlContext): XbrlContext {
-        val startDate = fyCtx.period.endDate?.let { endDate ->
-            YearQuarter.from(endDate).atDay(1)
-        }
-        return fyCtx.copy(period = XbrlPeriod(startDate = startDate))
+        val startDate = fyCtx.period.endDate
+            ?.minusMonths(3)
+            ?.with(lastDayOfMonth())
+            ?.plusDays(1)
+        return fyCtx.copy(period = fyCtx.period.copy(startDate = startDate))
     }
 
     /**
