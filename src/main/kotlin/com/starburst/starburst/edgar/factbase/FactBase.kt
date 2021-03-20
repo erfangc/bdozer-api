@@ -18,13 +18,10 @@ class FactBase(
 
     private val col = mongoDatabase.getCollection<Fact>()
 
-    fun bootstrapFacts(cik: String) {
-        factsBootstrapper.bootstrapFacts(cik)
-    }
+    fun bootstrapFacts(cik: String) = factsBootstrapper.bootstrapFacts(cik)
 
-    fun factComponents(cik: String, conceptId: String): FindFactComponentsResponse {
-        return factComponentFinder.findFactComponents(cik, conceptId)
-    }
+    fun factComponents(cik: String, conceptId: String): FindFactComponentsResponse =
+         factComponentFinder.findFactComponents(cik, conceptId)
 
     fun getFacts(cik: String): List<Fact> {
         return col.find(Fact::cik eq cik).toList()

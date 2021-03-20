@@ -1,19 +1,12 @@
 package com.starburst.starburst.filingentity
 
 import com.mongodb.client.MongoDatabase
-import com.starburst.starburst.AppConfiguration
 import com.starburst.starburst.edgar.factbase.FactBase
-import com.starburst.starburst.edgar.factbase.ingestor.FilingIngestor
-import com.starburst.starburst.edgar.factbase.ingestor.q4.Q4FactFinder
-import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.filingentity.dataclasses.Address
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.filingentity.internal.SECEntity
 import com.starburst.starburst.xml.HttpClientExtensions.readEntity
-import com.starburst.starburst.xml.HttpClientExtensions.readXml
-import com.starburst.starburst.zacks.modelbuilder.ZacksModelBuilder
 import org.apache.http.client.HttpClient
-import org.apache.http.impl.client.HttpClientBuilder
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
@@ -21,14 +14,12 @@ import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.time.LocalDate
 import java.util.concurrent.Executors
 
 @Service
 class FilingEntityManager(
     mongoDatabase: MongoDatabase,
     private val factBase: FactBase,
-    private val zacksModelBuilder: ZacksModelBuilder,
     private val httpClient: HttpClient,
 ) {
 
@@ -36,7 +27,7 @@ class FilingEntityManager(
     private val executor = Executors.newCachedThreadPool()
     private val col = mongoDatabase.getCollection<FilingEntity>()
 
-    fun getFilingEntity(cik:String):FilingEntity? {
+    fun getFilingEntity(cik: String): FilingEntity? {
         return col.findOneById(cik)
     }
 
@@ -45,34 +36,12 @@ class FilingEntityManager(
         return savedEntity ?: bootstrapFilingEntity(cik)
     }
 
-    fun bootstrapFilingEntity(cik: String): FilingEntity {
-        deleteFilingEntity(cik)
-        val entity = createFilingEntity(cik)
-        executor.execute {
-            try {
-                factBase.bootstrapFacts(cik)
-                /*
-                after the facts are ingested, attempt to build a model using the Zacks model builder
-                 */
-                val response =
-                    zacksModelBuilder.buildModel(entity.tradingSymbol ?: error("no trading symbol found for $cik"))
-                val updatedEntity = entity.copy(
-                    lastUpdated = Instant.now().toString(),
-                    statusMessage = "Completed",
-                    model = response.evaluateModelResult.model,
-                )
-                col.save(updatedEntity)
-                log.info("Completed bootstrapping and initial model building cik=${entity.cik}")
-            } catch (e: Exception) {
-                log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}", e)
-                col.save(entity.copy(lastUpdated = Instant.now().toString(), statusMessage = e.message))
-            }
-        }
-        return entity
-    }
-
+    /**
+     * Create a filing entity in the system by using
+     * SEC data (but do not parse the filings for facts)
+     */
     fun createFilingEntity(cik: String): FilingEntity {
-        val paddedCik = (0 until (10 - cik.length)).joinToString("") { "0" } + cik
+        val paddedCik = cik.padStart(10,'0')
         val secEntity = httpClient.readEntity<SECEntity>("https://data.sec.gov/submissions/CIK$paddedCik.json")
         val entity = FilingEntity(
             _id = cik,
@@ -108,6 +77,30 @@ class FilingEntityManager(
         )
         col.save(entity)
         log.info("Created filing entity cik=${entity.cik}")
+        return entity
+    }
+
+    /**
+     * Bootstraps a filing entity by creating the entity,
+     * saving it and then parsing & storing facts by crawling through the SEC's website
+     */
+    fun bootstrapFilingEntity(cik: String): FilingEntity {
+        deleteFilingEntity(cik)
+        val entity = createFilingEntity(cik)
+        executor.execute {
+            try {
+                /*
+                After the facts are ingested, attempt to build a model using the Zacks model builder
+                 */
+                factBase.bootstrapFacts(cik)
+                val updatedEntity = entity.copy(lastUpdated = Instant.now().toString(), statusMessage = "Completed")
+                col.save(updatedEntity)
+                log.info("Completed bootstrapping and initial model building cik=${entity.cik}")
+            } catch (e: Exception) {
+                log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}", e)
+                col.save(entity.copy(lastUpdated = Instant.now().toString(), statusMessage = e.message))
+            }
+        }
         return entity
     }
 

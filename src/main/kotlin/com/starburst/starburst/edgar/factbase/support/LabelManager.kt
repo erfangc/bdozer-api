@@ -14,7 +14,7 @@ class LabelManager(filingProvider: FilingProvider) {
 
     private val labelElement = filingProvider.labelLinkbase()
 
-    private val node = labelElement.getElementByTag(link, "labelLink") ?: error("...")
+    private val node = labelElement.getElementByTag(link, "labelLink") ?: error("${filingProvider.labelLinkbaseFilename()} does not contain labelLink")
 
     //
     // we have loc = locators, label (which is what we want) and labelArc

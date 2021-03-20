@@ -73,7 +73,11 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
                         val href = loc.href() ?: error("...")
                         URI(href).fragment == rootLocator && !href.toLowerCase().endsWith("parenthetical")
                     }
-            } ?: error("unable to find a presentation link with root locator $rootLocator")
+            }
+        // for some reason this keeps happening
+        if (presentationLink == null) {
+            error("unable to find a presentation link with root locator $rootLocator")
+        }
         val role = presentationLink.role() ?: error("presentationLink $rootLocator has no role attribute")
         val arcs = presentationLink
             .getElementsByTag(link, "presentationArc")

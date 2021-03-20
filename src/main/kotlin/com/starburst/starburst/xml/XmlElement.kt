@@ -97,8 +97,13 @@ class XmlElement(element: Element) : Element by element {
     }
 
     fun getElementsByTag(namespace: String, tag: String): List<XmlNode> {
-        val newTag = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag
-        return this.getElementsByTag(newTag)
+        return if (defaultLongNamespace == namespace) {
+            this.getElementsByTag(tag)
+        } else {
+            val newTag = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag
+            this.getElementsByTag(newTag)
+        }
+
     }
 
     fun getElementsByTag(tag: String): List<XmlNode> {
@@ -115,8 +120,12 @@ class XmlElement(element: Element) : Element by element {
     }
 
     fun getElementByTag(namespace: String, tag: String): XmlNode? {
-        val newTag = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag
-        return this.getElementByTag(newTag)
+        return if (defaultLongNamespace == namespace) {
+            this.getElementByTag(tag)
+        } else {
+            val newTag = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag
+            this.getElementByTag(newTag)
+        }
     }
 
 }
