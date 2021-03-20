@@ -18,6 +18,7 @@ import com.starburst.starburst.xml.XmlNode
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Node
 import java.time.Instant
+import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 /**
  * Goes through a single filing as provided by the [FilingProvider]
@@ -184,6 +185,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
         } else {
             endDate
                 .minusMonths(3)
+                .with(lastDayOfMonth())
                 .plusDays(1)
         }
 
@@ -230,7 +232,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
     }
 
     private fun cik(): String {
-        return filingProvider.cik()
+        return filingProvider.cik().padStart(10, '0')
     }
 
     private fun parseInstanceNodeName(nodeName: String?): Pair<String, String> {

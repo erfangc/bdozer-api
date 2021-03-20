@@ -91,9 +91,7 @@ class Q4FactFinder(
                         DocumentFiscalPeriodFocus.Q2,
                         DocumentFiscalPeriodFocus.Q3,
                     ).sumByDouble { quarter ->
-                        valuesByQ[quarter]
-                            ?.doubleValue
-                            ?: error("unable to find $quarter for FY element ${fyFact.conceptName}")
+                        valuesByQ[quarter]?.doubleValue ?: 0.0
                     }
 
                     fyFact.copy(
@@ -108,7 +106,7 @@ class Q4FactFinder(
                         lastUpdated = Instant.now().toString(),
                     )
                 } catch (e: Exception) {
-                    errors.add("${fyFact.conceptName} ${fyContext.entity.segment?.explicitMembers?.joinToString(",")}")
+                    log.error("Error encountered", e)
                     null
                 }
             } else {

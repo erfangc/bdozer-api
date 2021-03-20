@@ -25,12 +25,22 @@ class FactsBootstrapper(
 
         val paddedCik = cik.padStart(10, '0')
 
-        val tenKResults = tenKs.map { recent10K ->
-            filingIngestor.ingestFiling(cik = paddedCik, adsh = recent10K.adsh)
+        val tenKResults = tenKs.mapNotNull { recent10K ->
+            try {
+                filingIngestor.ingestFiling(cik = paddedCik, adsh = recent10K.adsh)
+            } catch (e: Exception) {
+                log.error("Unable to finish ingesting $paddedCik, adsh=${recent10K.adsh}", e)
+                null
+            }
         }
 
-        val tenQResults = tenQs.map { recent10Q ->
-            filingIngestor.ingestFiling(cik = paddedCik, adsh = recent10Q.adsh)
+        val tenQResults = tenQs.mapNotNull { recent10Q ->
+            try {
+                filingIngestor.ingestFiling(cik = paddedCik, adsh = recent10Q.adsh)
+            } catch (e: Exception) {
+                log.error("Unable to finish ingesting $paddedCik, adsh=${recent10Q.adsh}", e)
+                null
+            }
         }
 
         /*
