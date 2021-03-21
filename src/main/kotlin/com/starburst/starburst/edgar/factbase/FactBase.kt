@@ -28,7 +28,7 @@ class FactBase(
     }
 
     fun deleteAll(cik: String) {
-        col.deleteMany(Fact::cik eq cik)
+        col.deleteMany(Fact::cik eq cik.padStart(10, '0'))
     }
 
 }
