@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("api/model-builder-factory")
 class ModelBuilderFactoryController(private val modelBuilderFactory: ModelBuilderFactory) {
     @GetMapping("{cik}")
-    fun model(@PathVariable cik: String): EvaluateModelResult {
+    fun createModel(@PathVariable cik: String): EvaluateModelResult {
         return modelBuilderFactory.createModel(cik)
     }
 }
