@@ -72,4 +72,11 @@ class EdgarExplorer(
             )!!
         }
     }
+
+    fun latestFiscalFiling(ciK: String): EdgarFilingMetadata? {
+        return searchFilings(ciK)
+            .filter { it.form == "10-K" }
+            .maxByOrNull { it.period_ending }
+    }
+
 }

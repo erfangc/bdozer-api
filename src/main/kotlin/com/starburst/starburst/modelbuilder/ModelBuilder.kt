@@ -49,12 +49,12 @@ class ModelBuilder(
         )
     }
 
-    fun model(): Model {
+    fun buildModel(): Model {
         val cik = filingProvider.cik()
         val calculations = factBase.calculations(cik)
         val incomeStatement = calculations.incomeStatement
 
-        val lineItemsIdx = incomeStatement.indexOfFirst { it.conceptName.fragment() == "us-gaap_StatementLineItems" }
+        val lineItemsIdx = incomeStatement.indexOfFirst { it.conceptHref.fragment() == "us-gaap_StatementLineItems" }
 
         val statementArcs = incomeStatement.subList(
             lineItemsIdx + 1,
@@ -82,9 +82,6 @@ class ModelBuilder(
         }
 
         val incomeStatementItems = statementArcs
-            .filter { arc ->
-                !arcId(arc).toLowerCase().endsWith("abstract")
-            }
             .map { arc ->
                 if (arc.calculations.isEmpty()) {
                     Item(
