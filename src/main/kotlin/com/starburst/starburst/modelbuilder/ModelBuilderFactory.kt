@@ -3,7 +3,7 @@ package com.starburst.starburst.modelbuilder
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
-import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.EvaluateModelResult
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,7 +12,7 @@ class ModelBuilderFactory(
     private val filingProviderFactory: FilingProviderFactory,
     private val edgarExplorer: EdgarExplorer,
 ) {
-    fun createModel(cik: String): Model {
+    fun createModel(cik: String): EvaluateModelResult {
         val cik = cik.padStart(10, '0')
         val metadata = edgarExplorer.latestFiscalFiling(cik) ?: error("Unable to find latest fiscal filing for $cik")
         val adsh = metadata.adsh

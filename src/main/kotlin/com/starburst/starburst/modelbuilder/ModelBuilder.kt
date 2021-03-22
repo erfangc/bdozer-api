@@ -6,6 +6,9 @@ import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFo
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
 import com.starburst.starburst.edgar.factbase.support.ConceptManager
 import com.starburst.starburst.edgar.factbase.support.LabelManager
+import com.starburst.starburst.models.EvaluateModelResult
+import com.starburst.starburst.models.ModelEvaluator
+import com.starburst.starburst.models.Utility.PresentValuePerShare
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
@@ -20,8 +23,8 @@ class ModelBuilder(
     private val conceptManager = ConceptManager(filingProvider)
     private val labelManager = LabelManager(filingProvider)
 
-    fun arcId(arc: Arc): String {
-        return arc.conceptHref.fragment()
+    fun arcId(href: String): String {
+        return conceptManager.getConceptDefinition(href)?.conceptName ?: href.fragment()
     }
 
     fun arcLabel(arc: Arc): String {
@@ -49,7 +52,7 @@ class ModelBuilder(
         )
     }
 
-    fun buildModel(): Model {
+    fun buildModel(): EvaluateModelResult {
         val cik = filingProvider.cik()
         val calculations = factBase.calculations(cik)
         val incomeStatement = calculations.incomeStatement
@@ -61,19 +64,16 @@ class ModelBuilder(
             incomeStatement.size
         )
 
-        /**
-         * [Arc]
-         */
         fun expression(arc: Arc): String {
             val positives = arc
                 .calculations
                 .filter { it.weight > 0 }
-                .joinToString("+") { it.conceptHref.fragment() }
+                .joinToString("+") { arcId(it.conceptHref) }
 
             val negatives = arc
                 .calculations
                 .filter { it.weight < 0 }
-                .joinToString("-") { it.conceptHref.fragment() }
+                .joinToString("-") { arcId(it.conceptHref) }
 
             return if (negatives.isNotEmpty()) {
                 "$positives - $negatives"
@@ -83,27 +83,30 @@ class ModelBuilder(
 
         val incomeStatementItems = statementArcs
             .map { arc ->
+                val historicalValue = historicalValue(arc)
                 if (arc.calculations.isEmpty()) {
                     Item(
-                        name = arcId(arc),
+                        name = arcId(arc.conceptHref),
                         description = arcLabel(arc),
-                        historicalValue = historicalValue(arc),
-                        expression = "0.0",
+                        historicalValue = historicalValue,
+                        expression = "${historicalValue?.value ?: 0.0}",
                     )
                 } else {
                     Item(
-                        name = arcId(arc),
+                        name = arcId(arc.conceptHref),
                         description = arcLabel(arc),
-                        historicalValue = historicalValue(arc),
+                        historicalValue = historicalValue,
                         expression = expression(arc),
                     )
                 }
-
             }
 
-        return Model(
+        val model = Model(
             name = "Model",
-            incomeStatementItems = incomeStatementItems,
+            incomeStatementItems = incomeStatementItems + Item(name = PresentValuePerShare, expression = "0.0"),
         )
+        val evaluator = ModelEvaluator()
+        val output = evaluator.evaluate(model)
+        return output
     }
 }
