@@ -15,11 +15,12 @@ import com.starburst.starburst.models.Utility.Revenue
 import com.starburst.starburst.models.Utility.TaxExpense
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Discrete
+import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.zacks.dataclasses.Context
 import com.starburst.starburst.zacks.dataclasses.IncomeStatement
-import com.starburst.starburst.zacks.fa.ZacksFundamentalA
 import com.starburst.starburst.zacks.dataclasses.KeyInputs
+import com.starburst.starburst.zacks.fa.ZacksFundamentalA
 import org.springframework.stereotype.Service
 
 @Service
@@ -87,7 +88,7 @@ class IncomeStatementBuilder(
         return Item(
             name = CostOfGoodsSold,
             description = "Cost of Goods",
-            historicalValue = latest.cost_good_sold.orZero(),
+            historicalValue = HistoricalValue(value = latest.cost_good_sold.orZero()),
             commentaries = Commentary(
                 commentary = """
                 |Cost of goods sold has historically been ${fwrdCogsPct.fmtPct()} of revenue. 
@@ -132,39 +133,39 @@ class IncomeStatementBuilder(
             Item(
                 name = GrossProfit,
                 description = "Gross Profit",
-                historicalValue = latest.gross_profit.orZero(),
+                historicalValue = HistoricalValue(value = latest.gross_profit.orZero()),
                 expression = "$Revenue - $CostOfGoodsSold",
             ),
             operatingExpenses,
             Item(
                 name = OperatingIncome,
                 description = "Operating Income",
-                historicalValue = latest.oper_income.orZero(),
+                historicalValue = HistoricalValue(value = latest.oper_income.orZero()),
                 expression = "$GrossProfit-$OperatingExpense",
             ),
             Item(
                 name = NonOperatingExpense,
                 description = "Non-Operating Expense",
-                historicalValue = latest.tot_non_oper_income_exp.orZero(),
+                historicalValue = HistoricalValue(value = latest.tot_non_oper_income_exp.orZero()),
                 expression = "$totNonOperIncomeExp",
             ),
             Item(
                 name = PretaxIncome,
                 description = "Pretax Income",
-                historicalValue = preTaxIncome,
+                historicalValue = HistoricalValue(value = preTaxIncome),
                 expression = "$OperatingIncome-$NonOperatingExpense",
             ),
             Item(
                 name = TaxExpense,
                 description = "Tax Expense",
-                historicalValue = taxesPaid,
+                historicalValue = HistoricalValue(value = taxesPaid),
                 expression = "$taxRate*$PretaxIncome",
                 commentaries = Commentary("Pretax income is taxed at ${taxRate.fmtPct()}")
             ),
             Item(
                 name = NetIncome,
                 description = "Net Income",
-                historicalValue = latest.net_income_loss_share_holder.orZero(),
+                historicalValue = HistoricalValue(value = latest.net_income_loss_share_holder.orZero()),
                 expression = "$PretaxIncome-$TaxExpense"
             ),
         )
@@ -201,7 +202,7 @@ class IncomeStatementBuilder(
             Item(
                 name = Revenue,
                 description = "Revenue",
-                historicalValue = totRevnu,
+                historicalValue = HistoricalValue(value = totRevnu),
                 expression = formula
             )
         }
@@ -238,7 +239,7 @@ class IncomeStatementBuilder(
             Item(
                 name = OperatingExpense,
                 description = "Operating Expense",
-                historicalValue = operatingExpenses,
+                historicalValue = HistoricalValue(value = operatingExpenses),
                 expression = "$fwrdOperatingExp",
                 commentaries = Commentary(
                     """
@@ -251,7 +252,7 @@ class IncomeStatementBuilder(
             Item(
                 name = OperatingExpense,
                 description = "Operating Expense",
-                historicalValue = operatingExpenses,
+                historicalValue = HistoricalValue(value = operatingExpenses),
                 expression = "$operatingExpenses",
             )
         }

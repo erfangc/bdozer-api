@@ -14,6 +14,7 @@ import com.starburst.starburst.models.Utility.SharesOutstanding
 import com.starburst.starburst.models.Utility.TotalAsset
 import com.starburst.starburst.models.Utility.TotalLiability
 import com.starburst.starburst.models.dataclasses.Commentary
+import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.zacks.dataclasses.BalanceSheet
 import com.starburst.starburst.zacks.dataclasses.Context
@@ -56,13 +57,13 @@ class BalanceSheetBuilder {
             Item(
                 name = CurrentAsset,
                 commentaries = Commentary("Current asset is ${caRatio.fmtPct()} of total asset"),
-                historicalValue = totCurrAsset,
+                historicalValue = HistoricalValue(value = totCurrAsset),
                 expression = "$caRatio * $TotalAsset",
             ),
             Item(
                 name = PropertyPlanetAndEquipement,
                 commentaries = Commentary("PP&E is ${ppeRatio.fmtPct()} of total asset"),
-                historicalValue = netPropPlantEquip,
+                historicalValue = HistoricalValue(value = netPropPlantEquip),
                 expression = "$ppeRatio * $TotalAsset",
             ),
             Item(
@@ -70,13 +71,13 @@ class BalanceSheetBuilder {
                 commentaries = Commentary("LT Asset is ${ltaRatio.fmtPct()}% of total asset"),
                 // y = px / (1-p); p = target % of total asset, x = everything except long-term asset
                 // avoid circular reference
-                historicalValue = totLtermAsset,
+                historicalValue = HistoricalValue(value = totLtermAsset),
                 expression = "$ltaRatio * $TotalAsset + $PropertyPlanetAndEquipement",
             ),
             Item(
                 name = TotalAsset,
                 commentaries = Commentary("Total asset is ${totalAssetOverRevenue.fmtRound()}x of revenue"),
-                historicalValue = totAsset,
+                historicalValue = HistoricalValue(value = totAsset),
                 expression = "$totalAssetOverRevenue * $Revenue"
             ),
             /*
@@ -84,25 +85,25 @@ class BalanceSheetBuilder {
              */
             Item(
                 name = CurrentLiability,
-                historicalValue = totCurrLiab,
+                historicalValue = HistoricalValue(value = totCurrLiab),
                 commentaries = Commentary("Current liability is ${clRatio.fmtPct()} of total liability"),
                 expression = "$clRatio*${TotalLiability}",
             ),
             Item(
                 name = LongTermDebt,
-                historicalValue = totLtermDebt,
+                historicalValue = HistoricalValue(value = totLtermDebt),
                 commentaries = Commentary("Long-term debt liability is ${ltdRatio.fmtPct()} of total liability"),
                 expression = "$ltdRatio*${TotalLiability}",
             ),
             Item(
                 name = LongTermLiability,
-                historicalValue = totLtermLiab,
+                historicalValue = HistoricalValue(value = totLtermLiab),
                 commentaries = Commentary("Long-term liability is ${ltlRatio.fmtPct()} of total liability"),
                 expression = "$ltlRatio*${TotalLiability} + $LongTermDebt",
             ),
             Item(
                 name = TotalLiability,
-                historicalValue = totLiab,
+                historicalValue = HistoricalValue(value = totLiab),
                 commentaries = Commentary("Total liability is ${totalLiabilityOverRevenue.fmtRound()}x of revenue"),
                 expression = "$totalLiabilityOverRevenue * $Revenue"
             ),
@@ -111,12 +112,12 @@ class BalanceSheetBuilder {
              */
             Item(
                 name = ShareholdersEquity,
-                historicalValue = totShareHolderEquity,
+                historicalValue = HistoricalValue(value = totShareHolderEquity),
                 expression = "$TotalAsset - $TotalLiability"
             ),
             Item(
                 name = SharesOutstanding,
-                historicalValue = avgBShares,
+                historicalValue = HistoricalValue(value = avgBShares),
                 expression = "$avgBShares"
             ),
         )

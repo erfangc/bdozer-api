@@ -8,7 +8,7 @@ import com.starburst.starburst.models.Utility.SharesOutstanding
 import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.evaluator.ModelEvaluator
+import com.starburst.starburst.models.ModelEvaluator
 import com.starburst.starburst.zacks.dataclasses.BuildModelResponse
 import com.starburst.starburst.zacks.dataclasses.Context
 import com.starburst.starburst.zacks.dataclasses.KeyInputs

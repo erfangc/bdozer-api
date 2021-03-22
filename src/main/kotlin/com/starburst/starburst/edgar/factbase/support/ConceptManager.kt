@@ -17,12 +17,10 @@ import com.starburst.starburst.edgar.FilingProvider
  * of the schema XSD as well as the `id` attribute of the element definition within that XSD
  *
  * 2. From inside the Instance document, in which case the namespace / local namespace is defined
- * since [SchemaManager] is agnostic of how local namespaces are declared in the Instance document
- * [SchemaManager] require full namespace
+ * since [ConceptManager] is agnostic of how local namespaces are declared in the Instance document
+ * [ConceptManager] require full namespace
  */
-class SchemaManager(
-    filingProvider: FilingProvider
-) {
+class ConceptManager(filingProvider: FilingProvider) {
 
     private val schemaFileName = filingProvider.schemaExtensionFilename()
     private val schemaLocations: Map<String, String>
@@ -48,9 +46,7 @@ class SchemaManager(
         putSchemaDocument(schemaFileName, filingProvider.schema())
     }
 
-    fun getConceptDefinition(href: String): ConceptDefinition? {
-        return ConceptDefinitions.getConceptDefinition(href)
-    }
+    fun getConceptDefinition(conceptHref: String) = ConceptDefinitions.getConceptDefinition(conceptHref)
 
     fun getConceptDefinition(namespace: String, conceptName: String): ConceptDefinition? {
         val schemaLocation = schemaLocations[namespace] ?: return null

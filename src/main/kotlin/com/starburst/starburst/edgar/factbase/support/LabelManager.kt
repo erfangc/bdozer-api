@@ -56,8 +56,8 @@ class LabelManager(filingProvider: FilingProvider) {
             }.toMap()
         }.toMap()
 
-    fun getLabel(schemaElementId: String): Labels? {
-        val loc = locs[schemaElementId] ?: return null
+    fun getLabel(conceptId: String): Labels? {
+        val loc = locs[conceptId] ?: return null
         val arcLabel = labelArcs[loc] ?: return null
         val labels = labels[arcLabel] ?: emptyMap()
 

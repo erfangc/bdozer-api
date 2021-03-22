@@ -3,10 +3,10 @@ package com.starburst.starburst.edgar.factbase.ingestor
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.ReplaceOptions
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
-import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingCalculations
+import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
 import com.starburst.starburst.edgar.factbase.ingestor.q4.Q4FactFinder
-import com.starburst.starburst.edgar.factbase.ingestor.support.CalculationsParser
+import com.starburst.starburst.edgar.factbase.ingestor.support.FilingCalculationsParser
 import com.starburst.starburst.edgar.factbase.ingestor.support.FactsParser
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import org.litote.kmongo.eq
@@ -52,7 +52,7 @@ class FilingIngestor(
         Parse and save the calculations
          */
         try {
-            val calculationsParser = CalculationsParser(filingProvider = filingProvider)
+            val calculationsParser = FilingCalculationsParser(filingProvider = filingProvider)
             val calculations = calculationsParser.parseCalculations()
             calculationsCol.save(calculations)
         } catch (e: Exception) {

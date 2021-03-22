@@ -19,7 +19,8 @@ class TaxExpenseFormulaGenerator : FormulaGenerator {
             val ebit = ctx.originalItem(
                 IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
             )
-            val effectiveTaxRate = item.historicalValue / (ebit?.historicalValue ?: error("..."))
+            val effectiveTaxRate =
+                (item.historicalValue?.value ?: 0.0) / (ebit?.historicalValue?.value ?: 0.0)
             val taxRate = max(0.01, min(0.15, effectiveTaxRate))
             val commentary = """
                     The company has been taxed at ${effectiveTaxRate.fmtPct()} historically, 

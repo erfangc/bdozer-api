@@ -13,7 +13,7 @@ import com.starburst.starburst.models.Utility.TaxExpense
 import com.starburst.starburst.models.Utility.previous
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.translator.CellGenerator
+import com.starburst.starburst.models.CellGenerator
 import com.starburst.starburst.spreadsheet.Cell
 import com.starburst.starburst.zacks.dataclasses.KeyInputs
 import com.starburst.starburst.zacks.dataclasses.Narrative
@@ -34,7 +34,7 @@ class NarrativeBuilder(
 
     private fun Model.valueOf(itemName: String) =
         (incomeStatementItems + cashFlowStatementItems + balanceSheetItems + otherItems)
-            .find { item -> item.name == itemName }?.historicalValue.orZero()
+            .find { item -> item.name == itemName }?.historicalValue?.value.orZero()
 
     private fun Model.item(itemName: String) =
         (incomeStatementItems + cashFlowStatementItems + balanceSheetItems + otherItems)
@@ -70,12 +70,12 @@ class NarrativeBuilder(
 
         val incomeStatementItems = model.incomeStatementItems
 
-        val noGrowthValueTalkingPoint = executor.submit(Callable{ noGrowthValueTalkingPt(ticker) })
+        val noGrowthValueTalkingPoint = executor.submit(Callable { noGrowthValueTalkingPt(ticker) })
 
         val revenueItem = model.item(Revenue)
         val revCAGR = revCAGRComputation(revenueItem)
         val revenueTalkingPoint = TalkingPoint(
-            data = revenueItem?.historicalValue,
+            data = revenueItem?.historicalValue?.value,
             commentary = revenueItem?.commentaries?.commentary,
             forwardCommentary = """
             |Zack's research estimates revenue growth to be ${revCAGR.fmtPct()}. 
@@ -86,12 +86,12 @@ class NarrativeBuilder(
 
         val cogsItem = model.item(CostOfGoodsSold)
         val variableCostTalkingPoint = TalkingPoint(
-            data = cogsItem?.historicalValue?.orZero(),
+            data = cogsItem?.historicalValue?.value?.orZero(),
             forwardCommentary = cogsItem?.commentaries?.commentary,
         )
         val operatingExpense = incomeStatementItems.find { it.name == OperatingExpense }
         val fixedCostTalkingPoint = TalkingPoint(
-            data = operatingExpense?.historicalValue,
+            data = operatingExpense?.historicalValue?.value,
             forwardCommentary = operatingExpense?.commentaries?.commentary,
         )
 
@@ -143,17 +143,18 @@ class NarrativeBuilder(
         incomeStatementItems: List<Item>,
         model: Model
     ): TalkingPoint {
-        val netIncome = incomeStatementItems.find { it.name == NetIncome }?.historicalValue ?: 0.0
-        val sharesOutstanding = model.balanceSheetItems.find { it.name == SharesOutstanding }?.historicalValue ?: 0.0
+        val netIncome = incomeStatementItems.find { it.name == NetIncome }?.historicalValue?.value ?: 0.0
+        val sharesOutstanding =
+            model.balanceSheetItems.find { it.name == SharesOutstanding }?.historicalValue?.value ?: 0.0
         return TalkingPoint(
             data = netIncome / sharesOutstanding,
         )
     }
 
     private fun otherExpensesTalkingPt(incomeStatementItems: List<Item>): TalkingPoint {
-        val nonOpExp = incomeStatementItems.find { it.name == NonOperatingExpense }?.historicalValue ?: 0.0
-        val taxExp = incomeStatementItems.find { it.name == TaxExpense }?.historicalValue ?: 0.0
-        val intExp = incomeStatementItems.find { it.name == InterestExpense }?.historicalValue ?: 0.0
+        val nonOpExp = incomeStatementItems.find { it.name == NonOperatingExpense }?.historicalValue?.value ?: 0.0
+        val taxExp = incomeStatementItems.find { it.name == TaxExpense }?.historicalValue?.value ?: 0.0
+        val intExp = incomeStatementItems.find { it.name == InterestExpense }?.historicalValue?.value ?: 0.0
         return TalkingPoint(
             data = nonOpExp + taxExp + intExp,
         )

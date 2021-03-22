@@ -1,8 +1,9 @@
-package com.starburst.starburst.models.translator
+package com.starburst.starburst.models
 
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.models.translator.FormulaTranslationContext
 import com.starburst.starburst.models.translator.subtypes.*
 import com.starburst.starburst.spreadsheet.Address
 import com.starburst.starburst.spreadsheet.Cell
@@ -186,7 +187,7 @@ class CellGenerator {
             driver (defaults to zero)
              */
             val updatedCell = if (period == 0) {
-                val historicalValue = item.historicalValue
+                val historicalValue = item.historicalValue?.value ?: 0.0
                 cell.copy(
                     formula = "$historicalValue"
                 )

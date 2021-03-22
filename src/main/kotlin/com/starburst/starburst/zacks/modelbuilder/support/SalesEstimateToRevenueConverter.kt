@@ -3,6 +3,7 @@ package com.starburst.starburst.zacks.modelbuilder.support
 import com.starburst.starburst.DoubleExtensions.fmtPct
 import com.starburst.starburst.models.Utility
 import com.starburst.starburst.models.dataclasses.Discrete
+import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.zacks.dataclasses.Context
@@ -103,7 +104,7 @@ class SalesEstimateToRevenueConverter(
         return Item(
             name = Utility.Revenue,
             description = "Revenue",
-            historicalValue = latestActualRevenue,
+            historicalValue = HistoricalValue(value = latestActualRevenue),
             type = ItemType.Discrete,
             discrete = Discrete(
                 formulas = revenueEstimates

@@ -3,7 +3,7 @@ package com.starburst.starburst.edgar.factbase.support
 import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.dataclasses.FindFactComponentsResponse
-import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingCalculations
+import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
 import org.litote.kmongo.and
 import org.litote.kmongo.descending
 import org.litote.kmongo.eq

@@ -13,18 +13,23 @@ import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtension
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalYearFocus
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
-import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Calculation
-import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingCalculations
-import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.SectionNode
+import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
+import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
+import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
+import com.starburst.starburst.edgar.factbase.support.ConceptManager
 import java.net.URI
 import java.util.*
 
-class CalculationsParser(private val filingProvider: FilingProvider) {
+class FilingCalculationsParser(private val filingProvider: FilingProvider) {
 
     private val incomeStatementRootHref = "us-gaap_IncomeStatementAbstract"
     private val cashFlowStatementRootHref = "us-gaap_StatementOfCashFlowsAbstract"
     private val balanceSheetRootHref = "us-gaap_StatementOfFinancialPositionAbstract"
+    private val conceptManager = ConceptManager(filingProvider = filingProvider)
 
+    /**
+     * Parse filing calculations
+     */
     fun parseCalculations(): FilingCalculations {
         val incomeStatement = traversePresentation(incomeStatementRootHref)
         val cashFlowStatement = traversePresentation(cashFlowStatementRootHref)
@@ -50,12 +55,12 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
     }
 
     /**
-     * Traverse presentation XMLs and construct [SectionNode]
+     * Traverse presentation XMLs and construct [Arc]
      */
-    private fun traversePresentation(rootLocator: String): List<SectionNode> {
+    private fun traversePresentation(rootLocator: String): List<Arc> {
 
         val presentation = filingProvider.presentationLinkbase()
-        val graphNodes = mutableListOf<SectionNode>()
+        val graphNodes = mutableListOf<Arc>()
 
         /*
         Find the presentationLink that contains the given root locator
@@ -73,11 +78,9 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
                         val href = loc.href() ?: error("...")
                         URI(href).fragment == rootLocator && !href.toLowerCase().endsWith("parenthetical")
                     }
-            }
+            } ?: error("unable to find a presentation link with root locator $rootLocator")
+
         // for some reason this keeps happening
-        if (presentationLink == null) {
-            error("unable to find a presentation link with root locator $rootLocator")
-        }
         val role = presentationLink.role() ?: error("presentationLink $rootLocator has no role attribute")
         val arcs = presentationLink
             .getElementsByTag(link, "presentationArc")
@@ -131,10 +134,11 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
             data structure
              */
             graphNodes.add(
-                SectionNode(
+                Arc(
                     conceptHref = conceptHref,
                     calculations = calculationArcs[conceptHref] ?: emptyList(),
-                    parentHref = if (parents.isNotEmpty()) locatorHrefs[parents.peek()] else null
+                    parentHref = if (parents.isNotEmpty()) locatorHrefs[parents.peek()] else null,
+                    conceptName = conceptManager.getConceptDefinition(conceptHref)?.conceptName!!,
                 )
             )
 
@@ -182,7 +186,11 @@ class CalculationsParser(private val filingProvider: FilingProvider) {
             ?.associate { (from, nodes) ->
                 val calculations = nodes.map { node ->
                     val conceptHref = calculationLocs[node.to()] ?: error("...")
-                    Calculation(conceptHref = conceptHref, weight = node.weight())
+                    Calculation(
+                        conceptHref = conceptHref,
+                        weight = node.weight(),
+                        conceptName = conceptManager.getConceptDefinition(conceptHref)?.conceptName!!
+                    )
                 }
                 val fromConceptHref = calculationLocs[from] ?: error("...")
                 fromConceptHref to calculations

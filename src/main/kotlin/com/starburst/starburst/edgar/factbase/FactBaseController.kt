@@ -17,8 +17,8 @@ class FactBaseController(
 
     private val executor = Executors.newCachedThreadPool()
 
-    @GetMapping("{cik}/all-facts")
-    fun allFactsForCik(@PathVariable cik: String): List<Fact> {
+    @GetMapping("{cik}/facts")
+    fun facts(@PathVariable cik: String): List<Fact> {
         return factBase.getFacts(cik)
     }
 
@@ -34,6 +34,9 @@ class FactBaseController(
             }
         }
     }
+
+    @GetMapping("{cik}/calculations")
+    fun calculations(@PathVariable cik: String) = factBase.calculations(cik.padStart(10, '0'))
 
 
     @PostMapping("filing-ingestor")

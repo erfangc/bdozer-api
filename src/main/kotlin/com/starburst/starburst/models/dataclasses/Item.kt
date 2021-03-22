@@ -16,8 +16,7 @@ data class Item(
     /**
      * [historicalValue] the latest actual value for this item
      */
-    val historicalValue: Double = 0.0,
-    val historicalValues: HistoricalValues? = null,
+    val historicalValue: HistoricalValue? = null,
 
     val expression: String = "0.0",
 
@@ -40,9 +39,5 @@ data class Item(
 
     val commentaries: Commentary? = null,
 
-    /**
-     * [subtotal]
-     */
-    val subtotal: Boolean? = null,
 )
 

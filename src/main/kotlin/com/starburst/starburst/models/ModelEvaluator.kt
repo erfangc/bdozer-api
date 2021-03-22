@@ -1,8 +1,7 @@
-package com.starburst.starburst.models.evaluator
+package com.starburst.starburst.models
 
 import com.starburst.starburst.models.Utility.PresentValuePerShare
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.models.translator.CellGenerator
 import com.starburst.starburst.spreadsheet.evaluation.CellEvaluator
 import org.springframework.stereotype.Service
 

@@ -75,13 +75,16 @@ internal object ItemValueExtractorsExtension {
         val revenueItem = items.find { it.name == itemName } ?: error("unable to find $itemName")
         return when (type) {
             Period.ANNUAL -> {
-                revenueItem.historicalValues?.fiscalYear ?: emptyList()
+                // TODO
+                emptyList()
             }
             Period.QUARTER -> {
-                revenueItem.historicalValues?.quarterly ?: emptyList()
+                // TODO
+                emptyList()
             }
             Period.LTM -> {
-                revenueItem.historicalValues?.ltm?.let { listOf(it) } ?: emptyList()
+                // TODO
+                emptyList()
             }
         }
     }
