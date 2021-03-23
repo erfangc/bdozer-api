@@ -75,4 +75,11 @@ object USGaapConstants {
         "RevenueFromContractWithCustomerExcludingAssessedTax"
     const val SellingAndMarketingExpense = "SellingAndMarketingExpense"
     const val ShareBasedCompensation = "ShareBasedCompensation"
+
+    const val EarningsPerShareDiluted = "EarningsPerShareDiluted"
+    const val EarningsPerShareBasic = "EarningsPerShareBasic"
+    const val WeightedAverageNumberOfDilutedSharesOutstanding = "WeightedAverageNumberOfDilutedSharesOutstanding"
+    const val WeightedAverageNumberOfSharesOutstandingBasic = "WeightedAverageNumberOfSharesOutstandingBasic"
+    const val NetIncomeLoss = "NetIncomeLoss"
+    const val CostsAndExpenses = "CostsAndExpenses"
 }

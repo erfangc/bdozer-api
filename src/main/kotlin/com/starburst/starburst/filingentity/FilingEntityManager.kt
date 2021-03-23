@@ -28,7 +28,7 @@ class FilingEntityManager(
     private val col = mongoDatabase.getCollection<FilingEntity>()
 
     fun getFilingEntity(cik: String): FilingEntity? {
-        return col.findOneById(cik)
+        return col.findOneById(cik.padStart(10,'0'))
     }
 
     fun getOrBootstrapFilingEntity(cik: String): FilingEntity {
@@ -44,7 +44,7 @@ class FilingEntityManager(
         val paddedCik = cik.padStart(10,'0')
         val secEntity = httpClient.readEntity<SECEntity>("https://data.sec.gov/submissions/CIK$paddedCik.json")
         val entity = FilingEntity(
-            _id = cik,
+            _id = paddedCik,
             cik = secEntity.cik,
             entityType = secEntity.entityType,
             sic = secEntity.sic,
