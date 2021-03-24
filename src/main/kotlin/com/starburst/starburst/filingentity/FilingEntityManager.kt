@@ -32,7 +32,7 @@ class FilingEntityManager(
     }
 
     fun getOrBootstrapFilingEntity(cik: String): FilingEntity {
-        val savedEntity = col.findOneById(cik)
+        val savedEntity = col.findOneById(cik.padStart(10, '0'))
         return savedEntity ?: bootstrapFilingEntity(cik)
     }
 
