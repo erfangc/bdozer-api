@@ -1,10 +1,8 @@
 package com.starburst.starburst.filingentity.dataclasses
 
-import com.starburst.starburst.models.dataclasses.Model
-
 data class FilingEntity(
     val _id: String,
-    val cik: String? = null,
+    val cik: String,
     val tradingSymbol: String? = null,
     val name: String,
 
@@ -32,5 +30,7 @@ data class FilingEntity(
     val statusMessage: String? = null,
     val lastUpdated: String,
     val latestAdsh: String? = null,
-    val model: Model? = null
+
+    val modelTemplate: ModelTemplate? = null,
 )
+

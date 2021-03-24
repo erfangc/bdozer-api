@@ -13,6 +13,11 @@ class FilingEntityManagerController(private val filingEntityManager: FilingEntit
         return filingEntityManager.getOrBootstrapFilingEntity(cik)
     }
 
+    @PostMapping
+    fun saveFilingEntity(@RequestBody filingEntity: FilingEntity) {
+        return filingEntityManager.saveFilingEntity(filingEntity)
+    }
+
     @PostMapping("{cik}")
     fun bootstrapFilingEntity(@PathVariable cik: String): FilingEntity {
         return filingEntityManager.bootstrapFilingEntity(cik)

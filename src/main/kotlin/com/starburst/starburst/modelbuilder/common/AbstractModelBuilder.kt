@@ -14,14 +14,16 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.support.ConceptManager
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.filingentity.FilingEntityManager
+import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.Extensions.fragment
-import com.starburst.starburst.modelbuilder.templates.Recovery
+import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
 import com.starburst.starburst.models.ModelEvaluator
 import com.starburst.starburst.models.Utility.DiscountFactor
 import com.starburst.starburst.models.Utility.PresentValuePerShare
 import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -29,9 +31,9 @@ import java.util.concurrent.Executors
 import kotlin.collections.HashSet
 
 abstract class AbstractModelBuilder(
-    private val filingProvider: FilingProvider,
-    private val factBase: FactBase,
-    private val filingEntityManager: FilingEntityManager,
+    protected  val filingProvider: FilingProvider,
+    protected val factBase: FactBase,
+    protected val filingEntity: FilingEntity,
 ) {
 
     protected val executor = Executors.newCachedThreadPool()
@@ -39,16 +41,18 @@ abstract class AbstractModelBuilder(
     protected val conceptManager = ConceptManager(filingProvider)
     protected val labelManager = LabelManager(filingProvider)
     protected val evaluator = ModelEvaluator()
-    protected val filingEntity = filingEntityManager.getFilingEntity(cik) ?: error("...")
     protected val calculations = factBase.calculations(cik)
+
     val revenueConceptName = revenueItem()
     val conceptDependencies: Map<String, Set<String>>
+    val incomeStatement = calculations.incomeStatement
+    val tradingSymbol = filingEntity.tradingSymbol
 
     init {
         conceptDependencies = conceptDependencies()
     }
 
-    protected val log = LoggerFactory.getLogger(Recovery::class.java)
+    protected val log = LoggerFactory.getLogger(EarningsRecoveryAnalyzer::class.java)
 
     protected fun timeSeriesVsRevenue(
         conceptName: String,
@@ -166,7 +170,7 @@ abstract class AbstractModelBuilder(
         }
     }
 
-    abstract fun buildModel(): ModelResult
+    abstract fun analyze(): StockAnalysis
 
     protected fun createEpsItem(item: Item): Item {
         return when (item.name) {
@@ -233,5 +237,17 @@ abstract class AbstractModelBuilder(
 
     protected fun isEpsItem(item: Item) =
         item.name == EarningsPerShareBasic || item.name == EarningsPerShareDiluted
+
+    protected fun zeroRevenueGrowth(finalModel: Model): Model {
+        val updIs = finalModel.incomeStatementItems.map { item ->
+            if (item.name == revenueConceptName) {
+                item.copy(expression = item.historicalValue?.value.toString(), type = ItemType.Custom)
+            } else {
+                item
+            }
+        }
+        return finalModel.copy(incomeStatementItems = updIs)
+    }
+
 
 }

@@ -31,6 +31,10 @@ class FilingEntityManager(
         return col.findOneById(cik.padStart(10,'0'))
     }
 
+    fun saveFilingEntity(filingEntity: FilingEntity) {
+        col.save(filingEntity)
+    }
+
     fun getOrBootstrapFilingEntity(cik: String): FilingEntity {
         val savedEntity = col.findOneById(cik.padStart(10, '0'))
         return savedEntity ?: bootstrapFilingEntity(cik)
@@ -45,7 +49,7 @@ class FilingEntityManager(
         val secEntity = httpClient.readEntity<SECEntity>("https://data.sec.gov/submissions/CIK$paddedCik.json")
         val entity = FilingEntity(
             _id = paddedCik,
-            cik = secEntity.cik,
+            cik = paddedCik,
             entityType = secEntity.entityType,
             sic = secEntity.sic,
             sicDescription = secEntity.sicDescription,

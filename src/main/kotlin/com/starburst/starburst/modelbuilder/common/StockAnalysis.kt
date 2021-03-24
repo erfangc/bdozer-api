@@ -3,8 +3,11 @@ package com.starburst.starburst.modelbuilder.common
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.spreadsheet.Cell
+import java.time.Instant
 
-data class ModelResult(
+data class StockAnalysis(
+    val _id: String,
+    val lastUpdated: Instant = Instant.now(),
     /*
     value breakdown
      */

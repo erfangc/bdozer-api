@@ -7,28 +7,25 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.filingentity.FilingEntityManager
+import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.AbstractModelBuilder
 import com.starburst.starburst.modelbuilder.common.Extensions.businessWaterfall
 import com.starburst.starburst.modelbuilder.common.Extensions.fragment
-import com.starburst.starburst.modelbuilder.common.ModelResult
+import com.starburst.starburst.modelbuilder.common.StockAnalysis
 import com.starburst.starburst.models.dataclasses.*
 import com.starburst.starburst.zacks.dataclasses.Context
 import com.starburst.starburst.zacks.modelbuilder.support.SalesEstimateToRevenueConverter
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import java.util.concurrent.Callable
 
-class Recovery(
-    private val filingProvider: FilingProvider,
-    private val factBase: FactBase,
+class EarningsRecoveryAnalyzer(
     private val zacksEstimatesService: ZacksEstimatesService,
-    filingEntityManager: FilingEntityManager,
-) : AbstractModelBuilder(filingProvider, factBase, filingEntityManager) {
+    filingProvider: FilingProvider,
+    factBase: FactBase,
+    filingEntity: FilingEntity,
+) : AbstractModelBuilder(filingProvider, factBase, filingEntity) {
 
-    override fun buildModel(): ModelResult {
-        val cik = filingProvider.cik()
-        val calculations = factBase.calculations(cik)
-        val incomeStatement = calculations.incomeStatement
-
+    override fun analyze(): StockAnalysis {
         val lineItemsIdx = incomeStatement.indexOfFirst {
             it.conceptHref.fragment() == "us-gaap_StatementLineItems"
         }
@@ -38,7 +35,6 @@ class Recovery(
             incomeStatement.size
         )
 
-        val tradingSymbol = filingEntity.tradingSymbol
         val model = Model(
             name = "Valuation Model - $tradingSymbol",
             symbol = tradingSymbol,
@@ -85,7 +81,7 @@ class Recovery(
 
         val evalResult = evaluator.evaluate(finalModel)
 
-        return ModelResult(
+        return StockAnalysis(
             model = evalResult.model,
             cells = evalResult.cells,
 
@@ -100,6 +96,8 @@ class Recovery(
 
             targetPrice = evalResult.targetPrice,
             discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
+
+            _id = cik,
         )
     }
 
@@ -110,17 +108,6 @@ class Recovery(
 
     private fun profitPerShare(model: Model): Item {
         return model.incomeStatementItems.find { it.name == EarningsPerShareDiluted } ?: error("...")
-    }
-
-    private fun zeroRevenueGrowth(finalModel: Model): Model {
-        val updIs = finalModel.incomeStatementItems.map { item ->
-            if (item.name == revenueConceptName) {
-                item.copy(expression = item.historicalValue?.value.toString(), type = ItemType.Custom)
-            } else {
-                item
-            }
-        }
-        return finalModel.copy(incomeStatementItems = updIs)
     }
 
     private fun itemAsPercentOfRevenue(item: Item): Item {
