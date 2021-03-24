@@ -5,25 +5,34 @@ import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasic
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.edgar.factbase.support.ConceptManager
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.modelbuilder.common.Extensions.fragment
-import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.ModelEvaluator
+import com.starburst.starburst.models.Utility.DiscountFactor
+import com.starburst.starburst.models.Utility.PresentValuePerShare
+import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.Model
 import org.slf4j.LoggerFactory
 import java.util.*
+import java.util.concurrent.Executors
 import kotlin.collections.HashSet
-
 
 abstract class AbstractModelBuilder(
     private val filingProvider: FilingProvider,
     private val factBase: FactBase,
-    filingEntityManager: FilingEntityManager,
+    private val filingEntityManager: FilingEntityManager,
 ) {
 
+    protected val executor = Executors.newCachedThreadPool()
     protected val cik = filingProvider.cik()
     protected val conceptManager = ConceptManager(filingProvider)
     protected val labelManager = LabelManager(filingProvider)
@@ -55,6 +64,26 @@ abstract class AbstractModelBuilder(
         return arr
     }
 
+    protected fun deriveOtherItems(model: Model): List<Item> {
+        val periods = model.periods
+        val discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate
+        val terminalPeMultiple = 1.0 / (discountRate - model.terminalFcfGrowthRate)
+        return listOf(
+            Item(
+                name = DiscountFactor,
+                expression = "1 / (1.0 + $discountRate)^period"
+            ),
+            Item(
+                name = TerminalValuePerShare,
+                expression = "if(period=$periods,${EarningsPerShareDiluted} * ${terminalPeMultiple},0.0)"
+            ),
+            Item(
+                name = PresentValuePerShare,
+                expression = "$DiscountFactor * (${EarningsPerShareDiluted} + ${TerminalValuePerShare})"
+            )
+        )
+    }
+
     /**
      * Retrieves from [FactBase] the time series for the given concept
      * (empty of any dimensions) for the specified periodFocus type
@@ -84,14 +113,6 @@ abstract class AbstractModelBuilder(
      */
     protected fun isOneTime(item: Item): Boolean {
         return setOf("RestructuringAndOtherExpenseIncomeMainline").contains(item.name)
-    }
-
-    private fun revenueItem(): String {
-        return calculations
-            .incomeStatement
-            .find {
-                setOf("RevenueFromContractWithCustomerExcludingAssessedTax").contains(it.conceptName)
-            }?.conceptName ?: error("unable to find revenue total item name for $cik")
     }
 
     /**
@@ -143,12 +164,39 @@ abstract class AbstractModelBuilder(
         }
     }
 
-    abstract fun buildModel(): EvaluateModelResult
+    abstract fun buildModel(): ModelResult
+
+    protected fun createEpsItem(item: Item): Item {
+        return when (item.name) {
+            EarningsPerShareDiluted -> {
+                item.copy(
+                    expression = "$NetIncomeLoss / $WeightedAverageNumberOfDilutedSharesOutstanding"
+                )
+            }
+            EarningsPerShareBasic -> {
+                item.copy(
+                    expression = "$NetIncomeLoss / $WeightedAverageNumberOfSharesOutstandingBasic"
+                )
+            }
+            else -> {
+                item
+            }
+        }
+    }
+
+    private fun revenueItem(): String {
+        return calculations
+            .incomeStatement
+            .find {
+                setOf("RevenueFromContractWithCustomerExcludingAssessedTax").contains(it.conceptName)
+            }?.conceptName ?: error("unable to find revenue total item name for $cik")
+    }
 
     private fun conceptDependencies(): Map<String, Set<String>> {
         val lookup = calculations
             .incomeStatement
             .associateBy { it.conceptName }
+
         fun flattenSingleConcept(conceptName: String): Set<String> {
             val calculations = lookup[conceptName]?.calculations ?: emptyList()
             val results = HashSet<String>()
@@ -156,10 +204,11 @@ abstract class AbstractModelBuilder(
             stack.addAll(calculations.map { it.conceptName })
             while (stack.isNotEmpty()) {
                 val conceptName = stack.pop()
-                results.add(conceptName)
                 val calculations = lookup[conceptName]?.calculations ?: emptyList()
                 if (calculations.isNotEmpty()) {
                     stack.addAll(calculations.map { it.conceptName })
+                } else {
+                    results.add(conceptName)
                 }
             }
             return results

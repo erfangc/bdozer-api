@@ -1,6 +1,6 @@
 package com.starburst.starburst.modelbuilder
 
-import com.starburst.starburst.models.EvaluateModelResult
+import com.starburst.starburst.modelbuilder.templates.ModelResult
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("api/model-builder-factory")
 class ModelBuilderFactoryController(private val modelBuilderFactory: ModelBuilderFactory) {
     @GetMapping("{cik}")
-    fun createModel(@PathVariable cik: String): EvaluateModelResult {
+    fun createModel(@PathVariable cik: String): ModelResult {
         return modelBuilderFactory.createModel(cik)
     }
 }

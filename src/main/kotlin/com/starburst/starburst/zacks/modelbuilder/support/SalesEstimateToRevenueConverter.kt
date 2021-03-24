@@ -56,12 +56,12 @@ class SalesEstimateToRevenueConverter(
             figure out the growth rate implied by the most estimate
              */
             val lastEstimate = relevantEstimates.last().sales_median_est ?: 0.0
-            val secondToLastEsitmate = if (relevantEstimates.size >= 2) {
+            val secondToLastEstimate = if (relevantEstimates.size >= 2) {
                 relevantEstimates[relevantEstimates.size - 2].sales_median_est ?: 0.0
             } else {
                 latestActualRevenue
             }
-            val growthRate = (lastEstimate / secondToLastEsitmate) - 1
+            val growthRate = (lastEstimate / secondToLastEstimate) - 1
 
             /*
             extrapolation period

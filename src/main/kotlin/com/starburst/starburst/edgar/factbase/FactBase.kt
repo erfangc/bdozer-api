@@ -56,6 +56,7 @@ class FactBase(
                     conceptName?.let { Fact::conceptName eq it }
                 )
             )
+            .sort(descending(Fact::documentPeriodEndDate))
             .toList()
     }
 
