@@ -6,13 +6,14 @@ import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
-import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.AbstractModelBuilder
 import com.starburst.starburst.modelbuilder.common.Extensions.businessWaterfall
 import com.starburst.starburst.modelbuilder.common.Extensions.fragment
 import com.starburst.starburst.modelbuilder.common.StockAnalysis
-import com.starburst.starburst.models.dataclasses.*
+import com.starburst.starburst.models.dataclasses.Commentary
+import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.zacks.dataclasses.Context
 import com.starburst.starburst.zacks.modelbuilder.support.SalesEstimateToRevenueConverter
 import com.starburst.starburst.zacks.se.ZacksEstimatesService

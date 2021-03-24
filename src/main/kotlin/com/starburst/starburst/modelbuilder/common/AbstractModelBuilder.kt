@@ -37,7 +37,7 @@ abstract class AbstractModelBuilder(
 ) {
 
     protected val executor = Executors.newCachedThreadPool()
-    protected val cik = filingProvider.cik()
+    protected val cik = filingProvider.cik().padStart(10, '0')
     protected val conceptManager = ConceptManager(filingProvider)
     protected val labelManager = LabelManager(filingProvider)
     protected val evaluator = ModelEvaluator()
@@ -134,7 +134,6 @@ abstract class AbstractModelBuilder(
      */
     protected fun historicalValue(arc: Arc): HistoricalValue? {
         val conceptName = arc.conceptName
-        val cik = filingProvider.cik()
         val fact = factBase.getFacts(
             cik,
             DocumentFiscalPeriodFocus.FY,
