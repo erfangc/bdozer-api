@@ -27,5 +27,10 @@ data class ModelResult(
     /*
     target price
      */
-    val targetPrice: Double
+    val targetPrice: Double,
+
+    val discountRate: Double,
+    val beta: Double,
+    val riskFreeRate: Double,
+    val equityRiskPremium: Double,
 )

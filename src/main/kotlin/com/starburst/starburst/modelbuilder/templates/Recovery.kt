@@ -38,9 +38,14 @@ class Recovery(
             incomeStatement.size
         )
 
+        val tradingSymbol = filingEntity.tradingSymbol
         val model = Model(
-            name = "Model",
-            symbol = filingEntity.tradingSymbol,
+            name = "Valuation Model - $tradingSymbol",
+            symbol = tradingSymbol,
+            description = filingEntity.description,
+            currentPrice = 22.7,
+            beta = 1.86,
+            terminalFcfGrowthRate = 0.02
         )
 
         val incomeStatementItems = statementArcs
@@ -79,7 +84,6 @@ class Recovery(
         val zeroGrowthPrice = zeroGrowthResult.targetPrice.coerceAtLeast(0.0)
 
         val evalResult = evaluator.evaluate(finalModel)
-        val currentPrice = 23.83
 
         return ModelResult(
             cells = evalResult.cells,
@@ -91,11 +95,15 @@ class Recovery(
             profitPerShare = profitPerShare(finalModel),
             shareOutstanding = shareOutstanding(finalModel),
 
-            currentPrice = currentPrice,
+            currentPrice = model.currentPrice,
             zeroGrowthPrice = zeroGrowthPrice,
-            impliedPriceFromGrowth = currentPrice - zeroGrowthPrice,
+            impliedPriceFromGrowth = model.currentPrice - zeroGrowthPrice,
 
             targetPrice = evalResult.targetPrice,
+            beta = model.beta,
+            discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
+            equityRiskPremium = model.equityRiskPremium,
+            riskFreeRate = model.riskFreeRate,
         )
     }
 
