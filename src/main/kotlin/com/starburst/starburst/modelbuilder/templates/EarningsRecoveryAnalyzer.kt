@@ -37,7 +37,7 @@ class EarningsRecoveryAnalyzer(
         )
 
         val model = Model(
-            name = "Valuation Model - $tradingSymbol",
+            name = filingEntity.name,
             symbol = tradingSymbol,
             description = filingEntity.description,
             currentPrice = 22.7,
