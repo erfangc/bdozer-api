@@ -9,6 +9,7 @@ import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.StockAnalysis
 import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
+import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
@@ -56,4 +57,9 @@ class StockAnalyzerFactory(
         filingEntity = filingEntity,
         zacksEstimatesService = zacksEstimatesService,
     )
+
+    fun getAnalysis(cik: String): StockAnalysis {
+        val cik = cik.padStart(10, '0')
+        return col.findOneById(cik) ?: error("No analysis can be found for $cik")
+    }
 }

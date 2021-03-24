@@ -19,4 +19,9 @@ class StockAnalyzerFactoryController(private val stockAnalyzerFactory: StockAnal
     fun getAnalyses(): List<StockAnalysis> {
         return stockAnalyzerFactory.getAnalyses()
     }
+
+    @GetMapping("{cik}/analysis")
+    fun getAnalysis(@PathVariable cik: String): StockAnalysis {
+        return stockAnalyzerFactory.getAnalysis(cik)
+    }
 }
