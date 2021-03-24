@@ -4,18 +4,18 @@ import com.starburst.starburst.DoubleExtensions.fmtPct
 import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasic
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeTaxExpenseBenefit
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.filingentity.FilingEntityManager
+import com.starburst.starburst.modelbuilder.common.AbstractModelBuilder
+import com.starburst.starburst.modelbuilder.common.Extensions.businessWaterfall
 import com.starburst.starburst.modelbuilder.common.Extensions.fragment
+import com.starburst.starburst.modelbuilder.common.ModelResult
 import com.starburst.starburst.models.dataclasses.*
 import com.starburst.starburst.zacks.dataclasses.Context
 import com.starburst.starburst.zacks.modelbuilder.support.SalesEstimateToRevenueConverter
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
+import java.util.concurrent.Callable
 
 class Recovery(
     private val filingProvider: FilingProvider,
@@ -53,14 +53,14 @@ class Recovery(
                 val historicalValue = historicalValue(arc)
                 val item = if (arc.calculations.isEmpty()) {
                     Item(
-                        name = itemName(arc.conceptHref),
+                        name = itemNameFromHref(arc.conceptHref),
                         description = arcLabel(arc),
                         historicalValue = historicalValue,
                         expression = "${historicalValue?.value ?: 0.0}",
                     )
                 } else {
                     Item(
-                        name = itemName(arc.conceptHref),
+                        name = itemNameFromHref(arc.conceptHref),
                         description = arcLabel(arc),
                         historicalValue = historicalValue,
                         expression = expression(arc),
@@ -80,38 +80,26 @@ class Recovery(
         /*
         try a version of this where revenue remains constant
          */
-        val zeroGrowthResult = evaluator.evaluate(zeroRevenueGrowth(finalModel))
-        val zeroGrowthPrice = zeroGrowthResult.targetPrice.coerceAtLeast(0.0)
+        val zeroGrowthResult = executor.submit(Callable { evaluator.evaluate(zeroRevenueGrowth(finalModel)) })
+        val zeroGrowthPrice = zeroGrowthResult.get().targetPrice.coerceAtLeast(0.0)
 
         val evalResult = evaluator.evaluate(finalModel)
 
         return ModelResult(
-            cells = evalResult.cells,
             model = evalResult.model,
+            cells = evalResult.cells,
 
-            revenue = revenue(finalModel),
-            categorizedExpenses = categorizedExpenses(finalModel),
-            profit = profit(finalModel),
             profitPerShare = profitPerShare(finalModel),
             shareOutstanding = shareOutstanding(finalModel),
+
+            businessWaterfall = businessWaterfall(evalResult),
 
             currentPrice = model.currentPrice,
             zeroGrowthPrice = zeroGrowthPrice,
             impliedPriceFromGrowth = model.currentPrice - zeroGrowthPrice,
 
             targetPrice = evalResult.targetPrice,
-            beta = model.beta,
             discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
-            equityRiskPremium = model.equityRiskPremium,
-            riskFreeRate = model.riskFreeRate,
-        )
-    }
-
-    private fun isTaxItem(item: Item): Boolean = item.name == IncomeTaxExpenseBenefit
-
-    private fun taxItems(item: Item): Item {
-        return item.copy(
-            expression = "$IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest*0.12"
         )
     }
 
@@ -124,42 +112,9 @@ class Recovery(
         return model.incomeStatementItems.find { it.name == EarningsPerShareDiluted } ?: error("...")
     }
 
-    private fun profit(model: Model): Item {
-        return model.incomeStatementItems.find { it.name == NetIncomeLoss } ?: error("...")
-    }
-
-    private fun categorizedExpenses(model: Model): List<Item> {
-
-        val concepts = conceptDependencies[NetIncomeLoss]
-            ?.filter { !isRevenue(it) }
-            ?.mapNotNull { conceptName -> model.incomeStatementItems.find { it.name == conceptName } }
-            ?.sortedByDescending { it.historicalValue?.value ?: 0.0 }
-            ?: error("...")
-
-        val conceptSize = concepts.size
-        val cutoff = 5
-
-        return if (conceptSize > cutoff) {
-            val others = concepts.subList(cutoff, concepts.size)
-            val subList = concepts.subList(0, cutoff)
-            subList + Item(
-                name = "Others",
-                historicalValue = HistoricalValue(
-                    value = others.sumByDouble { it.historicalValue?.value ?: 0.0 }
-                )
-            )
-        } else {
-            concepts
-        }
-    }
-
-    private fun revenue(model: Model): Item {
-        return model.incomeStatementItems.find { isRevenue(it.name) } ?: error("...")
-    }
-
     private fun zeroRevenueGrowth(finalModel: Model): Model {
         val updIs = finalModel.incomeStatementItems.map { item ->
-            if (isRevenue(item.name)) {
+            if (item.name == revenueConceptName) {
                 item.copy(expression = item.historicalValue?.value.toString(), type = ItemType.Custom)
             } else {
                 item
@@ -171,7 +126,6 @@ class Recovery(
     private fun itemAsPercentOfRevenue(item: Item): Item {
         val ts = timeSeriesVsRevenue(conceptName = item.name)
         val pctOfRev = ts.subList(0, ts.size - 1).map { it.second / it.first }
-
         return if (pctOfRev.isNotEmpty()) {
             val pct = pctOfRev.average()
             item.copy(
@@ -192,24 +146,29 @@ class Recovery(
         }
     }
 
-    private fun isRevenue(itemName: String) = itemName == revenueConceptName
-
     private fun processItem(item: Item, model: Model): Item {
-        return if (isRevenue(item.name)) {
-            createRevenueItemWithProjection(model, item)
-        } else if (item.name == EarningsPerShareBasic || item.name == EarningsPerShareDiluted) {
-            createEpsItem(item)
-        } else if (isTaxItem(item)) {
-            taxItems(item)
-        } else if (isOneTime(item)) {
-            item.copy(
-                expression = "0.0",
-                commentaries = Commentary(commentary = "This is a one-time item")
-            )
-        } else if (isCostOperatingCost(item)) {
-            createOperatingCostItem(item)
-        } else {
-            item
+        return when {
+            item.name == revenueConceptName -> {
+                createRevenueItemWithProjection(model, item)
+            }
+            isEpsItem(item) -> {
+                createEpsItem(item)
+            }
+            isTaxItem(item) -> {
+                taxItems(item)
+            }
+            isOneTime(item) -> {
+                item.copy(
+                    expression = "0.0",
+                    commentaries = Commentary(commentary = "This is a one-time item")
+                )
+            }
+            isCostOperatingCost(item) -> {
+                createOperatingCostItem(item)
+            }
+            else -> {
+                item
+            }
         }
     }
 

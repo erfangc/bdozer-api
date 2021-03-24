@@ -4,9 +4,8 @@ import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.filingentity.FilingEntityManager
-import com.starburst.starburst.modelbuilder.templates.ModelResult
+import com.starburst.starburst.modelbuilder.common.ModelResult
 import com.starburst.starburst.modelbuilder.templates.Recovery
-import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import org.springframework.stereotype.Service
 

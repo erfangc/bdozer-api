@@ -1,6 +1,6 @@
 package com.starburst.starburst.modelbuilder
 
-import com.starburst.starburst.modelbuilder.templates.ModelResult
+import com.starburst.starburst.modelbuilder.common.ModelResult
 import org.springframework.web.bind.annotation.*
 
 @RestController

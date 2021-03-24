@@ -1,11 +1,10 @@
-package com.starburst.starburst.modelbuilder.templates
+package com.starburst.starburst.modelbuilder.common
 
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.spreadsheet.Cell
 
 data class ModelResult(
-    val cells: List<Cell>,
     /*
     value breakdown
      */
@@ -14,13 +13,13 @@ data class ModelResult(
     val currentPrice: Double,
 
     val model: Model,
+    val cells: List<Cell>,
 
     /*
-    revenue waterfall
+    revenue waterfall by period
      */
-    val revenue: Item,
-    val categorizedExpenses: List<Item>,
-    val profit: Item,
+    val businessWaterfall: Map<Int, Waterfall>,
+
     val shareOutstanding: Item,
     val profitPerShare: Item,
 
@@ -28,9 +27,5 @@ data class ModelResult(
     target price
      */
     val targetPrice: Double,
-
     val discountRate: Double,
-    val beta: Double,
-    val riskFreeRate: Double,
-    val equityRiskPremium: Double,
 )

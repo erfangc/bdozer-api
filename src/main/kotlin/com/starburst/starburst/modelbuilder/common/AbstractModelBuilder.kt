@@ -1,10 +1,11 @@
-package com.starburst.starburst.modelbuilder.templates
+package com.starburst.starburst.modelbuilder.common
 
 import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasic
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
@@ -14,6 +15,7 @@ import com.starburst.starburst.edgar.factbase.support.ConceptManager
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.modelbuilder.common.Extensions.fragment
+import com.starburst.starburst.modelbuilder.templates.Recovery
 import com.starburst.starburst.models.ModelEvaluator
 import com.starburst.starburst.models.Utility.DiscountFactor
 import com.starburst.starburst.models.Utility.PresentValuePerShare
@@ -39,8 +41,8 @@ abstract class AbstractModelBuilder(
     protected val evaluator = ModelEvaluator()
     protected val filingEntity = filingEntityManager.getFilingEntity(cik) ?: error("...")
     protected val calculations = factBase.calculations(cik)
-    protected val revenueConceptName = revenueItem()
-    protected val conceptDependencies: Map<String, Set<String>>
+    val revenueConceptName = revenueItem()
+    val conceptDependencies: Map<String, Set<String>>
 
     init {
         conceptDependencies = conceptDependencies()
@@ -102,7 +104,7 @@ abstract class AbstractModelBuilder(
      * Determines the "name" of an [Item] based on the
      * href of a concept
      */
-    protected fun itemName(conceptHref: String): String {
+    protected fun itemNameFromHref(conceptHref: String): String {
         return conceptManager
             .getConceptDefinition(conceptHref)
             ?.conceptName ?: conceptHref.fragment()
@@ -150,12 +152,12 @@ abstract class AbstractModelBuilder(
         val positives = arc
             .calculations
             .filter { it.weight > 0 }
-            .joinToString("+") { itemName(it.conceptHref) }
+            .joinToString("+") { itemNameFromHref(it.conceptHref) }
 
         val negatives = arc
             .calculations
             .filter { it.weight < 0 }
-            .joinToString("-") { itemName(it.conceptHref) }
+            .joinToString("-") { itemNameFromHref(it.conceptHref) }
 
         return if (negatives.isNotEmpty()) {
             "$positives - $negatives"
@@ -220,5 +222,16 @@ abstract class AbstractModelBuilder(
             .toMap()
 
     }
+
+    protected fun isTaxItem(item: Item): Boolean = item.name == USGaapConstants.IncomeTaxExpenseBenefit
+
+    protected fun taxItems(item: Item): Item {
+        return item.copy(
+            expression = "${USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest}*0.12"
+        )
+    }
+
+    protected fun isEpsItem(item: Item) =
+        item.name == EarningsPerShareBasic || item.name == EarningsPerShareDiluted
 
 }
