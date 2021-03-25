@@ -31,7 +31,7 @@ data class Model(
     val riskFreeRate: Double = 0.005,
     val equityRiskPremium: Double = 0.075,
     val terminalFcfMultiple: Double = 15.0,
-    val terminalFcfGrowthRate: Double = 0.03,
+    val terminalGrowthRate: Double = 0.03,
 
     /**
      * Projection period

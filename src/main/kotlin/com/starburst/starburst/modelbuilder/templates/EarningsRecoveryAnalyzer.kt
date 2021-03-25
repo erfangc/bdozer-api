@@ -42,7 +42,7 @@ class EarningsRecoveryAnalyzer(
             description = filingEntity.description,
             currentPrice = 22.7,
             beta = 1.86,
-            terminalFcfGrowthRate = 0.02
+            terminalGrowthRate = 0.02
         )
 
         val incomeStatementItems = statementArcs

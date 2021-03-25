@@ -83,7 +83,7 @@ class ZacksModelBuilder(
     private fun deriveOtherItems(model: Model): List<Item> {
         val periods = model.periods
         val discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate
-        val terminalPeMultiple = 1.0 / (discountRate - model.terminalFcfGrowthRate)
+        val terminalPeMultiple = 1.0 / (discountRate - model.terminalGrowthRate)
         return listOf(
             Item(
                 name = DiscountFactor,
