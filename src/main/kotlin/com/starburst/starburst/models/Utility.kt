@@ -34,9 +34,10 @@ object Utility {
     const val StockBasedCompensation = "StockBasedCompensation"
     const val ChangeInWorkingCapital = "ChangeInWorkingCapital"
     const val SharesOutstanding = "SharesOutstanding"
-    const val DilutedSharesOutstanding = "DilutedSharesOutstanding"
     const val DiscountFactor = "DiscountFactor"
     const val TerminalValuePerShare = "TerminalValuePerShare"
+    const val PresentValueOfEarningsPerShare = "PresentValueOfEarningsPerShare"
+    const val PresentValueOfTerminalValuePerShare = "PresentValueOfTerminalValuePerShare"
     const val PresentValuePerShare = "PresentValuePerShare"
     const val EarningsPerShare = "EarningsPerShare"
 

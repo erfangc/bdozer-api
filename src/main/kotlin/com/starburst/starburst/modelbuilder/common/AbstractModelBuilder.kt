@@ -19,6 +19,8 @@ import com.starburst.starburst.modelbuilder.common.Extensions.fragment
 import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
 import com.starburst.starburst.models.ModelEvaluator
 import com.starburst.starburst.models.Utility.DiscountFactor
+import com.starburst.starburst.models.Utility.PresentValueOfEarningsPerShare
+import com.starburst.starburst.models.Utility.PresentValueOfTerminalValuePerShare
 import com.starburst.starburst.models.Utility.PresentValuePerShare
 import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.HistoricalValue
@@ -84,8 +86,16 @@ abstract class AbstractModelBuilder(
                 expression = "if(period=$periods,${EarningsPerShareDiluted} * ${terminalPeMultiple},0.0)"
             ),
             Item(
+                name = PresentValueOfTerminalValuePerShare,
+                expression = "$DiscountFactor * $TerminalValuePerShare"
+            ),
+            Item(
+                name = PresentValueOfEarningsPerShare,
+                expression = "$DiscountFactor * $EarningsPerShareDiluted"
+            ),
+            Item(
                 name = PresentValuePerShare,
-                expression = "$DiscountFactor * (${EarningsPerShareDiluted} + ${TerminalValuePerShare})"
+                expression = "$PresentValueOfEarningsPerShare + $PresentValueOfTerminalValuePerShare"
             )
         )
     }
