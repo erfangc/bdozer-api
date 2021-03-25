@@ -2,6 +2,7 @@ package com.starburst.starburst.modelbuilder.common
 
 import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.factbase.FactBase
+import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
@@ -13,7 +14,6 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.edgar.factbase.support.ConceptManager
 import com.starburst.starburst.edgar.factbase.support.LabelManager
-import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.Extensions.fragment
 import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
@@ -31,20 +31,20 @@ import java.util.concurrent.Executors
 import kotlin.collections.HashSet
 
 abstract class AbstractModelBuilder(
-    protected  val filingProvider: FilingProvider,
-    protected val factBase: FactBase,
-    protected val filingEntity: FilingEntity,
+    val filingProvider: FilingProvider,
+    val factBase: FactBase,
+    val filingEntity: FilingEntity,
 ) {
 
-    protected val executor = Executors.newCachedThreadPool()
-    protected val cik = filingProvider.cik().padStart(10, '0')
-    protected val conceptManager = ConceptManager(filingProvider)
-    protected val labelManager = LabelManager(filingProvider)
-    protected val evaluator = ModelEvaluator()
-    protected val calculations = factBase.calculations(cik)
+    val executor = Executors.newCachedThreadPool()
+    val cik = filingProvider.cik().padStart(10, '0')
+    val conceptManager = ConceptManager(filingProvider)
+    val labelManager = LabelManager(filingProvider)
+    val evaluator = ModelEvaluator()
+    val calculations = factBase.calculations(cik)
 
     val revenueConceptName = revenueItem()
-    val conceptDependencies: Map<String, Set<String>>
+    val conceptDependencies: Map<String, Set<Calculation>>
     val incomeStatement = calculations.incomeStatement
     val tradingSymbol = filingEntity.tradingSymbol
 
@@ -52,7 +52,7 @@ abstract class AbstractModelBuilder(
         conceptDependencies = conceptDependencies()
     }
 
-    protected val log = LoggerFactory.getLogger(EarningsRecoveryAnalyzer::class.java)
+    val log = LoggerFactory.getLogger(EarningsRecoveryAnalyzer::class.java)
 
     protected fun timeSeriesVsRevenue(
         conceptName: String,
@@ -197,28 +197,30 @@ abstract class AbstractModelBuilder(
             }?.conceptName ?: error("unable to find revenue total item name for $cik")
     }
 
-    private fun conceptDependencies(): Map<String, Set<String>> {
-        val lookup = calculations
+    private fun conceptDependencies(): Map<String, HashSet<Calculation>> {
+        val immediateChildrenLookup = calculations
             .incomeStatement
             .associateBy { it.conceptName }
 
-        fun flattenSingleConcept(conceptName: String): Set<String> {
-            val calculations = lookup[conceptName]?.calculations ?: emptyList()
-            val results = HashSet<String>()
-            val stack = Stack<String>()
-            stack.addAll(calculations.map { it.conceptName })
+        fun flattenSingleConcept(conceptName: String): HashSet<Calculation> {
+
+            val calculations = immediateChildrenLookup[conceptName]?.calculations ?: emptyList()
+            val results = HashSet<Calculation>()
+            val stack = Stack<Calculation>()
+            stack.addAll(calculations)
+
             while (stack.isNotEmpty()) {
-                val conceptName = stack.pop()
-                val calculations = lookup[conceptName]?.calculations ?: emptyList()
-                if (calculations.isNotEmpty()) {
-                    stack.addAll(calculations.map { it.conceptName })
+                val calculation = stack.pop()
+                val childrenCalculations = immediateChildrenLookup[calculation.conceptName]?.calculations ?: emptyList()
+                if (childrenCalculations.isNotEmpty()) {
+                    stack.addAll(childrenCalculations)
                 } else {
-                    results.add(conceptName)
+                    results.add(calculation)
                 }
             }
             return results
         }
-        return lookup
+        return immediateChildrenLookup
             .keys
             .map { key -> key to flattenSingleConcept(key) }
             .filter { it.second.isNotEmpty() }

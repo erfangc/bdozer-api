@@ -190,5 +190,5 @@ class EarningsRecoveryAnalyzer(
     }
 
     private fun isCostOperatingCost(item: Item): Boolean =
-        conceptDependencies[USGaapConstants.CostsAndExpenses]?.contains(item.name) == true
+        conceptDependencies[USGaapConstants.CostsAndExpenses]?.map { it.conceptName }?.contains(item.name) == true
 }
