@@ -1,6 +1,7 @@
 package com.starburst.starburst.modelbuilder.templates
 
 import com.starburst.starburst.DoubleExtensions.fmtPct
+import com.starburst.starburst.DoubleExtensions.orZero
 import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
@@ -11,6 +12,7 @@ import com.starburst.starburst.modelbuilder.common.AbstractModelBuilder
 import com.starburst.starburst.modelbuilder.common.Extensions.businessWaterfall
 import com.starburst.starburst.modelbuilder.common.Extensions.fragment
 import com.starburst.starburst.modelbuilder.common.StockAnalysis
+import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
@@ -18,6 +20,7 @@ import com.starburst.starburst.zacks.dataclasses.Context
 import com.starburst.starburst.zacks.modelbuilder.support.SalesEstimateToRevenueConverter
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import java.util.concurrent.Callable
+import kotlin.math.pow
 
 class EarningsRecoveryAnalyzer(
     private val zacksEstimatesService: ZacksEstimatesService,
@@ -81,8 +84,11 @@ class EarningsRecoveryAnalyzer(
         val zeroGrowthPrice = zeroGrowthResult.get().targetPrice.coerceAtLeast(0.0)
 
         val evalResult = evaluator.evaluate(finalModel)
+        val revenueCAGR = revenueCAGR(evalResult)
 
         return StockAnalysis(
+            _id = cik,
+
             model = evalResult.model,
             cells = evalResult.cells,
 
@@ -98,8 +104,15 @@ class EarningsRecoveryAnalyzer(
             targetPrice = evalResult.targetPrice,
             discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
 
-            _id = cik,
+            revenueCAGR = revenueCAGR,
         )
+    }
+
+    private fun revenueCAGR(evalResult: EvaluateModelResult): Double {
+        val revenues = evalResult
+            .cells
+            .filter { cell -> cell.item.name == revenueConceptName }
+        return (revenues.last().value.orZero() / revenues.first().value.orZero()).pow(1.0 / revenues.size) - 1
     }
 
     private fun shareOutstanding(model: Model): Item {

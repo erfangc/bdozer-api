@@ -31,4 +31,6 @@ data class StockAnalysis(
      */
     val targetPrice: Double,
     val discountRate: Double,
+
+    val revenueCAGR: Double,
 )
