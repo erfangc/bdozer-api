@@ -27,7 +27,11 @@ class EdgarExplorer(
             objectMapper.treeToValue<EdgarEntity>(node)
         }.filter { it?._source?.tickers != null }.map {
             it?.copy(
-                _source = it._source.copy(tickers = it._source.tickers?.split(",")?.first()?.trim())
+                _source = it
+                    ._source
+                    .copy(tickers = it._source.tickers?.split(",")
+                        ?.first()
+                        ?.trim())
             )
         }
     }
