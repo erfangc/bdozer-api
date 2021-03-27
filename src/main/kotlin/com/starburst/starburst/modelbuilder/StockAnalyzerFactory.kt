@@ -50,7 +50,7 @@ class StockAnalyzerFactory(
     }
 
     fun getAnalyses(): List<StockAnalysis> {
-        return col.find().toList()
+        return col.find().map { analysis -> updateCurrentPrice(analysis) }.toList()
     }
 
     private fun earningRecoveryAnalyzer(filingEntity: FilingEntity, adsh: String) = EarningsRecoveryAnalyzer(
@@ -63,6 +63,10 @@ class StockAnalyzerFactory(
     fun getAnalysis(cik: String): StockAnalysis {
         val cik = cik.padStart(10, '0')
         val stockAnalysis = col.findOneById(cik) ?: error("No analysis can be found for $cik")
+        return updateCurrentPrice(stockAnalysis)
+    }
+
+    private fun updateCurrentPrice(stockAnalysis: StockAnalysis): StockAnalysis {
         val currentPrice = alphaVantageService.latestPrice(ticker = stockAnalysis.model.symbol ?: error("..."))
         return stockAnalysis.copy(currentPrice = currentPrice)
     }
