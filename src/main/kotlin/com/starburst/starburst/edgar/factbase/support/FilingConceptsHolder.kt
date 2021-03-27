@@ -1,11 +1,11 @@
 package com.starburst.starburst.edgar.factbase.support
 
-import com.starburst.starburst.edgar.ConceptDefinitions
-import com.starburst.starburst.edgar.ConceptDefinitions.getBySchemaLocationAndName
-import com.starburst.starburst.edgar.ConceptDefinitions.putSchemaDocument
-import com.starburst.starburst.edgar.XbrlNamespaces.xsd
-import com.starburst.starburst.edgar.dataclasses.ConceptDefinition
+import com.starburst.starburst.edgar.ConceptsManager
+import com.starburst.starburst.edgar.ConceptsManager.getBySchemaLocationAndName
+import com.starburst.starburst.edgar.ConceptsManager.putSchemaDocument
 import com.starburst.starburst.edgar.FilingProvider
+import com.starburst.starburst.edgar.XbrlNamespaces.xsd
+import com.starburst.starburst.edgar.dataclasses.Concept
 
 /**
  * The goal is to take the standard and extension XSDs of the filing
@@ -17,12 +17,12 @@ import com.starburst.starburst.edgar.FilingProvider
  * of the schema XSD as well as the `id` attribute of the element definition within that XSD
  *
  * 2. From inside the Instance document, in which case the namespace / local namespace is defined
- * since [ConceptManager] is agnostic of how local namespaces are declared in the Instance document
- * [ConceptManager] require full namespace
+ * since [FilingConceptsHolder] is agnostic of how local namespaces are declared in the Instance document
+ * [FilingConceptsHolder] require full namespace
  */
-class ConceptManager(filingProvider: FilingProvider) {
+class FilingConceptsHolder(filingProvider: FilingProvider) {
 
-    private val schemaFileName = filingProvider.schemaExtensionFilename()
+    private val schemaFilename = filingProvider.schemaExtensionFilename()
     private val schemaLocations: Map<String, String>
     private val schema = filingProvider.schema()
 
@@ -31,7 +31,7 @@ class ConceptManager(filingProvider: FilingProvider) {
         load all the schemas and imports
          */
         val targetNamespace = schema.targetNamespace()
-            ?: error("target namespace not declared on $schemaFileName")
+            ?: error("target namespace not declared on $schemaFilename")
 
         schemaLocations = schema
             .getElementsByTag(xsd, "import")
@@ -41,17 +41,16 @@ class ConceptManager(filingProvider: FilingProvider) {
                 val schemaLocation = it.attr("schemaLocation")
                     ?: error("no schema location defined for namespace $namespace on import")
                 namespace to schemaLocation
-            }.plus(targetNamespace to schemaFileName)
+            }.plus(targetNamespace to schemaFilename)
 
-        putSchemaDocument(schemaFileName, filingProvider.schema())
+        putSchemaDocument(schemaFilename, filingProvider.schema())
     }
 
-    fun getConceptDefinition(conceptHref: String) = ConceptDefinitions.getConceptDefinition(conceptHref)
+    fun getConcept(conceptHref: String) = ConceptsManager.getConcept(conceptHref)
 
-    fun getConceptDefinition(namespace: String, conceptName: String): ConceptDefinition? {
+    fun getConcept(namespace: String, conceptName: String): Concept? {
         val schemaLocation = schemaLocations[namespace] ?: return null
         return getBySchemaLocationAndName(schemaLocation, conceptName)
     }
-
 
 }

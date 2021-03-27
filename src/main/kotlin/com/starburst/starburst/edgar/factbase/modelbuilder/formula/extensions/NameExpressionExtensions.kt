@@ -9,7 +9,7 @@ import com.starburst.starburst.models.dataclasses.Item
 internal object NameExpressionExtensions {
 
     /**
-     * Figure out the correct [Item.expression] for total revenue for this company
+     * Figure out the correct [Item.formula] for total revenue for this company
      * if a total revenue line is already defined, then use that otherwise create a summation expression
      * of the individual components
      */

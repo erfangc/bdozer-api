@@ -7,7 +7,7 @@ import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
-import com.starburst.starburst.modelbuilder.common.StockAnalysis
+import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
 import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
 import com.starburst.starburst.models.CellGenerator
 import com.starburst.starburst.zacks.se.ZacksEstimatesService

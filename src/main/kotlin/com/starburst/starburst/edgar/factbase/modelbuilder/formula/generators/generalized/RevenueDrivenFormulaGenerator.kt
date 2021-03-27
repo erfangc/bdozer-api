@@ -44,7 +44,7 @@ class RevenueDrivenFormulaGenerator : FormulaGenerator {
                 This expense historically have been ${slope.fmtPct()} of revenue, on top of ${intercept.fmtRound()}
                 """.trimIndent()
                 Result(
-                    item = item.copy(expression = "$slope*(${ctx.totalRevenueExpression()})${if (intercept > 0) "+$intercept" else intercept}"),
+                    item = item.copy(formula = "$slope*(${ctx.totalRevenueExpression()})${if (intercept > 0) "+$intercept" else intercept}"),
                     commentary = commentary
                 )
             } else {

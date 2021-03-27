@@ -18,7 +18,7 @@ data class Item(
      */
     val historicalValue: HistoricalValue? = null,
 
-    val expression: String = "0.0",
+    val formula: String = "0.0",
 
     val subscriptionRevenue: SubscriptionRevenue? = null,
 
@@ -39,5 +39,5 @@ data class Item(
 
     val commentaries: Commentary? = null,
 
-)
+    )
 

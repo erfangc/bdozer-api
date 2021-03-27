@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.dataclasses
 
-data class ConceptDefinition(
+data class Concept(
     val id: String,
     val targetNamespace: String,
     val conceptHref: String,

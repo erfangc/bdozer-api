@@ -5,7 +5,7 @@ import com.starburst.starburst.spreadsheet.Cell
 
 class CustomTranslator(private val ctx: FormulaTranslationContext) : FormulaTranslator {
     override fun translateFormula(cell: Cell): Cell {
-        val expression = cell.item.expression
+        val expression = cell.item.formula
         return GenericTranslator(ctx)
             .translateFormula(cell.copy(formula = expression))
     }

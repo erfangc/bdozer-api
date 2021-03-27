@@ -21,7 +21,7 @@ class AverageFormulaGenerator : FormulaGenerator {
         } else {
             Result(
                 item = item.copy(
-                    expression = "$average"
+                    formula = "$average"
                 ),
                 commentary = "We assume this item will proceed forward at it's historical average level of ${average.fmtRound()}"
             )

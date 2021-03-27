@@ -96,7 +96,7 @@ class IncomeStatementBuilder(
                 |Out of conservatism, We will assume ${fwrdCogsPct.fmtPct()} going forward
                 |""".trimMargin()
             ),
-            expression = "$fwrdCogsPct * $Revenue",
+            formula = "$fwrdCogsPct * $Revenue",
         )
     }
 
@@ -134,39 +134,39 @@ class IncomeStatementBuilder(
                 name = GrossProfit,
                 description = "Gross Profit",
                 historicalValue = HistoricalValue(value = latest.gross_profit.orZero()),
-                expression = "$Revenue - $CostOfGoodsSold",
+                formula = "$Revenue - $CostOfGoodsSold",
             ),
             operatingExpenses,
             Item(
                 name = OperatingIncome,
                 description = "Operating Income",
                 historicalValue = HistoricalValue(value = latest.oper_income.orZero()),
-                expression = "$GrossProfit-$OperatingExpense",
+                formula = "$GrossProfit-$OperatingExpense",
             ),
             Item(
                 name = NonOperatingExpense,
                 description = "Non-Operating Expense",
                 historicalValue = HistoricalValue(value = latest.tot_non_oper_income_exp.orZero()),
-                expression = "$totNonOperIncomeExp",
+                formula = "$totNonOperIncomeExp",
             ),
             Item(
                 name = PretaxIncome,
                 description = "Pretax Income",
                 historicalValue = HistoricalValue(value = preTaxIncome),
-                expression = "$OperatingIncome-$NonOperatingExpense",
+                formula = "$OperatingIncome-$NonOperatingExpense",
             ),
             Item(
                 name = TaxExpense,
                 description = "Tax Expense",
                 historicalValue = HistoricalValue(value = taxesPaid),
-                expression = "$taxRate*$PretaxIncome",
+                formula = "$taxRate*$PretaxIncome",
                 commentaries = Commentary("Pretax income is taxed at ${taxRate.fmtPct()}")
             ),
             Item(
                 name = NetIncome,
                 description = "Net Income",
                 historicalValue = HistoricalValue(value = latest.net_income_loss_share_holder.orZero()),
-                expression = "$PretaxIncome-$TaxExpense"
+                formula = "$PretaxIncome-$TaxExpense"
             ),
         )
 
@@ -203,7 +203,7 @@ class IncomeStatementBuilder(
                 name = Revenue,
                 description = "Revenue",
                 historicalValue = HistoricalValue(value = totRevnu),
-                expression = formula
+                formula = formula
             )
         }
     }
@@ -240,7 +240,7 @@ class IncomeStatementBuilder(
                 name = OperatingExpense,
                 description = "Operating Expense",
                 historicalValue = HistoricalValue(value = operatingExpenses),
-                expression = "$fwrdOperatingExp",
+                formula = "$fwrdOperatingExp",
                 commentaries = Commentary(
                     """
                     |Going forward operating expense will be ${'$'}${fwrdOperatingExp.fmtRound()} million,
@@ -253,7 +253,7 @@ class IncomeStatementBuilder(
                 name = OperatingExpense,
                 description = "Operating Expense",
                 historicalValue = HistoricalValue(value = operatingExpenses),
-                expression = "$operatingExpenses",
+                formula = "$operatingExpenses",
             )
         }
     }

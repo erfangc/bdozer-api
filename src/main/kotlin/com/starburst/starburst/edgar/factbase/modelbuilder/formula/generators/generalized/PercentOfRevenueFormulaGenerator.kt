@@ -20,7 +20,7 @@ class PercentOfRevenueFormulaGenerator : FormulaGenerator {
             value.value!! / revenue.value!!
         }.average()
         return Result(
-            item = item.copy(expression = "$revenueExpression*$average"),
+            item = item.copy(formula = "$revenueExpression*$average"),
             commentary = """
             Cost of goods sold is variable with respect to revenue, historically cost of goods
             sold has been ${average.fmtPct()}

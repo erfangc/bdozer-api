@@ -14,7 +14,7 @@ class RevenueFormulaGenerator : FormulaGenerator {
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {
         return Result(
             item = item.copy(
-                expression = "${previous(item.name)} * (1+15%)"
+                formula = "${previous(item.name)} * (1+15%)"
             )
         )
     }

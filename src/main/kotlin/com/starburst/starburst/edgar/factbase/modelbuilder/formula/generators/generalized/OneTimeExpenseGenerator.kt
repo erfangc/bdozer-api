@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 class OneTimeExpenseGenerator : FormulaGenerator {
     override fun generate(item: Item, ctx: ModelFormulaBuilderContext): Result {
         return Result(
-            item = item.copy(expression = "0.0"),
+            item = item.copy(formula = "0.0"),
             commentary = "This is a one time items that we do not expect to repeat"
         )
     }

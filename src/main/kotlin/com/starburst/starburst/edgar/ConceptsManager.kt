@@ -1,7 +1,7 @@
 package com.starburst.starburst.edgar
 
 import com.starburst.starburst.edgar.XbrlNamespaces.xsd
-import com.starburst.starburst.edgar.dataclasses.ConceptDefinition
+import com.starburst.starburst.edgar.dataclasses.Concept
 import com.starburst.starburst.xml.HttpClientExtensions.readXml
 import com.starburst.starburst.xml.XmlElement
 import org.apache.http.impl.client.HttpClientBuilder
@@ -9,20 +9,20 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 
 /**
- * This is an App wide [ConceptDefinition] manager
+ * This is an App wide [Concept] manager
  * that allows a clean interface for retrieving concept definitions
  * by their `href`
  */
-object ConceptDefinitions {
+object ConceptsManager {
 
     private val schemaLocations = mutableMapOf<String, String>()
-    private val concepts = mutableMapOf<String, Map<String, ConceptDefinition>>()
-    private val conceptsByName = mutableMapOf<String, Map<String, ConceptDefinition>>()
+    private val concepts = mutableMapOf<String, Map<String, Concept>>()
+    private val conceptsByName = mutableMapOf<String, Map<String, Concept>>()
     private val http = HttpClientBuilder.create().build()
     private val visitedSchemaLocations = hashSetOf<String>()
-    private val log = LoggerFactory.getLogger(ConceptDefinitions::class.java)
+    private val log = LoggerFactory.getLogger(ConceptsManager::class.java)
 
-    fun getConceptDefinition(href: String): ConceptDefinition? {
+    fun getConcept(href: String): Concept? {
         val uri = URI(href)
         val schemaLocation = schemaLocation(uri)
         if (!visitedSchemaLocations.contains(schemaLocation)) {
@@ -38,7 +38,7 @@ object ConceptDefinitions {
         "${uri.scheme}://${uri.host}${uri.path}"
     }
 
-    fun getBySchemaLocationAndName(schemaLocation: String, conceptName: String): ConceptDefinition? {
+    fun getBySchemaLocationAndName(schemaLocation: String, conceptName: String): Concept? {
         if (!visitedSchemaLocations.contains(schemaLocation))
             loadRemoteSchema(schemaLocation)
         return conceptsByName[schemaLocation]?.get(conceptName)
@@ -52,7 +52,7 @@ object ConceptDefinitions {
             .map { element ->
                 val name = element.attr("name") ?: error("")
                 val id = element.attr("id")
-                ConceptDefinition(
+                Concept(
                     id = id ?: name,
                     targetNamespace = targetNamespace,
                     conceptHref = "$schemaLocation#$id",

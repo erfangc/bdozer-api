@@ -16,7 +16,7 @@ import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtension
 import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
-import com.starburst.starburst.edgar.factbase.support.ConceptManager
+import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import java.net.URI
 import java.util.*
 
@@ -25,7 +25,7 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
     private val incomeStatementRootHref = "us-gaap_IncomeStatementAbstract"
     private val cashFlowStatementRootHref = "us-gaap_StatementOfCashFlowsAbstract"
     private val balanceSheetRootHref = "us-gaap_StatementOfFinancialPositionAbstract"
-    private val conceptManager = ConceptManager(filingProvider = filingProvider)
+    private val conceptManager = FilingConceptsHolder(filingProvider = filingProvider)
 
     /**
      * Parse filing calculations
@@ -138,7 +138,7 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
                     conceptHref = conceptHref,
                     calculations = calculationArcs[conceptHref] ?: emptyList(),
                     parentHref = if (parents.isNotEmpty()) locatorHrefs[parents.peek()] else null,
-                    conceptName = conceptManager.getConceptDefinition(conceptHref)?.conceptName!!,
+                    conceptName = conceptManager.getConcept(conceptHref)?.conceptName!!,
                 )
             )
 
@@ -189,7 +189,7 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
                     Calculation(
                         conceptHref = conceptHref,
                         weight = node.weight(),
-                        conceptName = conceptManager.getConceptDefinition(conceptHref)?.conceptName!!
+                        conceptName = conceptManager.getConcept(conceptHref)?.conceptName!!
                     )
                 }
                 val fromConceptHref = calculationLocs[from] ?: error("...")

@@ -27,7 +27,7 @@ class TaxExpenseFormulaGenerator : FormulaGenerator {
                     we will assume ${taxRate.fmtPct()} going forward
                 """.trimIndent()
             Result(
-                item = item.copy(expression = "$IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest*$taxRate"),
+                item = item.copy(formula = "$IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest*$taxRate"),
                 commentary = commentary
             )
         } else {

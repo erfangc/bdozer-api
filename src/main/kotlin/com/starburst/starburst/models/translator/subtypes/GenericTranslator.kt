@@ -8,8 +8,8 @@ import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token.NOT_MATCHED
 
 /**
- * [GenericTranslator] resolves a [Cell] whose value is linked to an [Item] with [Item.expression] populated.
- * Normally [Item]'s expression is the sum of drivers - [Item] may take on value specified by [Item.expression]. This resolver
+ * [GenericTranslator] resolves a [Cell] whose value is linked to an [Item] with [Item.formula] populated.
+ * Normally [Item]'s expression is the sum of drivers - [Item] may take on value specified by [Item.formula]. This resolver
  * populates such expression with real cells
  *
  */

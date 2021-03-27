@@ -260,7 +260,7 @@ class CellGenerator {
              */
             val periodCell = Cell(
                 period = period,
-                item = Item(name = "period", expression = "$period"),
+                item = Item(name = "period", formula = "$period"),
                 name = "period_$period",
                 value = period.toDouble(),
                 address = Address(
@@ -278,7 +278,7 @@ class CellGenerator {
             val balanceSheetCells = model.balanceSheetItems.mapIndexed { idx, item ->
                 Cell(
                     name = "${item.name}_Period$period",
-                    formula = item.expression,
+                    formula = item.formula,
                     item = item,
                     period = period,
                     address = Address(
@@ -297,7 +297,7 @@ class CellGenerator {
             val cashFlowStatementItems = model.cashFlowStatementItems.mapIndexed { idx, item ->
                 Cell(
                     name = "${item.name}_Period$period",
-                    formula = item.expression,
+                    formula = item.formula,
                     item = item,
                     period = period,
                     address = Address(
@@ -316,7 +316,7 @@ class CellGenerator {
             val otherCells = model.otherItems.mapIndexed { idx, item ->
                 Cell(
                     name = "${item.name}_Period$period",
-                    formula = item.expression,
+                    formula = item.formula,
                     item = item,
                     period = period,
                     address = Address(

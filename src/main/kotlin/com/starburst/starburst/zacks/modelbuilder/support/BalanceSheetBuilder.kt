@@ -58,13 +58,13 @@ class BalanceSheetBuilder {
                 name = CurrentAsset,
                 commentaries = Commentary("Current asset is ${caRatio.fmtPct()} of total asset"),
                 historicalValue = HistoricalValue(value = totCurrAsset),
-                expression = "$caRatio * $TotalAsset",
+                formula = "$caRatio * $TotalAsset",
             ),
             Item(
                 name = PropertyPlanetAndEquipement,
                 commentaries = Commentary("PP&E is ${ppeRatio.fmtPct()} of total asset"),
                 historicalValue = HistoricalValue(value = netPropPlantEquip),
-                expression = "$ppeRatio * $TotalAsset",
+                formula = "$ppeRatio * $TotalAsset",
             ),
             Item(
                 name = LongTermAsset,
@@ -72,13 +72,13 @@ class BalanceSheetBuilder {
                 // y = px / (1-p); p = target % of total asset, x = everything except long-term asset
                 // avoid circular reference
                 historicalValue = HistoricalValue(value = totLtermAsset),
-                expression = "$ltaRatio * $TotalAsset + $PropertyPlanetAndEquipement",
+                formula = "$ltaRatio * $TotalAsset + $PropertyPlanetAndEquipement",
             ),
             Item(
                 name = TotalAsset,
                 commentaries = Commentary("Total asset is ${totalAssetOverRevenue.fmtRound()}x of revenue"),
                 historicalValue = HistoricalValue(value = totAsset),
-                expression = "$totalAssetOverRevenue * $Revenue"
+                formula = "$totalAssetOverRevenue * $Revenue"
             ),
             /*
             Liabilities
@@ -87,25 +87,25 @@ class BalanceSheetBuilder {
                 name = CurrentLiability,
                 historicalValue = HistoricalValue(value = totCurrLiab),
                 commentaries = Commentary("Current liability is ${clRatio.fmtPct()} of total liability"),
-                expression = "$clRatio*${TotalLiability}",
+                formula = "$clRatio*${TotalLiability}",
             ),
             Item(
                 name = LongTermDebt,
                 historicalValue = HistoricalValue(value = totLtermDebt),
                 commentaries = Commentary("Long-term debt liability is ${ltdRatio.fmtPct()} of total liability"),
-                expression = "$ltdRatio*${TotalLiability}",
+                formula = "$ltdRatio*${TotalLiability}",
             ),
             Item(
                 name = LongTermLiability,
                 historicalValue = HistoricalValue(value = totLtermLiab),
                 commentaries = Commentary("Long-term liability is ${ltlRatio.fmtPct()} of total liability"),
-                expression = "$ltlRatio*${TotalLiability} + $LongTermDebt",
+                formula = "$ltlRatio*${TotalLiability} + $LongTermDebt",
             ),
             Item(
                 name = TotalLiability,
                 historicalValue = HistoricalValue(value = totLiab),
                 commentaries = Commentary("Total liability is ${totalLiabilityOverRevenue.fmtRound()}x of revenue"),
-                expression = "$totalLiabilityOverRevenue * $Revenue"
+                formula = "$totalLiabilityOverRevenue * $Revenue"
             ),
             /*
             Shareholders Equity
@@ -113,12 +113,12 @@ class BalanceSheetBuilder {
             Item(
                 name = ShareholdersEquity,
                 historicalValue = HistoricalValue(value = totShareHolderEquity),
-                expression = "$TotalAsset - $TotalLiability"
+                formula = "$TotalAsset - $TotalLiability"
             ),
             Item(
                 name = SharesOutstanding,
                 historicalValue = HistoricalValue(value = avgBShares),
-                expression = "$avgBShares"
+                formula = "$avgBShares"
             ),
         )
         return BalanceSheet(items = items)

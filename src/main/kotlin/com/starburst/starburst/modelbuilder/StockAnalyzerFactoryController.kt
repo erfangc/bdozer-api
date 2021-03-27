@@ -1,6 +1,6 @@
 package com.starburst.starburst.modelbuilder
 
-import com.starburst.starburst.modelbuilder.common.StockAnalysis
+import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
 import org.springframework.web.bind.annotation.*
 
 @RestController

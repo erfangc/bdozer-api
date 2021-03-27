@@ -87,19 +87,19 @@ class ZacksModelBuilder(
         return listOf(
             Item(
                 name = DiscountFactor,
-                expression = "1 / (1.0 + $discountRate)^period"
+                formula = "1 / (1.0 + $discountRate)^period"
             ),
             Item(
                 name = EarningsPerShare,
-                expression = "$NetIncome / $SharesOutstanding"
+                formula = "$NetIncome / $SharesOutstanding"
             ),
             Item(
                 name = TerminalValuePerShare,
-                expression = "if(period=$periods,$EarningsPerShare * ${terminalPeMultiple},0.0)"
+                formula = "if(period=$periods,$EarningsPerShare * ${terminalPeMultiple},0.0)"
             ),
             Item(
                 name = PresentValuePerShare,
-                expression = "$DiscountFactor * ($EarningsPerShare + $TerminalValuePerShare)"
+                formula = "$DiscountFactor * ($EarningsPerShare + $TerminalValuePerShare)"
             )
         )
     }

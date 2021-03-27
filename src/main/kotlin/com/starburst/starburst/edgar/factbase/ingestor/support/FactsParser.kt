@@ -11,7 +11,7 @@ import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtension
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
 import com.starburst.starburst.edgar.factbase.support.LabelManager
-import com.starburst.starburst.edgar.factbase.support.ConceptManager
+import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.xml.LocalDateExtensions.toLocalDate
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.xml.XmlNode
@@ -26,7 +26,7 @@ import java.time.temporal.TemporalAdjusters.lastDayOfMonth
  */
 class FactsParser(private val filingProvider: FilingProvider) {
 
-    private val conceptManager = ConceptManager(filingProvider)
+    private val conceptManager = FilingConceptsHolder(filingProvider)
     private val labelManager = LabelManager(filingProvider)
     private val instanceDocument = filingProvider.instanceDocument()
     private val log = LoggerFactory.getLogger(FactsParser::class.java)
@@ -249,12 +249,12 @@ class FactsParser(private val filingProvider: FilingProvider) {
         }
     }
 
-    private fun lookupConceptDefinition(nodeName: String): ConceptDefinition? {
+    private fun lookupConceptDefinition(nodeName: String): Concept? {
         val (namespace, tag) = parseInstanceNodeName(nodeName)
         return if (namespace.isEmpty()) {
             null
         } else {
-            conceptManager.getConceptDefinition(namespace, tag)
+            conceptManager.getConcept(namespace, tag)
         }
     }
 

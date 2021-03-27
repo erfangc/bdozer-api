@@ -1,34 +1,38 @@
-package com.starburst.starburst.modelbuilder.common
+package com.starburst.starburst.modelbuilder.common.extensions
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
+import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
+import com.starburst.starburst.modelbuilder.dataclasses.Waterfall
 import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.spreadsheet.Cell
-import java.net.URI
 import kotlin.math.abs
 
-object Extensions {
-    fun String.fragment(): String = URI(this).fragment
+object BusinessWaterfallExtensions {
 
-    fun AbstractModelBuilder.businessWaterfall(evalResult: EvaluateModelResult): Map<Int, Waterfall> {
+    /**
+     * This method computes the [Waterfall] for every period. A [Waterfall] groups - for 1 period -
+     * the major expenses into at most 5 categories for ease of display
+     */
+    fun AbstractStockAnalyzer.businessWaterfall(evalResult: EvaluateModelResult): Map<Int, Waterfall> {
         return evalResult
             .cells
             .groupBy { it.period }
             .map { (period, cells) ->
                 val cells = cells.associateBy { it.item.name }
                 /*
-                extract revenue
+                Find total revenue revenue
                  */
-                val revenue = cells[revenueConceptName] ?: error("no revenue cell found for period $period")
+                val revenue = cells[totalRevenueConceptName] ?: error("no revenue cell found for period $period")
 
                 /*
-                extract expenses
+                Find all the expenses
                  */
                 val expenses = conceptDependencies[NetIncomeLoss]
-                    ?.filter { calculation -> calculation.conceptName != revenueConceptName }
+                    ?.filter { calculation -> calculation.conceptName != totalRevenueConceptName }
                     ?.mapNotNull { calculation ->
                         val cell = cells[calculation.conceptName]
-                        val concept = conceptManager.getConceptDefinition(calculation.conceptHref)
+                        val concept = conceptManager.getConcept(calculation.conceptHref)
                         val weight = if (concept?.balance == "credit") 1.0 else -1.0
                         cell?.copy(value = (cell.value ?: 0.0) * weight)
                     }
@@ -38,7 +42,7 @@ object Extensions {
                 val cutoff = 5
 
                 /*
-                top 5
+                top 5 expenses and then lump everything else into Other
                  */
                 val condensedExpenses = if (conceptSize > cutoff) {
                     val top5Expenses = expenses.subList(0, cutoff)
@@ -58,7 +62,7 @@ object Extensions {
                  */
                 val profit = cells[NetIncomeLoss] ?: error("no revenue cell found for period $period")
 
-                period to Waterfall(revenue = revenue, topExpenses = condensedExpenses, profit = profit)
+                period to Waterfall(revenue = revenue, expenses = condensedExpenses, profit = profit)
             }.toMap()
     }
 
