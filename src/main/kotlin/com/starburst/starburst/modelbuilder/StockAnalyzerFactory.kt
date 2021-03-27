@@ -9,6 +9,7 @@ import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.StockAnalysis
 import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
+import com.starburst.starburst.models.CellGenerator
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
@@ -29,6 +30,11 @@ class StockAnalyzerFactory(
 
     private val col = mongoDatabase.getCollection<StockAnalysis>()
     private val log = LoggerFactory.getLogger(StockAnalyzerFactory::class.java)
+
+    fun excelModel(cik: String): ByteArray {
+        val stockAnalysis = getAnalysis(cik)
+        return CellGenerator.exportToXls(stockAnalysis.model, stockAnalysis.cells)
+    }
 
     fun analyze(cik: String, save: Boolean?): StockAnalysis {
         val cik = cik.padStart(10, '0')

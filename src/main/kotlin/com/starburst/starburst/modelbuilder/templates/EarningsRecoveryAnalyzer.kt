@@ -87,7 +87,8 @@ class EarningsRecoveryAnalyzer(
 
         return StockAnalysis(
             _id = cik,
-
+            cik = cik,
+            ticker = filingEntity.tradingSymbol,
             model = evalResult.model,
             cells = evalResult.cells,
 

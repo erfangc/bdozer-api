@@ -7,6 +7,8 @@ import java.time.Instant
 
 data class StockAnalysis(
     val _id: String,
+    val cik: String,
+    val ticker: String? = null,
     val lastUpdated: Instant = Instant.now(),
     /*
     value breakdown
