@@ -22,7 +22,6 @@ data class Model(
     /**
      * Assumptions
      */
-    val currentPrice: Double = 1.0,
     val beta: Double = 1.0,
     val sharesOutstanding: Double = 1.0,
     val dilutedSharesOutstanding: Double? = null,

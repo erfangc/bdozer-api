@@ -43,7 +43,6 @@ class EarningsRecoveryAnalyzer(
             name = filingEntity.name,
             symbol = tradingSymbol,
             description = filingEntity.description,
-            currentPrice = 22.7,
             beta = 1.86,
             terminalGrowthRate = 0.02
         )
@@ -97,15 +96,14 @@ class EarningsRecoveryAnalyzer(
 
             businessWaterfall = businessWaterfall(evalResult),
 
-            currentPrice = model.currentPrice,
             zeroGrowthPrice = zeroGrowthPrice,
-            impliedPriceFromGrowth = model.currentPrice - zeroGrowthPrice,
 
             targetPrice = evalResult.targetPrice,
             discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
 
             revenueCAGR = revenueCAGR,
-        )
+
+            )
     }
 
     private fun revenueCAGR(evalResult: EvaluateModelResult): Double {
@@ -115,7 +113,7 @@ class EarningsRecoveryAnalyzer(
         return (revenues.last().value.orZero() / revenues.first().value.orZero()).pow(1.0 / revenues.size) - 1
     }
 
-    private fun shareOutstanding(model: Model): Item {
+    protected fun shareOutstanding(model: Model): Item {
         return model.incomeStatementItems.find { it.name == WeightedAverageNumberOfDilutedSharesOutstanding }
             ?: error("...")
     }

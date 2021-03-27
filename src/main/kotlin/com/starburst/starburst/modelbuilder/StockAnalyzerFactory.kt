@@ -1,6 +1,7 @@
 package com.starburst.starburst.modelbuilder
 
 import com.mongodb.client.MongoDatabase
+import com.starburst.starburst.alphavantage.AlphaVantageService
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
@@ -23,6 +24,7 @@ class StockAnalyzerFactory(
     private val zacksEstimatesService: ZacksEstimatesService,
     private val edgarExplorer: EdgarExplorer,
     private val filingEntityManager: FilingEntityManager,
+    private val alphaVantageService: AlphaVantageService,
 ) {
 
     private val col = mongoDatabase.getCollection<StockAnalysis>()
@@ -60,6 +62,8 @@ class StockAnalyzerFactory(
 
     fun getAnalysis(cik: String): StockAnalysis {
         val cik = cik.padStart(10, '0')
-        return col.findOneById(cik) ?: error("No analysis can be found for $cik")
+        val stockAnalysis = col.findOneById(cik) ?: error("No analysis can be found for $cik")
+        val currentPrice = alphaVantageService.latestPrice(ticker = stockAnalysis.model.symbol ?: error("..."))
+        return stockAnalysis.copy(currentPrice = currentPrice)
     }
 }

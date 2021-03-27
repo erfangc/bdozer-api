@@ -12,8 +12,6 @@ data class StockAnalysis(
     value breakdown
      */
     val zeroGrowthPrice: Double,
-    val impliedPriceFromGrowth: Double,
-    val currentPrice: Double,
 
     val model: Model,
     val cells: List<Cell>,
@@ -33,4 +31,6 @@ data class StockAnalysis(
     val discountRate: Double,
 
     val revenueCAGR: Double,
+
+    val currentPrice: Double = 0.0,
 )
