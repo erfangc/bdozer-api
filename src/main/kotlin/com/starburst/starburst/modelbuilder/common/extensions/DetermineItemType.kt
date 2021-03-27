@@ -5,7 +5,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
 import com.starburst.starburst.models.dataclasses.Item
 
-object DetermineItemTypeExtensions {
+object DetermineItemType {
 
     fun AbstractStockAnalyzer.isCostOperatingCost(item: Item): Boolean =
         conceptDependencies[CostsAndExpenses]?.map { it.conceptName }?.contains(item.name) == true

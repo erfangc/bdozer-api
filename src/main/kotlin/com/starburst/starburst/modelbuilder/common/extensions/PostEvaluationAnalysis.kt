@@ -4,7 +4,7 @@ import com.starburst.starburst.DoubleExtensions.orZero
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
-import com.starburst.starburst.modelbuilder.common.extensions.BusinessWaterfallExtensions.businessWaterfall
+import com.starburst.starburst.modelbuilder.common.extensions.BusinessWaterfall.businessWaterfall
 import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
 import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Item
@@ -12,7 +12,7 @@ import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
 import kotlin.math.pow
 
-object StockAnalysisExtensions {
+object PostEvaluationAnalysis {
 
     fun AbstractStockAnalyzer.postModelEvaluationAnalysis(evalResult: EvaluateModelResult): StockAnalysis {
         val model = evalResult.model

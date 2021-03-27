@@ -23,5 +23,4 @@ interface FilingProvider {
     fun labelLinkbaseFilename(): String
     fun presentationLinkbaseFilename(): String
     fun instanceDocumentFilename(): String
-
 }

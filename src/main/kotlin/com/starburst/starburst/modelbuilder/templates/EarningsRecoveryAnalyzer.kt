@@ -5,6 +5,7 @@ import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
+import com.starburst.starburst.modelbuilder.common.StockAnalyzerDataProvider
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.zacks.dataclasses.Context
@@ -13,10 +14,8 @@ import com.starburst.starburst.zacks.se.ZacksEstimatesService
 
 class EarningsRecoveryAnalyzer(
     private val zacksEstimatesService: ZacksEstimatesService,
-    filingProvider: FilingProvider,
-    factBase: FactBase,
-    filingEntity: FilingEntity,
-) : AbstractStockAnalyzer(filingProvider, factBase, filingEntity) {
+    dataProvider: StockAnalyzerDataProvider,
+) : AbstractStockAnalyzer(dataProvider) {
 
     override fun processOperatingCostItem(item: Item): Item {
         return itemAsPercentOfRevenue(item)

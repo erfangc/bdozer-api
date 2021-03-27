@@ -8,7 +8,7 @@ import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.spreadsheet.Cell
 import kotlin.math.abs
 
-object BusinessWaterfallExtensions {
+object BusinessWaterfall {
 
     /**
      * This method computes the [Waterfall] for every period. A [Waterfall] groups - for 1 period -

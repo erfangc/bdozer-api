@@ -92,7 +92,6 @@ class FilingProviderFactory(
         val calculationLinkbase: XmlElement = http.readXml("$baseUrl/$calculationLinkbaseRef")
 
         return object : FilingProvider {
-
             override fun adsh(): String {
                 return adsh
             }

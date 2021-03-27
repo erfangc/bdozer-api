@@ -1,26 +1,26 @@
 package com.starburst.starburst.modelbuilder.common
 
-import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
-import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.edgar.factbase.support.LabelManager
-import com.starburst.starburst.filingentity.dataclasses.FilingEntity
-import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.processEpsItem
-import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.processOneTimeItem
-import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.processTaxItem
+import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.fillEpsItem
+import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.fillOneTimeItem
+import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.fillTaxItem
 import com.starburst.starburst.modelbuilder.common.GeneralExtensions.fragment
-import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelperExtensions.conceptHrefToItemName
-import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelperExtensions.historicalValue
-import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemTypeExtensions.isCostOperatingCost
-import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemTypeExtensions.isEpsItem
-import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemTypeExtensions.isOneTime
-import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemTypeExtensions.isTaxItem
-import com.starburst.starburst.modelbuilder.common.extensions.StockAnalysisExtensions.postModelEvaluationAnalysis
+import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.conceptHrefToItemName
+import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.conceptLabel
+import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.expression
+import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.historicalValue
+import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isCostOperatingCost
+import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isEpsItem
+import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isOneTime
+import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isTaxItem
+import com.starburst.starburst.modelbuilder.common.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
 import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
 import com.starburst.starburst.models.ModelEvaluator
@@ -36,24 +36,18 @@ import java.util.*
 import kotlin.collections.HashSet
 
 abstract class AbstractStockAnalyzer(
-    val filingProvider: FilingProvider,
-    val factBase: FactBase,
-    val filingEntity: FilingEntity
-) {
-
+    dataProvider: StockAnalyzerDataProvider
+) : StockAnalyzer {
+    val filingProvider = dataProvider.filingProvider
+    val factBase = dataProvider.factBase
+    val filingEntity = dataProvider.filingEntity
     val cik = filingProvider.cik().padStart(10, '0')
     val conceptManager = FilingConceptsHolder(filingProvider)
     val labelManager = LabelManager(filingProvider)
     val evaluator = ModelEvaluator()
     val calculations = factBase.calculations(cik)
-
     val totalRevenueConceptName = totalRevenueItemName()
-    val conceptDependencies: Map<String, Set<Calculation>>
-    val tradingSymbol = filingEntity.tradingSymbol
-
-    init {
-        conceptDependencies = conceptDependencies()
-    }
+    val conceptDependencies = conceptDependencies()
 
     val log = LoggerFactory.getLogger(EarningsRecoveryAnalyzer::class.java)
 
@@ -114,7 +108,7 @@ abstract class AbstractStockAnalyzer(
             .toList()
     }
 
-    fun analyze(): StockAnalysis {
+    override fun analyze(): StockAnalysis {
         val model = emptyModel().copy(
             incomeStatementItems = createIncomeStatementItems()
         )
@@ -125,7 +119,7 @@ abstract class AbstractStockAnalyzer(
 
     fun emptyModel() = Model(
         name = filingEntity.name,
-        symbol = tradingSymbol,
+        symbol = filingEntity.tradingSymbol,
         description = filingEntity.description,
         beta = 1.86,
         terminalGrowthRate = 0.02
@@ -152,69 +146,38 @@ abstract class AbstractStockAnalyzer(
                 val concept = conceptManager.getConcept(conceptHref) ?: conceptNotFound(conceptHref)
                 val historicalValue = historicalValue(concept)
 
-                /**
-                 * Find the label of an [Arc]
-                 */
-                fun arcLabel(arc: Arc): String {
-                    val label = labelManager.getLabel(arc.conceptHref.fragment())
-                    return label?.terseLabel ?: label?.label ?: arc.conceptName
-                }
-
-                /**
-                 * For an Arc with dependent calculations
-                 * create a String based formula based on the weight
-                 * and concept defined in those calculations
-                 */
-                fun expression(arc: Arc): String {
-                    val positives = arc
-                        .calculations
-                        .filter { it.weight > 0 }
-                        .joinToString("+") { conceptHrefToItemName(it.conceptHref) }
-
-                    val negatives = arc
-                        .calculations
-                        .filter { it.weight < 0 }
-                        .joinToString("-") { conceptHrefToItemName(it.conceptHref) }
-
-                    return if (negatives.isNotEmpty()) {
-                        "$positives - $negatives"
-                    } else {
-                        positives
-                    }
-                }
-
                 val item = if (arc.calculations.isEmpty()) {
                     Item(
                         name = conceptHrefToItemName(conceptHref),
-                        description = arcLabel(arc),
+                        description = conceptLabel(conceptHref),
                         historicalValue = historicalValue,
                         formula = "${historicalValue?.value ?: 0.0}",
                     )
                 } else {
                     Item(
                         name = conceptHrefToItemName(conceptHref),
-                        description = arcLabel(arc),
+                        description = conceptLabel(conceptHref),
                         historicalValue = historicalValue,
                         formula = expression(arc),
                     )
                 }
-                processItem(item = item)
+                fillInItem(item = item)
             }
     }
 
-    fun processItem(item: Item): Item {
+    fun fillInItem(item: Item): Item {
         return when {
             item.name == totalRevenueConceptName -> {
                 processTotalRevenueItem(item)
             }
             isEpsItem(item) -> {
-                processEpsItem(item)
+                fillEpsItem(item)
             }
             isTaxItem(item) -> {
-                processTaxItem(item)
+                fillTaxItem(item)
             }
             isOneTime(item) -> {
-                processOneTimeItem(item)
+                fillOneTimeItem(item)
             }
             isCostOperatingCost(item) -> {
                 processOperatingCostItem(item)
@@ -225,16 +188,18 @@ abstract class AbstractStockAnalyzer(
         }
     }
 
-    abstract fun processOperatingCostItem(item: Item): Item
-    abstract fun processTotalRevenueItem(item: Item): Item
-
     fun totalRevenueItemName(): String {
         return calculations
             .incomeStatement
             .find {
-                setOf("RevenueFromContractWithCustomerExcludingAssessedTax").contains(it.conceptName)
+                setOf(RevenueFromContractWithCustomerExcludingAssessedTax)
+                    .contains(it.conceptName)
             }?.conceptName ?: error("unable to find revenue total item name for $cik")
     }
+
+    abstract fun processOperatingCostItem(item: Item): Item
+
+    abstract fun processTotalRevenueItem(item: Item): Item
 
     /**
      * This method creates a flattened list of dependencies
@@ -247,9 +212,9 @@ abstract class AbstractStockAnalyzer(
      */
     private fun conceptDependencies(): Map<String, Set<Calculation>> {
 
-        val immediateChildrenLookup = (calculations.incomeStatement
-                + calculations.cashFlowStatement
-                + calculations.balanceSheet)
+        val immediateChildrenLookup = (
+                calculations.incomeStatement
+                )
             .associateBy { it.conceptName }
 
         fun flattenSingleConcept(conceptName: String): HashSet<Calculation> {

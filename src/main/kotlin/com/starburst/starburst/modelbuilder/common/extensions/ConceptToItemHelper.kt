@@ -8,7 +8,30 @@ import com.starburst.starburst.modelbuilder.common.GeneralExtensions.fragment
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 
-object ConceptToItemHelperExtensions {
+object ConceptToItemHelper {
+
+    /**
+     * For an Arc with dependent calculations
+     * create a String based formula based on the weight
+     * and concept defined in those calculations
+     */
+    fun AbstractStockAnalyzer.expression(arc: Arc): String {
+        val positives = arc
+            .calculations
+            .filter { it.weight > 0 }
+            .joinToString("+") { conceptHrefToItemName(it.conceptHref) }
+
+        val negatives = arc
+            .calculations
+            .filter { it.weight < 0 }
+            .joinToString("-") { conceptHrefToItemName(it.conceptHref) }
+
+        return if (negatives.isNotEmpty()) {
+            "$positives - $negatives"
+        } else {
+            positives
+        }
+    }
 
     /**
      * Determines the "name" of an [Item] based on the
@@ -18,6 +41,15 @@ object ConceptToItemHelperExtensions {
         return conceptManager
             .getConcept(conceptHref)
             ?.conceptName ?: conceptHref.fragment()
+    }
+
+    /**
+     * Find the label of an [Arc]
+     */
+    fun AbstractStockAnalyzer.conceptLabel(conceptHref: String): String {
+        val conceptId = conceptHref.fragment()
+        val label = labelManager.getLabel(conceptId)
+        return label?.terseLabel ?: label?.label ?: conceptId
     }
 
     /**
