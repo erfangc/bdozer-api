@@ -31,6 +31,8 @@ object USGaapConstants {
     const val GeneralAndAdministrativeExpense = "GeneralAndAdministrativeExpense"
     const val Goodwill = "Goodwill"
     const val IncomeTaxExpenseBenefit = "IncomeTaxExpenseBenefit"
+    const val IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment = "IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment"
+    const val RestructuringAndOtherExpenseIncomeMainline = "RestructuringAndOtherExpenseIncomeMainline"
     const val IncreaseDecreaseInAccountsAndOtherReceivables = "IncreaseDecreaseInAccountsAndOtherReceivables"
     const val IncreaseDecreaseInAccountsPayable = "IncreaseDecreaseInAccountsPayable"
     const val IncreaseDecreaseInAccruedLiabilitiesAndOtherLiabilities =

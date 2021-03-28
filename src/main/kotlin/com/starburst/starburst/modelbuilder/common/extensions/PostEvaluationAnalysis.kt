@@ -63,12 +63,12 @@ object PostEvaluationAnalysis {
 
     private fun shareOutstanding(model: Model): Item {
         return model.allItems().find { it.name == WeightedAverageNumberOfDilutedSharesOutstanding }
-            ?: error("cannot find item with name $WeightedAverageNumberOfDilutedSharesOutstanding")
+            ?: error("Cannot find item with name $WeightedAverageNumberOfDilutedSharesOutstanding")
     }
 
     private fun profitPerShare(model: Model): Item {
         return model.allItems().find { it.name == EarningsPerShareDiluted }
-            ?: error("cannot find item with name $EarningsPerShareDiluted")
+            ?: error("Cannot find item with name $EarningsPerShareDiluted")
     }
 
 }
