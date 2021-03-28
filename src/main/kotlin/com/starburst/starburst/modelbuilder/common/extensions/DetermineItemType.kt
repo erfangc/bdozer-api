@@ -5,6 +5,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeTaxExpenseBenefit
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RestructuringAndOtherExpenseIncomeMainline
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.SpecialItems
 import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
 import com.starburst.starburst.models.dataclasses.Item
 
@@ -19,7 +20,8 @@ object DetermineItemType {
     fun AbstractStockAnalyzer.isOneTime(item: Item): Boolean {
         return setOf(
             RestructuringAndOtherExpenseIncomeMainline,
-            IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment
+            IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment,
+            SpecialItems,
         ).contains(item.name)
     }
 
