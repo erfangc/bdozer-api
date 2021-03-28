@@ -32,5 +32,6 @@ data class FilingEntity(
     val latestAdsh: String? = null,
 
     val modelTemplate: ModelTemplate? = null,
+    val beta: Double = 1.0,
 )
 

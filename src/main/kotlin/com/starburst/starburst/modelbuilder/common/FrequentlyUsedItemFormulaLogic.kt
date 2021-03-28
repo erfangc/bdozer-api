@@ -1,8 +1,15 @@
 package com.starburst.starburst.modelbuilder.common
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.CostsAndExpenses
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasic
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingCostsAndExpenses
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 
@@ -17,12 +24,12 @@ object FrequentlyUsedItemFormulaLogic {
         return when (item.name) {
             EarningsPerShareDiluted -> {
                 item.copy(
-                    formula = "${USGaapConstants.NetIncomeLoss} / ${USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding}"
+                    formula = "$NetIncomeLoss / $WeightedAverageNumberOfDilutedSharesOutstanding"
                 )
             }
             EarningsPerShareBasic -> {
                 item.copy(
-                    formula = "${USGaapConstants.NetIncomeLoss} / ${USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic}"
+                    formula = "$NetIncomeLoss / $WeightedAverageNumberOfSharesOutstandingBasic"
                 )
             }
             else -> {
@@ -31,9 +38,44 @@ object FrequentlyUsedItemFormulaLogic {
         }
     }
 
-    fun fillTaxItem(item: Item): Item {
+    fun AbstractStockAnalyzer.fillTaxItem(item: Item): Item {
         return item.copy(
-            formula = "${USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest}*0.12"
+            formula = "${ebitConceptName}*0.12"
         )
+    }
+
+    fun AbstractStockAnalyzer.totalRevenueItemName(): String {
+        val candidateConceptNames = setOf(
+            USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax
+        )
+        return calculations
+            .incomeStatement
+            .find {
+                candidateConceptNames
+                    .contains(it.conceptName)
+            }?.conceptName ?: error("Unable to find revenue total item name for $cik")
+    }
+
+    fun AbstractStockAnalyzer.ebitItemName(): String {
+        val candidateConceptNames = setOf(
+            IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,
+            IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
+        )
+        return calculations
+            .incomeStatement
+            .find { arc -> candidateConceptNames.contains(arc.conceptName) }
+            ?.conceptName ?: error("Unable to determine the Earning Before Income Tax conceptName for $cik")
+    }
+
+    fun AbstractStockAnalyzer.operatingCostsItemName(): String {
+        val candidates = setOf(
+            OperatingCostsAndExpenses,
+            CostsAndExpenses,
+        )
+
+        return calculations
+            .incomeStatement
+            .find { arc -> candidates.contains(arc.conceptName) }
+            ?.conceptName ?: error("Unable to determine the Operating Costs conceptName for $cik")
     }
 }

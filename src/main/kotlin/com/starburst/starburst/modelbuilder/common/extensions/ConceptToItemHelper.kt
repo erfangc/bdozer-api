@@ -57,6 +57,13 @@ object ConceptToItemHelper {
      */
     fun AbstractStockAnalyzer.historicalValue(concept: Concept): HistoricalValue? {
         val conceptName = concept.conceptName
+       return historicalValue(conceptName)
+    }
+
+    /**
+     * Find the [HistoricalValue] of an [Arc] (most recent annual)
+     */
+    fun AbstractStockAnalyzer.historicalValue(conceptName: String): HistoricalValue? {
         val fact = factBase.getFacts(
             cik,
             DocumentFiscalPeriodFocus.FY,

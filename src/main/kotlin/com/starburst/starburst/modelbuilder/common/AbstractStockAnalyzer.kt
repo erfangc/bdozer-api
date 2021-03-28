@@ -6,11 +6,17 @@ import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFo
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.edgar.factbase.support.LabelManager
+import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.ebitItemName
 import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.fillEpsItem
 import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.fillOneTimeItem
 import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.fillTaxItem
+import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.operatingCostsItemName
+import com.starburst.starburst.modelbuilder.common.FrequentlyUsedItemFormulaLogic.totalRevenueItemName
+import com.starburst.starburst.modelbuilder.common.GeneralExtensions.conceptNotFound
 import com.starburst.starburst.modelbuilder.common.GeneralExtensions.fragment
 import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.conceptHrefToItemName
 import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.conceptLabel
@@ -38,38 +44,73 @@ import kotlin.collections.HashSet
 abstract class AbstractStockAnalyzer(
     dataProvider: StockAnalyzerDataProvider
 ) : StockAnalyzer {
+
+    val log = LoggerFactory.getLogger(EarningsRecoveryAnalyzer::class.java)
+
     val filingProvider = dataProvider.filingProvider
-    val factBase = dataProvider.factBase
     val filingEntity = dataProvider.filingEntity
     val cik = filingProvider.cik().padStart(10, '0')
+    val factBase = dataProvider.factBase
     val conceptManager = FilingConceptsHolder(filingProvider)
     val labelManager = LabelManager(filingProvider)
     val evaluator = ModelEvaluator()
     val calculations = factBase.calculations(cik)
     val totalRevenueConceptName = totalRevenueItemName()
-    val conceptDependencies = conceptDependencies()
+    val ebitConceptName = ebitItemName()
+    val operatingCostConceptName = operatingCostsItemName()
 
-    val log = LoggerFactory.getLogger(EarningsRecoveryAnalyzer::class.java)
+    val conceptDependencies = conceptDependencies()
 
     fun timeSeriesVsRevenue(
         conceptName: String,
         periodFocus: DocumentFiscalPeriodFocus = DocumentFiscalPeriodFocus.FY,
     ): List<Pair<Double, Double>> {
-        val revenueFacts = timeSeries(conceptName = totalRevenueConceptName, periodFocus = periodFocus)
+        val revenueFacts = timeSeries(
+            conceptName = totalRevenueConceptName,
+            periodFocus = periodFocus
+        )
+
         val otherFacts = timeSeries(
             conceptName = conceptName,
             periodFocus = periodFocus
         ).associateBy { it.documentPeriodEndDate }
+
         return revenueFacts.sortedBy { it.documentPeriodEndDate }.map { revenue ->
             val otherFact = otherFacts[revenue.documentPeriodEndDate]?.doubleValue ?: 0.0
             (revenue.doubleValue ?: 0.0) to otherFact
         }
     }
 
+    /**
+     * Create items that would end up computing the NPV of the investment
+     */
     fun dcfItems(model: Model): List<Item> {
         val periods = model.periods
         val discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate
         val terminalPeMultiple = 1.0 / (discountRate - model.terminalGrowthRate)
+
+        /*
+        add some mandatory fields if they don't already exist
+         */
+
+        val weightedAverageNumberOfDilutedSharesOutstanding =
+            historicalValue(WeightedAverageNumberOfDilutedSharesOutstanding)
+        val weightedAverageNumberOfSharesOutstandingBasic =
+            historicalValue(WeightedAverageNumberOfSharesOutstandingBasic)
+
+        val additionalMandatoryItems = listOf(
+            Item(
+                name = WeightedAverageNumberOfDilutedSharesOutstanding,
+                historicalValue = weightedAverageNumberOfDilutedSharesOutstanding,
+                formula = weightedAverageNumberOfDilutedSharesOutstanding?.value.toString()
+            ),
+            Item(
+                name = WeightedAverageNumberOfSharesOutstandingBasic,
+                historicalValue = weightedAverageNumberOfSharesOutstandingBasic,
+                formula = weightedAverageNumberOfSharesOutstandingBasic?.value.toString()
+            )
+        ).filter { mandatoryItem -> !model.incomeStatementItems.any { item -> item.name == mandatoryItem.name } }
+
         return listOf(
             Item(
                 name = DiscountFactor,
@@ -91,7 +132,7 @@ abstract class AbstractStockAnalyzer(
                 name = PresentValuePerShare,
                 formula = "$PresentValueOfEarningsPerShare + $PresentValueOfTerminalValuePerShare"
             )
-        )
+        ) + additionalMandatoryItems
     }
 
     /**
@@ -121,7 +162,7 @@ abstract class AbstractStockAnalyzer(
         name = filingEntity.name,
         symbol = filingEntity.tradingSymbol,
         description = filingEntity.description,
-        beta = 1.86,
+        beta = filingEntity.beta,
         terminalGrowthRate = 0.02
     )
 
@@ -165,6 +206,9 @@ abstract class AbstractStockAnalyzer(
             }
     }
 
+    /**
+     * This method fills in the given [Item] with the correct formula
+     */
     fun fillInItem(item: Item): Item {
         return when {
             item.name == totalRevenueConceptName -> {
@@ -186,15 +230,6 @@ abstract class AbstractStockAnalyzer(
                 item
             }
         }
-    }
-
-    fun totalRevenueItemName(): String {
-        return calculations
-            .incomeStatement
-            .find {
-                setOf(RevenueFromContractWithCustomerExcludingAssessedTax)
-                    .contains(it.conceptName)
-            }?.conceptName ?: error("unable to find revenue total item name for $cik")
     }
 
     abstract fun processOperatingCostItem(item: Item): Item
