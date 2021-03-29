@@ -15,7 +15,6 @@ class MarketingController(database: MongoDatabase) {
     val stockAnalysisInterest = database.getCollection<StockAnalysisInterest>()
     val feedbacks = database.getCollection<Feedback>()
 
-
     @PostMapping("early-access-requests")
     fun earlyAccessRequests(@RequestBody body: EarlyAccessRequest) {
         earlyAccessRequests.save(body)
