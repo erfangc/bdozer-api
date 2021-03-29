@@ -6,7 +6,9 @@ import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
 import com.starburst.starburst.modelbuilder.common.StockAnalyzerDataProvider
+import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.historicalValue
 import com.starburst.starburst.models.dataclasses.Commentary
+import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.zacks.dataclasses.Context
 import com.starburst.starburst.zacks.modelbuilder.support.SalesEstimateToRevenueConverter
@@ -37,6 +39,7 @@ class EarningsRecoveryAnalyzer(
         return revenueItem
             .copy(
                 name = item.name,
+                historicalValue = item.historicalValue,
                 discrete = discrete?.copy(
                     formulas = discrete
                         .formulas

@@ -1,23 +1,12 @@
 package com.starburst.starburst.edgar.factbase
 
 import com.mongodb.client.MongoDatabase
-import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
-import com.starburst.starburst.edgar.factbase.dataclasses.Fact
-import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
-import com.starburst.starburst.edgar.factbase.dataclasses.FindFactComponentsResponse
-import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
+import com.starburst.starburst.DoubleExtensions.orZero
+import com.starburst.starburst.edgar.factbase.dataclasses.*
 import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.edgar.factbase.support.FactsBootstrapper
-import com.starburst.starburst.edgar.factbase.support.LabelManager
-import com.starburst.starburst.models.dataclasses.HistoricalValue
-import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.models.dataclasses.Model
-import org.litote.kmongo.and
-import org.litote.kmongo.descending
-import org.litote.kmongo.eq
-import org.litote.kmongo.getCollection
+import org.litote.kmongo.*
 import org.springframework.stereotype.Service
-import java.net.URI
 
 @Service
 class FactBase(
@@ -39,9 +28,48 @@ class FactBase(
         .sort(descending(FilingCalculations::documentPeriodEndDate))
         .first() ?: error("no 10-K based calculation found for $cik")
 
-    fun getFacts(cik: String): List<Fact> {
-        return facts.find(Fact::cik eq cik).toList()
+    fun getFactTimeSeries(factId: String): FactTimeSeries {
+        val originalFact = facts
+            .findOneById(factId)
+            ?: error("no fact can be found for id $factId")
+
+        val cik = originalFact.cik
+        val conceptName = originalFact.conceptName
+
+        val filter = and(
+            Fact::cik eq cik,
+            Fact::conceptName eq conceptName,
+            Fact::explicitMembers eq emptyList()
+        )
+
+        val factTimeSeries = facts
+            .find(filter)
+            .sort(descending(Fact::documentPeriodEndDate))
+            .toList()
+
+        val fyFacts = factTimeSeries
+            .filter { fact -> fact.documentFiscalPeriodFocus == DocumentFiscalPeriodFocus.FY }
+
+        val quarterlyFacts = factTimeSeries
+            .filter { fact -> fact.documentFiscalPeriodFocus != DocumentFiscalPeriodFocus.FY }
+
+        val ltmFacts = mutableListOf<Fact>()
+        for (i in (0 until quarterlyFacts.size - 3)) {
+            val minus0 = quarterlyFacts[i]?.doubleValue.orZero()
+            val minus1 = quarterlyFacts[i + 1]?.doubleValue.orZero()
+            val minus2 = quarterlyFacts[i + 2]?.doubleValue.orZero()
+            val minus3 = quarterlyFacts[i + 3]?.doubleValue.orZero()
+            ltmFacts.add(
+                quarterlyFacts[i].copy(doubleValue = minus0 + minus1 + minus2 + minus3)
+            )
+        }
+
+        return FactTimeSeries(
+            fyFacts, quarterlyFacts, ltmFacts
+        )
     }
+
+    fun getFacts(cik: String): List<Fact> = facts.find(Fact::cik eq cik).toList()
 
     fun getFacts(
         cik: String,
