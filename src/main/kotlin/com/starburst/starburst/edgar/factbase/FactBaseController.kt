@@ -1,32 +1,19 @@
 package com.starburst.starburst.edgar.factbase
 
-import com.starburst.starburst.edgar.factbase.dataclasses.Fact
-import com.starburst.starburst.edgar.factbase.dataclasses.FactTimeSeries
 import com.starburst.starburst.edgar.factbase.ingestor.FilingIngestor
 import com.starburst.starburst.edgar.factbase.ingestor.RssFilingIngestor
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.Executors
 
 @RestController
-@RequestMapping("public/fact-base")
+@RequestMapping("api/fact-base")
 @CrossOrigin
 class FactBaseController(
-    private val factBase: FactBase,
     private val filingIngestor: FilingIngestor,
     private val rssFilingIngestor: RssFilingIngestor,
 ) {
 
     private val executor = Executors.newCachedThreadPool()
-
-    @GetMapping("{cik}/facts")
-    fun facts(@PathVariable cik: String): List<Fact> {
-        return factBase.getFacts(cik)
-    }
-
-    @GetMapping("{factId}/time-series")
-    fun getFactTimeSeries(@PathVariable factId: String): FactTimeSeries {
-        return factBase.getFactTimeSeries(factId)
-    }
 
     @PostMapping("rss-filing-ingestor")
     fun runRssFilingIngestor(
@@ -40,9 +27,6 @@ class FactBaseController(
             }
         }
     }
-
-    @GetMapping("{cik}/calculations")
-    fun calculations(@PathVariable cik: String) = factBase.calculations(cik.padStart(10, '0'))
 
 
     @PostMapping("filing-ingestor")

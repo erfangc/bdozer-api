@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin
-@RequestMapping("public/filing-entity-manager1")
-class PublicFilingEntityManagerController1(private val filingEntityManager: FilingEntityManager) {
+@RequestMapping("public/filing-entity-manager")
+class FilingEntityManagerUnsecuredController(private val filingEntityManager: FilingEntityManager) {
 
     @GetMapping("{cik}")
     fun getFilingEntity(@PathVariable cik: String): FilingEntity {
