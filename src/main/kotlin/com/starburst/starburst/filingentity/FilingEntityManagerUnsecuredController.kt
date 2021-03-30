@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*
 class FilingEntityManagerUnsecuredController(private val filingEntityManager: FilingEntityManager) {
 
     @GetMapping("{cik}")
-    fun getFilingEntity(@PathVariable cik: String): FilingEntity {
-        return filingEntityManager.getOrBootstrapFilingEntity(cik)
+    fun getFilingEntity(@PathVariable cik: String): FilingEntity? {
+        return filingEntityManager.getFilingEntity(cik)
     }
 
 }
