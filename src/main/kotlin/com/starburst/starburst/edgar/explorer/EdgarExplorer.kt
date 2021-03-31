@@ -23,17 +23,29 @@ class EdgarExplorer(
         httpPost.entity = entity
         val jsonNode = objectMapper.readTree(http.execute(httpPost).entity.content)
         httpPost.releaseConnection()
-        return (jsonNode.at("/hits/hits") as ArrayNode).map { node ->
-            objectMapper.treeToValue<EdgarEntity>(node)
-        }.filter { it?._source?.tickers != null }.map {
-            it?.copy(
-                _source = it
-                    ._source
-                    .copy(tickers = it._source.tickers?.split(",")
-                        ?.first()
-                        ?.trim())
-            )
+        val arrayNodes = jsonNode.at("/hits/hits")
+        if (!arrayNodes.isArray) {
+            return emptyList()
         }
+        val hits = arrayNodes as ArrayNode
+        return hits
+            .mapNotNull { node ->
+                try {
+                    objectMapper.treeToValue<EdgarEntity>(node)
+                } catch (e: Exception) {
+                    null
+                }
+            }.filter { it._source.tickers != null }.map {
+                it.copy(
+                    _source = it
+                        ._source
+                        .copy(
+                            tickers = it._source.tickers?.split(",")
+                                ?.first()
+                                ?.trim()
+                        )
+                )
+            }
     }
 
     fun searchFilings(cik: String): List<EdgarFilingMetadata> {
