@@ -27,22 +27,19 @@ class EdgarExplorer(
         if (!arrayNodes.isArray) {
             return emptyList()
         }
-        val hits = arrayNodes as ArrayNode
-        return hits
+        return (arrayNodes as ArrayNode)
             .mapNotNull { node ->
                 try {
                     objectMapper.treeToValue<EdgarEntity>(node)
                 } catch (e: Exception) {
                     null
                 }
-            }.filter { it._source.tickers != null }.map {
-                it.copy(
-                    _source = it
-                        ._source
-                        .copy(
-                            tickers = it._source.tickers?.split(",")
-                                ?.first()
-                                ?.trim()
+            }.filter { it._source.tickers != null }.map { edgarEntity ->
+                edgarEntity.copy(
+                    _source = edgarEntity._source.copy(
+                            tickers = edgarEntity
+                                ._source.tickers
+                                ?.split(",")?.first()?.trim()
                         )
                 )
             }
