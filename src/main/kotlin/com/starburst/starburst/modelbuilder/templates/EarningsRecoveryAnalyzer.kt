@@ -1,17 +1,12 @@
 package com.starburst.starburst.modelbuilder.templates
 
 import com.starburst.starburst.DoubleExtensions.fmtPct
-import com.starburst.starburst.edgar.FilingProvider
-import com.starburst.starburst.edgar.factbase.FactBase
-import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
 import com.starburst.starburst.modelbuilder.common.StockAnalyzerDataProvider
-import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.historicalValue
 import com.starburst.starburst.models.dataclasses.Commentary
-import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.zacks.dataclasses.Context
-import com.starburst.starburst.zacks.modelbuilder.support.SalesEstimateToRevenueConverter
+import com.starburst.starburst.modelbuilder.support.Context
+import com.starburst.starburst.modelbuilder.support.SalesEstimateToRevenueConverter
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 
 class EarningsRecoveryAnalyzer(
@@ -28,9 +23,7 @@ class EarningsRecoveryAnalyzer(
         val ticker = filingEntity.tradingSymbol ?: error("...")
         val salesEstimates = zacksEstimatesService.getZacksSaleEstimates(ticker)
         val ctx = Context(
-            ticker = ticker,
             model = model,
-            zacksFundamentalA = emptyList(),
             zacksSalesEstimates = salesEstimates,
         )
         val converter = SalesEstimateToRevenueConverter(ctx = ctx)

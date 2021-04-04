@@ -34,13 +34,18 @@ class EdgarExplorer(
                 } catch (e: Exception) {
                     null
                 }
-            }.filter { it._source.tickers != null }.map { edgarEntity ->
+            }
+            .filter { it._source.tickers != null }
+            .map { edgarEntity ->
                 edgarEntity.copy(
                     _source = edgarEntity._source.copy(
-                            tickers = edgarEntity
-                                ._source.tickers
-                                ?.split(",")?.first()?.trim()
-                        )
+                        tickers = edgarEntity
+                            ._source
+                            .tickers
+                            ?.split(",")
+                            ?.first()
+                            ?.trim()
+                    )
                 )
             }
     }

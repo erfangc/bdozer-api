@@ -1,4 +1,4 @@
-package com.starburst.starburst.zacks.modelbuilder.support
+package com.starburst.starburst.modelbuilder.support
 
 import com.starburst.starburst.DoubleExtensions.fmtPct
 import com.starburst.starburst.models.Utility
@@ -6,13 +6,10 @@ import com.starburst.starburst.models.dataclasses.Discrete
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
-import com.starburst.starburst.zacks.dataclasses.Context
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class SalesEstimateToRevenueConverter(
-    private val ctx: Context
-) {
+class SalesEstimateToRevenueConverter(private val ctx: Context) {
 
     private val log = LoggerFactory.getLogger(SalesEstimateToRevenueConverter::class.java)
 
