@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.common
+package com.starburst.starburst.modelbuilder.common.extensions
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.CostsAndExpenses
@@ -10,17 +10,18 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingCostsAndExpenses
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
+import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 
 object FrequentlyUsedItemFormulaLogic {
 
-    fun fillOneTimeItem(item: Item) = item.copy(
+    fun AbstractStockAnalyzer.fillOneTimeItem(item: Item) = item.copy(
         formula = "0.0",
         commentaries = Commentary(commentary = "This is a one-time item")
     )
 
-    fun fillEpsItem(item: Item): Item {
+    fun AbstractStockAnalyzer.fillEpsItem(item: Item): Item {
         return when (item.name) {
             EarningsPerShareDiluted -> {
                 item.copy(

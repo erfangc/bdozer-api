@@ -4,7 +4,7 @@ import com.starburst.starburst.edgar.dataclasses.Concept
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
 import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
-import com.starburst.starburst.modelbuilder.common.GeneralExtensions.fragment
+import com.starburst.starburst.modelbuilder.common.extensions.General.fragment
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 

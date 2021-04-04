@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.support
+package com.starburst.starburst.modelbuilder.common
 
 import com.starburst.starburst.DoubleExtensions.fmtPct
 import com.starburst.starburst.models.Utility

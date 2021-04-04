@@ -5,8 +5,8 @@ import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
 import com.starburst.starburst.modelbuilder.common.StockAnalyzerDataProvider
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.modelbuilder.support.Context
-import com.starburst.starburst.modelbuilder.support.SalesEstimateToRevenueConverter
+import com.starburst.starburst.modelbuilder.common.Context
+import com.starburst.starburst.modelbuilder.common.SalesEstimateToRevenueConverter
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 
 class EarningsRecoveryAnalyzer(
