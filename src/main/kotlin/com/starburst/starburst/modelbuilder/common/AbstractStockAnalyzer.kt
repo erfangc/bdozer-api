@@ -28,7 +28,6 @@ import com.starburst.starburst.modelbuilder.common.extensions.General.conceptNot
 import com.starburst.starburst.modelbuilder.common.extensions.General.fragment
 import com.starburst.starburst.modelbuilder.common.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
-import com.starburst.starburst.modelbuilder.analyzers.CrashAndRecovery
 import com.starburst.starburst.models.ModelEvaluator
 import com.starburst.starburst.models.Utility.DiscountFactor
 import com.starburst.starburst.models.Utility.PresentValueOfEarningsPerShare
@@ -39,16 +38,11 @@ import com.starburst.starburst.models.dataclasses.Discrete
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 import kotlin.collections.HashSet
 
-abstract class AbstractStockAnalyzer(
-    dataProvider: StockAnalyzerDataProvider
-) : StockAnalyzer {
-
-    private val log = LoggerFactory.getLogger(CrashAndRecovery::class.java)
+abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : StockAnalyzer {
 
     val filingProvider = dataProvider.filingProvider
     val zacksEstimatesService = dataProvider.zacksEstimatesService

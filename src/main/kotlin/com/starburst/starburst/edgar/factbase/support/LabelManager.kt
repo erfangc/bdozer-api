@@ -1,9 +1,9 @@
 package com.starburst.starburst.edgar.factbase.support
 
+import com.starburst.starburst.edgar.FilingProvider
 import com.starburst.starburst.edgar.XbrlNamespaces.link
 import com.starburst.starburst.edgar.XbrlNamespaces.xlink
 import com.starburst.starburst.edgar.dataclasses.Labels
-import com.starburst.starburst.edgar.FilingProvider
 import java.net.URI
 
 /**
@@ -14,7 +14,8 @@ class LabelManager(filingProvider: FilingProvider) {
 
     private val labelElement = filingProvider.labelLinkbase()
 
-    private val node = labelElement.getElementByTag(link, "labelLink") ?: error("${filingProvider.labelLinkbaseFilename()} does not contain labelLink")
+    private val node = labelElement.getElementByTag(link, "labelLink")
+        ?: error("${filingProvider.labelLinkbaseFilename()} does not contain labelLink")
 
     //
     // we have loc = locators, label (which is what we want) and labelArc

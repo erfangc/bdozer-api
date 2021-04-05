@@ -9,12 +9,12 @@ import com.starburst.starburst.edgar.factbase.XLinkExtentions.label
 import com.starburst.starburst.edgar.factbase.XLinkExtentions.role
 import com.starburst.starburst.edgar.factbase.XLinkExtentions.to
 import com.starburst.starburst.edgar.factbase.XLinkExtentions.weight
+import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
+import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalYearFocus
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
-import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
-import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import java.net.URI

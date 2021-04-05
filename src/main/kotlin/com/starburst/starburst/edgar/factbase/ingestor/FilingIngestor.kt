@@ -6,8 +6,8 @@ import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
 import com.starburst.starburst.edgar.factbase.ingestor.q4.Q4FactFinder
-import com.starburst.starburst.edgar.factbase.ingestor.support.FilingCalculationsParser
 import com.starburst.starburst.edgar.factbase.ingestor.support.FactsParser
+import com.starburst.starburst.edgar.factbase.ingestor.support.FilingCalculationsParser
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection

@@ -19,10 +19,14 @@ object HttpClientExtensions {
         val builder = factory.newDocumentBuilder()
         return XmlElement(builder.parse(this).documentElement)
     }
+
     private fun HttpClient.readLink(link: String): ByteArray? {
         log.info("Reading link $link")
         val get = HttpGet(link)
-        get.addHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36")
+        get.addHeader(
+            HttpHeaders.USER_AGENT,
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
+        )
         val httpResponse = this.execute(get)
         val entity = httpResponse.entity
         val allBytes = entity.content.readAllBytes()

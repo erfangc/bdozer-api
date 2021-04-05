@@ -10,8 +10,8 @@ import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtension
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
-import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
+import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.xml.LocalDateExtensions.toLocalDate
 import com.starburst.starburst.xml.XmlElement
 import com.starburst.starburst.xml.XmlNode

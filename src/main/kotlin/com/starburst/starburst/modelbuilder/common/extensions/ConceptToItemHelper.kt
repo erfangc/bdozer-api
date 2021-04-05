@@ -57,7 +57,7 @@ object ConceptToItemHelper {
      */
     fun AbstractStockAnalyzer.historicalValue(concept: Concept): HistoricalValue? {
         val conceptName = concept.conceptName
-       return historicalValue(conceptName)
+        return historicalValue(conceptName)
     }
 
     /**

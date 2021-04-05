@@ -10,7 +10,8 @@ import java.time.LocalDate
 @Service
 class AlphaVantageService(private val httpClient: HttpClient) {
 
-    val apiKey: String = System.getenv("ALPHA_VANTAGE_API_KEY") ?: error("environment ALPHA_VANTAGE_API_KEY not defined")
+    val apiKey: String =
+        System.getenv("ALPHA_VANTAGE_API_KEY") ?: error("environment ALPHA_VANTAGE_API_KEY not defined")
 
     @Cacheable("latestPrice")
     fun latestPrice(ticker: String): Double {

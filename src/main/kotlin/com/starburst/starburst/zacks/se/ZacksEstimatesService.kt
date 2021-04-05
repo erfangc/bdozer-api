@@ -54,7 +54,8 @@ class ZacksEstimatesService(mongoDatabase: MongoDatabase) {
 
         return relevantEstimates
             .mapIndexed { index, zacksSalesEstimates ->
-                zacksSalesEstimates.per_end_date?.year!! to zacksSalesEstimates.sales_median_est?.times(1_000_000.0).orZero()
+                zacksSalesEstimates.per_end_date?.year!! to zacksSalesEstimates.sales_median_est?.times(1_000_000.0)
+                    .orZero()
             }
             .toMap()
     }

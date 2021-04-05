@@ -9,9 +9,7 @@ import com.starburst.starburst.edgar.factbase.ingestor.support.FactIdGenerator
 import org.litote.kmongo.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.threeten.extra.YearQuarter
 import java.time.Instant
-import java.time.temporal.TemporalAdjusters
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 /**
