@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.common.extensions
+package com.starburst.starburst.stockanalyzer.common.extensions
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.CostsAndExpenses
@@ -10,7 +10,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingCostsAndExpenses
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
-import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 

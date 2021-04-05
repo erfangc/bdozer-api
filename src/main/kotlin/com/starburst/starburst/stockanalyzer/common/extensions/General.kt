@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.common.extensions
+package com.starburst.starburst.stockanalyzer.common.extensions
 
 import java.net.URI
 

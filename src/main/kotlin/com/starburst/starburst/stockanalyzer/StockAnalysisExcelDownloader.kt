@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder
+package com.starburst.starburst.stockanalyzer
 
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

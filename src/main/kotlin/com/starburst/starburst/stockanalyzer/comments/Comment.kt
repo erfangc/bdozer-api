@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.comments
+package com.starburst.starburst.stockanalyzer.comments
 
 import java.time.Instant
 import java.util.*

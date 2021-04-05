@@ -1,13 +1,13 @@
-package com.starburst.starburst.modelbuilder.analyzers
+package com.starburst.starburst.stockanalyzer.analyzers
 
 import com.starburst.starburst.DoubleExtensions.fmtPct
-import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
-import com.starburst.starburst.modelbuilder.common.StockAnalyzerDataProvider
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.common.StockAnalyzerDataProvider
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
 
 /**
- * This [com.starburst.starburst.modelbuilder.common.StockAnalyzer]
+ * This [com.starburst.starburst.stockanalyzer.common.StockAnalyzer]
  * models costs by looking back to historical periods where operations are stable and positive
  * instead of estimating costs as a percentage of most recent year
  *

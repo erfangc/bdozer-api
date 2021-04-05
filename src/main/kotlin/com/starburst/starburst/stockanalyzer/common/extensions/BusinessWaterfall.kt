@@ -1,8 +1,8 @@
-package com.starburst.starburst.modelbuilder.common.extensions
+package com.starburst.starburst.stockanalyzer.common.extensions
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
-import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
-import com.starburst.starburst.modelbuilder.dataclasses.Waterfall
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.dataclasses.Waterfall
 import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.spreadsheet.Cell

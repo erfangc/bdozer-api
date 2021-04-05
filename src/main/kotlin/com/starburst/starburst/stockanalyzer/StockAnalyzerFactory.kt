@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder
+package com.starburst.starburst.stockanalyzer
 
 import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.alphavantage.AlphaVantageService
@@ -6,10 +6,12 @@ import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.filingentity.FilingEntityManager
-import com.starburst.starburst.modelbuilder.analyzers.CrashAndRecovery
-import com.starburst.starburst.modelbuilder.common.StockAnalyzerDataProvider
-import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
+import com.starburst.starburst.stockanalyzer.analyzers.CrashAndRecovery
+import com.starburst.starburst.stockanalyzer.common.StockAnalyzerDataProvider
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
 import com.starburst.starburst.models.CellGenerator
+import com.starburst.starburst.stockanalyzer.overrides.ModelOverride
+import com.starburst.starburst.stockanalyzer.overrides.ModelOverrideService
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service
 class StockAnalyzerFactory(
     mongoDatabase: MongoDatabase,
     private val factBase: FactBase,
+    private val modelOverrideService: ModelOverrideService,
     private val filingProviderFactory: FilingProviderFactory,
     private val zacksEstimatesService: ZacksEstimatesService,
     private val edgarExplorer: EdgarExplorer,
@@ -53,6 +56,7 @@ class StockAnalyzerFactory(
             factBase = factBase,
             filingEntity = filingEntity,
             zacksEstimatesService = zacksEstimatesService,
+            modelOverrideService = modelOverrideService,
         )
 
         val stockAnalysis = when (filingEntity.modelTemplate?.template) {

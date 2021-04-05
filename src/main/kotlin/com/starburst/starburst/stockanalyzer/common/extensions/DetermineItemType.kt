@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.common.extensions
+package com.starburst.starburst.stockanalyzer.common.extensions
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasic
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
@@ -6,7 +6,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeTaxExpenseBenefit
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RestructuringAndOtherExpenseIncomeMainline
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.SpecialItems
-import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
 import com.starburst.starburst.models.dataclasses.Item
 
 object DetermineItemType {

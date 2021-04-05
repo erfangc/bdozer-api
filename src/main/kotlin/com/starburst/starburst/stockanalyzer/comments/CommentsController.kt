@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.comments
+package com.starburst.starburst.stockanalyzer.comments
 
 import org.springframework.web.bind.annotation.*
 

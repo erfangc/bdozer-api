@@ -1,11 +1,11 @@
-package com.starburst.starburst.modelbuilder.common.extensions
+package com.starburst.starburst.stockanalyzer.common.extensions
 
 import com.starburst.starburst.DoubleExtensions.orZero
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
-import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
-import com.starburst.starburst.modelbuilder.common.extensions.BusinessWaterfall.businessWaterfall
-import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.common.extensions.BusinessWaterfall.businessWaterfall
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
 import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType

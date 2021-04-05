@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.dataclasses
+package com.starburst.starburst.stockanalyzer.dataclasses
 
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model

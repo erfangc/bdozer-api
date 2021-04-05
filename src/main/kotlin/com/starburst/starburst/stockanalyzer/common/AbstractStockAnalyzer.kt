@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.common
+package com.starburst.starburst.stockanalyzer.common
 
 import com.starburst.starburst.DoubleExtensions.orZero
 import com.starburst.starburst.edgar.factbase.FactBase
@@ -10,24 +10,6 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.edgar.factbase.support.LabelManager
-import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.conceptHrefToItemName
-import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.conceptLabel
-import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.expression
-import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.historicalValue
-import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isCostOperatingCost
-import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isEpsItem
-import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isOneTime
-import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isTaxItem
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.ebitItemName
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillEpsItem
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillOneTimeItem
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillTaxItem
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.operatingCostsItemName
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.totalRevenueItemName
-import com.starburst.starburst.modelbuilder.common.extensions.General.conceptNotFound
-import com.starburst.starburst.modelbuilder.common.extensions.General.fragment
-import com.starburst.starburst.modelbuilder.common.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
-import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
 import com.starburst.starburst.models.ModelEvaluator
 import com.starburst.starburst.models.Utility.DiscountFactor
 import com.starburst.starburst.models.Utility.PresentValueOfEarningsPerShare
@@ -38,6 +20,24 @@ import com.starburst.starburst.models.dataclasses.Discrete
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.stockanalyzer.common.extensions.ConceptToItemHelper.conceptHrefToItemName
+import com.starburst.starburst.stockanalyzer.common.extensions.ConceptToItemHelper.conceptLabel
+import com.starburst.starburst.stockanalyzer.common.extensions.ConceptToItemHelper.expression
+import com.starburst.starburst.stockanalyzer.common.extensions.ConceptToItemHelper.historicalValue
+import com.starburst.starburst.stockanalyzer.common.extensions.DetermineItemType.isCostOperatingCost
+import com.starburst.starburst.stockanalyzer.common.extensions.DetermineItemType.isEpsItem
+import com.starburst.starburst.stockanalyzer.common.extensions.DetermineItemType.isOneTime
+import com.starburst.starburst.stockanalyzer.common.extensions.DetermineItemType.isTaxItem
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.ebitItemName
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.fillEpsItem
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.fillOneTimeItem
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.fillTaxItem
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.operatingCostsItemName
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.totalRevenueItemName
+import com.starburst.starburst.stockanalyzer.common.extensions.General.conceptNotFound
+import com.starburst.starburst.stockanalyzer.common.extensions.General.fragment
+import com.starburst.starburst.stockanalyzer.common.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
 import java.time.LocalDate
 import java.util.*
 import kotlin.collections.HashSet
@@ -56,6 +56,7 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
     val totalRevenueConceptName = totalRevenueItemName()
     val ebitConceptName = ebitItemName()
     val operatingCostConceptName = operatingCostsItemName()
+    val modelOverrides = dataProvider.modelOverrideService.getOverrides(cik)
     val conceptDependencies = conceptDependencies()
 
     fun timeSeriesVsRevenue(
@@ -204,27 +205,35 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
      * This method fills in the given [Item] with the correct formula
      */
     fun fillInItem(item: Item): Item {
-        return when {
-            /*
-            Revenue by default sources from Zack's median estimates
-             */
-            item.name == totalRevenueConceptName -> {
-                useZacksRevenueEstimate(item)
-            }
-            isEpsItem(item) -> {
-                fillEpsItem(item)
-            }
-            isTaxItem(item) -> {
-                fillTaxItem(item)
-            }
-            isOneTime(item) -> {
-                fillOneTimeItem(item)
-            }
-            isCostOperatingCost(item) -> {
-                processOperatingCostItem(item)
-            }
-            else -> {
-                item
+        /*
+        If this item has an override, use that instead
+         */
+        val override = modelOverrides.items.find { it.name == item.name }
+        if (override != null) {
+            return override
+        } else {
+            return when {
+                /*
+                Revenue by default sources from Zack's median estimates
+                 */
+                item.name == totalRevenueConceptName -> {
+                    useZacksRevenueEstimate(item)
+                }
+                isEpsItem(item) -> {
+                    fillEpsItem(item)
+                }
+                isTaxItem(item) -> {
+                    fillTaxItem(item)
+                }
+                isOneTime(item) -> {
+                    fillOneTimeItem(item)
+                }
+                isCostOperatingCost(item) -> {
+                    processOperatingCostItem(item)
+                }
+                else -> {
+                    item
+                }
             }
         }
     }

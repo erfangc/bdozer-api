@@ -1,4 +1,4 @@
-package com.starburst.starburst.modelbuilder.dataclasses
+package com.starburst.starburst.stockanalyzer.dataclasses
 
 import com.starburst.starburst.spreadsheet.Cell
 

@@ -1,10 +1,10 @@
-package com.starburst.starburst.modelbuilder.common.extensions
+package com.starburst.starburst.stockanalyzer.common.extensions
 
 import com.starburst.starburst.edgar.dataclasses.Concept
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
-import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
-import com.starburst.starburst.modelbuilder.common.extensions.General.fragment
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.common.extensions.General.fragment
 import com.starburst.starburst.models.dataclasses.HistoricalValue
 import com.starburst.starburst.models.dataclasses.Item
 
