@@ -8,7 +8,7 @@ import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.modelbuilder.common.StockAnalyzerDataProvider
 import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
-import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
+import com.starburst.starburst.modelbuilder.analyzers.CrashAndRecovery
 import com.starburst.starburst.models.CellGenerator
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import org.litote.kmongo.findOneById
@@ -47,6 +47,7 @@ class StockAnalyzerFactory(
             filingProvider = filingProviderFactory.createFilingProvider(filingEntity.cik, adsh),
             factBase = factBase,
             filingEntity = filingEntity,
+            zacksEstimatesService = zacksEstimatesService,
         )
 
         val stockAnalysis = when (filingEntity.modelTemplate?.template) {
@@ -68,8 +69,7 @@ class StockAnalyzerFactory(
         return col.find().map { analysis -> withCurrentPrice(analysis) }.toList()
     }
 
-    private fun earningRecoveryAnalyzer(dataProvider: StockAnalyzerDataProvider) = EarningsRecoveryAnalyzer(
-        zacksEstimatesService = zacksEstimatesService,
+    private fun earningRecoveryAnalyzer(dataProvider: StockAnalyzerDataProvider) = CrashAndRecovery(
         dataProvider = dataProvider,
     )
 

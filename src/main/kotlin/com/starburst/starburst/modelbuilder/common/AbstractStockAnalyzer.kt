@@ -1,5 +1,6 @@
 package com.starburst.starburst.modelbuilder.common
 
+import com.starburst.starburst.DoubleExtensions.orZero
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
@@ -9,14 +10,6 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.edgar.factbase.support.LabelManager
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.ebitItemName
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillEpsItem
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillOneTimeItem
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillTaxItem
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.operatingCostsItemName
-import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.totalRevenueItemName
-import com.starburst.starburst.modelbuilder.common.extensions.General.conceptNotFound
-import com.starburst.starburst.modelbuilder.common.extensions.General.fragment
 import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.conceptHrefToItemName
 import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.conceptLabel
 import com.starburst.starburst.modelbuilder.common.extensions.ConceptToItemHelper.expression
@@ -25,18 +18,28 @@ import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.
 import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isEpsItem
 import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isOneTime
 import com.starburst.starburst.modelbuilder.common.extensions.DetermineItemType.isTaxItem
+import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.ebitItemName
+import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillEpsItem
+import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillOneTimeItem
+import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.fillTaxItem
+import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.operatingCostsItemName
+import com.starburst.starburst.modelbuilder.common.extensions.FrequentlyUsedItemFormulaLogic.totalRevenueItemName
+import com.starburst.starburst.modelbuilder.common.extensions.General.conceptNotFound
+import com.starburst.starburst.modelbuilder.common.extensions.General.fragment
 import com.starburst.starburst.modelbuilder.common.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.starburst.starburst.modelbuilder.dataclasses.StockAnalysis
-import com.starburst.starburst.modelbuilder.templates.EarningsRecoveryAnalyzer
+import com.starburst.starburst.modelbuilder.analyzers.CrashAndRecovery
 import com.starburst.starburst.models.ModelEvaluator
 import com.starburst.starburst.models.Utility.DiscountFactor
 import com.starburst.starburst.models.Utility.PresentValueOfEarningsPerShare
 import com.starburst.starburst.models.Utility.PresentValueOfTerminalValuePerShare
 import com.starburst.starburst.models.Utility.PresentValuePerShare
 import com.starburst.starburst.models.Utility.TerminalValuePerShare
+import com.starburst.starburst.models.dataclasses.Discrete
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -44,9 +47,10 @@ abstract class AbstractStockAnalyzer(
     dataProvider: StockAnalyzerDataProvider
 ) : StockAnalyzer {
 
-    val log = LoggerFactory.getLogger(EarningsRecoveryAnalyzer::class.java)
+    private val log = LoggerFactory.getLogger(CrashAndRecovery::class.java)
 
     val filingProvider = dataProvider.filingProvider
+    val zacksEstimatesService = dataProvider.zacksEstimatesService
     val filingEntity = dataProvider.filingEntity
     val cik = filingProvider.cik().padStart(10, '0')
     val factBase = dataProvider.factBase
@@ -57,7 +61,6 @@ abstract class AbstractStockAnalyzer(
     val totalRevenueConceptName = totalRevenueItemName()
     val ebitConceptName = ebitItemName()
     val operatingCostConceptName = operatingCostsItemName()
-
     val conceptDependencies = conceptDependencies()
 
     fun timeSeriesVsRevenue(
@@ -68,12 +71,10 @@ abstract class AbstractStockAnalyzer(
             conceptName = totalRevenueConceptName,
             periodFocus = periodFocus
         )
-
         val otherFacts = timeSeries(
             conceptName = conceptName,
             periodFocus = periodFocus
         ).associateBy { it.documentPeriodEndDate }
-
         return revenueFacts.sortedBy { it.documentPeriodEndDate }.map { revenue ->
             val otherFact = otherFacts[revenue.documentPeriodEndDate]?.doubleValue ?: 0.0
             (revenue.doubleValue ?: 0.0) to otherFact
@@ -162,7 +163,7 @@ abstract class AbstractStockAnalyzer(
         symbol = filingEntity.tradingSymbol,
         description = filingEntity.description,
         beta = filingEntity.beta,
-        terminalGrowthRate = 0.02
+        terminalGrowthRate = 0.02,
     )
 
     fun createIncomeStatementItems(): List<Item> {
@@ -210,8 +211,11 @@ abstract class AbstractStockAnalyzer(
      */
     fun fillInItem(item: Item): Item {
         return when {
+            /*
+            Revenue by default sources from Zack's median estimates
+             */
             item.name == totalRevenueConceptName -> {
-                processTotalRevenueItem(item)
+                useZacksRevenueEstimate(item)
             }
             isEpsItem(item) -> {
                 fillEpsItem(item)
@@ -233,7 +237,21 @@ abstract class AbstractStockAnalyzer(
 
     abstract fun processOperatingCostItem(item: Item): Item
 
-    abstract fun processTotalRevenueItem(item: Item): Item
+    protected fun useZacksRevenueEstimate(item: Item): Item {
+        val model = emptyModel()
+        val projections = zacksEstimatesService.revenueProjections(ticker = model.symbol!!)
+        /*
+        if there are more periods than there are estimates decide what to do
+         */
+        val formulas = (1..model.periods).map { period ->
+            val finalRevenue = projections[projections.toSortedMap().lastKey()].orZero()
+            val year = period + LocalDate.now().year
+            period to (projections[year] ?: finalRevenue).toString()
+        }.toMap()
+        return item.copy(
+            discrete = Discrete(formulas)
+        )
+    }
 
     /**
      * This method creates a flattened list of dependencies

@@ -1,46 +1,22 @@
-package com.starburst.starburst.modelbuilder.templates
+package com.starburst.starburst.modelbuilder.analyzers
 
 import com.starburst.starburst.DoubleExtensions.fmtPct
 import com.starburst.starburst.modelbuilder.common.AbstractStockAnalyzer
 import com.starburst.starburst.modelbuilder.common.StockAnalyzerDataProvider
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.modelbuilder.common.Context
-import com.starburst.starburst.modelbuilder.common.SalesEstimateToRevenueConverter
-import com.starburst.starburst.zacks.se.ZacksEstimatesService
 
-class EarningsRecoveryAnalyzer(
-    private val zacksEstimatesService: ZacksEstimatesService,
-    dataProvider: StockAnalyzerDataProvider,
-) : AbstractStockAnalyzer(dataProvider) {
+/**
+ * This [com.starburst.starburst.modelbuilder.common.StockAnalyzer]
+ * models costs by looking back to historical periods where operations are stable and positive
+ * instead of estimating costs as a percentage of most recent year
+ *
+ * The aim is to model situations where unexpected shocks caused large declines
+ */
+class CrashAndRecovery(dataProvider: StockAnalyzerDataProvider) : AbstractStockAnalyzer(dataProvider) {
 
     override fun processOperatingCostItem(item: Item): Item {
         return itemAsPercentOfRevenue(item)
-    }
-
-    override fun processTotalRevenueItem(item: Item): Item {
-        val model = emptyModel()
-        val ticker = filingEntity.tradingSymbol ?: error("...")
-        val salesEstimates = zacksEstimatesService.getZacksSaleEstimates(ticker)
-        val ctx = Context(
-            model = model,
-            zacksSalesEstimates = salesEstimates,
-        )
-        val converter = SalesEstimateToRevenueConverter(ctx = ctx)
-        val revenueItem = converter.convert(item.historicalValue?.value ?: error("..."))
-        val discrete = revenueItem.discrete
-        return revenueItem
-            .copy(
-                name = item.name,
-                historicalValue = item.historicalValue,
-                discrete = discrete?.copy(
-                    formulas = discrete
-                        .formulas
-                        .mapValues { (_, v) ->
-                            (v.toDouble() * 1_000_000.0).toString()
-                        }
-                )
-            )
     }
 
     private fun itemAsPercentOfRevenue(item: Item): Item {
