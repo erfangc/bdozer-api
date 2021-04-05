@@ -7,12 +7,15 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin
 @RequestMapping("public/model-builder-factory")
 class StockAnalyzerFactoryController(private val stockAnalyzerFactory: StockAnalyzerFactory) {
+
+    @PostMapping
+    fun saveAnalysis(@RequestBody stockAnalysis: StockAnalysis) {
+        stockAnalyzerFactory.save(stockAnalysis)
+    }
+
     @GetMapping("{cik}")
-    fun analyze(
-        @PathVariable cik: String,
-        @RequestParam(required = false) save: Boolean? = null
-    ): StockAnalysis {
-        return stockAnalyzerFactory.analyze(cik, save)
+    fun analyze(@PathVariable cik: String): StockAnalysis {
+        return stockAnalyzerFactory.analyze(cik)
     }
 
     @GetMapping

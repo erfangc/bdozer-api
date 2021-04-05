@@ -37,6 +37,7 @@ import com.starburst.starburst.models.Utility.PresentValuePerShare
 import com.starburst.starburst.models.Utility.TerminalValuePerShare
 import com.starburst.starburst.models.dataclasses.Discrete
 import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -150,9 +151,8 @@ abstract class AbstractStockAnalyzer(
     }
 
     override fun analyze(): StockAnalysis {
-        val model = emptyModel().copy(
-            incomeStatementItems = createIncomeStatementItems()
-        )
+        val model = emptyModel()
+            .copy(incomeStatementItems = createIncomeStatementItems())
         val finalModel = model.copy(otherItems = dcfItems(model))
         val evalResult = evaluator.evaluate(finalModel)
         return postModelEvaluationAnalysis(evalResult)
@@ -243,12 +243,14 @@ abstract class AbstractStockAnalyzer(
         /*
         if there are more periods than there are estimates decide what to do
          */
+        val lastDocumentPeriodEnd = item.historicalValue?.documentPeriodEndDate
         val formulas = (1..model.periods).map { period ->
             val finalRevenue = projections[projections.toSortedMap().lastKey()].orZero()
-            val year = period + LocalDate.now().year
+            val year = period + LocalDate.parse(lastDocumentPeriodEnd).year
             period to (projections[year] ?: finalRevenue).toString()
         }.toMap()
         return item.copy(
+            type = ItemType.Discrete,
             discrete = Discrete(formulas)
         )
     }

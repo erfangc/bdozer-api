@@ -36,7 +36,12 @@ class StockAnalyzerFactory(
         return CellGenerator.exportToXls(stockAnalysis.model, stockAnalysis.cells)
     }
 
-    fun analyze(cik: String, save: Boolean?): StockAnalysis {
+    fun save(stockAnalysis: StockAnalysis) {
+        col.save(stockAnalysis)
+        log.info("Saved stock analysis for _id=${stockAnalysis._id}, cik=${stockAnalysis.cik}")
+    }
+
+    fun analyze(cik: String): StockAnalysis {
         val cik = cik.padStart(10, '0')
         val filingEntity = filingEntityManager.getFilingEntity(cik) ?: error("...")
         val adsh = edgarExplorer
@@ -55,11 +60,6 @@ class StockAnalyzerFactory(
                 earningRecoveryAnalyzer(dataProvider).analyze()
             }
             else -> error("No analysis template found for $cik")
-        }
-
-        if (save == true) {
-            col.save(stockAnalysis)
-            log.info("Saved stock analysis for _id=${stockAnalysis._id}, cik=$cik")
         }
 
         return withCurrentPrice(stockAnalysis)
