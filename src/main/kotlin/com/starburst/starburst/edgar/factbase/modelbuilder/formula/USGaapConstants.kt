@@ -83,6 +83,7 @@ object USGaapConstants {
     const val ShareBasedCompensation = "ShareBasedCompensation"
 
     const val EarningsPerShareDiluted = "EarningsPerShareDiluted"
+    const val EarningsPerShareBasicAndDiluted = "EarningsPerShareBasicAndDiluted"
     const val EarningsPerShareBasic = "EarningsPerShareBasic"
     const val WeightedAverageNumberOfDilutedSharesOutstanding = "WeightedAverageNumberOfDilutedSharesOutstanding"
     const val WeightedAverageNumberOfSharesOutstandingBasic = "WeightedAverageNumberOfSharesOutstandingBasic"

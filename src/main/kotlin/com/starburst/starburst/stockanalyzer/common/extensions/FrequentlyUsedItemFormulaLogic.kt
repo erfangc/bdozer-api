@@ -3,12 +3,14 @@ package com.starburst.starburst.stockanalyzer.common.extensions
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.CostsAndExpenses
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasic
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasicAndDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingCostsAndExpenses
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingExpenses
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
@@ -24,14 +26,19 @@ object FrequentlyUsedItemFormulaLogic {
 
     fun AbstractStockAnalyzer.fillEpsItem(item: Item): Item {
         return when (item.name) {
+            EarningsPerShareBasicAndDiluted -> {
+                item.copy(
+                    formula = "$netIncomeConceptName / $WeightedAverageNumberOfDilutedSharesOutstanding"
+                )
+            }
             EarningsPerShareDiluted -> {
                 item.copy(
-                    formula = "$NetIncomeLoss / $WeightedAverageNumberOfDilutedSharesOutstanding"
+                    formula = "$netIncomeConceptName / $WeightedAverageNumberOfDilutedSharesOutstanding"
                 )
             }
             EarningsPerShareBasic -> {
                 item.copy(
-                    formula = "$NetIncomeLoss / $WeightedAverageNumberOfSharesOutstandingBasic"
+                    formula = "$netIncomeConceptName / $WeightedAverageNumberOfSharesOutstandingBasic"
                 )
             }
             else -> {
@@ -46,16 +53,43 @@ object FrequentlyUsedItemFormulaLogic {
         )
     }
 
-    fun AbstractStockAnalyzer.totalRevenueItemName(): String {
+    fun AbstractStockAnalyzer.epsConceptName(): String {
         val candidateConceptNames = setOf(
-            USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax
+            EarningsPerShareDiluted,
+            EarningsPerShareBasicAndDiluted,
         )
         return calculations
             .incomeStatement
             .find {
                 candidateConceptNames
                     .contains(it.conceptName)
-            }?.conceptName ?: error("Unable to find revenue total item name for $cik")
+            }
+            ?.conceptName ?: error("Unable to find eps item name for $cik")
+    }
+    fun AbstractStockAnalyzer.netIncomeConceptName(): String {
+        val candidateConceptNames = setOf(
+            NetIncomeLoss
+        )
+        return calculations
+            .incomeStatement
+            .find {
+                candidateConceptNames
+                    .contains(it.conceptName)
+            }
+            ?.conceptName ?: error("Unable to find net income item name for $cik")
+    }
+
+    fun AbstractStockAnalyzer.totalRevenueItemName(): String {
+        val candidateConceptNames = setOf(
+            RevenueFromContractWithCustomerExcludingAssessedTax
+        )
+        return calculations
+            .incomeStatement
+            .find {
+                candidateConceptNames
+                    .contains(it.conceptName)
+            }
+            ?.conceptName ?: error("Unable to find revenue total item name for $cik")
     }
 
     fun AbstractStockAnalyzer.ebitItemName(): String {

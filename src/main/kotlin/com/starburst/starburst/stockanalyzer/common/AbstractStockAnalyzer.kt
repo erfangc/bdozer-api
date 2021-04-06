@@ -29,9 +29,11 @@ import com.starburst.starburst.stockanalyzer.common.extensions.DetermineItemType
 import com.starburst.starburst.stockanalyzer.common.extensions.DetermineItemType.isOneTime
 import com.starburst.starburst.stockanalyzer.common.extensions.DetermineItemType.isTaxItem
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.ebitItemName
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.epsConceptName
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.fillEpsItem
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.fillOneTimeItem
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.fillTaxItem
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.netIncomeConceptName
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.operatingCostsItemName
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.totalRevenueItemName
 import com.starburst.starburst.stockanalyzer.common.extensions.General.conceptNotFound
@@ -54,6 +56,8 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
     val evaluator = ModelEvaluator()
     val calculations = factBase.calculations(cik)
     val totalRevenueConceptName = totalRevenueItemName()
+    val epsConceptName = epsConceptName()
+    val netIncomeConceptName = netIncomeConceptName()
     val ebitConceptName = ebitItemName()
     val operatingCostConceptName = operatingCostsItemName()
     val modelOverrides = dataProvider.modelOverrideService.getOverrides(cik)
@@ -114,7 +118,7 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
             ),
             Item(
                 name = TerminalValuePerShare,
-                formula = "if(period=$periods,${EarningsPerShareDiluted} * ${terminalPeMultiple},0.0)"
+                formula = "if(period=$periods,${epsConceptName} * ${terminalPeMultiple},0.0)"
             ),
             Item(
                 name = PresentValueOfTerminalValuePerShare,
@@ -122,7 +126,7 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
             ),
             Item(
                 name = PresentValueOfEarningsPerShare,
-                formula = "$DiscountFactor * $EarningsPerShareDiluted"
+                formula = "$DiscountFactor * $epsConceptName"
             ),
             Item(
                 name = PresentValuePerShare,

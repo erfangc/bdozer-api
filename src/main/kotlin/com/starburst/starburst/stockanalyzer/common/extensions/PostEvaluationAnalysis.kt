@@ -61,14 +61,14 @@ object PostEvaluationAnalysis {
         return incomeStatementItems + cashFlowStatementItems + balanceSheetItems + otherItems
     }
 
-    private fun shareOutstanding(model: Model): Item {
+    private fun AbstractStockAnalyzer.shareOutstanding(model: Model): Item {
         return model.allItems().find { it.name == WeightedAverageNumberOfDilutedSharesOutstanding }
             ?: error("Cannot find item with name $WeightedAverageNumberOfDilutedSharesOutstanding")
     }
 
-    private fun profitPerShare(model: Model): Item {
-        return model.allItems().find { it.name == EarningsPerShareDiluted }
-            ?: error("Cannot find item with name $EarningsPerShareDiluted")
+    private fun AbstractStockAnalyzer.profitPerShare(model: Model): Item {
+        return model.allItems().find { it.name == epsConceptName }
+            ?: error("Cannot find item with name $epsConceptName")
     }
 
 }

@@ -1,6 +1,7 @@
 package com.starburst.starburst.stockanalyzer.common.extensions
 
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasic
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasicAndDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeTaxExpenseBenefit
@@ -30,7 +31,7 @@ object DetermineItemType {
     }
 
     fun AbstractStockAnalyzer.isEpsItem(item: Item): Boolean {
-        val candidates = setOf(EarningsPerShareDiluted, EarningsPerShareBasic)
+        val candidates = setOf(EarningsPerShareBasicAndDiluted, EarningsPerShareDiluted, EarningsPerShareBasic)
         return candidates.contains(item.name)
     }
 

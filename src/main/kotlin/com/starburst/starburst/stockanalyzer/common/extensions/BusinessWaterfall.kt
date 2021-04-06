@@ -28,7 +28,7 @@ object BusinessWaterfall {
                 /*
                 Find all the expenses
                  */
-                val expenses = conceptDependencies[NetIncomeLoss]
+                val expenses = conceptDependencies[netIncomeConceptName]
                     ?.filter { calculation -> calculation.conceptName != totalRevenueConceptName }
                     ?.mapNotNull { calculation ->
                         val cell = cells[calculation.conceptName]
@@ -60,7 +60,7 @@ object BusinessWaterfall {
                 /*
                 profit
                  */
-                val profit = cells[NetIncomeLoss] ?: error("no revenue cell found for period $period")
+                val profit = cells[netIncomeConceptName] ?: error("no revenue cell found for period $period")
 
                 period to Waterfall(revenue = revenue, expenses = condensedExpenses, profit = profit)
             }.toMap()
