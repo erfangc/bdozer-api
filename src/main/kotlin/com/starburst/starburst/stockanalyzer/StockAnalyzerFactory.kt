@@ -6,11 +6,11 @@ import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.filingentity.FilingEntityManager
-import com.starburst.starburst.stockanalyzer.analyzers.CrashAndRecovery
+import com.starburst.starburst.stockanalyzer.analyzers.Recovery
 import com.starburst.starburst.stockanalyzer.common.StockAnalyzerDataProvider
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
 import com.starburst.starburst.models.CellGenerator
-import com.starburst.starburst.stockanalyzer.overrides.ModelOverride
+import com.starburst.starburst.stockanalyzer.analyzers.Normal
 import com.starburst.starburst.stockanalyzer.overrides.ModelOverrideService
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import org.litote.kmongo.findOneById
@@ -30,6 +30,11 @@ class StockAnalyzerFactory(
     private val filingEntityManager: FilingEntityManager,
     private val alphaVantageService: AlphaVantageService,
 ) {
+
+    companion object {
+        const val Recovery = "Recovery"
+        const val Normal = "Normal"
+    }
 
     private val col = mongoDatabase.getCollection<StockAnalysis>()
     private val log = LoggerFactory.getLogger(StockAnalyzerFactory::class.java)
@@ -60,8 +65,11 @@ class StockAnalyzerFactory(
         )
 
         val stockAnalysis = when (filingEntity.modelTemplate?.template) {
-            "Recovery" -> {
-                earningRecoveryAnalyzer(dataProvider).analyze()
+            Recovery -> {
+                recovery(dataProvider).analyze()
+            }
+            Normal -> {
+                normal(dataProvider).analyze()
             }
             else -> error("No analysis template found for $cik")
         }
@@ -73,7 +81,11 @@ class StockAnalyzerFactory(
         return col.find().map { analysis -> withCurrentPrice(analysis) }.toList()
     }
 
-    private fun earningRecoveryAnalyzer(dataProvider: StockAnalyzerDataProvider) = CrashAndRecovery(
+    private fun recovery(dataProvider: StockAnalyzerDataProvider) = Recovery(
+        dataProvider = dataProvider,
+    )
+
+    private fun normal(dataProvider: StockAnalyzerDataProvider) = Normal(
         dataProvider = dataProvider,
     )
 

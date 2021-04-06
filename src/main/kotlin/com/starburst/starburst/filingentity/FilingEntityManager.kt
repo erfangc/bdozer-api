@@ -23,6 +23,12 @@ class FilingEntityManager(
     private val httpClient: HttpClient,
 ) {
 
+    companion object {
+        const val Completed = "Completed"
+        const val Created = "Created"
+        const val Bootstrapping = "Bootstrapping"
+    }
+
     private val log = LoggerFactory.getLogger(FilingEntityManager::class.java)
     private val executor = Executors.newCachedThreadPool()
     private val col = mongoDatabase.getCollection<FilingEntity>()
@@ -72,7 +78,7 @@ class FilingEntityManager(
             ),
             phone = secEntity.phone,
             lastUpdated = Instant.now().toString(),
-            statusMessage = "Created",
+            statusMessage = Created,
         )
         col.save(entity)
         log.info("Created filing entity cik=${entity.cik}")
@@ -85,14 +91,12 @@ class FilingEntityManager(
      */
     fun bootstrapFilingEntity(cik: String): FilingEntity {
         deleteFilingEntity(cik)
-        val entity = createFilingEntity(cik)
+        val entity = createFilingEntity(cik).copy(statusMessage = Bootstrapping)
+        col.save(entity)
         executor.execute {
             try {
-                /*
-                After the facts are ingested, attempt to build a model using the Zacks model builder
-                 */
                 factBase.bootstrapFacts(cik)
-                val updatedEntity = entity.copy(lastUpdated = Instant.now().toString(), statusMessage = "Completed")
+                val updatedEntity = entity.copy(lastUpdated = Instant.now().toString(), statusMessage = Completed)
                 col.save(updatedEntity)
                 log.info("Completed bootstrapping and initial model building cik=${entity.cik}")
             } catch (e: Exception) {

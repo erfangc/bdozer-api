@@ -13,7 +13,7 @@ import com.starburst.starburst.models.dataclasses.Item
  *
  * The aim is to model situations where unexpected shocks caused large declines
  */
-class CrashAndRecovery(dataProvider: StockAnalyzerDataProvider) : AbstractStockAnalyzer(dataProvider) {
+class Recovery(dataProvider: StockAnalyzerDataProvider) : AbstractStockAnalyzer(dataProvider) {
 
     override fun processOperatingCostItem(item: Item): Item {
         return itemAsPercentOfRevenue(item)
