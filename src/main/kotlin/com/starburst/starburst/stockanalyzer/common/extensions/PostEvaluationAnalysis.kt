@@ -1,14 +1,13 @@
 package com.starburst.starburst.stockanalyzer.common.extensions
 
 import com.starburst.starburst.DoubleExtensions.orZero
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
-import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
-import com.starburst.starburst.stockanalyzer.common.extensions.BusinessWaterfall.businessWaterfall
-import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
 import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.common.extensions.BusinessWaterfall.businessWaterfall
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
 import kotlin.math.pow
 
 object PostEvaluationAnalysis {
@@ -34,6 +33,12 @@ object PostEvaluationAnalysis {
             targetPrice = evalResult.targetPrice,
             discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
             revenueCAGR = revenueCAGR(evalResult),
+            totalRevenueConceptName = totalRevenueConceptName,
+            epsConceptName = epsConceptName,
+            netIncomeConceptName = netIncomeConceptName,
+            ebitConceptName = ebitConceptName,
+            operatingCostConceptName = operatingCostConceptName,
+            sharesOutstandingConceptName = sharesOutstandingConceptName,
         )
 
     }
@@ -61,8 +66,8 @@ object PostEvaluationAnalysis {
     }
 
     private fun AbstractStockAnalyzer.shareOutstanding(model: Model): Item {
-        return model.allItems().find { it.name == WeightedAverageNumberOfDilutedSharesOutstanding }
-            ?: error("Cannot find item with name $WeightedAverageNumberOfDilutedSharesOutstanding")
+        return model.allItems().find { it.name == sharesOutstandingConceptName }
+            ?: error("Cannot find item with name $sharesOutstandingConceptName")
     }
 
     private fun AbstractStockAnalyzer.profitPerShare(model: Model): Item {

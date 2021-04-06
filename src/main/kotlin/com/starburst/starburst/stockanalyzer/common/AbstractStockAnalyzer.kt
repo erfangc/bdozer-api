@@ -5,9 +5,6 @@ import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.models.ModelEvaluator
@@ -35,6 +32,7 @@ import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedIte
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.fillTaxItem
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.netIncomeConceptName
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.operatingCostsItemName
+import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.sharesOutstandingConceptName
 import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedItemFormulaLogic.totalRevenueItemName
 import com.starburst.starburst.stockanalyzer.common.extensions.General.conceptNotFound
 import com.starburst.starburst.stockanalyzer.common.extensions.General.fragment
@@ -47,21 +45,24 @@ import kotlin.collections.HashSet
 abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : StockAnalyzer {
 
     val filingProvider = dataProvider.filingProvider
+    val cik = filingProvider.cik().padStart(10, '0')
     val zacksEstimatesService = dataProvider.zacksEstimatesService
     val filingEntity = dataProvider.filingEntity
-    val cik = filingProvider.cik().padStart(10, '0')
     val factBase = dataProvider.factBase
     val conceptManager = FilingConceptsHolder(filingProvider)
     val labelManager = LabelManager(filingProvider)
     val evaluator = ModelEvaluator()
+
     val calculations = factBase.calculations(cik)
+    val modelOverrides = dataProvider.modelOverrideService.getOverrides(cik)
+    val conceptDependencies = conceptDependencies()
+
     val totalRevenueConceptName = totalRevenueItemName()
     val epsConceptName = epsConceptName()
     val netIncomeConceptName = netIncomeConceptName()
     val ebitConceptName = ebitItemName()
     val operatingCostConceptName = operatingCostsItemName()
-    val modelOverrides = dataProvider.modelOverrideService.getOverrides(cik)
-    val conceptDependencies = conceptDependencies()
+    val sharesOutstandingConceptName = sharesOutstandingConceptName()
 
     fun timeSeriesVsRevenue(
         conceptName: String,
@@ -93,22 +94,14 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
         add some mandatory fields if they don't already exist
          */
 
-        val weightedAverageNumberOfDilutedSharesOutstanding =
-            historicalValue(WeightedAverageNumberOfDilutedSharesOutstanding)
-        val weightedAverageNumberOfSharesOutstandingBasic =
-            historicalValue(WeightedAverageNumberOfSharesOutstandingBasic)
+        val sharesOutstanding = historicalValue(sharesOutstandingConceptName)
 
         val additionalMandatoryItems = listOf(
             Item(
-                name = WeightedAverageNumberOfDilutedSharesOutstanding,
-                historicalValue = weightedAverageNumberOfDilutedSharesOutstanding,
-                formula = weightedAverageNumberOfDilutedSharesOutstanding?.value.toString()
+                name = sharesOutstandingConceptName,
+                historicalValue = sharesOutstanding,
+                formula = sharesOutstanding?.value.toString()
             ),
-            Item(
-                name = WeightedAverageNumberOfSharesOutstandingBasic,
-                historicalValue = weightedAverageNumberOfSharesOutstandingBasic,
-                formula = weightedAverageNumberOfSharesOutstandingBasic?.value.toString()
-            )
         ).filter { mandatoryItem -> !model.incomeStatementItems.any { item -> item.name == mandatoryItem.name } }
 
         return listOf(

@@ -39,4 +39,14 @@ data class StockAnalysis(
     val discountRate: Double,
     val revenueCAGR: Double,
     val currentPrice: Double = 0.0,
+
+    /*
+    crucial Item / concept names
+     */
+    val totalRevenueConceptName: String,
+    val epsConceptName: String,
+    val netIncomeConceptName: String,
+    val ebitConceptName: String,
+    val operatingCostConceptName: String,
+    val sharesOutstandingConceptName: String,
 )

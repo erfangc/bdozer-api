@@ -74,7 +74,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
             if (!isNodeRelevant(node) || context == null) {
                 irrelevantTag++
                 null // return null to skip
-            } else if (!isFactInPeriod(context)) {
+            } else if (!isFactInPeriod(context) && conceptDefinition?.conceptName != "EntityCommonStockSharesOutstanding") {
                 irrelevantPeriod++
                 null // return null to skip
             } else if (conceptDefinition == null) {
@@ -96,7 +96,8 @@ class FactsParser(private val filingProvider: FilingProvider) {
                 val id = factIdGenerator.generateId(
                     elementName = conceptName,
                     context = context,
-                    documentPeriodEndDate = documentPeriodEndDate
+                    documentPeriodEndDate = documentPeriodEndDate,
+                    documentFiscalPeriodFocus = documentFiscalPeriodFocus,
                 )
 
                 val instanceDocumentElementId = node.attr("id") ?: "N/A"

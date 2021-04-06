@@ -139,7 +139,8 @@ class Q4FactFinder(
             .generateId(
                 fyFact.conceptName,
                 q4Context(fyCtx),
-                fyFact.documentPeriodEndDate
+                fyFact.documentPeriodEndDate,
+                fyFact.documentFiscalPeriodFocus,
             )
     }
 

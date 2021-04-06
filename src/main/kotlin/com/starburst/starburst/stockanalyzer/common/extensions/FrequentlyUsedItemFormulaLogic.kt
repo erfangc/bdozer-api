@@ -1,10 +1,9 @@
 package com.starburst.starburst.stockanalyzer.common.extensions
 
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.CostsAndExpenses
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasic
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareBasicAndDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EarningsPerShareDiluted
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.EntityCommonStockSharesOutstanding
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
@@ -12,10 +11,11 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingExpenses
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfShareOutstandingBasicAndDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
-import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
 
 object FrequentlyUsedItemFormulaLogic {
 
@@ -25,26 +25,9 @@ object FrequentlyUsedItemFormulaLogic {
     )
 
     fun AbstractStockAnalyzer.fillEpsItem(item: Item): Item {
-        return when (item.name) {
-            EarningsPerShareBasicAndDiluted -> {
-                item.copy(
-                    formula = "$netIncomeConceptName / $WeightedAverageNumberOfDilutedSharesOutstanding"
-                )
-            }
-            EarningsPerShareDiluted -> {
-                item.copy(
-                    formula = "$netIncomeConceptName / $WeightedAverageNumberOfDilutedSharesOutstanding"
-                )
-            }
-            EarningsPerShareBasic -> {
-                item.copy(
-                    formula = "$netIncomeConceptName / $WeightedAverageNumberOfSharesOutstandingBasic"
-                )
-            }
-            else -> {
-                item
-            }
-        }
+        return item.copy(
+            formula = "$netIncomeConceptName / $sharesOutstandingConceptName"
+        )
     }
 
     fun AbstractStockAnalyzer.fillTaxItem(item: Item): Item {
@@ -66,6 +49,7 @@ object FrequentlyUsedItemFormulaLogic {
             }
             ?.conceptName ?: error("Unable to find eps item name for $cik")
     }
+
     fun AbstractStockAnalyzer.netIncomeConceptName(): String {
         val candidateConceptNames = setOf(
             NetIncomeLoss
@@ -109,10 +93,24 @@ object FrequentlyUsedItemFormulaLogic {
             CostsAndExpenses,
             OperatingExpenses,
         )
-
         return calculations
             .incomeStatement
             .find { arc -> candidates.contains(arc.conceptName) }
             ?.conceptName ?: error("Unable to determine the Operating Costs conceptName for $cik")
+    }
+
+    fun AbstractStockAnalyzer.sharesOutstandingConceptName(): String {
+        val candidates = setOf(
+            WeightedAverageNumberOfShareOutstandingBasicAndDiluted,
+            WeightedAverageNumberOfDilutedSharesOutstanding,
+            WeightedAverageNumberOfSharesOutstandingBasic,
+        )
+        /*
+        TODO some of these must be determined at ingestion time
+         */
+        return calculations
+            .incomeStatement
+            .find { arc -> candidates.contains(arc.conceptName) }
+            ?.conceptName ?: EntityCommonStockSharesOutstanding
     }
 }
