@@ -6,16 +6,16 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("api/stock-analyzer/stock-analyses")
 @CrossOrigin
 @RestController
-class StockAnalysisCrudController(private val stockAnalysisCrudService: StockAnalysisCrudService) {
+class StockAnalysisCRUDController(private val stockAnalysisCRUDService: StockAnalysisCRUDService) {
 
     @PostMapping
     fun save(@RequestBody analysis: StockAnalysis2) {
-        stockAnalysisCrudService.save(analysis)
+        stockAnalysisCRUDService.save(analysis)
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: String) {
-        stockAnalysisCrudService.delete(id)
+        stockAnalysisCRUDService.delete(id)
     }
 
     @GetMapping
@@ -24,7 +24,7 @@ class StockAnalysisCrudController(private val stockAnalysisCrudService: StockAna
         @RequestParam cik: String? = null,
         @RequestParam ticker: String? = null,
     ): List<StockAnalysis2> {
-        return stockAnalysisCrudService.find(userId, cik, ticker)
+        return stockAnalysisCRUDService.find(userId, cik, ticker)
     }
 
 }

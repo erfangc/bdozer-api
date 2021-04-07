@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class StockAnalysisCrudService(mongoDatabase: MongoDatabase) {
+class StockAnalysisCRUDService(mongoDatabase: MongoDatabase) {
 
     val col = mongoDatabase.getCollection<StockAnalysis2>()
 
