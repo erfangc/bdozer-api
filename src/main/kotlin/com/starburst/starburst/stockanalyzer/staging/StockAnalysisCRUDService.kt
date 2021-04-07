@@ -19,6 +19,10 @@ class StockAnalysisCRUDService(mongoDatabase: MongoDatabase) {
         col.deleteOneById(id)
     }
 
+    fun get(id: String): StockAnalysis2? {
+        return col.findOneById(id)
+    }
+
     fun find(
         userId: String? = null,
         cik: String? = null,
@@ -26,7 +30,7 @@ class StockAnalysisCRUDService(mongoDatabase: MongoDatabase) {
     ): List<StockAnalysis2> {
         val filter = and(
             userId?.let { StockAnalysis2::userId eq it },
-            cik?.let { StockAnalysis2::cik eq it },
+            cik?.let { StockAnalysis2::cik eq it.padStart(10, '0') },
             ticker?.let { StockAnalysis2::ticker eq it },
         )
         return col

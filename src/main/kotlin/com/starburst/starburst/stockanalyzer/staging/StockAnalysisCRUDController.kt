@@ -1,6 +1,7 @@
 package com.starburst.starburst.stockanalyzer.staging
 
 import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
+import org.litote.kmongo.findOneById
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("api/stock-analyzer/stock-analyses")
@@ -16,6 +17,11 @@ class StockAnalysisCRUDController(private val stockAnalysisCRUDService: StockAna
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: String) {
         stockAnalysisCRUDService.delete(id)
+    }
+
+    @GetMapping("{id}")
+    fun get(@PathVariable id: String): StockAnalysis2? {
+        return stockAnalysisCRUDService.get(id)
     }
 
     @GetMapping
