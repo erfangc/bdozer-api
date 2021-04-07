@@ -3,6 +3,7 @@ package com.starburst.starburst.stockanalyzer
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
 import org.springframework.web.bind.annotation.*
 
+@Deprecated("do not use")
 @RestController
 @CrossOrigin
 @RequestMapping("public/model-builder-factory")
@@ -11,11 +12,6 @@ class StockAnalyzerFactoryController(private val stockAnalyzerFactory: StockAnal
     @PostMapping
     fun saveAnalysis(@RequestBody stockAnalysis: StockAnalysis) {
         stockAnalyzerFactory.save(stockAnalysis)
-    }
-
-    @GetMapping("{cik}")
-    fun analyze(@PathVariable cik: String): StockAnalysis {
-        return stockAnalyzerFactory.analyze(cik)
     }
 
     @GetMapping

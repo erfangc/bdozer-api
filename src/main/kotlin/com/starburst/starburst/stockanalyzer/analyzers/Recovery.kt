@@ -1,10 +1,11 @@
 package com.starburst.starburst.stockanalyzer.analyzers
 
 import com.starburst.starburst.extensions.DoubleExtensions.fmtPct
-import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
-import com.starburst.starburst.stockanalyzer.common.StockAnalyzerDataProvider
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
+import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.common.StockAnalyzerDataProvider
+import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
 
 /**
  * This [com.starburst.starburst.stockanalyzer.common.StockAnalyzer]
@@ -13,7 +14,8 @@ import com.starburst.starburst.models.dataclasses.Item
  *
  * The aim is to model situations where unexpected shocks caused large declines
  */
-class Recovery(dataProvider: StockAnalyzerDataProvider) : AbstractStockAnalyzer(dataProvider) {
+class Recovery(dataProvider: StockAnalyzerDataProvider, stockAnalysis: StockAnalysis2) :
+    AbstractStockAnalyzer(dataProvider, stockAnalysis) {
 
     override fun processOperatingCostItem(item: Item): Item {
         return itemAsPercentOfRevenue(item)

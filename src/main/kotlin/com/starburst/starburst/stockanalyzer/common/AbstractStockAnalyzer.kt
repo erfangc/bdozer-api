@@ -1,12 +1,12 @@
 package com.starburst.starburst.stockanalyzer.common
 
-import com.starburst.starburst.extensions.DoubleExtensions.orZero
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.edgar.factbase.support.LabelManager
+import com.starburst.starburst.extensions.DoubleExtensions.orZero
 import com.starburst.starburst.models.ModelEvaluator
 import com.starburst.starburst.models.Utility.DiscountFactor
 import com.starburst.starburst.models.Utility.PresentValueOfEarningsPerShare
@@ -37,12 +37,14 @@ import com.starburst.starburst.stockanalyzer.common.extensions.FrequentlyUsedIte
 import com.starburst.starburst.stockanalyzer.common.extensions.General.conceptNotFound
 import com.starburst.starburst.stockanalyzer.common.extensions.General.fragment
 import com.starburst.starburst.stockanalyzer.common.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
-import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
+import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
 import java.time.LocalDate
 import java.util.*
-import kotlin.collections.HashSet
 
-abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : StockAnalyzer {
+abstract class AbstractStockAnalyzer(
+    dataProvider: StockAnalyzerDataProvider,
+    val originalStockAnalysis: StockAnalysis2,
+) {
 
     val filingProvider = dataProvider.filingProvider
     val cik = filingProvider.cik().padStart(10, '0')
@@ -54,9 +56,11 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
     val evaluator = ModelEvaluator()
 
     val calculations = factBase.calculations(cik)
-    val modelOverrides = dataProvider.modelOverrideService.getOverrides(cik)
     val conceptDependencies = conceptDependencies()
 
+    /*
+    Concept names
+     */
     val totalRevenueConceptName = totalRevenueItemName()
     val epsConceptName = epsConceptName()
     val netIncomeConceptName = netIncomeConceptName()
@@ -93,9 +97,7 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
         /*
         add some mandatory fields if they don't already exist
          */
-
         val sharesOutstanding = historicalValue(sharesOutstandingConceptName)
-
         val additionalMandatoryItems = listOf(
             Item(
                 name = sharesOutstandingConceptName,
@@ -142,21 +144,14 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
             .toList()
     }
 
-    override fun analyze(): StockAnalysis {
-        val model = emptyModel()
+    fun analyze(): StockAnalysis2 {
+        val model = originalStockAnalysis
+            .model
             .copy(incomeStatementItems = createIncomeStatementItems())
         val finalModel = model.copy(otherItems = dcfItems(model))
         val evalResult = evaluator.evaluate(finalModel)
         return postModelEvaluationAnalysis(evalResult)
     }
-
-    fun emptyModel() = Model(
-        name = filingEntity.name,
-        symbol = filingEntity.tradingSymbol,
-        description = filingEntity.description,
-        beta = filingEntity.beta,
-        terminalGrowthRate = 0.02,
-    )
 
     fun createIncomeStatementItems(): List<Item> {
         val incomeStatementArcs = calculations.incomeStatement
@@ -170,7 +165,6 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
 
         /*
         Turn each Arc in the statement into an Item based, based on the possibilities:
-
         - The arc defines calculation components
          */
         return statementArcs
@@ -205,7 +199,7 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
         /*
         If this item has an override, use that instead
          */
-        val override = modelOverrides.items.find { it.name == item.name }
+        val override = originalStockAnalysis.model.itemOverrides.find { it.name == item.name }
         if (override != null) {
             return override
         } else {
@@ -238,7 +232,7 @@ abstract class AbstractStockAnalyzer(dataProvider: StockAnalyzerDataProvider) : 
     abstract fun processOperatingCostItem(item: Item): Item
 
     protected fun useZacksRevenueEstimate(item: Item): Item {
-        val model = emptyModel()
+        val model = originalStockAnalysis.model
         val projections = zacksEstimatesService.revenueProjections(ticker = model.symbol!!)
         /*
         if there are more periods than there are estimates decide what to do

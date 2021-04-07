@@ -7,12 +7,13 @@ import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
 import com.starburst.starburst.stockanalyzer.common.extensions.BusinessWaterfall.businessWaterfall
-import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis
+import com.starburst.starburst.stockanalyzer.staging.dataclasses.DerivedStockAnalytics
+import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
 import kotlin.math.pow
 
 object PostEvaluationAnalysis {
 
-    fun AbstractStockAnalyzer.postModelEvaluationAnalysis(evalResult: EvaluateModelResult): StockAnalysis {
+    fun AbstractStockAnalyzer.postModelEvaluationAnalysis(evalResult: EvaluateModelResult): StockAnalysis2 {
         val model = evalResult.model
         /*
         try a version of this where revenue remains constant
@@ -20,25 +21,27 @@ object PostEvaluationAnalysis {
         val zeroGrowthResult = evaluator.evaluate(zeroRevenueGrowth(model))
         val zeroGrowthPrice = zeroGrowthResult.targetPrice.coerceAtLeast(0.0)
 
-        return StockAnalysis(
-            _id = cik,
+        return originalStockAnalysis.copy(
             cik = cik,
             ticker = filingEntity.tradingSymbol,
-            model = evalResult.model,
+            model = evalResult.model.copy(
+                totalRevenueConceptName = totalRevenueConceptName,
+                epsConceptName = epsConceptName,
+                netIncomeConceptName = netIncomeConceptName,
+                ebitConceptName = ebitConceptName,
+                operatingCostConceptName = operatingCostConceptName,
+                sharesOutstandingConceptName = sharesOutstandingConceptName,
+            ),
             cells = evalResult.cells,
-            profitPerShare = profitPerShare(model),
-            shareOutstanding = shareOutstanding(model),
-            businessWaterfall = businessWaterfall(evalResult),
-            zeroGrowthPrice = zeroGrowthPrice,
-            targetPrice = evalResult.targetPrice,
-            discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
-            revenueCAGR = revenueCAGR(evalResult),
-            totalRevenueConceptName = totalRevenueConceptName,
-            epsConceptName = epsConceptName,
-            netIncomeConceptName = netIncomeConceptName,
-            ebitConceptName = ebitConceptName,
-            operatingCostConceptName = operatingCostConceptName,
-            sharesOutstandingConceptName = sharesOutstandingConceptName,
+            derivedStockAnalytics = DerivedStockAnalytics(
+                profitPerShare = profitPerShare(model),
+                shareOutstanding = shareOutstanding(model),
+                businessWaterfall = businessWaterfall(evalResult),
+                zeroGrowthPrice = zeroGrowthPrice,
+                targetPrice = evalResult.targetPrice,
+                discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
+                revenueCAGR = revenueCAGR(evalResult),
+            ),
         )
 
     }

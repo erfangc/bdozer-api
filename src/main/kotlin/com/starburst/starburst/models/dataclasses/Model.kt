@@ -1,15 +1,27 @@
 package com.starburst.starburst.models.dataclasses
 
-import java.time.Instant
-import java.util.*
-
 data class Model(
-    val _id: String = UUID.randomUUID().toString(),
     val name: String = "Untitled Model",
     val symbol: String? = null,
     val cik: String? = null,
+    /**
+     * The SEC filing adsh from
+     * which the automated model generate from
+     */
+    val adsh: String? = null,
     val description: String? = null,
-    val tags: List<String> = emptyList(),
+
+
+    val itemOverrides: List<Item> = emptyList(),
+    /**
+     * Crucial Item / concept names
+     */
+    val totalRevenueConceptName: String? = null,
+    val epsConceptName: String? = null,
+    val netIncomeConceptName: String? = null,
+    val ebitConceptName: String? = null,
+    val operatingCostConceptName: String? = null,
+    val sharesOutstandingConceptName: String? = null,
 
     /**
      * The main statements
@@ -23,14 +35,9 @@ data class Model(
      * Assumptions
      */
     val beta: Double = 1.0,
-    val sharesOutstanding: Double = 1.0,
-    val dilutedSharesOutstanding: Double? = null,
-    val corporateTaxRate: Double = 0.1,
-    val costOfDebt: Double = 0.04,
     val riskFreeRate: Double = 0.005,
     val equityRiskPremium: Double = 0.075,
-    val terminalFcfMultiple: Double = 15.0,
-    val terminalGrowthRate: Double = 0.03,
+    val terminalGrowthRate: Double = 0.02,
 
     /**
      * Projection period
@@ -42,7 +49,4 @@ data class Model(
      */
     val excelColumnOffset: Int = 1,
     val excelRowOffset: Int = 1,
-
-    val updatedAt: Instant = Instant.now(),
-    val updatedBy: String? = null
 )

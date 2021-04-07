@@ -4,6 +4,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.web.bind.annotation.*
 
+@Deprecated("do not use")
 @CrossOrigin
 @RequestMapping("public/stock-analysis-excel-downloader")
 @RestController
