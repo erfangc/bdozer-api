@@ -6,15 +6,19 @@ import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
 import com.starburst.starburst.filingentity.FilingEntityManager
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
+import com.starburst.starburst.models.CellGenerator
 import com.starburst.starburst.stockanalyzer.analyzers.Normal
 import com.starburst.starburst.stockanalyzer.analyzers.Recovery
 import com.starburst.starburst.stockanalyzer.common.StockAnalyzerDataProvider
 import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
 
 @Service
 class StockAnalysisWorkflowService(
+    private val stockAnalysisCRUDService: StockAnalysisCRUDService,
     private val factBase: FactBase,
     private val filingProviderFactory: FilingProviderFactory,
     private val alphaVantageService: AlphaVantageService,
@@ -22,6 +26,15 @@ class StockAnalysisWorkflowService(
     private val edgarExplorer: EdgarExplorer,
     private val filingEntityManager: FilingEntityManager,
 ) {
+
+    fun download(id: String): HttpEntity<ByteArray> {
+        val stockAnalysis = stockAnalysisCRUDService.get(id) ?: error("...")
+        val headers = HttpHeaders()
+        headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel")
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${stockAnalysis.cik}.xlsx")
+        val byteArray = CellGenerator.exportToXls(stockAnalysis.model, stockAnalysis.cells)
+        return HttpEntity(byteArray, headers)
+    }
 
     fun create(cik: String): StockAnalysis2 {
         return run(StockAnalysis2(cik = cik))
