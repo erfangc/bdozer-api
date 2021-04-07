@@ -20,9 +20,9 @@ class StockAnalysisCRUDController(private val stockAnalysisCRUDService: StockAna
 
     @GetMapping
     fun find(
-        @RequestParam userId: String? = null,
-        @RequestParam cik: String? = null,
-        @RequestParam ticker: String? = null,
+        @RequestParam(required = false) userId: String? = null,
+        @RequestParam(required = false) cik: String? = null,
+        @RequestParam(required = false) ticker: String? = null,
     ): List<StockAnalysis2> {
         return stockAnalysisCRUDService.find(userId, cik, ticker)
     }
