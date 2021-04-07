@@ -53,6 +53,7 @@ abstract class AbstractStockAnalyzer(
     val factBase = dataProvider.factBase
     val conceptManager = FilingConceptsHolder(filingProvider)
     val labelManager = LabelManager(filingProvider)
+    val alphaVantageService = dataProvider.alphaVantageService
     val evaluator = ModelEvaluator()
 
     val calculations = factBase.calculations(cik)

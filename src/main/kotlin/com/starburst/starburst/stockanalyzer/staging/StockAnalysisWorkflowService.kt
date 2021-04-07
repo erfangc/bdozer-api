@@ -1,5 +1,6 @@
 package com.starburst.starburst.stockanalyzer.staging
 
+import com.starburst.starburst.alphavantage.AlphaVantageService
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.provider.FilingProviderFactory
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service
 class StockAnalysisWorkflowService(
     private val factBase: FactBase,
     private val filingProviderFactory: FilingProviderFactory,
+    private val alphaVantageService: AlphaVantageService,
     private val zacksEstimatesService: ZacksEstimatesService,
     private val edgarExplorer: EdgarExplorer,
     private val filingEntityManager: FilingEntityManager,
@@ -56,6 +58,7 @@ class StockAnalysisWorkflowService(
         factBase = factBase,
         filingEntity = filingEntity,
         zacksEstimatesService = zacksEstimatesService,
+        alphaVantageService = alphaVantageService,
     )
 
 }

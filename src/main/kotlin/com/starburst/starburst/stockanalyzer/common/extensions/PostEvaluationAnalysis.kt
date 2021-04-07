@@ -41,9 +41,14 @@ object PostEvaluationAnalysis {
                 targetPrice = evalResult.targetPrice,
                 discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
                 revenueCAGR = revenueCAGR(evalResult),
+                currentPrice = currentPrice(filingEntity.tradingSymbol),
             ),
         )
 
+    }
+
+    private fun AbstractStockAnalyzer.currentPrice(tradingSymbol: String?): Double {
+        return alphaVantageService.latestPrice(tradingSymbol ?: error("..."))
     }
 
     private fun AbstractStockAnalyzer.zeroRevenueGrowth(model: Model): Model {
