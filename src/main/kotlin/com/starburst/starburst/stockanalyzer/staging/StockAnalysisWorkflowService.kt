@@ -9,7 +9,7 @@ import com.starburst.starburst.filingentity.dataclasses.FilingEntity
 import com.starburst.starburst.models.CellGenerator
 import com.starburst.starburst.stockanalyzer.analyzers.Normal
 import com.starburst.starburst.stockanalyzer.analyzers.Recovery
-import com.starburst.starburst.stockanalyzer.common.StockAnalyzerDataProvider
+import com.starburst.starburst.stockanalyzer.analyzers.StockAnalyzerDataProvider
 import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import org.springframework.http.HttpEntity

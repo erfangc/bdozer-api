@@ -1,12 +1,12 @@
-package com.starburst.starburst.stockanalyzer.common.extensions
+package com.starburst.starburst.stockanalyzer.analyzers.extensions
 
 import com.starburst.starburst.extensions.DoubleExtensions.orZero
 import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
-import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
-import com.starburst.starburst.stockanalyzer.common.extensions.BusinessWaterfall.businessWaterfall
+import com.starburst.starburst.stockanalyzer.analyzers.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.analyzers.extensions.BusinessWaterfall.businessWaterfall
 import com.starburst.starburst.stockanalyzer.staging.dataclasses.DerivedStockAnalytics
 import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
 import kotlin.math.pow

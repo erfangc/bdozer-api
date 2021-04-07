@@ -1,4 +1,4 @@
-package com.starburst.starburst.stockanalyzer.common.extensions
+package com.starburst.starburst.stockanalyzer.analyzers.extensions
 
 import java.net.URI
 

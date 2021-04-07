@@ -1,9 +1,9 @@
-package com.starburst.starburst.stockanalyzer.common.extensions
+package com.starburst.starburst.stockanalyzer.analyzers.extensions
 
 import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.spreadsheet.Cell
-import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
+import com.starburst.starburst.stockanalyzer.analyzers.AbstractStockAnalyzer
 import com.starburst.starburst.stockanalyzer.dataclasses.Waterfall
 import kotlin.math.abs
 

@@ -1,4 +1,4 @@
-package com.starburst.starburst.stockanalyzer.common
+package com.starburst.starburst.stockanalyzer.analyzers
 
 import com.starburst.starburst.alphavantage.AlphaVantageService
 import com.starburst.starburst.edgar.FilingProvider
