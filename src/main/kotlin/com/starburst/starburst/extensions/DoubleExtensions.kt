@@ -1,9 +1,10 @@
-package com.starburst.starburst
+package com.starburst.starburst.extensions
 
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 object DoubleExtensions {
+
     fun Double?.fmtRound(precision: Int = 0): String {
         return if (this == null) {
             "0"
@@ -23,4 +24,5 @@ object DoubleExtensions {
     }
 
     fun Double?.orZero() = this ?: 0.0
+
 }

@@ -3,7 +3,7 @@ package com.starburst.starburst.authn
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.starburst.starburst.ApiError
+import com.starburst.starburst.controlleradvice.ApiError
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component

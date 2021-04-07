@@ -1,6 +1,6 @@
 package com.starburst.starburst.stockanalyzer.analyzers
 
-import com.starburst.starburst.DoubleExtensions.fmtPct
+import com.starburst.starburst.extensions.DoubleExtensions.fmtPct
 import com.starburst.starburst.stockanalyzer.common.AbstractStockAnalyzer
 import com.starburst.starburst.stockanalyzer.common.StockAnalyzerDataProvider
 import com.starburst.starburst.models.dataclasses.Commentary

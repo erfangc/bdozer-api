@@ -1,6 +1,6 @@
 package com.starburst.starburst.stockanalyzer.common.extensions
 
-import com.starburst.starburst.DoubleExtensions.orZero
+import com.starburst.starburst.extensions.DoubleExtensions.orZero
 import com.starburst.starburst.models.EvaluateModelResult
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.ItemType

@@ -1,6 +1,6 @@
 package com.starburst.starburst.stockanalyzer.common
 
-import com.starburst.starburst.DoubleExtensions.orZero
+import com.starburst.starburst.extensions.DoubleExtensions.orZero
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus

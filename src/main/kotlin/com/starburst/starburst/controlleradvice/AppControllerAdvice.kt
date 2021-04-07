@@ -1,4 +1,4 @@
-package com.starburst.starburst
+package com.starburst.starburst.controlleradvice
 
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -35,8 +35,7 @@ class AppControllerAdvice {
             timestamp = Instant.now()
         )
 
-        val ret = ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        val ret = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(error)
 
         log.error(id, ex)

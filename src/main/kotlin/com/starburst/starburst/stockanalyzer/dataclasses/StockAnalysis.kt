@@ -4,16 +4,19 @@ import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.spreadsheet.Cell
 import java.time.Instant
+import java.time.LocalDate
+import java.util.*
 
 /**
  * This is the common output for all the Stock Analyzers
  */
 data class StockAnalysis(
-    val _id: String,
+    val _id: String = UUID.randomUUID().toString(),
 
     val cik: String,
+    val adsh: String? = null,
+    val userId: String? = null,
     val ticker: String? = null,
-
     val lastUpdated: Instant = Instant.now(),
 
     /*
@@ -28,7 +31,6 @@ data class StockAnalysis(
     revenue waterfall by period
      */
     val businessWaterfall: Map<Int, Waterfall>,
-
     val shareOutstanding: Item,
     val profitPerShare: Item,
 

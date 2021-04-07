@@ -1,4 +1,4 @@
-package com.starburst.starburst.json
+package com.starburst.starburst.extensions
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
 
-object Extensions {
+object JsonExtensions {
     val objectMapper: ObjectMapper = jacksonObjectMapper().findAndRegisterModules()
 
     inline fun <reified T> HttpClient.readValue(url: String): T {

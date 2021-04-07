@@ -1,7 +1,7 @@
 package com.starburst.starburst.alphavantage
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.starburst.starburst.json.Extensions.readJson
+import com.starburst.starburst.extensions.JsonExtensions.readJson
 import org.apache.http.client.HttpClient
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service

@@ -66,10 +66,10 @@ class StockAnalyzerFactory(
 
         val stockAnalysis = when (filingEntity.modelTemplate?.template) {
             Recovery -> {
-                recovery(dataProvider).analyze()
+                Recovery(dataProvider = dataProvider).analyze()
             }
             Normal -> {
-                normal(dataProvider).analyze()
+                Normal(dataProvider).analyze()
             }
             else -> error("No analysis template found for $cik")
         }
@@ -80,14 +80,6 @@ class StockAnalyzerFactory(
     fun getAnalyses(): List<StockAnalysis> {
         return col.find().map { analysis -> withCurrentPrice(analysis) }.toList()
     }
-
-    private fun recovery(dataProvider: StockAnalyzerDataProvider) = Recovery(
-        dataProvider = dataProvider,
-    )
-
-    private fun normal(dataProvider: StockAnalyzerDataProvider) = Normal(
-        dataProvider = dataProvider,
-    )
 
     fun getAnalysis(cik: String): StockAnalysis {
         val cik = cik.padStart(10, '0')

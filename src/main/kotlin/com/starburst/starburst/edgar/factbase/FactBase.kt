@@ -1,7 +1,7 @@
 package com.starburst.starburst.edgar.factbase
 
 import com.mongodb.client.MongoDatabase
-import com.starburst.starburst.DoubleExtensions.orZero
+import com.starburst.starburst.extensions.DoubleExtensions.orZero
 import com.starburst.starburst.edgar.factbase.dataclasses.*
 import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.edgar.factbase.support.FactsBootstrapper

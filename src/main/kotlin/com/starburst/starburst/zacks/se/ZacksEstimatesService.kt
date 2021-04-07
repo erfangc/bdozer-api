@@ -1,7 +1,7 @@
 package com.starburst.starburst.zacks.se
 
 import com.mongodb.client.MongoDatabase
-import com.starburst.starburst.DoubleExtensions.orZero
+import com.starburst.starburst.extensions.DoubleExtensions.orZero
 import com.starburst.starburst.models.dataclasses.Item
 import org.litote.kmongo.div
 import org.litote.kmongo.eq

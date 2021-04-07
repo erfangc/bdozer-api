@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.generalized
 
-import com.starburst.starburst.DoubleExtensions.fmtPct
+import com.starburst.starburst.extensions.DoubleExtensions.fmtPct
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.extensions.ElementSemanticsExtensions.isDebtFlowItem

@@ -1,6 +1,6 @@
 package com.starburst.starburst.edgar.factbase.modelbuilder.formula.generators.itemized
 
-import com.starburst.starburst.DoubleExtensions.fmtPct
+import com.starburst.starburst.extensions.DoubleExtensions.fmtPct
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.ModelFormulaBuilderContext
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeTaxExpenseBenefit
