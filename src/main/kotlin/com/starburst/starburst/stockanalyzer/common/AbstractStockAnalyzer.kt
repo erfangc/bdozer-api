@@ -233,16 +233,17 @@ abstract class AbstractStockAnalyzer(
 
     protected fun useZacksRevenueEstimate(item: Item): Item {
         val model = originalStockAnalysis.model
-        val projections = zacksEstimatesService.revenueProjections(ticker = model.symbol!!)
+        val ticker = filingEntity.tradingSymbol ?: error("No trading symbol defined for $cik")
+        val projections = zacksEstimatesService.revenueProjections(ticker = ticker)
         /*
         if there are more periods than there are estimates decide what to do
          */
         val lastDocumentPeriodEnd = item.historicalValue?.documentPeriodEndDate
-        val formulas = (1..model.periods).map { period ->
+        val formulas = (1..model.periods).associateWith { period ->
             val finalRevenue = projections[projections.toSortedMap().lastKey()].orZero()
             val year = period + LocalDate.parse(lastDocumentPeriodEnd).year
-            period to (projections[year] ?: finalRevenue).toString()
-        }.toMap()
+            (projections[year] ?: finalRevenue).toString()
+        }
         return item.copy(
             type = ItemType.Discrete,
             discrete = Discrete(formulas)
