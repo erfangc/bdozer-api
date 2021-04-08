@@ -4,7 +4,7 @@ import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("api/published-stock-analyses")
+@RequestMapping("public/published-stock-analyses")
 class StockAnalysisPublicationController(
     private val stockAnalysisPublicationService: StockAnalysisPublicationService
 ) {
@@ -25,8 +25,8 @@ class StockAnalysisPublicationController(
 
     @GetMapping
     fun find(
-        @RequestParam(required = false) skip: Int = 0,
-        @RequestParam(required = false) limit: Int = 10
+        @RequestParam(required = false) skip: Int? = null,
+        @RequestParam(required = false) limit: Int? = null,
     ): List<StockAnalysis2> {
         return stockAnalysisPublicationService.find(skip, limit)
     }

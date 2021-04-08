@@ -22,11 +22,11 @@ class StockAnalysisPublicationService(
         col.deleteOneById(id)
     }
 
-    fun find(skip: Int = 0, limit: Int = 10): List<StockAnalysis2> {
+    fun find(skip: Int?, limit: Int?): List<StockAnalysis2> {
         return col
             .find()
-            .skip(skip)
-            .limit(limit)
+            .skip(skip ?: 0)
+            .limit(limit ?: 10)
             .toList()
     }
 
