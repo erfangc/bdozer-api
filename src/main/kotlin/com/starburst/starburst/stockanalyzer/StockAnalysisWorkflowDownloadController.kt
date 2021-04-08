@@ -1,4 +1,4 @@
-package com.starburst.starburst.stockanalyzer.staging
+package com.starburst.starburst.stockanalyzer
 
 import org.springframework.http.HttpEntity
 import org.springframework.web.bind.annotation.*

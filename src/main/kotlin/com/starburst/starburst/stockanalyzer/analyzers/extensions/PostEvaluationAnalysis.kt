@@ -7,8 +7,8 @@ import com.starburst.starburst.models.dataclasses.ItemType
 import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.stockanalyzer.analyzers.AbstractStockAnalyzer
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.BusinessWaterfall.businessWaterfall
-import com.starburst.starburst.stockanalyzer.staging.dataclasses.DerivedStockAnalytics
-import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
+import com.starburst.starburst.stockanalyzer.dataclasses.DerivedStockAnalytics
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import kotlin.math.pow
 
 object PostEvaluationAnalysis {

@@ -1,7 +1,7 @@
-package com.starburst.starburst.stockanalyzer.staging
+package com.starburst.starburst.stockanalyzer
 
 import com.mongodb.client.MongoDatabase
-import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import org.litote.kmongo.*
 import org.springframework.stereotype.Service
 import java.time.Instant

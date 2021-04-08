@@ -3,7 +3,7 @@ package com.starburst.starburst.stockanalyzer.analyzers
 import com.starburst.starburst.extensions.DoubleExtensions.fmtPct
 import com.starburst.starburst.models.dataclasses.Commentary
 import com.starburst.starburst.models.dataclasses.Item
-import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 
 /**
  * This [com.starburst.starburst.stockanalyzer.common.StockAnalyzer]

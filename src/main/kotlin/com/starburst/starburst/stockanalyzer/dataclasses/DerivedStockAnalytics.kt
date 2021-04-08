@@ -1,4 +1,4 @@
-package com.starburst.starburst.stockanalyzer.staging.dataclasses
+package com.starburst.starburst.stockanalyzer.dataclasses
 
 import com.starburst.starburst.models.dataclasses.Item
 import com.starburst.starburst.stockanalyzer.dataclasses.Waterfall

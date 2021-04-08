@@ -1,4 +1,4 @@
-package com.starburst.starburst.stockanalyzer.staging
+package com.starburst.starburst.stockanalyzer
 
 import com.starburst.starburst.alphavantage.AlphaVantageService
 import com.starburst.starburst.edgar.explorer.EdgarExplorer
@@ -10,7 +10,7 @@ import com.starburst.starburst.models.CellGenerator
 import com.starburst.starburst.stockanalyzer.analyzers.Normal
 import com.starburst.starburst.stockanalyzer.analyzers.Recovery
 import com.starburst.starburst.stockanalyzer.analyzers.StockAnalyzerDataProvider
-import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import com.starburst.starburst.zacks.se.ZacksEstimatesService
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

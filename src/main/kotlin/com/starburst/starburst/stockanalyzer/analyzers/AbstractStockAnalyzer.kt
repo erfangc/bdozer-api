@@ -37,7 +37,7 @@ import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsed
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.conceptNotFound
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.fragment
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
-import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
+import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import java.time.LocalDate
 import java.util.*
 
