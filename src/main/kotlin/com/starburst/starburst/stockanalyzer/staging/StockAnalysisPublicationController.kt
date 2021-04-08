@@ -4,27 +4,28 @@ import com.starburst.starburst.stockanalyzer.staging.dataclasses.StockAnalysis2
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@CrossOrigin
 @RequestMapping("public/published-stock-analyses")
 class StockAnalysisPublicationController(
     private val stockAnalysisPublicationService: StockAnalysisPublicationService
 ) {
     @PostMapping
-    fun publish(@RequestBody stockAnalysis: StockAnalysis2) {
+    fun publishStockAnalysis(@RequestBody stockAnalysis: StockAnalysis2) {
         stockAnalysisPublicationService.publish(stockAnalysis)
     }
 
     @GetMapping("{id}")
-    fun get(@PathVariable id: String): StockAnalysis2? {
+    fun getPublishedStockAnalysis(@PathVariable id: String): StockAnalysis2? {
         return stockAnalysisPublicationService.get(id)
     }
 
     @DeleteMapping("{id}")
-    fun unpublish(@PathVariable id: String) {
+    fun unpublishStockAnalysis(@PathVariable id: String) {
         stockAnalysisPublicationService.unpublish(id)
     }
 
     @GetMapping
-    fun find(
+    fun findPublishedStockAnalyses(
         @RequestParam(required = false) skip: Int? = null,
         @RequestParam(required = false) limit: Int? = null,
     ): List<StockAnalysis2> {

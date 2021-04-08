@@ -10,22 +10,22 @@ import org.springframework.web.bind.annotation.*
 class StockAnalysisCRUDController(private val stockAnalysisCRUDService: StockAnalysisCRUDService) {
 
     @PostMapping
-    fun save(@RequestBody analysis: StockAnalysis2) {
+    fun saveStockAnalysis(@RequestBody analysis: StockAnalysis2) {
         stockAnalysisCRUDService.save(analysis)
     }
 
     @DeleteMapping("{id}")
-    fun delete(@PathVariable id: String) {
+    fun deleteStockAnalysis(@PathVariable id: String) {
         stockAnalysisCRUDService.delete(id)
     }
 
     @GetMapping("{id}")
-    fun get(@PathVariable id: String): StockAnalysis2? {
+    fun getStockAnalysis(@PathVariable id: String): StockAnalysis2? {
         return stockAnalysisCRUDService.get(id)
     }
 
     @GetMapping
-    fun find(
+    fun findStockAnalyses(
         @RequestParam(required = false) userId: String? = null,
         @RequestParam(required = false) cik: String? = null,
         @RequestParam(required = false) ticker: String? = null,

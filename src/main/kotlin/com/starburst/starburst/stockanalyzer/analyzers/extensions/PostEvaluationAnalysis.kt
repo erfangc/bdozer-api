@@ -23,6 +23,7 @@ object PostEvaluationAnalysis {
 
         return originalStockAnalysis.copy(
             cik = cik,
+            name = filingEntity.name,
             ticker = filingEntity.tradingSymbol,
             model = evalResult.model.copy(
                 totalRevenueConceptName = totalRevenueConceptName,
