@@ -93,4 +93,5 @@ object USGaapConstants {
     const val CostsAndExpenses = "CostsAndExpenses"
     const val OperatingCostsAndExpenses = "OperatingCostsAndExpenses"
     const val OperatingExpenses = "OperatingExpenses"
+    const val OperatingIncomeLoss = "OperatingIncomeLoss"
 }

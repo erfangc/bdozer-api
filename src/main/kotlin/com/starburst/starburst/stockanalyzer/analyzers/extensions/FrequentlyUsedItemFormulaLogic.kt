@@ -9,6 +9,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingCostsAndExpenses
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingExpenses
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingIncomeLoss
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfShareOutstandingBasicAndDiluted
@@ -31,9 +32,11 @@ object FrequentlyUsedItemFormulaLogic {
     }
 
     fun AbstractStockAnalyzer.fillTaxItem(item: Item): Item {
-        return item.copy(
-            formula = "${ebitConceptName}*0.12"
-        )
+        return if (ebitConceptName != null)
+            item.copy(
+                formula = "${ebitConceptName}*0.12"
+            ) else
+            item
     }
 
     fun AbstractStockAnalyzer.epsConceptName(): String {
@@ -76,7 +79,7 @@ object FrequentlyUsedItemFormulaLogic {
             ?.conceptName ?: error("Unable to find revenue total item name for $cik")
     }
 
-    fun AbstractStockAnalyzer.ebitItemName(): String {
+    fun AbstractStockAnalyzer.ebitItemName(): String? {
         val candidateConceptNames = setOf(
             IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,
             IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
@@ -84,7 +87,7 @@ object FrequentlyUsedItemFormulaLogic {
         return calculations
             .incomeStatement
             .find { arc -> candidateConceptNames.contains(arc.conceptName) }
-            ?.conceptName ?: error("Unable to determine the Earning Before Income Tax conceptName for $cik")
+            ?.conceptName
     }
 
     fun AbstractStockAnalyzer.operatingCostsItemName(): String {
@@ -92,6 +95,7 @@ object FrequentlyUsedItemFormulaLogic {
             OperatingCostsAndExpenses,
             CostsAndExpenses,
             OperatingExpenses,
+            OperatingIncomeLoss,
         )
         return calculations
             .incomeStatement
