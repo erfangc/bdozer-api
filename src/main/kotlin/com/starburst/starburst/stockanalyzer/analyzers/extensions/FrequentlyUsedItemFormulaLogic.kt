@@ -11,6 +11,7 @@ import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstan
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingExpenses
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingIncomeLoss
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.RevenueFromContractWithCustomerIncludingAssessedTax
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfShareOutstandingBasicAndDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
@@ -68,7 +69,8 @@ object FrequentlyUsedItemFormulaLogic {
 
     fun AbstractStockAnalyzer.totalRevenueItemName(): String {
         val candidateConceptNames = setOf(
-            RevenueFromContractWithCustomerExcludingAssessedTax
+            RevenueFromContractWithCustomerExcludingAssessedTax,
+            RevenueFromContractWithCustomerIncludingAssessedTax,
         )
         return calculations
             .incomeStatement

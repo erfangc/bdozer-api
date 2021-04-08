@@ -79,6 +79,8 @@ object USGaapConstants {
     const val RetainedEarningsAccumulatedDeficit = "RetainedEarningsAccumulatedDeficit"
     const val RevenueFromContractWithCustomerExcludingAssessedTax =
         "RevenueFromContractWithCustomerExcludingAssessedTax"
+    const val RevenueFromContractWithCustomerIncludingAssessedTax =
+        "RevenueFromContractWithCustomerIncludingAssessedTax"
     const val SellingAndMarketingExpense = "SellingAndMarketingExpense"
     const val ShareBasedCompensation = "ShareBasedCompensation"
 
@@ -86,7 +88,8 @@ object USGaapConstants {
     const val EarningsPerShareBasicAndDiluted = "EarningsPerShareBasicAndDiluted"
     const val EarningsPerShareBasic = "EarningsPerShareBasic"
     const val WeightedAverageNumberOfDilutedSharesOutstanding = "WeightedAverageNumberOfDilutedSharesOutstanding"
-    const val WeightedAverageNumberOfShareOutstandingBasicAndDiluted = "WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
+    const val WeightedAverageNumberOfShareOutstandingBasicAndDiluted =
+        "WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
     const val WeightedAverageNumberOfSharesOutstandingBasic = "WeightedAverageNumberOfSharesOutstandingBasic"
     const val EntityCommonStockSharesOutstanding = "EntityCommonStockSharesOutstanding"
     const val NetIncomeLoss = "NetIncomeLoss"
