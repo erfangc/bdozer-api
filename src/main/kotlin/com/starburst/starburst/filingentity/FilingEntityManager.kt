@@ -4,6 +4,7 @@ import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.filingentity.dataclasses.Address
 import com.starburst.starburst.filingentity.dataclasses.FilingEntity
+import com.starburst.starburst.filingentity.dataclasses.ModelTemplate
 import com.starburst.starburst.filingentity.internal.SECEntity
 import com.starburst.starburst.xml.HttpClientExtensions.readEntity
 import org.apache.http.client.HttpClient
@@ -79,6 +80,10 @@ class FilingEntityManager(
             phone = secEntity.phone,
             lastUpdated = Instant.now().toString(),
             statusMessage = Created,
+            modelTemplate = ModelTemplate(
+                name = "Normal",
+                template = "Normal",
+            ),
         )
         col.save(entity)
         log.info("Created filing entity cik=${entity.cik}")
