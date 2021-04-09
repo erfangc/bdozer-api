@@ -75,8 +75,7 @@ object FrequentlyUsedItemFormulaLogic {
         return calculations
             .incomeStatement
             .find {
-                candidateConceptNames
-                    .contains(it.conceptName)
+                candidateConceptNames.contains(it.conceptName)
             }
             ?.conceptName ?: error("Unable to find revenue total item name for $cik")
     }
