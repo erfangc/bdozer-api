@@ -200,7 +200,7 @@ class CellGenerator {
                     ItemType.SubscriptionRevenue -> SubscriptionRevenueTranslator(ctx)
                         .resolveExpression(cell)
 
-                    ItemType.PercentOfRevenue -> PercentOfRevenueTranslator()
+                    ItemType.PercentOfRevenue -> PercentOfRevenueTranslator(ctx)
                         .translateFormula(cell)
 
                     ItemType.PercentOfTotalAsset -> PercentOfTotalAssetTranslator(ctx)

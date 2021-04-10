@@ -10,12 +10,24 @@ import com.starburst.starburst.edgar.factbase.XLinkExtentions.role
 import com.starburst.starburst.edgar.factbase.XLinkExtentions.to
 import com.starburst.starburst.edgar.factbase.XLinkExtentions.weight
 import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
+import com.starburst.starburst.edgar.factbase.dataclasses.ConceptNames
 import com.starburst.starburst.edgar.factbase.dataclasses.FilingCalculations
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalYearFocus
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.CostsAndExpenses
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingCostsAndExpenses
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingExpenses
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingIncomeLoss
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfShareOutstandingBasicAndDiluted
+import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.xml.XmlNode
 import java.net.URI
@@ -27,6 +39,17 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
     private val cashFlowStatementRootHref = "us-gaap_StatementOfCashFlowsAbstract"
     private val balanceSheetRootHref = "us-gaap_StatementOfFinancialPositionAbstract"
     private val conceptManager = FilingConceptsHolder(filingProvider = filingProvider)
+
+    private val allConceptNames: List<String>
+
+    init {
+        allConceptNames = filingProvider
+            .presentationLinkbase()
+            .getElementsByTag(link, "presentationLink")
+            .flatMap { presentLink -> traversePresentationLink(presentLink).toList() }
+            .map { it.conceptName }
+            .distinct()
+    }
 
     /**
      * Parse filing calculations
@@ -51,10 +74,68 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
             documentFiscalYearFocus = instanceDocument.documentFiscalYearFocus(),
             incomeStatement = incomeStatement,
             balanceSheet = balanceSheet,
-            cashFlowStatement = cashFlowStatement
+            cashFlowStatement = cashFlowStatement,
+            conceptNames = ConceptNames(
+                totalRevenue = totalRevenueConceptName(),
+                eps = epsConceptName(),
+                netIncome = netIncomeConceptName(),
+                ebit = ebitConceptName(),
+                operatingCost = operatingCostConceptName(),
+                sharesOutstanding = sharesOutstandingConceptName(),
+            )
         )
     }
-    
+
+    private fun sharesOutstandingConceptName(): String? {
+        val candidates = setOf(
+            WeightedAverageNumberOfShareOutstandingBasicAndDiluted,
+            WeightedAverageNumberOfDilutedSharesOutstanding,
+            WeightedAverageNumberOfSharesOutstandingBasic,
+        )
+        return allConceptNames.find { candidates.contains(it) }
+    }
+
+    private fun operatingCostConceptName(): String? {
+        val candidates = setOf(
+            OperatingCostsAndExpenses,
+            CostsAndExpenses,
+            OperatingExpenses,
+            OperatingIncomeLoss,
+        )
+        return allConceptNames.find { candidates.contains(it) }
+    }
+
+    private fun ebitConceptName(): String? {
+        val candidates = setOf(
+            IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,
+            IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
+        )
+        return allConceptNames.find { candidates.contains(it) }
+    }
+
+    private fun netIncomeConceptName(): String? {
+        val candidates = setOf(
+            NetIncomeLoss
+        )
+        return allConceptNames.find { candidates.contains(it) }
+    }
+
+    private fun epsConceptName(): String? {
+        val candidates = setOf(
+            USGaapConstants.EarningsPerShareDiluted,
+            USGaapConstants.EarningsPerShareBasicAndDiluted,
+        )
+        return allConceptNames.find { candidates.contains(it) }
+    }
+
+    private fun totalRevenueConceptName(): String? {
+        val candidates = setOf(
+            USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax,
+            USGaapConstants.RevenueFromContractWithCustomerIncludingAssessedTax,
+        )
+        return allConceptNames.find { candidates.contains(it) }
+    }
+
     /**
      * Traverse presentation XMLs and construct [Arc]
      */

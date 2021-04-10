@@ -25,15 +25,9 @@ import com.starburst.starburst.stockanalyzer.analyzers.extensions.DetermineItemT
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.DetermineItemType.isEpsItem
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.DetermineItemType.isOneTime
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.DetermineItemType.isTaxItem
-import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.ebitItemName
-import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.epsConceptName
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.fillEpsItem
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.fillOneTimeItem
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.fillTaxItem
-import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.netIncomeConceptName
-import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.operatingCostsItemName
-import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.sharesOutstandingConceptName
-import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsedItemFormulaLogic.totalRevenueItemName
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.conceptNotFound
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.fragment
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
@@ -62,12 +56,12 @@ abstract class AbstractStockAnalyzer(
     /*
     Concept names
      */
-    val totalRevenueConceptName = totalRevenueItemName()
-    val epsConceptName = epsConceptName()
-    val netIncomeConceptName = netIncomeConceptName()
-    val ebitConceptName = ebitItemName()
-    val operatingCostConceptName = operatingCostsItemName()
-    val sharesOutstandingConceptName = sharesOutstandingConceptName()
+    val totalRevenueConceptName = calculations.conceptNames.totalRevenue ?: error("...")
+    val epsConceptName = calculations.conceptNames.eps
+    val netIncomeConceptName = calculations.conceptNames.netIncome
+    val ebitConceptName = calculations.conceptNames.ebit
+    val operatingCostConceptName = calculations.conceptNames.operatingCost
+    val sharesOutstandingConceptName = calculations.conceptNames.sharesOutstanding ?: error("...")
 
     fun timeSeriesVsRevenue(
         conceptName: String,

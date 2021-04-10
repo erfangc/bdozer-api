@@ -1,18 +1,17 @@
 package com.starburst.starburst.models.dataclasses
 
 data class Model(
-    val name: String = "Untitled Model",
-    val symbol: String? = null,
-    val cik: String? = null,
     /**
      * The SEC filing adsh from
      * which the automated model generate from
      */
     val adsh: String? = null,
-    val description: String? = null,
 
-
+    /**
+     * Manual overrides for items
+     */
     val itemOverrides: List<Item> = emptyList(),
+
     /**
      * Crucial Item / concept names
      */

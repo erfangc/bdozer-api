@@ -6,9 +6,9 @@ import org.springframework.cache.annotation.EnableCaching
 
 @EnableCaching
 @SpringBootApplication
-class StarburstApplication
+class BdozerApiApplication
 
 fun main(args: Array<String>) {
-    runApplication<StarburstApplication>(*args)
+    runApplication<BdozerApiApplication>(*args)
 }
 

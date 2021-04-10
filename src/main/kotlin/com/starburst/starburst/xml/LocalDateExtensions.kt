@@ -5,6 +5,6 @@ import java.time.LocalDate
 
 object LocalDateExtensions {
     fun Node.toLocalDate(): LocalDate? {
-        return LocalDate.parse(this.textContent)
+        return LocalDate.parse(this.textContent.trim())
     }
 }

@@ -17,5 +17,20 @@ data class FilingCalculations(
     val incomeStatement: List<Arc>,
     val cashFlowStatement: List<Arc>,
     val balanceSheet: List<Arc>,
+
+    /**
+     * Crucial Item / concept names
+     */
+    val conceptNames: ConceptNames,
+
     val lastUpdated: String = Instant.now().toString(),
+)
+
+data class ConceptNames(
+    val totalRevenue: String? = null,
+    val eps: String? = null,
+    val netIncome: String? = null,
+    val ebit: String? = null,
+    val operatingCost: String? = null,
+    val sharesOutstanding: String? = null,
 )

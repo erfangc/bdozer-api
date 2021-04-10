@@ -112,6 +112,26 @@ class FilingEntityManager(
         return entity
     }
 
+    /**
+     * Bootstraps a filing entity by creating the entity,
+     * saving it and then parsing & storing facts by crawling through the SEC's website
+     */
+    fun bootstrapFilingEntitySync(cik: String): FilingEntity {
+        deleteFilingEntity(cik)
+        val entity = createFilingEntity(cik).copy(statusMessage = Bootstrapping)
+        col.save(entity)
+        try {
+            factBase.bootstrapFacts(cik)
+            val updatedEntity = entity.copy(lastUpdated = Instant.now().toString(), statusMessage = Completed)
+            col.save(updatedEntity)
+            log.info("Completed bootstrapping and initial model building cik=${entity.cik}")
+        } catch (e: Exception) {
+            log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}", e)
+            col.save(entity.copy(lastUpdated = Instant.now().toString(), statusMessage = e.message))
+        }
+        return entity
+    }
+
     private fun deleteFilingEntity(cik: String) {
         /*
         delete any existing data on this entity
