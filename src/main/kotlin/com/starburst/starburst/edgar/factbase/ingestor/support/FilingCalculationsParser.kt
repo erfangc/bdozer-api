@@ -1,8 +1,8 @@
 package com.starburst.starburst.edgar.factbase.ingestor.support
 
 import com.starburst.starburst.edgar.FilingProvider
-import com.starburst.starburst.edgar.XbrlNamespaces
 import com.starburst.starburst.edgar.XbrlNamespaces.link
+import com.starburst.starburst.edgar.XbrlNamespaces.xlink
 import com.starburst.starburst.edgar.factbase.XLinkExtentions.from
 import com.starburst.starburst.edgar.factbase.XLinkExtentions.href
 import com.starburst.starburst.edgar.factbase.XLinkExtentions.label
@@ -17,6 +17,7 @@ import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtension
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
+import com.starburst.starburst.xml.XmlNode
 import java.net.URI
 import java.util.*
 
@@ -53,26 +54,25 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
             cashFlowStatement = cashFlowStatement
         )
     }
-
+    
     /**
      * Traverse presentation XMLs and construct [Arc]
      */
     private fun traversePresentation(rootLocator: String): List<Arc> {
 
         val presentation = filingProvider.presentationLinkbase()
-        val graphNodes = mutableListOf<Arc>()
 
         /*
         Find the presentationLink that contains the given root locator
          */
         val presentationLink = presentation
             .getElementsByTag(link, "presentationLink")
-            .find { plink ->
+            .find { presentationLink ->
                 /*
                 The correct presentationLink to use is the one
                 that contains our rootLocator and is not a parenthetical
                  */
-                plink
+                presentationLink
                     .getElementsByTag(link, "loc")
                     .any { loc ->
                         val href = loc.href() ?: error("...")
@@ -80,8 +80,17 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
                     }
             } ?: error("unable to find a presentation link with root locator $rootLocator")
 
-        // for some reason this keeps happening
-        val role = presentationLink.role() ?: error("presentationLink $rootLocator has no role attribute")
+        return traversePresentationLink(presentationLink, rootLocator)
+    }
+
+    private fun traversePresentationLink(
+        presentationLink: XmlNode,
+        rootLocator: String? = null
+    ): MutableList<Arc> {
+        /*
+        For some reason this keeps happening
+         */
+        val role = presentationLink.role() ?: error("presentationLink has no role attribute")
         val arcs = presentationLink
             .getElementsByTag(link, "presentationArc")
             .groupBy { it.from() }
@@ -94,14 +103,17 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
             }
 
         /*
-        calculationArcs is a lookup take for Calculations given the href
+        CalculationArcs is a lookup take for Calculations given the href
         of a single locator
          */
         val calculationArcs = parseCalculationArcs(role)
 
+        if (locators.isEmpty()) {
+            return mutableListOf()
+        }
         val rootLocatorLabel = locators
             .find { loc -> loc.href()?.let { URI(it).fragment } == rootLocator }
-            .label()
+            .label() ?: locators.first().label()
 
         val stack = Stack<String>()
         val parents = Stack<String>()
@@ -121,10 +133,11 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
         lastSiblings.add(rootLocatorLabel)
 
         /*
-        perform a DFS walk of the presentation arcs
+        Perform a DFS walk of the presentation arcs
         using xlink:from -> xlink:to, as we encounter new nodes
         we derive the corresponding concept's calculation shallowly
          */
+        val graphNodes = mutableListOf<Arc>()
         while (stack.isNotEmpty()) {
             val currLocLabel = stack.pop()
             val conceptHref = locatorHrefs[currLocLabel] ?: error("cannot find $currLocLabel in locators")
@@ -154,7 +167,7 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
 
             val children = arcs[currLocLabel]
             if (!children.isNullOrEmpty()) {
-                val elements = children.map { it.attr(XbrlNamespaces.xlink, "to") }.reversed()
+                val elements = children.map { it.attr(xlink, "to") }.reversed()
                 stack.addAll(elements)
                 val lastSibling = elements.first()
                 parents.add(currLocLabel)
