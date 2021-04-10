@@ -32,6 +32,7 @@ import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.concep
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.fragment
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
@@ -139,13 +140,20 @@ abstract class AbstractStockAnalyzer(
             .toList()
     }
 
+    private val log = LoggerFactory.getLogger(AbstractStockAnalyzer::class.java)
+
     fun analyze(): StockAnalysis2 {
         val model = originalStockAnalysis
             .model
             .copy(incomeStatementItems = createIncomeStatementItems())
+        log.info("Finished building income statement items for ${originalStockAnalysis.cik}, building other items")
         val finalModel = model.copy(otherItems = dcfItems(model))
+        log.info("Finished building model for ${originalStockAnalysis.cik}, evaluating")
         val evalResult = evaluator.evaluate(finalModel)
-        return postModelEvaluationAnalysis(evalResult)
+        log.info("Finished evaluating model for ${originalStockAnalysis.cik}, running post evaluation analysis")
+        val ret = postModelEvaluationAnalysis(evalResult)
+        log.info("Finished post evaluation analysis for ${originalStockAnalysis.cik}")
+        return ret
     }
 
     fun createIncomeStatementItems(): List<Item> {

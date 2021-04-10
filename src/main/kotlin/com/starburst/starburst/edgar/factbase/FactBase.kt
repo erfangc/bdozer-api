@@ -6,6 +6,7 @@ import com.starburst.starburst.edgar.factbase.dataclasses.*
 import com.starburst.starburst.edgar.factbase.support.FactComponentFinder
 import com.starburst.starburst.edgar.factbase.support.FactsBootstrapper
 import org.litote.kmongo.*
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
@@ -71,6 +72,7 @@ class FactBase(
 
     fun getFacts(cik: String): List<Fact> = facts.find(Fact::cik eq cik).toList()
 
+    @Cacheable("facts")
     fun getFacts(
         cik: String,
         documentFiscalPeriodFocus: DocumentFiscalPeriodFocus? = null,

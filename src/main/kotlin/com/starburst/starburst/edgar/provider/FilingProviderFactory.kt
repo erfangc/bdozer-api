@@ -8,6 +8,8 @@ import com.starburst.starburst.xml.HttpClientExtensions.readXml
 import com.starburst.starburst.xml.XmlElement
 import org.apache.http.client.HttpClient
 import org.springframework.stereotype.Service
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 @Service
 class FilingProviderFactory(
@@ -86,10 +88,16 @@ class FilingProviderFactory(
         labelLinkbaseRef = linkbaseRefs["http://www.xbrl.org/2003/role/labelLinkbaseRef"] ?: error("...")
         calculationLinkbaseRef = linkbaseRefs["http://www.xbrl.org/2003/role/calculationLinkbaseRef"] ?: error("...")
 
-        val presentationLinkbase: XmlElement = http.readXml("$baseUrl/$presentationLinkbaseRef")
-        val definitionLinkbase: XmlElement = http.readXml("$baseUrl/$definitionLinkbaseRef")
-        val labelLinkbase: XmlElement = http.readXml("$baseUrl/$labelLinkbaseRef")
-        val calculationLinkbase: XmlElement = http.readXml("$baseUrl/$calculationLinkbaseRef")
+        val executor = Executors.newCachedThreadPool()
+        val future1 = executor.submit(Callable {  http.readXml("$baseUrl/$presentationLinkbaseRef") })
+        val future2 = executor.submit(Callable {  http.readXml("$baseUrl/$definitionLinkbaseRef") })
+        val future3 = executor.submit(Callable {  http.readXml("$baseUrl/$labelLinkbaseRef") })
+        val future4 = executor.submit(Callable {  http.readXml("$baseUrl/$calculationLinkbaseRef") })
+
+        val presentationLinkbase: XmlElement = future1.get()
+        val definitionLinkbase: XmlElement = future2.get()
+        val labelLinkbase: XmlElement = future3.get()
+        val calculationLinkbase: XmlElement = future4.get()
 
         return object : FilingProvider {
             override fun adsh(): String {
