@@ -33,6 +33,7 @@ import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.fragme
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.time.LocalDate
 import java.util.*
 

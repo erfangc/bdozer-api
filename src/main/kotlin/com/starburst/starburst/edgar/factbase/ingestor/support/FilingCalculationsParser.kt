@@ -17,14 +17,6 @@ import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtension
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import com.starburst.starburst.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.CostsAndExpenses
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.NetIncomeLoss
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingCostsAndExpenses
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingExpenses
-import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.OperatingIncomeLoss
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfShareOutstandingBasicAndDiluted
 import com.starburst.starburst.edgar.factbase.modelbuilder.formula.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
@@ -63,7 +55,7 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
         val cik = filingProvider.cik()
         val adsh = filingProvider.adsh()
 
-        return FilingCalculations(
+        val filingCalculations = FilingCalculations(
             _id = "$cik:$adsh",
             cik = cik,
             adsh = adsh,
@@ -75,14 +67,11 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
             incomeStatement = incomeStatement,
             balanceSheet = balanceSheet,
             cashFlowStatement = cashFlowStatement,
-            conceptNames = ConceptNames(
-                totalRevenue = totalRevenueConceptName(),
-                eps = epsConceptName(),
-                netIncome = netIncomeConceptName(),
-                ebit = ebitConceptName(),
-                operatingCost = operatingCostConceptName(),
-                sharesOutstanding = sharesOutstandingConceptName(),
-            )
+            conceptNames = ConceptNames()
+        )
+        return filingCalculations.copy(
+            conceptNames = ConceptNamesMapper(filingCalculations).resolve()
+                .copy(sharesOutstanding = sharesOutstandingConceptName())
         )
     }
 
@@ -91,47 +80,6 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
             WeightedAverageNumberOfShareOutstandingBasicAndDiluted,
             WeightedAverageNumberOfDilutedSharesOutstanding,
             WeightedAverageNumberOfSharesOutstandingBasic,
-        )
-        return allConceptNames.find { candidates.contains(it) }
-    }
-
-    private fun operatingCostConceptName(): String? {
-        val candidates = setOf(
-            OperatingCostsAndExpenses,
-            CostsAndExpenses,
-            OperatingExpenses,
-            OperatingIncomeLoss,
-        )
-        return allConceptNames.find { candidates.contains(it) }
-    }
-
-    private fun ebitConceptName(): String? {
-        val candidates = setOf(
-            IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,
-            IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
-        )
-        return allConceptNames.find { candidates.contains(it) }
-    }
-
-    private fun netIncomeConceptName(): String? {
-        val candidates = setOf(
-            NetIncomeLoss
-        )
-        return allConceptNames.find { candidates.contains(it) }
-    }
-
-    private fun epsConceptName(): String? {
-        val candidates = setOf(
-            USGaapConstants.EarningsPerShareDiluted,
-            USGaapConstants.EarningsPerShareBasicAndDiluted,
-        )
-        return allConceptNames.find { candidates.contains(it) }
-    }
-
-    private fun totalRevenueConceptName(): String? {
-        val candidates = setOf(
-            USGaapConstants.RevenueFromContractWithCustomerExcludingAssessedTax,
-            USGaapConstants.RevenueFromContractWithCustomerIncludingAssessedTax,
         )
         return allConceptNames.find { candidates.contains(it) }
     }

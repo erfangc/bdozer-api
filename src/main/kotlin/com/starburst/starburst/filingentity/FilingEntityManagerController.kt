@@ -23,5 +23,10 @@ class FilingEntityManagerController(private val filingEntityManager: FilingEntit
         return filingEntityManager.bootstrapFilingEntity(cik)
     }
 
+    @PostMapping("{cik}/sync")
+    fun bootstrapFilingEntitySync(@PathVariable cik: String): FilingEntity {
+        return filingEntityManager.bootstrapFilingEntitySync(cik)
+    }
+
 }
 
