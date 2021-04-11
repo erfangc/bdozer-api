@@ -21,6 +21,11 @@ class FactBaseUnsecuredController(
         return factBase.getFactTimeSeries(factId)
     }
 
+    @GetMapping("{factId}")
+    fun getFact(@PathVariable factId: String): Fact? {
+        return factBase.getFact(factId)
+    }
+
     @GetMapping("{cik}/calculations")
     fun calculations(@PathVariable cik: String) = factBase.calculations(cik.padStart(10, '0'))
 

@@ -1,5 +1,7 @@
 package com.starburst.starburst.models.dataclasses
 
+import com.starburst.starburst.models.translator.subtypes.CompoundedGrowth
+
 data class Item(
     /**
      * [name] of this item, this is akin to an identifier
@@ -29,15 +31,13 @@ data class Item(
     val percentOfTotalAsset: PercentOfTotalAsset? = null,
 
     val percentOfRevenue: PercentOfRevenue? = null,
-
-
+    val compoundedGrowth: CompoundedGrowth? = null,
     val fixedCost: FixedCost? = null,
 
     val stockBasedCompensation: Boolean? = null,
-
     val nonCashExpense: Boolean? = null,
-
     val commentaries: Commentary? = null,
+    val subtotal: Boolean = false,
 
     )
 

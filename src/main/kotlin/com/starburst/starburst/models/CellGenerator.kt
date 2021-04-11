@@ -215,6 +215,9 @@ class CellGenerator {
                     ItemType.Discrete -> DiscreteTranslator(ctx)
                         .translateFormula(cell)
 
+                    ItemType.CompoundedGrowth -> CompoundedGrowthTranslator(ctx)
+                        .translateFormula(cell)
+
                     ItemType.Custom -> CustomTranslator(ctx)
                         .translateFormula(cell)
                 }

@@ -93,4 +93,8 @@ class FactBase(
     fun deleteAll(cik: String) =
         facts.deleteMany(Fact::cik eq cik.padStart(10, '0'))
 
+    fun getFact(factId: String): Fact? {
+        return facts.findOneById(factId)
+    }
+
 }

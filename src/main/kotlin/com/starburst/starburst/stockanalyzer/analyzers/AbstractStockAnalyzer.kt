@@ -109,7 +109,7 @@ abstract class AbstractStockAnalyzer(
             ),
             Item(
                 name = TerminalValuePerShare,
-                formula = "if(period=$periods,${epsConceptName} * ${terminalPeMultiple},0.0)"
+                formula = "if(period=$periods,$epsConceptName * $terminalPeMultiple,0.0)"
             ),
             Item(
                 name = PresentValueOfTerminalValuePerShare,
@@ -189,6 +189,7 @@ abstract class AbstractStockAnalyzer(
                         description = conceptLabel(conceptHref),
                         historicalValue = historicalValue,
                         formula = expression(arc),
+                        subtotal = true,
                     )
                 }
                 fillInItem(item = item)
