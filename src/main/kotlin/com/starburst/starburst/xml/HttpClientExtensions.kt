@@ -3,16 +3,22 @@ package com.starburst.starburst.xml
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.benmanes.caffeine.cache.Caffeine
 import org.apache.http.HttpHeaders
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpGet
 import org.slf4j.LoggerFactory
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
+import java.util.function.Function
 import javax.xml.parsers.DocumentBuilderFactory
 
 object HttpClientExtensions {
 
     private val log = LoggerFactory.getLogger(HttpClientExtensions::class.java)
+    private val cache = Caffeine.newBuilder().maximumSize(10_000)
+        .expireAfterAccess(15, TimeUnit.MINUTES)
+        .build<String, ByteArray>()
 
     fun InputStream.readXml(): XmlElement {
         val factory = DocumentBuilderFactory.newInstance()
@@ -21,17 +27,19 @@ object HttpClientExtensions {
     }
 
     private fun HttpClient.readLink(link: String): ByteArray? {
-        log.info("Reading link $link")
-        val get = HttpGet(link)
-        get.addHeader(
-            HttpHeaders.USER_AGENT,
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
-        )
-        val httpResponse = this.execute(get)
-        val entity = httpResponse.entity
-        val allBytes = entity.content.readAllBytes()
-        get.releaseConnection()
-        return allBytes
+        return cache.get(link) { link ->
+            log.info("Reading link $link")
+            val get = HttpGet(link)
+            get.addHeader(
+                HttpHeaders.USER_AGENT,
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
+            )
+            val httpResponse = this.execute(get)
+            val entity = httpResponse.entity
+            val allBytes = entity.content.readAllBytes()
+            get.releaseConnection()
+            allBytes
+        }
     }
 
     fun HttpClient.readXml(link: String): XmlElement {

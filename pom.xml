@@ -73,6 +73,18 @@
             <version>${kmongo.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>guava</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
         <!--	validate auth0 issued JWT tokens	-->
         <dependency>
             <groupId>com.auth0</groupId>
