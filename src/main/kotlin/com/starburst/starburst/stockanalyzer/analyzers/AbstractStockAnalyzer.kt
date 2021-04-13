@@ -32,6 +32,7 @@ import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.concep
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.fragment
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.zeroRevenueGrowth
+import com.starburst.starburst.stockanalyzer.dataclasses.Dimension
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -64,6 +65,52 @@ abstract class AbstractStockAnalyzer(
      */
     val calculations = factBase.calculations(cik)
     val conceptDependencies = conceptDependencies()
+
+    /*
+    parse and store dimensions declared in the income statement
+    so they can be applied if concepts needs to be broken down
+    into the canonical dimensions represented by the income statement
+     */
+    val dimensions: List<Dimension>
+    init {
+        val incomeStatement = calculations.incomeStatement
+        /*
+        dimensional arcs are any thing in the StatementTable
+        immediate child that is not an statement item
+         */
+        val dimensionsArcs = incomeStatement
+            .filter {
+                it.parentHref?.endsWith("StatementTable") == true
+                        && !it.conceptHref.endsWith("StatementLineItems")
+            }
+        val instanceDocument = filingProvider.instanceDocument()
+
+        /*
+        we turn these dimensional "arcs" declared in the income statements
+        into [Dimension] objects - realizing they are represented as a two layer
+        graph, from dimension -> domain (which is a bit of a pointless wrapper) -> dimension members
+         */
+        dimensions = dimensionsArcs.map { dimension ->
+            val dimensionHref = dimension.conceptHref
+            val dimensionConcept = conceptManager.getConcept(dimensionHref) ?: error("...")
+            val domainMembers = incomeStatement.filter { it.parentHref == dimensionHref }
+
+            val memberConcepts = domainMembers.flatMap { domainHref ->
+                val domainHref = conceptManager.getConcept(domainHref.conceptHref)?.conceptHref ?: error("...")
+                incomeStatement.filter { it.parentHref == domainHref }.map { dimensionMember ->
+                    val concept = conceptManager.getConcept(dimensionMember.conceptHref) ?: error("...")
+                    val ns = instanceDocument.getShortNamespace(concept.targetNamespace) ?: error("...")
+                    "$ns:${concept.conceptName}"
+                }
+            }.toSet()
+
+            val ns = instanceDocument.getShortNamespace(dimensionConcept.targetNamespace) ?: error("...")
+            Dimension(
+                dimensionConcept = "$ns:${dimensionConcept.conceptName}",
+                memberConcepts = memberConcepts,
+            )
+        }
+    }
 
     /*
     Concept names

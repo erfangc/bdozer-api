@@ -1,7 +1,17 @@
 package com.starburst.starburst.models.dataclasses
 
 data class HistoricalValue(
+    /**
+     * [factId] is the single [Fact] that underlies this historical value
+     * instance
+     */
     val factId: String? = null,
+
+    /**
+     * [factId] is the series of decomposed [Fact]s that underlies this historical value
+     * instance along some dimension
+     */
+    val factIds: List<String> = emptyList(),
     val documentFiscalPeriodFocus: String? = null,
     val documentFiscalYearFocus: Int? = null,
     val documentPeriodEndDate: String? = null,
