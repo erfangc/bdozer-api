@@ -9,23 +9,23 @@ import com.starburst.starburst.stockanalyzer.analyzers.AbstractStockAnalyzer
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.BusinessWaterfall.businessWaterfall
 import com.starburst.starburst.stockanalyzer.dataclasses.DerivedStockAnalytics
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
+import java.util.concurrent.Future
 import kotlin.math.pow
 
 object PostEvaluationAnalysis {
 
-    fun AbstractStockAnalyzer.postModelEvaluationAnalysis(evalResult: EvaluateModelResult): StockAnalysis2 {
-        val model = evalResult.model
-        /*
-        try a version of this where revenue remains constant
-         */
-        val zeroGrowthResult = evaluator.evaluate(zeroRevenueGrowth(model))
-        val zeroGrowthPrice = zeroGrowthResult.targetPrice.coerceAtLeast(0.0)
-
+    fun AbstractStockAnalyzer.postModelEvaluationAnalysis(
+        evaluateModelResultFuture: Future<EvaluateModelResult>,
+        zeroRevenueGrowthResultFuture: Future<EvaluateModelResult>
+    ): StockAnalysis2 {
+        val evaluateModelResult = evaluateModelResultFuture.get()
+        val zeroRevenueGrowthResult = zeroRevenueGrowthResultFuture.get()
+        val model = evaluateModelResult.model
         return originalStockAnalysis.copy(
             cik = cik,
             name = filingEntity.name,
             ticker = filingEntity.tradingSymbol,
-            model = evalResult.model.copy(
+            model = evaluateModelResult.model.copy(
                 totalRevenueConceptName = totalRevenueConceptName,
                 epsConceptName = epsConceptName,
                 netIncomeConceptName = netIncomeConceptName,
@@ -33,15 +33,15 @@ object PostEvaluationAnalysis {
                 operatingCostConceptName = operatingCostConceptName,
                 sharesOutstandingConceptName = sharesOutstandingConceptName,
             ),
-            cells = evalResult.cells,
+            cells = evaluateModelResult.cells,
             derivedStockAnalytics = DerivedStockAnalytics(
                 profitPerShare = profitPerShare(model),
                 shareOutstanding = shareOutstanding(model),
-                businessWaterfall = businessWaterfall(evalResult),
-                zeroGrowthPrice = zeroGrowthPrice,
-                targetPrice = evalResult.targetPrice,
+                businessWaterfall = businessWaterfall(evaluateModelResult),
+                zeroGrowthPrice = zeroRevenueGrowthResult.targetPrice,
+                targetPrice = evaluateModelResult.targetPrice,
                 discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate,
-                revenueCAGR = revenueCAGR(evalResult),
+                revenueCAGR = revenueCAGR(evaluateModelResult),
                 currentPrice = currentPrice(filingEntity.tradingSymbol),
             ),
         )
@@ -52,7 +52,7 @@ object PostEvaluationAnalysis {
         return alphaVantageService.latestPrice(tradingSymbol ?: error("..."))
     }
 
-    private fun AbstractStockAnalyzer.zeroRevenueGrowth(model: Model): Model {
+    public fun AbstractStockAnalyzer.zeroRevenueGrowth(model: Model): Model {
         val incomeStatementItems = model.incomeStatementItems.map { item ->
             if (item.name == totalRevenueConceptName) {
                 item.copy(formula = item.historicalValue?.value.toString(), type = ItemType.Custom)

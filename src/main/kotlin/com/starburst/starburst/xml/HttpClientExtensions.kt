@@ -10,13 +10,15 @@ import org.apache.http.client.methods.HttpGet
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
-import java.util.function.Function
 import javax.xml.parsers.DocumentBuilderFactory
 
 object HttpClientExtensions {
 
     private val log = LoggerFactory.getLogger(HttpClientExtensions::class.java)
-    private val cache = Caffeine.newBuilder().maximumSize(10_000)
+
+    private val linkCache = Caffeine
+        .newBuilder()
+        .maximumSize(10_000)
         .expireAfterAccess(15, TimeUnit.MINUTES)
         .build<String, ByteArray>()
 
@@ -27,7 +29,7 @@ object HttpClientExtensions {
     }
 
     private fun HttpClient.readLink(link: String): ByteArray? {
-        return cache.get(link) { link ->
+        return linkCache.get(link) { link ->
             log.info("Reading link $link")
             val get = HttpGet(link)
             get.addHeader(
@@ -53,7 +55,7 @@ object HttpClientExtensions {
         val get = HttpGet(link)
         get.addHeader(
             HttpHeaders.USER_AGENT,
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
         )
         val response = this.execute(get)
         if (response.statusLine.statusCode in 200..299) {
@@ -64,7 +66,6 @@ object HttpClientExtensions {
             val responseBody = response.entity.content.bufferedReader().readText()
             error("Error calling $link. status=${response.statusLine.statusCode} responseBody=$responseBody")
         }
-
     }
 
 }

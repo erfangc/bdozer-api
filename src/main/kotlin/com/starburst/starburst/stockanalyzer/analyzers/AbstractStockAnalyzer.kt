@@ -31,11 +31,13 @@ import com.starburst.starburst.stockanalyzer.analyzers.extensions.FrequentlyUsed
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.conceptNotFound
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.fragment
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
+import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.zeroRevenueGrowth
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 abstract class AbstractStockAnalyzer(
     dataProvider: StockAnalyzerDataProvider,
@@ -44,6 +46,11 @@ abstract class AbstractStockAnalyzer(
 
     val filingProvider = dataProvider.filingProvider
     val cik = filingProvider.cik().padStart(10, '0')
+
+    /*
+    services
+     */
+    val executor = Executors.newCachedThreadPool()
     val zacksEstimatesService = dataProvider.zacksEstimatesService
     val filingEntity = dataProvider.filingEntity
     val factBase = dataProvider.factBase
@@ -52,6 +59,9 @@ abstract class AbstractStockAnalyzer(
     val alphaVantageService = dataProvider.alphaVantageService
     val evaluator = ModelEvaluator()
 
+    /*
+    analysis properties
+     */
     val calculations = factBase.calculations(cik)
     val conceptDependencies = conceptDependencies()
 
@@ -144,16 +154,25 @@ abstract class AbstractStockAnalyzer(
     private val log = LoggerFactory.getLogger(AbstractStockAnalyzer::class.java)
 
     fun analyze(): StockAnalysis2 {
+
         val model = originalStockAnalysis
             .model
             .copy(incomeStatementItems = createIncomeStatementItems())
         log.info("Finished building income statement items for ${originalStockAnalysis.cik}, building other items")
+
         val finalModel = model.copy(otherItems = dcfItems(model))
         log.info("Finished building model for ${originalStockAnalysis.cik}, evaluating")
-        val evalResult = evaluator.evaluate(finalModel)
+
+        /*
+        Run these in parallel to take advantage of parallelism
+         */
+        val evaluateModelResult = executor.submit(Callable { evaluator.evaluate(finalModel) })
+        val zeroGrowthResult = executor.submit(Callable { evaluator.evaluate(zeroRevenueGrowth(model)) })
         log.info("Finished evaluating model for ${originalStockAnalysis.cik}, running post evaluation analysis")
-        val ret = postModelEvaluationAnalysis(evalResult)
+
+        val ret = postModelEvaluationAnalysis(evaluateModelResult, zeroGrowthResult)
         log.info("Finished post evaluation analysis for ${originalStockAnalysis.cik}")
+
         return ret
     }
 
