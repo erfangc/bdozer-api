@@ -79,7 +79,7 @@ class EdgarExplorer(
             val content = http.execute(httpPost).entity.content
             objectMapper.readTree(content)
         } catch (e: Exception) {
-            error("unable to find latest adsh for $cik")
+            error("unable to find latest adsh for $cik, error: ${e.message}")
         }
         httpPost.releaseConnection()
 
