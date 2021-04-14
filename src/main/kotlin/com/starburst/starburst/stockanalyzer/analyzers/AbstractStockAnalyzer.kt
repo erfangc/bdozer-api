@@ -45,8 +45,16 @@ abstract class AbstractStockAnalyzer(
     val originalStockAnalysis: StockAnalysis2,
 ) {
 
+
+    private val log = LoggerFactory.getLogger(AbstractStockAnalyzer::class.java)
+
     val filingProvider = dataProvider.filingProvider
+
     val cik = filingProvider.cik().padStart(10, '0')
+
+    init {
+        log.info("Running stock analysis for $cik adsh=${filingProvider.adsh()}")
+    }
 
     /*
     services
@@ -58,12 +66,13 @@ abstract class AbstractStockAnalyzer(
     val conceptManager = FilingConceptsHolder(filingProvider)
     val labelManager = LabelManager(filingProvider)
     val alphaVantageService = dataProvider.alphaVantageService
-    val evaluator = ModelEvaluator()
 
+    val evaluator = ModelEvaluator()
     /*
     analysis properties
      */
     val calculations = factBase.calculations(cik)
+
     val conceptDependencies = conceptDependencies()
 
     /*
@@ -118,7 +127,6 @@ abstract class AbstractStockAnalyzer(
             )
         }
     }
-
     /*
     Concept names
      */
@@ -128,8 +136,13 @@ abstract class AbstractStockAnalyzer(
     val netIncomeConceptName = calculations.conceptNames.netIncome
     val ebitConceptName = calculations.conceptNames.ebit
     val operatingCostConceptName = calculations.conceptNames.operatingCost
+
     val sharesOutstandingConceptName =
         calculations.conceptNames.sharesOutstanding ?: error("sharesOutstanding conceptName cannot be found")
+
+    init {
+        log.info("Finished initializing the stock analyzer for $cik adsh=${filingProvider.adsh()}")
+    }
 
     fun timeSeriesVsRevenue(
         conceptName: String,
@@ -206,8 +219,6 @@ abstract class AbstractStockAnalyzer(
             cik, conceptName, dimensions, documentFiscalPeriodFocus = documentFiscalPeriodFocus
         )
     }
-
-    private val log = LoggerFactory.getLogger(AbstractStockAnalyzer::class.java)
 
     fun analyze(): StockAnalysis2 {
 

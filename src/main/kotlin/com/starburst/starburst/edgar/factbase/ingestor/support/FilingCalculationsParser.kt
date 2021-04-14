@@ -231,7 +231,8 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
                     Calculation(
                         conceptHref = conceptHref,
                         weight = node.weight(),
-                        conceptName = conceptManager.getConcept(conceptHref)?.conceptName!!
+                        conceptName = conceptManager.getConcept(conceptHref)?.conceptName
+                            ?: error("cannot find concept for $conceptHref")
                     )
                 }
                 val fromConceptHref = calculationLocs[from] ?: error("...")

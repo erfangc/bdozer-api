@@ -28,13 +28,19 @@ class XmlNode(
     fun getElementByTag(namespace: String, tag: String): XmlNode? {
         val myTag =
             XmlElement(this.ownerDocument.documentElement).getShortNamespace(namespace)?.let { "$it:$tag" } ?: tag
-        return this.childNodes().firstOrNull { it.nodeName == myTag }
+        val firstOrNull = this.childNodes().firstOrNull { it.nodeName == myTag }
+        return if (firstOrNull == null) {
+            this.childNodes().firstOrNull { it.nodeName == tag }
+        } else {
+            firstOrNull
+        }
     }
 
     fun getElementsByTag(namespace: String, tag: String): List<XmlNode> {
         val myTag =
             XmlElement(this.ownerDocument.documentElement).getShortNamespace(namespace)?.let { "$it:$tag" } ?: tag
-        return childNodes().toList().filter { it.nodeName == myTag }
+        val ret = childNodes().toList().filter { it.nodeName == myTag }
+        return ret + childNodes().toList().filter { it.nodeName == tag }
     }
 
     fun attr(attr: String): String? {
