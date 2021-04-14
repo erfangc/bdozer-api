@@ -3,6 +3,7 @@ package com.starburst.starburst.edgar.factbase
 import com.mongodb.client.MongoDatabase
 import com.starburst.starburst.edgar.factbase.FactExtensions.dimensions
 import com.starburst.starburst.edgar.factbase.FactExtensions.filterForDimensions
+import com.starburst.starburst.edgar.factbase.FactExtensions.filterForDimensionsWithFallback
 import com.starburst.starburst.edgar.factbase.dataclasses.*
 import com.starburst.starburst.edgar.factbase.support.FactsBootstrapper
 import com.starburst.starburst.extensions.DoubleExtensions.orZero
@@ -55,9 +56,11 @@ class FactBase(
     }
 
     /**
-     * Get time series of facts based using a single [factId]
-     * as template. Dimension of the fact referenced by the passed in [factId] will be used
+     * Get time series of facts based using a single [factIds]
+     * as template. Dimension of the fact referenced by the passed in [factIds] will be used
      * and no fallback will be performed
+     *
+     * @param factIds
      */
     fun getAnnualTimeSeries(factIds: List<String>): List<AggregatedFact> {
         val originalFacts = facts.find(Fact::_id `in` factIds).toList()
@@ -109,8 +112,6 @@ class FactBase(
      *
      * @param cik the filing entity identifier
      * @param dimensions the dimensions along which to query and filter the raw results
-     * @param preferDimensionless if specified a dimensionless lookup will be performed first and returned.
-     *      Only when the dimensionless query fail to return any results will dimensional query be applied
      *
      * @return a list of [Fact] aggregated by date. For a given period, data across multiple dimensions
      * are aggregated and thus not preserved
@@ -134,15 +135,15 @@ class FactBase(
                 )
             )
             .toList()
-            .filterForDimensions(dimensions)
-            .groupBy { it.documentPeriodEndDate }
+            .filterForDimensionsWithFallback(dimensions)
+            .groupBy { fact -> fact.documentPeriodEndDate }
             .map { (documentPeriodEndDate, values) ->
                 AggregatedFact(
-                    factIds = values.map { it._id },
-                    value = values.sumByDouble { it.doubleValue.orZero() }.orZero(),
+                    factIds = values.map { fact -> fact._id },
+                    value = values.sumByDouble { it.doubleValue.orZero() },
                     conceptName = conceptName,
                     documentFiscalPeriodFocus = documentFiscalPeriodFocus,
-                    documentPeriodEndDate = documentPeriodEndDate
+                    documentPeriodEndDate = documentPeriodEndDate,
                 )
             }
             .sortedByDescending { it.documentPeriodEndDate }

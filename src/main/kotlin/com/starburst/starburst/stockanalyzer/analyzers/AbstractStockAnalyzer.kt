@@ -1,9 +1,10 @@
 package com.starburst.starburst.stockanalyzer.analyzers
 
 import com.starburst.starburst.edgar.factbase.FactBase
+import com.starburst.starburst.edgar.factbase.dataclasses.AggregatedFact
 import com.starburst.starburst.edgar.factbase.dataclasses.Calculation
+import com.starburst.starburst.edgar.factbase.dataclasses.Dimension
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
-import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.edgar.factbase.support.FilingConceptsHolder
 import com.starburst.starburst.edgar.factbase.support.LabelManager
 import com.starburst.starburst.extensions.DoubleExtensions.orZero
@@ -32,7 +33,6 @@ import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.concep
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.fragment
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.zeroRevenueGrowth
-import com.starburst.starburst.edgar.factbase.dataclasses.Dimension
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -72,6 +72,7 @@ abstract class AbstractStockAnalyzer(
     into the canonical dimensions represented by the income statement
      */
     val dimensions: List<Dimension>
+
     init {
         val incomeStatement = calculations.incomeStatement
         /*
@@ -121,29 +122,32 @@ abstract class AbstractStockAnalyzer(
     /*
     Concept names
      */
-    val totalRevenueConceptName = calculations.conceptNames.totalRevenue ?: error("totalRevenue conceptName cannot be found")
+    val totalRevenueConceptName =
+        calculations.conceptNames.totalRevenue ?: error("totalRevenue conceptName cannot be found")
     val epsConceptName = calculations.conceptNames.eps
     val netIncomeConceptName = calculations.conceptNames.netIncome
     val ebitConceptName = calculations.conceptNames.ebit
     val operatingCostConceptName = calculations.conceptNames.operatingCost
-    val sharesOutstandingConceptName = calculations.conceptNames.sharesOutstanding ?: error("sharesOutstanding conceptName cannot be found")
+    val sharesOutstandingConceptName =
+        calculations.conceptNames.sharesOutstanding ?: error("sharesOutstanding conceptName cannot be found")
 
     fun timeSeriesVsRevenue(
         conceptName: String,
         periodFocus: DocumentFiscalPeriodFocus = DocumentFiscalPeriodFocus.FY,
     ): List<Pair<Double, Double>> {
-        val revenueFacts = timeSeries(
-            conceptName = totalRevenueConceptName,
-            periodFocus = periodFocus
-        )
+        val revenueFacts = factBase.getAnnualTimeSeries(cik, totalRevenueConceptName, dimensions)
+
         val otherFacts = timeSeries(
             conceptName = conceptName,
-            periodFocus = periodFocus
+            documentFiscalPeriodFocus = periodFocus
         ).associateBy { it.documentPeriodEndDate }
-        return revenueFacts.sortedBy { it.documentPeriodEndDate }.map { revenue ->
-            val otherFact = otherFacts[revenue.documentPeriodEndDate]?.doubleValue ?: 0.0
-            (revenue.doubleValue ?: 0.0) to otherFact
-        }
+
+        return revenueFacts
+            .sortedBy { it.documentPeriodEndDate }
+            .map { revenue ->
+                val otherFact = otherFacts[revenue.documentPeriodEndDate]?.value ?: 0.0
+                revenue.value.orZero() to otherFact
+            }
     }
 
     /**
@@ -196,13 +200,11 @@ abstract class AbstractStockAnalyzer(
      */
     fun timeSeries(
         conceptName: String,
-        periodFocus: DocumentFiscalPeriodFocus = DocumentFiscalPeriodFocus.FY,
-    ): List<Fact> {
-        // TODO if this is empty then aggregate it up from Dimensions
-        return factBase
-            .getFacts(cik, periodFocus, conceptName)
-            .filter { it.explicitMembers.isEmpty() }
-            .toList()
+        documentFiscalPeriodFocus: DocumentFiscalPeriodFocus = DocumentFiscalPeriodFocus.FY,
+    ): List<AggregatedFact> {
+        return factBase.getAnnualTimeSeries(
+            cik, conceptName, dimensions, documentFiscalPeriodFocus = documentFiscalPeriodFocus
+        )
     }
 
     private val log = LoggerFactory.getLogger(AbstractStockAnalyzer::class.java)
