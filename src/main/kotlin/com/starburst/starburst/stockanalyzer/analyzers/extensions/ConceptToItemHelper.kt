@@ -1,6 +1,7 @@
 package com.starburst.starburst.stockanalyzer.analyzers.extensions
 
 import com.starburst.starburst.edgar.dataclasses.Concept
+import com.starburst.starburst.edgar.factbase.FactExtensions.filterForDimensions
 import com.starburst.starburst.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.starburst.starburst.edgar.factbase.ingestor.dataclasses.Arc
 import com.starburst.starburst.extensions.DoubleExtensions.orZero
@@ -66,7 +67,7 @@ object ConceptToItemHelper {
      */
     fun AbstractStockAnalyzer.historicalValue(conceptName: String): HistoricalValue? {
 
-        val facts = factBase.getFacts(cik, DocumentFiscalPeriodFocus.FY, conceptName)
+        val facts = factBase.getFacts(cik, DocumentFiscalPeriodFocus.FY, conceptName).sortedByDescending { it.documentPeriodEndDate }
         val fact = facts.find { fact -> fact.explicitMembers.isEmpty() }
 
         if (fact != null) {
@@ -88,20 +89,7 @@ object ConceptToItemHelper {
                 .groupBy { it.documentPeriodEndDate }
                 .entries.maxByOrNull { it.key } ?: return null)
                 .value
-                .filter { fact ->
-                    val explicitMembers = fact.explicitMembers
-                    // every declared dimension from the StatementTable prologue must be matched
-                    // by the declared explicit members of the fact for the fact to be counted
-                    explicitMembers.size == dimensions.size && dimensions.all { dimension ->
-                        val dimensionConcept = dimension.dimensionConcept
-                        explicitMembers
-                            .any { explicitMember ->
-                                explicitMember.dimension == dimensionConcept && dimension.memberConcepts.contains(
-                                    explicitMember.value
-                                )
-                            }
-                    }
-                }
+                .filterForDimensions(dimensions)
 
             val firstFact = matchingFacts.firstOrNull() ?: return null
             val factIds = matchingFacts.map { it._id }
