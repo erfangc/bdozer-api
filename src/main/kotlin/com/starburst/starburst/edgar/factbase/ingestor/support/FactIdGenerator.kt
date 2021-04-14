@@ -10,7 +10,7 @@ import java.time.LocalDate
 class FactIdGenerator {
 
     fun generateId(
-        elementName: String,
+        conceptName: String,
         context: XbrlContext,
         documentPeriodEndDate: LocalDate,
         documentFiscalPeriodFocus: DocumentFiscalPeriodFocus,
@@ -35,7 +35,7 @@ class FactIdGenerator {
         return Hashing
             .sha256()
             .hashString(
-                "$elementName$entityId$documentFiscalPeriodFocus$documentPeriodEndDate$instant$startDate$endDate$explicitMembers",
+                "$conceptName$entityId$documentFiscalPeriodFocus$documentPeriodEndDate$instant$startDate$endDate$explicitMembers",
                 StandardCharsets.UTF_8
             )
             .toString()

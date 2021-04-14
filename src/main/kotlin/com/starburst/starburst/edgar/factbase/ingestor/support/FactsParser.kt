@@ -94,7 +94,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
                 */
                 val factIdGenerator = FactIdGenerator()
                 val id = factIdGenerator.generateId(
-                    elementName = conceptName,
+                    conceptName = conceptName,
                     context = context,
                     documentPeriodEndDate = documentPeriodEndDate,
                     documentFiscalPeriodFocus = documentFiscalPeriodFocus,
