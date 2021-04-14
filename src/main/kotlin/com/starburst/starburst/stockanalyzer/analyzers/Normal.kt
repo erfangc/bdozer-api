@@ -27,7 +27,7 @@ class Normal(
         for this scenario we remove the most recent period
          */
         val pctOfRev = ts.map { it.second / it.first }
-        return if (pctOfRev.isNotEmpty()) {
+        return if (ts.isNotEmpty()) {
             val pct = pctOfRev.average()
             item.copy(
                 formula = "$pct * $totalRevenueConceptName",
@@ -37,13 +37,7 @@ class Normal(
             )
         } else {
             // perpetuate current
-            val pct = ts.last().second / ts.last().first
-            item.copy(
-                formula = "$pct * $totalRevenueConceptName",
-                commentaries = Commentary(
-                    commentary = "Insufficient history of clean data, applying the most recent revenue percentage ${pct.fmtPct()} going forward"
-                )
-            )
+            item
         }
     }
 

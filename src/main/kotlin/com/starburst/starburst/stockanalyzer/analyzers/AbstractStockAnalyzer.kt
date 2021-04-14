@@ -331,6 +331,10 @@ abstract class AbstractStockAnalyzer(
         if there are more periods than there are estimates decide what to do
          */
         val lastDocumentPeriodEnd = item.historicalValue?.documentPeriodEndDate
+        if (lastDocumentPeriodEnd == null) {
+            log.info("Unable to determine Zacks estimates for revenue item ${item.name}")
+            return item
+        }
         val formulas = (1..model.periods).associateWith { period ->
             val finalRevenue = projections[projections.toSortedMap().lastKey()].orZero()
             val year = period + LocalDate.parse(lastDocumentPeriodEnd).year
