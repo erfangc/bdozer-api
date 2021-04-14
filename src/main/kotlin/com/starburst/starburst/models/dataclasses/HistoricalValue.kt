@@ -12,6 +12,7 @@ data class HistoricalValue(
      * instance along some dimension
      */
     val factIds: List<String> = emptyList(),
+    val conceptName: String? = null,
     val documentFiscalPeriodFocus: String? = null,
     val documentFiscalYearFocus: Int? = null,
     val documentPeriodEndDate: String? = null,

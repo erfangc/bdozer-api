@@ -1,4 +1,4 @@
-package com.starburst.starburst.stockanalyzer.dataclasses
+package com.starburst.starburst.edgar.factbase.dataclasses
 
 data class Dimension(
     val dimensionConcept: String,

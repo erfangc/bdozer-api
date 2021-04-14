@@ -84,20 +84,24 @@ object ConceptToItemHelper {
             now we return facts as decomposed by dimensions declared
             on the income statement
              */
-            val matchingFacts = facts.filter { fact ->
-                val explicitMembers = fact.explicitMembers
-                // every declared dimension from the StatementTable prologue must be matched
-                // by the declared explicit members of the fact for the fact to be counted
-                explicitMembers.size == dimensions.size && dimensions.all { dimension ->
-                    val dimensionConcept = dimension.dimensionConcept
-                    explicitMembers
-                        .any { explicitMember ->
-                            explicitMember.dimension == dimensionConcept && dimension.memberConcepts.contains(
-                                explicitMember.value
-                            )
-                        }
+            val matchingFacts = (facts
+                .groupBy { it.documentPeriodEndDate }
+                .entries.maxByOrNull { it.key } ?: return null)
+                .value
+                .filter { fact ->
+                    val explicitMembers = fact.explicitMembers
+                    // every declared dimension from the StatementTable prologue must be matched
+                    // by the declared explicit members of the fact for the fact to be counted
+                    explicitMembers.size == dimensions.size && dimensions.all { dimension ->
+                        val dimensionConcept = dimension.dimensionConcept
+                        explicitMembers
+                            .any { explicitMember ->
+                                explicitMember.dimension == dimensionConcept && dimension.memberConcepts.contains(
+                                    explicitMember.value
+                                )
+                            }
+                    }
                 }
-            }
 
             val firstFact = matchingFacts.firstOrNull() ?: return null
             val factIds = matchingFacts.map { it._id }

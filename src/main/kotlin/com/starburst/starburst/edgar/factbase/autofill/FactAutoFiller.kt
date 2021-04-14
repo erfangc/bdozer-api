@@ -3,6 +3,7 @@ package com.starburst.starburst.edgar.factbase.autofill
 import com.starburst.starburst.edgar.factbase.FactBase
 import com.starburst.starburst.edgar.factbase.autofill.dataclasses.FixedCostAutoFill
 import com.starburst.starburst.edgar.factbase.autofill.dataclasses.PercentOfRevenueAutoFill
+import com.starburst.starburst.edgar.factbase.dataclasses.AggregatedFact
 import com.starburst.starburst.edgar.factbase.dataclasses.Fact
 import com.starburst.starburst.extensions.DoubleExtensions.orZero
 import com.starburst.starburst.models.dataclasses.FixedCost
@@ -10,25 +11,41 @@ import com.starburst.starburst.models.dataclasses.Model
 import com.starburst.starburst.models.dataclasses.PercentOfRevenue
 import org.springframework.stereotype.Service
 
+/**
+ * [FactAutoFiller] creates auto fill
+ */
 @Service
 class FactAutoFiller(private val factBase: FactBase) {
 
     /**
      * Percent of Revenue autofill options
+     *
      * @param factId the factId to autofill based on
      * @param model the [Model]
      */
-    fun getPercentOfRevenueAutoFills(factId: String, model: Model): List<PercentOfRevenueAutoFill> {
+    fun getPercentOfRevenueAutoFills(
+        itemName: String,
+        model: Model,
+    ): List<PercentOfRevenueAutoFill> {
+
+        val item =
+            (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
+                .find { item -> item.name == itemName } ?: error("...")
 
         val revenueFactId = model
             .incomeStatementItems
             .find { item -> item.name == model.totalRevenueConceptName }
-            ?.historicalValue?.factId ?: error("unable to determine revenue factId")
+            ?.historicalValue
+            ?.factId ?: error("unable to determine revenue factId")
 
-        val timeSeries = factBase.getFactTimeSeries(factId)
-        val revenueTimeSeries = factBase.getFactTimeSeries(revenueFactId)
+        val factIds = item.historicalValue?.factId?.let { listOf(it) }
+            ?: item.historicalValue?.factIds
+            ?: error("cannot determine factId on item $itemName")
 
-        val pairs = toPairs(revenueTimeSeries.fyFacts, timeSeries.fyFacts)
+        val timeSeries = factBase.getAnnualTimeSeries(factIds)
+
+        val revenueTimeSeries = factBase.getAnnualTimeSeries(revenueFactId)
+        val pairs = toPairs(revenueTimeSeries, timeSeries)
         val average = pairs.map { it[1] / it[0] }.average()
         val latest = pairs.last().let { it[1] / it[0] }
 
@@ -46,16 +63,23 @@ class FactAutoFiller(private val factBase: FactBase) {
 
     /**
      * Percent of Revenue autofill options
+     *
      * @param factId the factId to autofill based on
      * @param model the [Model]
      */
-    fun getFixedCostAutoFills(factId: String, model: Model): List<FixedCostAutoFill> {
-        val timeSeries = factBase.getFactTimeSeries(factId)
+    fun getFixedCostAutoFills(itemName: String, model: Model): List<FixedCostAutoFill> {
 
-        val values = timeSeries
-            .fyFacts
-            .sortedBy { it.documentPeriodEndDate }
-            .map { it.doubleValue.orZero() }
+        val item =
+            (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
+                .find { item -> item.name == itemName } ?: error("...")
+
+        val factIds = item.historicalValue?.factId?.let { listOf(it) }
+            ?: item.historicalValue?.factIds
+            ?: error("cannot determine factId on item $itemName")
+
+        val timeSeries = factBase.getAnnualTimeSeries(factIds)
+
+        val values = timeSeries.map { it.value.orZero() }
 
         val average = values.average()
         val latest = values.last().orZero()
@@ -72,11 +96,11 @@ class FactAutoFiller(private val factBase: FactBase) {
         )
     }
 
-    private fun toPairs(x: List<Fact>, y: List<Fact>): Array<DoubleArray> {
+    private fun toPairs(x: List<Fact>, y: List<AggregatedFact>): Array<DoubleArray> {
         val lookup = y.associateBy { it.documentPeriodEndDate }
         return x
             .sortedBy { it.documentPeriodEndDate }
-            .map { doubleArrayOf(it.doubleValue.orZero(), lookup[it.documentPeriodEndDate]?.doubleValue.orZero()) }
+            .map { doubleArrayOf(it.doubleValue.orZero(), lookup[it.documentPeriodEndDate]?.value.orZero()) }
             .toTypedArray()
     }
 

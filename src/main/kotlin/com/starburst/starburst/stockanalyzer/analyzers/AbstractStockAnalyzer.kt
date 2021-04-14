@@ -32,7 +32,7 @@ import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.concep
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.General.fragment
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.starburst.starburst.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.zeroRevenueGrowth
-import com.starburst.starburst.stockanalyzer.dataclasses.Dimension
+import com.starburst.starburst.edgar.factbase.dataclasses.Dimension
 import com.starburst.starburst.stockanalyzer.dataclasses.StockAnalysis2
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -92,19 +92,25 @@ abstract class AbstractStockAnalyzer(
          */
         dimensions = dimensionsArcs.map { dimension ->
             val dimensionHref = dimension.conceptHref
-            val dimensionConcept = conceptManager.getConcept(dimensionHref) ?: error("...")
+            val dimensionConcept = conceptManager.getConcept(dimensionHref) ?: error("$dimensionHref cannot be found")
             val domainMembers = incomeStatement.filter { it.parentHref == dimensionHref }
 
             val memberConcepts = domainMembers.flatMap { domainHref ->
-                val domainHref = conceptManager.getConcept(domainHref.conceptHref)?.conceptHref ?: error("...")
+                val domainHref = conceptManager.getConcept(domainHref.conceptHref)?.conceptHref
+                    ?: error("${domainHref.conceptHref} cannot be found")
+
                 incomeStatement.filter { it.parentHref == domainHref }.map { dimensionMember ->
-                    val concept = conceptManager.getConcept(dimensionMember.conceptHref) ?: error("...")
-                    val ns = instanceDocument.getShortNamespace(concept.targetNamespace) ?: error("...")
+                    val concept = conceptManager.getConcept(dimensionMember.conceptHref)
+                        ?: error("${dimensionMember.conceptHref} cannot be found")
+                    val ns = instanceDocument.getShortNamespace(concept.targetNamespace)
+                        ?: error("targetNamespace ${concept.targetNamespace} cannot be found")
                     "$ns:${concept.conceptName}"
                 }
             }.toSet()
 
-            val ns = instanceDocument.getShortNamespace(dimensionConcept.targetNamespace) ?: error("...")
+            val ns = instanceDocument.getShortNamespace(dimensionConcept.targetNamespace)
+                ?: error("targetnamespace ${dimensionConcept.targetNamespace} cannot be found")
+
             Dimension(
                 dimensionConcept = "$ns:${dimensionConcept.conceptName}",
                 memberConcepts = memberConcepts,
@@ -115,12 +121,12 @@ abstract class AbstractStockAnalyzer(
     /*
     Concept names
      */
-    val totalRevenueConceptName = calculations.conceptNames.totalRevenue ?: error("...")
+    val totalRevenueConceptName = calculations.conceptNames.totalRevenue ?: error("totalRevenue conceptName cannot be found")
     val epsConceptName = calculations.conceptNames.eps
     val netIncomeConceptName = calculations.conceptNames.netIncome
     val ebitConceptName = calculations.conceptNames.ebit
     val operatingCostConceptName = calculations.conceptNames.operatingCost
-    val sharesOutstandingConceptName = calculations.conceptNames.sharesOutstanding ?: error("...")
+    val sharesOutstandingConceptName = calculations.conceptNames.sharesOutstanding ?: error("sharesOutstanding conceptName cannot be found")
 
     fun timeSeriesVsRevenue(
         conceptName: String,
@@ -156,7 +162,7 @@ abstract class AbstractStockAnalyzer(
             Item(
                 name = sharesOutstandingConceptName,
                 historicalValue = sharesOutstanding,
-                formula = sharesOutstanding?.value.toString()
+                formula = sharesOutstanding?.value.toString(),
             ),
         ).filter { mandatoryItem -> !model.incomeStatementItems.any { item -> item.name == mandatoryItem.name } }
 
@@ -192,6 +198,7 @@ abstract class AbstractStockAnalyzer(
         conceptName: String,
         periodFocus: DocumentFiscalPeriodFocus = DocumentFiscalPeriodFocus.FY,
     ): List<Fact> {
+        // TODO if this is empty then aggregate it up from Dimensions
         return factBase
             .getFacts(cik, periodFocus, conceptName)
             .filter { it.explicitMembers.isEmpty() }
@@ -221,6 +228,7 @@ abstract class AbstractStockAnalyzer(
         log.info("Finished post evaluation analysis for ${originalStockAnalysis.cik}")
 
         return ret
+
     }
 
     fun createIncomeStatementItems(): List<Item> {
