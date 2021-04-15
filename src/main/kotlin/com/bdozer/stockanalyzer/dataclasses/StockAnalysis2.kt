@@ -23,5 +23,6 @@ data class StockAnalysis2(
 
     val userId: String? = null,
     val tags: List<String> = emptyList(),
+    val published: Boolean = false,
     val lastUpdated: Instant = Instant.now(),
 )
