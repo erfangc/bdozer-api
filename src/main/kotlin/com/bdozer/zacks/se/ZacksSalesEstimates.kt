@@ -1,0 +1,38 @@
+package com.bdozer.zacks.se
+
+import java.time.LocalDate
+
+data class ZacksSalesEstimates(
+    val file_prod_date: LocalDate? = null,
+    val m_ticker: String? = null,
+    val ticker: String? = null,
+    val comp_name: String? = null,
+    val comp_name_2: String? = null,
+    val exchange: String? = null,
+    val currency_code: String? = null,
+    val per_end_date: LocalDate? = null,
+    val per_type: String? = null,
+    val per_code: String? = null,
+    val per_fisc_year: Int? = null,
+    val per_fisc_qtr: Int? = null,
+    val per_cal_year: Int? = null,
+    val per_cal_qtr: Int? = null,
+    val ann_rpt_flag: Int? = null,
+    val qtr_rpt_flag: Int? = null,
+    val last_rev_date: LocalDate? = null,
+    val sales_mean_est: Double? = null,
+    val sales_median_est: Double? = null,
+    val sales_cnt_est: Double? = null,
+    val sales_high_est: Double? = null,
+    val sales_low_est: Double? = null,
+    val sales_std_dev_est: Double? = null,
+    val sales_pct_chg_est_1w: Double? = null,
+    val sales_cnt_est_rev_up_1w: Double? = null,
+    val sales_cnt_est_rev_down_1w: Double? = null,
+    val sales_pct_chg_est_1m: Double? = null,
+    val sales_cnt_est_rev_up_1m: Double? = null,
+    val sales_cnt_est_rev_down_1m: Double? = null,
+    val sales_pct_chg_est_3m: Double? = null,
+    val sales_cnt_est_rev_up_3m: Double? = null,
+    val sales_cnt_est_rev_down_3m: Double? = null,
+)

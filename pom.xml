@@ -10,10 +10,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.starburst</groupId>
-    <artifactId>starburst</artifactId>
+    <groupId>com.bdozer</groupId>
+    <artifactId>bdozer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>starburst</name>
+    <name>bdozer</name>
 
     <properties>
         <kotlin.version>1.4.21</kotlin.version>
