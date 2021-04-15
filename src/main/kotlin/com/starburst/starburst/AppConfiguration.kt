@@ -19,11 +19,14 @@ class AppConfiguration {
     @Bean
     fun mongoClient(): MongoClient {
         val connectionString = getenv("MONGO_URI")
+            ?: error("environment MONGO_URI not defined")
         return KMongo.createClient(connectionString)
     }
 
     @Bean
     fun mongoDatabase(mongoClient: MongoClient): MongoDatabase {
-        return mongoClient.getDatabase("starburst")
+        val database = getenv("MONGO_DATABASE")
+            ?: error("environment MONGO_DATABASE not defined")
+        return mongoClient.getDatabase(database)
     }
 }
