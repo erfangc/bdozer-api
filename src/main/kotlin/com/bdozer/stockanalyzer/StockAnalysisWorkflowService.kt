@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class StockAnalysisWorkflowService(
-    private val stockAnalysisCRUDService: StockAnalysisCRUDService,
+    private val stockAnalysisService: StockAnalysisService,
     private val factBase: FactBase,
     private val filingProviderFactory: FilingProviderFactory,
     private val alphaVantageService: AlphaVantageService,
@@ -28,7 +28,7 @@ class StockAnalysisWorkflowService(
 ) {
 
     fun download(id: String): HttpEntity<ByteArray> {
-        val stockAnalysis = stockAnalysisCRUDService.get(id) ?: error("...")
+        val stockAnalysis = stockAnalysisService.get(id) ?: error("...")
         val headers = HttpHeaders()
         headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel")
         headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${stockAnalysis.cik}.xlsx")
