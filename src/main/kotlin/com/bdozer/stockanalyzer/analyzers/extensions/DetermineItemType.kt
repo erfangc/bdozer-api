@@ -5,17 +5,11 @@ import com.bdozer.edgar.factbase.USGaapConstants.IncomeTaxExpenseBenefit
 import com.bdozer.edgar.factbase.USGaapConstants.RestructuringAndOtherExpenseIncomeMainline
 import com.bdozer.edgar.factbase.USGaapConstants.SpecialItems
 import com.bdozer.models.dataclasses.Item
-import com.bdozer.stockanalyzer.analyzers.AbstractStockAnalyzer
+import com.bdozer.stockanalyzer.analyzers.StockAnalyzer
 
 object DetermineItemType {
 
-    fun AbstractStockAnalyzer.isCostOperatingCost(item: Item): Boolean {
-        return conceptDependencies[operatingCostConceptName]
-            ?.map { it.conceptName }
-            ?.contains(item.name) == true
-    }
-
-    fun AbstractStockAnalyzer.isOneTime(item: Item): Boolean {
+    fun StockAnalyzer.isOneTime(item: Item): Boolean {
         return setOf(
             RestructuringAndOtherExpenseIncomeMainline,
             IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment,
@@ -23,12 +17,12 @@ object DetermineItemType {
         ).contains(item.name)
     }
 
-    fun AbstractStockAnalyzer.isTaxItem(item: Item): Boolean {
+    fun StockAnalyzer.isTaxItem(item: Item): Boolean {
         return item.name == IncomeTaxExpenseBenefit
     }
 
-    fun AbstractStockAnalyzer.isEpsItem(item: Item): Boolean {
-        return item.name == epsConceptName
+    fun StockAnalyzer.isEpsItem(item: Item): Boolean {
+        return item.name == epsItemName
     }
 
 

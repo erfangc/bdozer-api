@@ -3,7 +3,7 @@ package com.bdozer.stockanalyzer.analyzers.extensions
 import com.bdozer.models.EvaluateModelResult
 import com.bdozer.models.dataclasses.Item
 import com.bdozer.spreadsheet.Cell
-import com.bdozer.stockanalyzer.analyzers.AbstractStockAnalyzer
+import com.bdozer.stockanalyzer.analyzers.StockAnalyzer
 import com.bdozer.stockanalyzer.dataclasses.Waterfall
 import kotlin.math.abs
 
@@ -13,7 +13,7 @@ object BusinessWaterfall {
      * This method computes the [Waterfall] for every period. A [Waterfall] groups - for 1 period -
      * the major expenses into at most 5 categories for ease of display
      */
-    fun AbstractStockAnalyzer.businessWaterfall(evalResult: EvaluateModelResult): Map<Int, Waterfall> {
+    fun StockAnalyzer.businessWaterfall(evalResult: EvaluateModelResult): Map<Int, Waterfall> {
         return evalResult
             .cells
             .groupBy { it.period }
@@ -22,13 +22,13 @@ object BusinessWaterfall {
                 /*
                 Find total revenue revenue
                  */
-                val revenue = cells[totalRevenueConceptName] ?: error("no revenue cell found for period $period")
+                val revenue = cells[totalRevenueItemName] ?: error("no revenue cell found for period $period")
 
                 /*
                 Find all the expenses
                  */
-                val expenses = conceptDependencies[netIncomeConceptName]
-                    ?.filter { calculation -> calculation.conceptName != totalRevenueConceptName }
+                val expenses = conceptDependencies[netIncomeItemName]
+                    ?.filter { calculation -> calculation.conceptName != totalRevenueItemName }
                     ?.mapNotNull { calculation ->
                         val cell = cells[calculation.conceptName]
                         val concept = conceptManager.getConcept(calculation.conceptHref)
@@ -59,7 +59,7 @@ object BusinessWaterfall {
                 /*
                 profit
                  */
-                val profit = cells[netIncomeConceptName] ?: error("no revenue cell found for period $period")
+                val profit = cells[netIncomeItemName] ?: error("no revenue cell found for period $period")
 
                 period to Waterfall(revenue = revenue, expenses = condensedExpenses, profit = profit)
             }.toMap()

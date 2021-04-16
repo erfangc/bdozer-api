@@ -1,4 +1,4 @@
-package com.bdozer.edgar.provider
+package com.bdozer.edgar.factbase
 
 import com.bdozer.edgar.XbrlNamespaces.link
 import com.bdozer.edgar.XbrlNamespaces.xlink

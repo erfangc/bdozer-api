@@ -1,10 +1,8 @@
-package com.bdozer.edgar.provider
+package com.bdozer.edgar.factbase
 
 import com.bdozer.edgar.XbrlNamespaces.link
 import com.bdozer.edgar.XbrlNamespaces.xlink
 import com.bdozer.edgar.XbrlNamespaces.xsd
-import com.bdozer.edgar.factbase.FactsParser
-import com.bdozer.edgar.factbase.FilingCalculationsParser
 import com.bdozer.xml.HttpClientExtensions.readXml
 import com.bdozer.xml.XmlElement
 import org.apache.http.client.HttpClient
@@ -100,7 +98,14 @@ class FilingProviderFactory(
         val labelLinkbase: XmlElement = future3.get()
         val calculationLinkbase: XmlElement = future4.get()
 
+
         return object : FilingProvider {
+
+            private val conceptManager = ConceptManager(this)
+            private val labelManager = LabelManager(this)
+            private val factsParser = FactsParser(this)
+            private val filingCalculationsParser = FilingCalculationsParser(this)
+
             override fun adsh(): String {
                 return adsh
             }
@@ -166,19 +171,19 @@ class FilingProviderFactory(
             }
 
             override fun conceptManager(): ConceptManager {
-                return ConceptManager(filingProvider = this)
+                return conceptManager
             }
 
             override fun labelManager(): LabelManager {
-                return LabelManager(filingProvider = this)
+                return labelManager
             }
 
             override fun factsParser(): FactsParser {
-                return FactsParser(filingProvider = this)
+                return factsParser
             }
 
             override fun filingCalculationsParser(): FilingCalculationsParser {
-                return FilingCalculationsParser(filingProvider = this)
+                return filingCalculationsParser
             }
 
         }

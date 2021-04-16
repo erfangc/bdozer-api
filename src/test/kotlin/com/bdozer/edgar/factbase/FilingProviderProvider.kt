@@ -1,8 +1,5 @@
 package com.bdozer.edgar.factbase
 
-import com.bdozer.edgar.provider.ConceptManager
-import com.bdozer.edgar.provider.FilingProvider
-import com.bdozer.edgar.provider.LabelManager
 import com.bdozer.xml.HttpClientExtensions.readXml
 import com.bdozer.xml.XmlElement
 import org.springframework.core.io.ClassPathResource
@@ -224,7 +221,7 @@ object FilingProviderProvider {
         }
     }
 
-    fun filingProviderCcl() = object : FilingProvider {
+    fun ccl202010k() = object : FilingProvider {
 
         private val schema = ClassPathResource("factbase/ccl/ccl-20201130.xsd")
             .inputStream

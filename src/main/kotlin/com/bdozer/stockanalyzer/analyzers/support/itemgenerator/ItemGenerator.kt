@@ -1,20 +1,14 @@
 package com.bdozer.stockanalyzer.analyzers.support.itemgenerator
 
-import com.bdozer.edgar.dataclasses.Concept
+import com.bdozer.edgar.dataclasses.Labels
 import com.bdozer.edgar.dataclasses.XbrlExplicitMember
-import com.bdozer.edgar.factbase.core.FactBase
 import com.bdozer.edgar.factbase.FactExtensions.filterForDimension
-import com.bdozer.edgar.factbase.dataclasses.Dimension
-import com.bdozer.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
-import com.bdozer.edgar.factbase.dataclasses.Fact
-import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
+import com.bdozer.edgar.factbase.FilingProvider
 import com.bdozer.edgar.factbase.dataclasses.Arc
-import com.bdozer.models.dataclasses.HistoricalValue
-import com.bdozer.models.dataclasses.Item
-import com.bdozer.models.dataclasses.ItemType
-import com.bdozer.stockanalyzer.analyzers.extensions.General.conceptNotFound
-import org.springframework.stereotype.Service
-import java.time.LocalDate
+import com.bdozer.edgar.factbase.dataclasses.Dimension
+import com.bdozer.edgar.factbase.dataclasses.Fact
+import com.bdozer.extensions.DoubleExtensions.orZero
+import com.bdozer.models.dataclasses.*
 
 /**
  * # Overview
@@ -22,10 +16,12 @@ import java.time.LocalDate
  * into one or more [Item] instances. A presentation arc typically represents a single concept.
  *
  * ## Simple translation
+ *
  * In the absence of dimension declarations, the Arc could be thought of as having a soft 1-to-1 relationship with an [Item]
  * The generated item is backed by a dimensionless [Fact]
  *
  * ## When dimensions are declared
+ *
  * When an arc defines a concept that must be decomposed into declared dimensions - then the arc
  * is translated into multiple [Item] each backed by their own [Fact]
  *
@@ -33,80 +29,372 @@ import java.time.LocalDate
  *
  *  - Create a consistent item naming convention so that items can be reliable and reproducibly generated
  *  - Generated [Item] instances with calculations defined must have those calculations populated
+ *
  */
-@Service
-class ItemGenerator(val factBase: FactBase) {
+class ItemGenerator(private val filingProvider: FilingProvider) {
+
+    /*
+    Declare helpers
+     */
+    private val itemNameGenerator = ItemNameGenerator()
+    private val filingCalculationsParser = filingProvider.filingCalculationsParser()
+    private val conceptManager = filingProvider.conceptManager()
+    private val labelManager = filingProvider.labelManager()
+
+    /*
+    Declare frequently used reference data
+     */
+    private val facts = facts(filingProvider)
+    private val dimensions = filingProvider.incomeStatementDeclaredDimensions()
+    private val calculations = filingCalculationsParser.parseCalculations()
+
+    /*
+    The follow statements translate Arcs -> Items
+     */
+    private val incomeStatementItems = calculations.incomeStatement.flatMap { arc ->
+        arcToItems(arc)
+    }
+
+    private val balanceSheetItems = calculations.balanceSheet.flatMap { arc ->
+        arcToItems(arc)
+    }
+
+    /*
+    ---------------------
+    Constants Hard Coding
+    ---------------------
+     */
+    private val revenueConceptNameCandidates = setOf(
+        "Revenues",
+        "RevenueFromContractWithCustomerExcludingAssessedTax",
+        "RevenueFromContractWithCustomerIncludingAssessedTax",
+    )
+
+    private val netIncomeLossConceptNameCandidates = setOf(
+        "NetIncomeLoss",
+        "NetIncomeLossAvailableToCommonStockholdersBasic",
+        "ProfitLoss",
+    )
+
+    private val avgSharesOutstandingBasicAndDiluted = "WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
+    private val avgSharesOutstandingBasic = "WeightedAverageNumberOfSharesOutstandingBasic"
+    private val avgSharesOutstandingDiluted = "WeightedAverageNumberOfDilutedSharesOutstanding"
+
+    /*
+    ----------------------------
+    End of Constants Hard Coding
+    ----------------------------
+     */
 
     /**
-     * Performs the primary tax of turning an [Arc]
+     * # What is this?
+     * Creates an [Item] from the given concept name
+     * if an [Item] has not been created by this instance of [ItemGenerator]
+     * during constructor invocation
+     *
+     * # Why is it used?
+     * This is used to find / create weighted average shares outstanding items,
+     * which are sometimes not declared on income statements and thus are not
+     * automatically created when we looped through income statement arcs to create items
+     */
+    private fun findOrCreate(conceptName: String): Item? {
+        val found = (incomeStatementItems + balanceSheetItems).find { item -> item.name == conceptName }
+        val itemName = itemNameGenerator.itemName(conceptName)
+        // no need to create this item
+        return if (found != null) {
+            return found
+        } else {
+            val fact = facts.find { it.conceptName == conceptName && it.explicitMembers.isEmpty() } ?: return null
+            val historicalValue = historicalValue(fact)
+            Item(
+                name = itemName,
+                historicalValue = historicalValue,
+                description = itemName,
+                type = ItemType.FixedCost,
+                fixedCost = FixedCost(historicalValue?.value.orZero()),
+            )
+        }
+    }
+
+    private fun earningsPerShareBasic(): Item? {
+        val items = incomeStatementItems.reversed()
+        val ret = items.find { item -> item.name == "EarningsPerShareBasic" }
+            ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerBasicShare" }
+        return ret?.copy(
+            type = ItemType.Custom,
+            formula = "${ret.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasic)}",
+        )
+    }
+
+    private fun earningsPerShareDiluted(): Item? {
+        val items = incomeStatementItems.reversed()
+        val ret = items.find { item -> item.name == "EarningsPerShareDiluted" }
+            ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerDilutedShare" }
+        return ret?.copy(
+            type = ItemType.Custom,
+            formula = "${ret.name}/${itemNameGenerator.itemName(avgSharesOutstandingDiluted)}",
+        )
+    }
+
+    private fun earningsPerShareBasicAndDiluted(): Item? {
+        val items = incomeStatementItems.reversed()
+        val ret = items.find { item -> item.name == "EarningsPerShareBasicAndDiluted" }
+        return ret?.copy(
+            type = ItemType.Custom,
+            formula = "${ret.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasicAndDiluted)}",
+        )
+    }
+
+    /**
+     *  Parse the filing to create [Item]s from the calculation arcs
+     *  declared on the Xbrl files [GenerateItemsResponse]
+     */
+    fun generateItems(): GenerateItemsResponse {
+        /*
+        Find the net income / revenue item etc.
+         */
+        val netIncomeItem = incomeStatementItems
+            .reversed()
+            .find { netIncomeLossConceptNameCandidates.contains(it.name) }
+        val revenueItem = revenueItemReverseBfs(incomeStatementItems, netIncomeItem)
+
+        /*
+        create and then replace existing EPS item(s) with the ones below
+         */
+        val epsBasic = earningsPerShareBasic()
+        val epsDiluted = earningsPerShareDiluted()
+        val epsBasicAndDiluted = earningsPerShareBasicAndDiluted()
+
+        val incomeStatementItemsWithEpsReplaced = listOfNotNull(epsBasic, epsDiluted, epsBasicAndDiluted).fold(incomeStatementItems) {
+            acc, item ->
+            if (acc.any { it.name == item.name }) {
+                acc.map {
+                    if (it.name == item.name) {
+                        item
+                    } else {
+                        it
+                    }
+                }
+            } else {
+                acc
+            }
+        }
+
+
+        /*
+        if any of the shares outstanding item is newly created
+        then tag them onto the end of the income statement
+         */
+        val basicSharesOutstanding = epsBasic
+            ?.let { findOrCreate(avgSharesOutstandingBasic) }
+        val dilutedSharesOutstanding = epsDiluted
+            ?.let { findOrCreate(avgSharesOutstandingDiluted) }
+        val basicAndDilutedSharesOutstanding = epsBasicAndDiluted
+            ?.let { findOrCreate(avgSharesOutstandingBasicAndDiluted) }
+
+        val incomeStatementItemsWithSharesOutstanding = listOfNotNull(
+            basicSharesOutstanding,
+            dilutedSharesOutstanding,
+            basicAndDilutedSharesOutstanding,
+        ).fold(incomeStatementItemsWithEpsReplaced) { acc, item ->
+            if (acc.any { it.name == item.name }) {
+                acc
+            } else {
+                acc + item
+            }
+        }
+
+        return GenerateItemsResponse(
+            revenue = revenueItem,
+            netIncome = netIncomeItem,
+            incomeStatementItems = incomeStatementItemsWithSharesOutstanding,
+            balanceSheetItems = balanceSheetItems,
+
+            epsBasic = epsBasic,
+            epsDiluted = epsDiluted,
+            epsBasicAndDiluted = epsBasicAndDiluted,
+
+            basicSharesOutstanding = basicSharesOutstanding,
+            dilutedSharesOutstanding = dilutedSharesOutstanding,
+            basicAndDilutedSharesOutstanding = basicAndDilutedSharesOutstanding,
+        )
+
+    }
+
+    /**
+     * Performs the primary task of turning an [Arc] into an [Item]
      *
      * @param arc the [Arc] to be turned into [Item]
-     * @param ctx the [GenerateItemContext] that provides the rest of the distilled formula from the filings as well as metadata
-     * needed to perform the analysis
      */
-    fun generateItems(arc: Arc, ctx: GenerateItemContext): List<Item> {
-
+    private fun arcToItems(arc: Arc): List<Item> {
         /*
-        Define and assign some variables we expect to use often
-         */
-        val conceptManager = ctx.filingProvider.conceptManager()
-        val cik = ctx.filingProvider.cik()
-        val dimensions = ctx.dimensions
-        val concept = conceptManager.getConcept(arc.conceptHref) ?: conceptNotFound(arc.conceptHref)
-        val documentPeriodEndDate = ctx.filingProvider.instanceDocument().documentPeriodEndDate() ?: error("...")
-
-        /*
-        Step 1 - query all facts for the concept defined by this arc
-         */
-        val facts = facts(cik, concept, documentPeriodEndDate)
-
-        /*
-        Step 2 - find the facts that we will itemize associated with this Arc's concept
+        Step 1 - find the facts that we will itemize associated with this Arc's concept
         this is either the dimensionless item or we've split it up by some dimension
          */
-        // TODO really tighten up the logic here (how do we know what are the correct combinations of dimensions to use)
-        val dimension = dimensions.find { dimension ->
-            /*
-            choose the current dimension if there are facts matching all of its members
-             */
-            val filtered = facts.filter { fact -> explicitMembersMatchDimension(fact.explicitMembers, dimension) }
-            filtered.isNotEmpty()
-        }
-
-        val itemizableFacts = if (dimension == null) {
-            facts.find { it.explicitMembers.isEmpty() }?.let { listOf(it) } ?: return emptyList()
-        } else {
-            facts.filterForDimension(dimension)
-        }
+        val dimensionalFacts =
+            findDimensionToUse(dimensions, facts)
+                ?.let { facts.filter { fact -> fact.conceptName == arc.conceptName }.filterForDimension(it) }
+                ?: emptyList()
+        val dimensionlessFact = facts.filter { it.conceptName == arc.conceptName }.find { it.explicitMembers.isEmpty() }
 
         /*
-        Case 1 - only dimensionless fact exist
-        Case 2 - both dimensionless and dimensional facts exist
-        Case 3 - only dimensional facts exist
-        Case 4 - neither exist
+        short circuit the process if dimensional and dimensionless facts
+        are not found and there are no associated calculations - this mean this fact has no value
          */
-        if (itemizableFacts.isEmpty()) {
+        if (dimensionalFacts.isEmpty()
+            && dimensionlessFact == null
+            && arc.calculations.isEmpty()
+        ) {
             return emptyList()
         }
 
         /*
-        Step 3 - Itemize all the itemizable facts
+        Step 2 - create dimensional items to the extent there are any
+        dimensional facts
          */
-        itemizableFacts.map { fact ->
-            // FIXME determine if the item is a subtotal
-            val subtotal = true
-            val itemName = ItemNameGenerator().itemName(fact)
+        val dimensionalItems = dimensionalFacts.map { fact ->
+            val labels = dimensionMemberLabel(fact)
             Item(
-                name = itemName,
-                description = "",
-                type = ItemType.Custom,
-                historicalValue = HistoricalValue(),
-                formula = "0.0",
-                subtotal = subtotal,
+                name = itemNameGenerator.itemName(fact),
+                description = labelWaterfall(labels),
+                type = ItemType.FixedCost,
+                historicalValue = historicalValue(fact),
+                fixedCost = FixedCost(fact.doubleValue.orZero())
             )
         }
-        TODO()
+
+        /*
+        Step 3 - create the dimensionless item from the dimensional items
+        and handle cases where the dimensionless item is not backed by a fact (i.e. a lookup for the corresponding concept
+        without a dimension returns nothing)
+         */
+
+        /*
+        Step 3.1 - Generate the Sum property that will go on our dimensionless Item
+        the Sum property consists of two kinds of constituents:
+
+        - Explicitly declared dependency on other Concepts via the calculationArcs
+        - Dimensional items found above
+
+         */
+        val explicitCalculationComponents = arc
+            .calculations
+            .map { calculation ->
+                Component(
+                    weight = calculation.weight,
+                    itemName = itemNameGenerator.itemName(calculation.conceptName)
+                )
+            }
+        val dimensionalComponents = dimensionalItems.map { item -> Component(weight = 1.0, itemName = item.name) }
+        val sum = Sum(explicitCalculationComponents + dimensionalComponents)
+
+        /*
+        Step 3.2 - Generate the dimensionless Item
+        this can be complicated by the fact that there might not be an Fact backing this Item
+         */
+        val labels = conceptManager.getConcept(arc.conceptHref)?.id?.let { labelManager.getLabel(it) }
+        val dimensionlessItem = if (dimensionlessFact == null) {
+            /*
+            If no fact can be found to support the dimensionless item
+            we must create one from scratch, this happens if the filing entity
+            only provide dimensional data
+             */
+            val historicalValue = historicalValue(dimensionalFacts)
+            Item(
+                name = arc.conceptName,
+                description = labelWaterfall(labels),
+                historicalValue = historicalValue
+            )
+        } else {
+            /*
+            Else, we are in the case where there is a Fact that backs
+            this dimensionless item
+             */
+            val historicalValue = historicalValue(dimensionlessFact)
+            Item(
+                name = itemNameGenerator.itemName(dimensionlessFact),
+                description = labelWaterfall(labels),
+                historicalValue = historicalValue,
+            )
+        }
+
+        /*
+        Step 3.3 - Set the formula for the dimensionless Item
+        if it has components (either explicitly declared or through dimensional decomposition) then
+        we assign it a [Sum] property otherwise it's formula will be set to its most recent historical value
+         */
+        val dlessItemWithFormula = if (sum.components.isEmpty()) {
+            dimensionlessItem.copy(
+                type = ItemType.FixedCost,
+                fixedCost = FixedCost(dimensionlessItem.historicalValue?.value.orZero()),
+                subtotal = false
+            )
+        } else {
+            dimensionlessItem.copy(type = ItemType.Sum, sum = sum, subtotal = true)
+        }
+
+        return dimensionalItems + dlessItemWithFormula
     }
+
+    private fun labelWaterfall(labels: Labels?) =
+        labels?.terseLabel ?: labels?.label ?: labels?.verboseLabel
+
+    /**
+     * Derive [Labels] from the [Fact], assuming the fact
+     * being presented have dimensions, if not the conceptId of the fact itself
+     * should be used to derive labels
+     */
+    private fun dimensionMemberLabel(fact: Fact): Labels? {
+        val parts = fact.explicitMembers.first().value.split(":")
+        val ns = parts[0]
+        val v = parts[1]
+        val longNs = filingProvider.instanceDocument().shortNamespaceToLongNamespaceMap()[ns]
+        val conceptId = filingProvider.conceptManager().getConcept(longNs!!, v)?.id
+        return conceptId?.let { labelManager.getLabel(it) }
+    }
+
+    /**
+     * Turn [facts] into a [HistoricalValue]
+     */
+    private fun historicalValue(facts: List<Fact>): HistoricalValue {
+        val fact = facts.first()
+        return HistoricalValue(
+            factIds = facts.map { fact -> fact._id },
+            conceptName = fact.conceptName,
+            value = facts.sumByDouble { it.doubleValue.orZero() },
+            documentFiscalPeriodFocus = fact.documentFiscalPeriodFocus.toString(),
+            documentPeriodEndDate = fact.documentPeriodEndDate.toString(),
+            documentFiscalYearFocus = fact.documentFiscalYearFocus,
+        )
+    }
+
+    private fun historicalValue(fact: Fact?): HistoricalValue? {
+        return if (fact == null) {
+            null
+        } else
+            HistoricalValue(
+                factId = fact._id,
+                conceptName = fact.conceptName,
+                value = fact.doubleValue.orZero(),
+                documentFiscalPeriodFocus = fact.documentFiscalPeriodFocus.toString(),
+                documentPeriodEndDate = fact.documentPeriodEndDate.toString(),
+                documentFiscalYearFocus = fact.documentFiscalYearFocus,
+            )
+    }
+
+    // TODO tighten up the logic here, how do we know what are the correct combinations of dimensions to use
+    private fun findDimensionToUse(dimensions: List<Dimension>, facts: List<Fact>): Dimension? {
+        return dimensions.find { dimension ->
+            /*
+            choose the current dimension if there are facts matching all of its members
+             */
+            val filtered = facts.filter { fact ->
+                explicitMembersMatchDimension(fact.explicitMembers, dimension)
+            }
+            filtered.isNotEmpty()
+        }
+    }
+
 
     /**
      * Determine if the passed in [XbrlExplicitMember]s match
@@ -127,17 +415,62 @@ class ItemGenerator(val factBase: FactBase) {
     /**
      * Get the latest facts for a given concept for a given filer
      */
-    private fun facts(
-        cik: String,
-        concept: Concept,
-        documentPeriodEndDate: LocalDate,
-    ): List<Fact> {
-        return factBase.getFacts(
-            cik = cik,
-            documentFiscalPeriodFocus = DocumentFiscalPeriodFocus.FY,
-            documentPeriodEndDate = documentPeriodEndDate,
-            conceptName = concept.conceptName,
-        )
+    private fun facts(filingProvider: FilingProvider): List<Fact> {
+        return filingProvider.factsParser().parseFacts().facts
+    }
+
+
+    /**
+     * ## What is this?
+     * Identify which item among the given items is a Revenue item
+     * this is done via a reverse breath-first-search
+     *
+     * We start with NetIncome and then walk backwards from the calculation tree
+     * (exhausting the search on current layer)
+     *
+     * ## Why a BFS?
+     * We cannot simply filter on a list of candidate concepts for Revenue
+     * as companies are idiotic and use multiple tags to represent revenue, that are sometimes
+     * completely in parallel to each other with no calculationArcs or presentationArcs bridging them
+     */
+    private fun revenueItemReverseBfs(
+        items: List<Item>,
+        netIncomeItem: Item?
+    ): Item? {
+        val lookup = items.associateBy { it.name }
+
+        /**
+         * This inner helper function help translate dependencies
+         * between items
+         * @param components
+         */
+        fun componentsToItem(components: List<Component>? = null): List<Item> {
+            if (components == null) {
+                return emptyList()
+            }
+            return components.mapNotNull { component ->
+                val itemName = component.itemName
+                lookup[itemName]
+            }
+        }
+
+        val queue = ArrayDeque<Item>()
+        queue.addAll(componentsToItem(netIncomeItem?.sum?.components))
+        var revenueItem: Item? = null
+        while (queue.isNotEmpty()) {
+            val item = queue.removeFirst()
+            /*
+            we've found the revenue item if this item is the first item that match one of the revenue
+            conceptNames
+             */
+            val itemName = item.name
+            if (revenueConceptNameCandidates.contains(itemName)) {
+                revenueItem = item
+            } else {
+                queue.addAll(componentsToItem(item.sum?.components))
+            }
+        }
+        return revenueItem
     }
 
 }

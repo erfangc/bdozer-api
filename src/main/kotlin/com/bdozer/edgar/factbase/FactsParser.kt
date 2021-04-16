@@ -9,7 +9,6 @@ import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFis
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.bdozer.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
-import com.bdozer.edgar.provider.FilingProvider
 import com.bdozer.xml.LocalDateExtensions.toLocalDate
 import com.bdozer.xml.XmlElement
 import com.bdozer.xml.XmlNode
@@ -159,7 +158,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
             facts = distinctFacts,
             documentFiscalPeriodFocus = documentFiscalPeriodFocus,
             documentPeriodEndDate = documentPeriodEndDate,
-            documentFiscalYearFocus = documentFiscalYearFocus
+            documentFiscalYearFocus = documentFiscalYearFocus,
         )
 
     }
@@ -210,7 +209,6 @@ class FactsParser(private val filingProvider: FilingProvider) {
     private fun primarySymbol(instanceDocument: XmlElement): String {
         val found = instanceDocument
             .getElementsByTag("dei:TradingSymbol")
-
         if (found.isEmpty()) {
             return "N/A"
         }

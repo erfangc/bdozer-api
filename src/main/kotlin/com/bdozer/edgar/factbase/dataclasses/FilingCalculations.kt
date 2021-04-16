@@ -13,14 +13,9 @@ data class FilingCalculations(
     val documentFiscalYearFocus: Int,
     val documentPeriodEndDate: LocalDate,
 
-    val incomeStatement: List<Arc>,
-    val cashFlowStatement: List<Arc>,
-    val balanceSheet: List<Arc>,
-
-    /**
-     * Crucial Item / concept names
-     */
-    val conceptNames: ConceptNames,
+    val incomeStatement: List<Arc> = emptyList(),
+    val cashFlowStatement: List<Arc> = emptyList(),
+    val balanceSheet: List<Arc> = emptyList(),
 
     val lastUpdated: String = Instant.now().toString(),
 )

@@ -1,6 +1,5 @@
 package com.bdozer.edgar.factbase
 
-import com.bdozer.edgar.provider.FilingProvider
 import com.bdozer.edgar.XbrlNamespaces.link
 import com.bdozer.edgar.XbrlNamespaces.xlink
 import com.bdozer.edgar.factbase.XLinkExtentions.from
@@ -10,18 +9,12 @@ import com.bdozer.edgar.factbase.XLinkExtentions.role
 import com.bdozer.edgar.factbase.XLinkExtentions.to
 import com.bdozer.edgar.factbase.XLinkExtentions.weight
 import com.bdozer.edgar.factbase.dataclasses.Calculation
-import com.bdozer.edgar.factbase.dataclasses.ConceptNames
 import com.bdozer.edgar.factbase.dataclasses.FilingCalculations
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalYearFocus
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.bdozer.edgar.factbase.dataclasses.Arc
-import com.bdozer.edgar.factbase.USGaapConstants.WeightedAverageNumberOfDilutedSharesOutstanding
-import com.bdozer.edgar.factbase.USGaapConstants.WeightedAverageNumberOfShareOutstandingBasicAndDiluted
-import com.bdozer.edgar.factbase.USGaapConstants.WeightedAverageNumberOfSharesOutstandingBasic
-import com.bdozer.edgar.factbase.ingestor.support.ConceptNamesMapper
-import com.bdozer.edgar.provider.ConceptManager
 import com.bdozer.xml.XmlNode
 import java.net.URI
 import java.util.*
@@ -29,33 +22,21 @@ import java.util.*
 class FilingCalculationsParser(private val filingProvider: FilingProvider) {
 
     private val incomeStatementRootHref = "us-gaap_IncomeStatementAbstract"
-    private val cashFlowStatementRootHref = "us-gaap_StatementOfCashFlowsAbstract"
     private val balanceSheetRootHref = "us-gaap_StatementOfFinancialPositionAbstract"
     private val conceptManager = filingProvider.conceptManager()
-    private val allConceptNames: List<String>
-
-    init {
-        allConceptNames = filingProvider
-            .presentationLinkbase()
-            .getElementsByTag(link, "presentationLink")
-            .flatMap { presentLink -> traversePresentationLink(presentLink).toList() }
-            .map { it.conceptName }
-            .distinct()
-    }
 
     /**
      * Parse filing calculations
      */
     fun parseCalculations(): FilingCalculations {
         val incomeStatement = traversePresentation(incomeStatementRootHref)
-        val cashFlowStatement = traversePresentation(cashFlowStatementRootHref)
         val balanceSheet = traversePresentation(balanceSheetRootHref)
 
         val instanceDocument = filingProvider.instanceDocument()
         val cik = filingProvider.cik()
         val adsh = filingProvider.adsh()
 
-        val filingCalculations = FilingCalculations(
+        return FilingCalculations(
             _id = "$cik:$adsh",
             cik = cik,
             adsh = adsh,
@@ -66,22 +47,7 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
             documentFiscalYearFocus = instanceDocument.documentFiscalYearFocus(),
             incomeStatement = incomeStatement,
             balanceSheet = balanceSheet,
-            cashFlowStatement = cashFlowStatement,
-            conceptNames = ConceptNames()
         )
-        return filingCalculations.copy(
-            conceptNames = ConceptNamesMapper(filingCalculations).resolve()
-                .copy(sharesOutstanding = sharesOutstandingConceptName())
-        )
-    }
-
-    private fun sharesOutstandingConceptName(): String? {
-        val candidates = setOf(
-            WeightedAverageNumberOfShareOutstandingBasicAndDiluted,
-            WeightedAverageNumberOfDilutedSharesOutstanding,
-            WeightedAverageNumberOfSharesOutstandingBasic,
-        )
-        return allConceptNames.find { candidates.contains(it) }
     }
 
     /**
@@ -187,7 +153,7 @@ class FilingCalculationsParser(private val filingProvider: FilingProvider) {
             /*
             We've processed all the children for the current parent
              */
-            if (lastSiblings.peek() == currLocLabel) {
+            if (lastSiblings.isNotEmpty() && lastSiblings.peek() == currLocLabel) {
                 lastSiblings.pop()
                 if (parents.isNotEmpty()) {
                     parents.pop()

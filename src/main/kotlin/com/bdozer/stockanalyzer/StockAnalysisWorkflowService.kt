@@ -3,12 +3,11 @@ package com.bdozer.stockanalyzer
 import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.edgar.explorer.EdgarExplorer
 import com.bdozer.edgar.factbase.core.FactBase
-import com.bdozer.edgar.provider.FilingProviderFactory
+import com.bdozer.edgar.factbase.FilingProviderFactory
 import com.bdozer.filingentity.FilingEntityManager
 import com.bdozer.filingentity.dataclasses.FilingEntity
 import com.bdozer.models.CellGenerator
-import com.bdozer.stockanalyzer.analyzers.Normal
-import com.bdozer.stockanalyzer.analyzers.Recovery
+import com.bdozer.stockanalyzer.analyzers.StockAnalyzer
 import com.bdozer.stockanalyzer.analyzers.support.StockAnalyzerDataProvider
 import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
 import com.bdozer.zacks.se.ZacksEstimatesService
@@ -51,15 +50,8 @@ class StockAnalysisWorkflowService(
         val adsh = latestAdsh(filingEntity)
         val dataProvider = createDataProvider(filingEntity, adsh)
 
-        return when (filingEntity.modelTemplate?.template) {
-            "Normal" -> {
-                Normal(dataProvider, stockAnalysis).analyze()
-            }
-            "Recovery" -> {
-                Recovery(dataProvider, stockAnalysis).analyze()
-            }
-            else -> error("model template not specified for $cik")
-        }
+        return StockAnalyzer(dataProvider = dataProvider,originalAnalysis = stockAnalysis)
+            .analyze()
     }
 
     private fun latestAdsh(filingEntity: FilingEntity) = (edgarExplorer

@@ -5,9 +5,7 @@ import com.mongodb.client.model.ReplaceOptions
 import com.bdozer.edgar.factbase.dataclasses.Fact
 import com.bdozer.edgar.factbase.dataclasses.FilingCalculations
 import com.bdozer.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
-import com.bdozer.edgar.factbase.FactsParser
-import com.bdozer.edgar.factbase.FilingCalculationsParser
-import com.bdozer.edgar.provider.FilingProviderFactory
+import com.bdozer.edgar.factbase.FilingProviderFactory
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.replaceOne

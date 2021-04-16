@@ -37,10 +37,19 @@ class XmlNode(
     }
 
     fun getElementsByTag(namespace: String, tag: String): List<XmlNode> {
-        val myTag =
-            XmlElement(this.ownerDocument.documentElement).getShortNamespace(namespace)?.let { "$it:$tag" } ?: tag
-        val ret = childNodes().toList().filter { it.nodeName == myTag }
-        return ret + childNodes().toList().filter { it.nodeName == tag }
+        val shortNamespace = XmlElement(this.ownerDocument.documentElement).getShortNamespace(namespace)
+        val nameSpacedFinds =
+            shortNamespace
+                ?.let { shortNs ->
+                    childNodes().toList().filter { node -> node.nodeName == "$shortNs:$tag" }
+                }
+                ?: emptyList()
+
+        val bareTagFinds = childNodes()
+            .toList()
+            .filter { it.nodeName == tag }
+
+        return nameSpacedFinds + bareTagFinds
     }
 
     fun attr(attr: String): String? {
