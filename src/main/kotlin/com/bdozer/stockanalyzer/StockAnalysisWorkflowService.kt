@@ -2,14 +2,14 @@ package com.bdozer.stockanalyzer
 
 import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.edgar.explorer.EdgarExplorer
-import com.bdozer.edgar.factbase.FactBase
+import com.bdozer.edgar.factbase.core.FactBase
 import com.bdozer.edgar.provider.FilingProviderFactory
 import com.bdozer.filingentity.FilingEntityManager
 import com.bdozer.filingentity.dataclasses.FilingEntity
 import com.bdozer.models.CellGenerator
 import com.bdozer.stockanalyzer.analyzers.Normal
 import com.bdozer.stockanalyzer.analyzers.Recovery
-import com.bdozer.stockanalyzer.analyzers.StockAnalyzerDataProvider
+import com.bdozer.stockanalyzer.analyzers.support.StockAnalyzerDataProvider
 import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
 import com.bdozer.zacks.se.ZacksEstimatesService
 import org.springframework.http.HttpEntity

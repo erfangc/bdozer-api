@@ -1,9 +1,10 @@
 package com.bdozer.edgar.provider
 
-import com.bdozer.edgar.FilingProvider
 import com.bdozer.edgar.XbrlNamespaces.link
 import com.bdozer.edgar.XbrlNamespaces.xlink
 import com.bdozer.edgar.XbrlNamespaces.xsd
+import com.bdozer.edgar.factbase.FactsParser
+import com.bdozer.edgar.factbase.FilingCalculationsParser
 import com.bdozer.xml.HttpClientExtensions.readXml
 import com.bdozer.xml.XmlElement
 import org.apache.http.client.HttpClient
@@ -162,6 +163,22 @@ class FilingProviderFactory(
 
             override fun instanceDocumentFilename(): String {
                 return instanceFilename
+            }
+
+            override fun conceptManager(): ConceptManager {
+                return ConceptManager(filingProvider = this)
+            }
+
+            override fun labelManager(): LabelManager {
+                return LabelManager(filingProvider = this)
+            }
+
+            override fun factsParser(): FactsParser {
+                return FactsParser(filingProvider = this)
+            }
+
+            override fun filingCalculationsParser(): FilingCalculationsParser {
+                return FilingCalculationsParser(filingProvider = this)
             }
 
         }

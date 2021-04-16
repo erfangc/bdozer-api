@@ -1,7 +1,6 @@
 package com.bdozer.edgar.factbase.ingestor
 
 import com.mongodb.client.MongoDatabase
-import com.bdozer.edgar.factbase.ingestor.q4.Q4FactFinder
 import com.bdozer.filingentity.FilingEntityManager
 import com.bdozer.xml.HttpClientExtensions.readXml
 import org.apache.http.client.HttpClient

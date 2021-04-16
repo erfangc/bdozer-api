@@ -1,12 +1,12 @@
 package com.bdozer.stockanalyzer.analyzers
 
-import com.bdozer.edgar.factbase.FactBase
+import com.bdozer.edgar.factbase.core.FactBase
 import com.bdozer.edgar.factbase.dataclasses.AggregatedFact
 import com.bdozer.edgar.factbase.dataclasses.Calculation
 import com.bdozer.edgar.factbase.dataclasses.Dimension
 import com.bdozer.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
-import com.bdozer.edgar.factbase.support.FilingConceptsHolder
-import com.bdozer.edgar.factbase.support.LabelManager
+import com.bdozer.edgar.provider.ConceptManager
+import com.bdozer.edgar.provider.LabelManager
 import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.models.ModelEvaluator
 import com.bdozer.models.Utility.DiscountFactor
@@ -33,6 +33,7 @@ import com.bdozer.stockanalyzer.analyzers.extensions.General.conceptNotFound
 import com.bdozer.stockanalyzer.analyzers.extensions.General.fragment
 import com.bdozer.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.postModelEvaluationAnalysis
 import com.bdozer.stockanalyzer.analyzers.extensions.PostEvaluationAnalysis.zeroRevenueGrowth
+import com.bdozer.stockanalyzer.analyzers.support.StockAnalyzerDataProvider
 import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -63,8 +64,8 @@ abstract class AbstractStockAnalyzer(
     val zacksEstimatesService = dataProvider.zacksEstimatesService
     val filingEntity = dataProvider.filingEntity
     val factBase = dataProvider.factBase
-    val conceptManager = FilingConceptsHolder(filingProvider)
-    val labelManager = LabelManager(filingProvider)
+    val conceptManager = filingProvider.conceptManager()
+    val labelManager = filingProvider.labelManager()
     val alphaVantageService = dataProvider.alphaVantageService
 
     val evaluator = ModelEvaluator()

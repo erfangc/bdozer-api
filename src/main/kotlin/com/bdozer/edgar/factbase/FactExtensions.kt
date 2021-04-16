@@ -22,6 +22,17 @@ object FactExtensions {
         }
     }
 
+    fun List<Fact>.filterForDimension(dimension: Dimension): List<Fact> {
+        return filter { fact ->
+            val explicitMembers = fact.explicitMembers
+            // every declared dimension from the StatementTable prologue must be matched
+            // by the declared explicit members of the fact for the fact to be counted
+            explicitMembers.size == 1 &&
+                    explicitMembers.first().dimension == dimension.dimensionConcept
+                    && dimension.memberConcepts.contains(explicitMembers.first().value)
+        }
+    }
+
     fun List<Fact>.filterForDimensionsWithFallback(dimensions: List<Dimension>): List<Fact> {
         val ret =  filter { fact ->
             val explicitMembers = fact.explicitMembers

@@ -1,7 +1,7 @@
 package com.bdozer.edgar.factbase.ingestor
 
 import com.bdozer.edgar.factbase.FilingProviderProvider.dbx202010k
-import com.bdozer.edgar.factbase.ingestor.support.FactsParser
+import com.bdozer.edgar.factbase.FactsParser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

@@ -1,6 +1,5 @@
 package com.bdozer.edgar.factbase.dataclasses
 
-import com.bdozer.edgar.factbase.ingestor.dataclasses.Arc
 import java.time.Instant
 import java.time.LocalDate
 

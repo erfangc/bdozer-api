@@ -1,7 +1,7 @@
 package com.bdozer.filingentity
 
 import com.mongodb.client.MongoDatabase
-import com.bdozer.edgar.factbase.FactBase
+import com.bdozer.edgar.factbase.core.FactBase
 import com.bdozer.filingentity.dataclasses.Address
 import com.bdozer.filingentity.dataclasses.FilingEntity
 import com.bdozer.filingentity.dataclasses.ModelTemplate

@@ -3,6 +3,7 @@ package com.bdozer.stockanalyzer.analyzers
 import com.bdozer.extensions.DoubleExtensions.fmtPct
 import com.bdozer.models.dataclasses.Commentary
 import com.bdozer.models.dataclasses.Item
+import com.bdozer.stockanalyzer.analyzers.support.StockAnalyzerDataProvider
 import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
 
 /**

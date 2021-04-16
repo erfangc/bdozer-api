@@ -5,9 +5,8 @@ import com.mongodb.client.model.ReplaceOptions
 import com.bdozer.edgar.factbase.dataclasses.Fact
 import com.bdozer.edgar.factbase.dataclasses.FilingCalculations
 import com.bdozer.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
-import com.bdozer.edgar.factbase.ingestor.q4.Q4FactFinder
-import com.bdozer.edgar.factbase.ingestor.support.FactsParser
-import com.bdozer.edgar.factbase.ingestor.support.FilingCalculationsParser
+import com.bdozer.edgar.factbase.FactsParser
+import com.bdozer.edgar.factbase.FilingCalculationsParser
 import com.bdozer.edgar.provider.FilingProviderFactory
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
@@ -37,7 +36,7 @@ class FilingIngestor(
         Parse and save the facts
          */
         log.info("Parsing facts from cik=$cik and adsh=$adsh")
-        val factsParser = FactsParser(filingProvider)
+        val factsParser = filingProvider.factsParser()
         val resp = factsParser.parseFacts()
         val facts = resp.facts
         val distinctIds = facts.distinctBy { it._id }.size
@@ -52,7 +51,7 @@ class FilingIngestor(
         Parse and save the calculations
          */
         try {
-            val calculationsParser = FilingCalculationsParser(filingProvider = filingProvider)
+            val calculationsParser = filingProvider.filingCalculationsParser()
             val calculations = calculationsParser.parseCalculations()
             calculationsCol.save(calculations)
         } catch (e: Exception) {

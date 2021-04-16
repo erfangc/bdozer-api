@@ -6,6 +6,7 @@ enum class ItemType {
     CompoundedGrowth,
     UnitSalesRevenue,
     Custom,
+    Sum,
     PercentOfRevenue,
     PercentOfTotalAsset,
     FixedCost,

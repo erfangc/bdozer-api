@@ -1,6 +1,6 @@
 package com.bdozer.edgar.factbase.autofill
 
-import com.bdozer.edgar.factbase.FactBase
+import com.bdozer.edgar.factbase.core.FactBase
 import com.bdozer.edgar.factbase.autofill.dataclasses.FixedCostAutoFill
 import com.bdozer.edgar.factbase.autofill.dataclasses.PercentOfRevenueAutoFill
 import com.bdozer.edgar.factbase.dataclasses.AggregatedFact

@@ -1,9 +1,9 @@
 package com.bdozer.stockanalyzer.analyzers.extensions
 
-import com.bdozer.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment
-import com.bdozer.edgar.factbase.modelbuilder.formula.USGaapConstants.IncomeTaxExpenseBenefit
-import com.bdozer.edgar.factbase.modelbuilder.formula.USGaapConstants.RestructuringAndOtherExpenseIncomeMainline
-import com.bdozer.edgar.factbase.modelbuilder.formula.USGaapConstants.SpecialItems
+import com.bdozer.edgar.factbase.USGaapConstants.IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairment
+import com.bdozer.edgar.factbase.USGaapConstants.IncomeTaxExpenseBenefit
+import com.bdozer.edgar.factbase.USGaapConstants.RestructuringAndOtherExpenseIncomeMainline
+import com.bdozer.edgar.factbase.USGaapConstants.SpecialItems
 import com.bdozer.models.dataclasses.Item
 import com.bdozer.stockanalyzer.analyzers.AbstractStockAnalyzer
 

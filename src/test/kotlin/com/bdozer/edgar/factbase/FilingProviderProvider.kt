@@ -1,6 +1,8 @@
 package com.bdozer.edgar.factbase
 
-import com.bdozer.edgar.FilingProvider
+import com.bdozer.edgar.provider.ConceptManager
+import com.bdozer.edgar.provider.FilingProvider
+import com.bdozer.edgar.provider.LabelManager
 import com.bdozer.xml.HttpClientExtensions.readXml
 import com.bdozer.xml.XmlElement
 import org.springframework.core.io.ClassPathResource
@@ -97,6 +99,22 @@ object FilingProviderProvider {
             return "tsla-20201231_htm.xml"
         }
 
+        override fun conceptManager(): ConceptManager {
+            return ConceptManager(this)
+        }
+
+        override fun labelManager(): LabelManager {
+            return LabelManager(this)
+        }
+
+        override fun factsParser(): FactsParser {
+            return FactsParser(this)
+        }
+
+        override fun filingCalculationsParser(): FilingCalculationsParser {
+            return FilingCalculationsParser(this)
+        }
+
     }
 
     fun dbx202010k() = object : FilingProvider {
@@ -188,6 +206,22 @@ object FilingProviderProvider {
         override fun instanceDocumentFilename(): String {
             return "dbx-20201231_htm.xml"
         }
+
+        override fun conceptManager(): ConceptManager {
+            return ConceptManager(this)
+        }
+
+        override fun labelManager(): LabelManager {
+            return LabelManager(this)
+        }
+
+        override fun factsParser(): FactsParser {
+            return FactsParser(this)
+        }
+
+        override fun filingCalculationsParser(): FilingCalculationsParser {
+            return FilingCalculationsParser(this)
+        }
     }
 
     fun filingProviderCcl() = object : FilingProvider {
@@ -278,6 +312,22 @@ object FilingProviderProvider {
 
         override fun instanceDocumentFilename(): String {
             return "dbx-20201231_htm.xml"
+        }
+
+        override fun conceptManager(): ConceptManager {
+            return ConceptManager(this)
+        }
+
+        override fun labelManager(): LabelManager {
+            return LabelManager(this)
+        }
+
+        override fun factsParser(): FactsParser {
+            return FactsParser(this)
+        }
+
+        override fun filingCalculationsParser(): FilingCalculationsParser {
+            return FilingCalculationsParser(this)
         }
     }
 
