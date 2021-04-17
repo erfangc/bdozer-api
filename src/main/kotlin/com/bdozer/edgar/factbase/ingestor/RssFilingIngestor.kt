@@ -1,5 +1,6 @@
 package com.bdozer.edgar.factbase.ingestor
 
+import com.bdozer.filingentity.FilingEntityBootstrapper
 import com.mongodb.client.MongoDatabase
 import com.bdozer.filingentity.FilingEntityManager
 import com.bdozer.xml.HttpClientExtensions.readXml
@@ -18,6 +19,7 @@ class RssFilingIngestor(
     private val ingestor: FilingIngestor,
     private val q4FactFinder: Q4FactFinder,
     private val filingEntityManager: FilingEntityManager,
+    private val filingEntityBootstrapper: FilingEntityBootstrapper,
     mongoDatabase: MongoDatabase,
 ) {
 
@@ -97,7 +99,7 @@ class RssFilingIngestor(
         items.distinctBy { it.cikNumber }.map { item ->
             // create the filing entity if it does not already exist
             filingEntityManager.getFilingEntity(item.cikNumber)
-                ?: filingEntityManager.createFilingEntity(item.cikNumber)
+                ?: filingEntityBootstrapper.createFilingEntity(item.cikNumber)
         }
 
         for (item in items) {

@@ -11,7 +11,7 @@ import java.util.*
 data class StockAnalysis2(
     val _id: String = UUID.randomUUID().toString(),
 
-    val name: String = "Untitled Stock Analysis",
+    val name: String? = null,
     val description: String? = null,
 
     val cik: String? = null,
