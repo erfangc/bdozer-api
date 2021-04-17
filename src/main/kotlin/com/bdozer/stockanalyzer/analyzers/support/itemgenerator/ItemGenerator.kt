@@ -310,10 +310,10 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
      */
     private fun dimensionMemberLabel(fact: Fact): Labels? {
         val parts = fact.explicitMembers.first().value.split(":")
-        val ns = parts[0]
-        val v = parts[1]
-        val longNs = filingProvider.instanceDocument().shortNamespaceToLongNamespaceMap()[ns]
-        val conceptId = filingProvider.conceptManager().getConcept(longNs!!, v)?.id
+        val namespace = parts[0]
+        val conceptName = parts[1]
+        val longNs = filingProvider.instanceDocument().shortNamespaceToLongNamespaceMap()[namespace]
+        val conceptId = filingProvider.conceptManager().getConcept(longNs!!, conceptName)?.id
         return conceptId?.let { labelManager.getLabel(it) }
     }
 
