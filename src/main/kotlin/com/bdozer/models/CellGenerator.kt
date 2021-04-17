@@ -218,7 +218,7 @@ class CellGenerator {
                     ItemType.CompoundedGrowth -> CompoundedGrowthTranslator(ctx)
                         .translateFormula(cell)
 
-                    ItemType.Sum -> SumTranslator(ctx)
+                    ItemType.SumOfOtherItems -> SumOfOtherItemsTranslator(ctx)
                         .translateFormula(cell)
 
                     ItemType.Custom -> CustomTranslator(ctx)

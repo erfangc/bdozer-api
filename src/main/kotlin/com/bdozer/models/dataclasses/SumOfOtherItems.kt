@@ -1,5 +1,5 @@
 package com.bdozer.models.dataclasses
 
-data class Sum(
+data class SumOfOtherItems(
     val components: List<Component>
 )

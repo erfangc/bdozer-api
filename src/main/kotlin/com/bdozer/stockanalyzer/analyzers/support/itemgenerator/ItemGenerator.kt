@@ -287,7 +287,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
                 )
             }
         val dimensionalComponents = dimensionalItems.map { item -> Component(weight = 1.0, itemName = item.name) }
-        val sum = Sum(explicitCalculationComponents + dimensionalComponents)
+        val sum = SumOfOtherItems(explicitCalculationComponents + dimensionalComponents)
 
         /*
         Step 3.2 - Generate the dimensionless Item
@@ -331,7 +331,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
                 subtotal = false
             )
         } else {
-            dimensionlessItem.copy(type = ItemType.Sum, sum = sum, subtotal = true)
+            dimensionlessItem.copy(type = ItemType.SumOfOtherItems, sumOfOtherItems = sum, subtotal = true)
         }
 
         return dimensionalItems + dlessItemWithFormula
@@ -455,7 +455,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         }
 
         val queue = ArrayDeque<Item>()
-        queue.addAll(componentsToItem(netIncomeItem?.sum?.components))
+        queue.addAll(componentsToItem(netIncomeItem?.sumOfOtherItems?.components))
         var revenueItem: Item? = null
         while (queue.isNotEmpty()) {
             val item = queue.removeFirst()
@@ -467,7 +467,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             if (revenueConceptNameCandidates.contains(itemName)) {
                 revenueItem = item
             } else {
-                queue.addAll(componentsToItem(item.sum?.components))
+                queue.addAll(componentsToItem(item.sumOfOtherItems?.components))
             }
         }
         return revenueItem

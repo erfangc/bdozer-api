@@ -20,7 +20,7 @@ data class Item(
 
     val formula: String = "0.0",
 
-    val sum: Sum? = null,
+    val sumOfOtherItems: SumOfOtherItems? = null,
     val subscriptionRevenue: SubscriptionRevenue? = null,
     val unitSalesRevenue: UnitSalesRevenue? = null,
     val discrete: Discrete? = null,

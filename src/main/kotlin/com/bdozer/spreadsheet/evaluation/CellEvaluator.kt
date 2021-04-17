@@ -29,7 +29,6 @@ class CellEvaluator {
         // must be handled prior to this step, otherwise it becomes very easy to conflate
         // the evaluation of this DAG of cells with concepts that are rooted in the nature of modeling
         // such as "how to depreciate an asset" etc.
-        // TODO make a defensive copy of the cells without referencing Item/Driver
 
         val stack = Stack<Cell>()
 
