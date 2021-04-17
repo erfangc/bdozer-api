@@ -75,6 +75,14 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         "NetIncomeLossAvailableToCommonStockholdersBasic",
         "ProfitLoss",
     )
+    /*
+    Find the net income / revenue item etc.
+     */
+    private val netIncomeItem = incomeStatementItems
+        .reversed()
+        .find { netIncomeLossConceptNameCandidates.contains(it.name) }
+
+    private val revenueItem = revenueItemReverseBfs(incomeStatementItems)
 
     private val avgSharesOutstandingBasicAndDiluted = "WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
     private val avgSharesOutstandingBasic = "WeightedAverageNumberOfSharesOutstandingBasic"
@@ -122,7 +130,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerBasicShare" }
         return ret?.copy(
             type = ItemType.Custom,
-            formula = "${ret.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasic)}",
+            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasic)}",
         )
     }
 
@@ -132,7 +140,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerDilutedShare" }
         return ret?.copy(
             type = ItemType.Custom,
-            formula = "${ret.name}/${itemNameGenerator.itemName(avgSharesOutstandingDiluted)}",
+            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingDiluted)}",
         )
     }
 
@@ -141,7 +149,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         val ret = items.find { item -> item.name == "EarningsPerShareBasicAndDiluted" }
         return ret?.copy(
             type = ItemType.Custom,
-            formula = "${ret.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasicAndDiluted)}",
+            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasicAndDiluted)}",
         )
     }
 
@@ -150,13 +158,6 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
      *  declared on the Xbrl files [GenerateItemsResponse]
      */
     fun generateItems(): GenerateItemsResponse {
-        /*
-        Find the net income / revenue item etc.
-         */
-        val netIncomeItem = incomeStatementItems
-            .reversed()
-            .find { netIncomeLossConceptNameCandidates.contains(it.name) }
-        val revenueItem = revenueItemReverseBfs(incomeStatementItems, netIncomeItem)
 
         /*
         create and then replace existing EPS item(s) with the ones below
@@ -434,8 +435,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
      * completely in parallel to each other with no calculationArcs or presentationArcs bridging them
      */
     private fun revenueItemReverseBfs(
-        items: List<Item>,
-        netIncomeItem: Item?
+        items: List<Item>
     ): Item? {
         val lookup = items.associateBy { it.name }
 

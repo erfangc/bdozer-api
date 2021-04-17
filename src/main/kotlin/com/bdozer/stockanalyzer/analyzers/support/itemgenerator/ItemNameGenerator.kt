@@ -11,8 +11,8 @@ class ItemNameGenerator {
             val dimensions = fact
                 .explicitMembers
                 .sortedByDescending { it.dimension }
-                .joinToString(",") { "${it.dimension}=${it.value}" }
-            "${fact.conceptName}[$dimensions]"
+                .joinToString("_") { "${it.dimension.replace(":","_")}_${it.value.replace(":","_")}" }
+            "${fact.conceptName}_$dimensions"
         }
     }
 
