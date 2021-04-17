@@ -95,65 +95,6 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
      */
 
     /**
-     * # What is this?
-     * Creates an [Item] from the given concept name
-     * if an [Item] has not been created by this instance of [ItemGenerator]
-     * during constructor invocation
-     *
-     * # Why is it used?
-     * This is used to find / create weighted average shares outstanding items,
-     * which are sometimes not declared on income statements and thus are not
-     * automatically created when we looped through income statement arcs to create items
-     */
-    private fun findOrCreate(conceptName: String): Item? {
-        val found = (incomeStatementItems + balanceSheetItems).find { item -> item.name == conceptName }
-        val itemName = itemNameGenerator.itemName(conceptName)
-        // no need to create this item
-        return if (found != null) {
-            return found
-        } else {
-            val fact = facts.find { it.conceptName == conceptName && it.explicitMembers.isEmpty() } ?: return null
-            val historicalValue = historicalValue(fact)
-            Item(
-                name = itemName,
-                historicalValue = historicalValue,
-                description = itemName,
-                type = ItemType.FixedCost,
-                fixedCost = FixedCost(historicalValue?.value.orZero()),
-            )
-        }
-    }
-
-    private fun earningsPerShareBasic(): Item? {
-        val items = incomeStatementItems.reversed()
-        val ret = items.find { item -> item.name == "EarningsPerShareBasic" }
-            ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerBasicShare" }
-        return ret?.copy(
-            type = ItemType.Custom,
-            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasic)}",
-        )
-    }
-
-    private fun earningsPerShareDiluted(): Item? {
-        val items = incomeStatementItems.reversed()
-        val ret = items.find { item -> item.name == "EarningsPerShareDiluted" }
-            ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerDilutedShare" }
-        return ret?.copy(
-            type = ItemType.Custom,
-            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingDiluted)}",
-        )
-    }
-
-    private fun earningsPerShareBasicAndDiluted(): Item? {
-        val items = incomeStatementItems.reversed()
-        val ret = items.find { item -> item.name == "EarningsPerShareBasicAndDiluted" }
-        return ret?.copy(
-            type = ItemType.Custom,
-            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasicAndDiluted)}",
-        )
-    }
-
-    /**
      *  Parse the filing to create [Item]s from the calculation arcs
      *  declared on the Xbrl files [GenerateItemsResponse]
      */
@@ -205,11 +146,33 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             }
         }
 
+        /*
+        clean up references that does not exist
+         */
+        val lookup = (incomeStatementItemsWithSharesOutstanding + balanceSheetItems).associateBy { it.name }
+        val cleanedIncomeStatement = incomeStatementItemsWithSharesOutstanding.map { item ->
+            if (item.sumOfOtherItems != null) {
+                val filtered = item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
+                item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered))
+            } else {
+                item
+            }
+        }
+
+        val cleanedBalanceSheet = balanceSheetItems.map { item ->
+            if (item.sumOfOtherItems != null) {
+                val filtered = item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
+                item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered))
+            } else {
+                item
+            }
+        }
+
         return GenerateItemsResponse(
             revenue = revenueItem,
             netIncome = netIncomeItem,
-            incomeStatementItems = incomeStatementItemsWithSharesOutstanding,
-            balanceSheetItems = balanceSheetItems,
+            incomeStatementItems = cleanedIncomeStatement,
+            balanceSheetItems = cleanedBalanceSheet,
 
             epsBasic = epsBasic,
             epsDiluted = epsDiluted,
@@ -471,6 +434,65 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             }
         }
         return revenueItem
+    }
+
+    /**
+     * # What is this?
+     * Creates an [Item] from the given concept name
+     * if an [Item] has not been created by this instance of [ItemGenerator]
+     * during constructor invocation
+     *
+     * # Why is it used?
+     * This is used to find / create weighted average shares outstanding items,
+     * which are sometimes not declared on income statements and thus are not
+     * automatically created when we looped through income statement arcs to create items
+     */
+    private fun findOrCreate(conceptName: String): Item? {
+        val found = (incomeStatementItems + balanceSheetItems).find { item -> item.name == conceptName }
+        val itemName = itemNameGenerator.itemName(conceptName)
+        // no need to create this item
+        return if (found != null) {
+            return found
+        } else {
+            val fact = facts.find { it.conceptName == conceptName && it.explicitMembers.isEmpty() } ?: return null
+            val historicalValue = historicalValue(fact)
+            Item(
+                name = itemName,
+                historicalValue = historicalValue,
+                description = itemName,
+                type = ItemType.FixedCost,
+                fixedCost = FixedCost(historicalValue?.value.orZero()),
+            )
+        }
+    }
+
+    private fun earningsPerShareBasic(): Item? {
+        val items = incomeStatementItems.reversed()
+        val ret = items.find { item -> item.name == "EarningsPerShareBasic" }
+            ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerBasicShare" }
+        return ret?.copy(
+            type = ItemType.Custom,
+            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasic)}",
+        )
+    }
+
+    private fun earningsPerShareDiluted(): Item? {
+        val items = incomeStatementItems.reversed()
+        val ret = items.find { item -> item.name == "EarningsPerShareDiluted" }
+            ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerDilutedShare" }
+        return ret?.copy(
+            type = ItemType.Custom,
+            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingDiluted)}",
+        )
+    }
+
+    private fun earningsPerShareBasicAndDiluted(): Item? {
+        val items = incomeStatementItems.reversed()
+        val ret = items.find { item -> item.name == "EarningsPerShareBasicAndDiluted" }
+        return ret?.copy(
+            type = ItemType.Custom,
+            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasicAndDiluted)}",
+        )
     }
 
 }
