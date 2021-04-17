@@ -1,15 +1,13 @@
 package com.bdozer.edgar.factbase.ingestor
 
+import com.bdozer.edgar.factbase.FilingProviderFactory
+import com.bdozer.edgar.factbase.dataclasses.Fact
+import com.bdozer.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.ReplaceOptions
-import com.bdozer.edgar.factbase.dataclasses.Fact
-import com.bdozer.edgar.factbase.dataclasses.FilingCalculations
-import com.bdozer.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
-import com.bdozer.edgar.factbase.FilingProviderFactory
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.replaceOne
-import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -21,7 +19,6 @@ class FilingIngestor(
 ) {
     private val log = LoggerFactory.getLogger(FilingIngestor::class.java)
     private val factsCol = mongoDatabase.getCollection<Fact>()
-    private val calculationsCol = mongoDatabase.getCollection<FilingCalculations>()
 
     /**
      * Parse and save to database a given SEC EDGAR filing's XBRL files
@@ -44,17 +41,6 @@ class FilingIngestor(
             factsCol.bulkWrite(bulk)
         }
         log.info("Saved ${facts.size} facts parsed for cik=$cik and adsh=$adsh")
-
-        /*
-        Parse and save the calculations
-         */
-        try {
-            val calculationsParser = filingProvider.filingCalculationsParser()
-            val calculations = calculationsParser.parseCalculations()
-            calculationsCol.save(calculations)
-        } catch (e: Exception) {
-            log.error("Unable to parse and save calculations for cik=$cik, adsh=$adsh", e)
-        }
 
         return FilingIngestionResponse(
             numberOfFactsFound = facts.size,

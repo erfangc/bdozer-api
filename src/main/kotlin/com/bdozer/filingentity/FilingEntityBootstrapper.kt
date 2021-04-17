@@ -5,8 +5,6 @@ import com.bdozer.filingentity.dataclasses.Address
 import com.bdozer.filingentity.dataclasses.FilingEntity
 import com.bdozer.filingentity.dataclasses.ModelTemplate
 import com.bdozer.filingentity.internal.SECEntity
-import com.bdozer.stockanalyzer.StockAnalysisService
-import com.bdozer.stockanalyzer.StockAnalysisWorkflowService
 import com.bdozer.xml.HttpClientExtensions.readEntity
 import org.apache.http.client.HttpClient
 import org.slf4j.LoggerFactory
@@ -19,11 +17,10 @@ class FilingEntityBootstrapper(
     private val httpClient: HttpClient,
     private val filingEntityManager: FilingEntityManager,
     private val factBase: FactBase,
-    private val stockAnalysisWorkflowService: StockAnalysisWorkflowService,
-    private val stockAnalysisService: StockAnalysisService,
 ) {
     private val log = LoggerFactory.getLogger(FilingEntityManager::class.java)
     private val executor = Executors.newCachedThreadPool()
+
     /**
      * Create a filing entity in the system by using
      * SEC data (but do not parse the filings for facts)
@@ -83,14 +80,18 @@ class FilingEntityBootstrapper(
         executor.execute {
             try {
                 factBase.bootstrapFacts(cik)
-                val updatedEntity = entity.copy(lastUpdated = Instant.now().toString(), statusMessage = FilingEntityManager.Completed)
+                val updatedEntity =
+                    entity.copy(lastUpdated = Instant.now().toString(), statusMessage = FilingEntityManager.Completed)
                 filingEntityManager.saveFilingEntity(updatedEntity)
                 log.info("Completed bootstrapping and initial model building cik=${entity.cik}")
-                val stockAnalysis = stockAnalysisWorkflowService.create(cik)
-                stockAnalysisService.save(stockAnalysis)
             } catch (e: Exception) {
                 log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}", e)
-                filingEntityManager.saveFilingEntity(entity.copy(lastUpdated = Instant.now().toString(), statusMessage = e.message))
+                filingEntityManager.saveFilingEntity(
+                    entity.copy(
+                        lastUpdated = Instant.now().toString(),
+                        statusMessage = e.message
+                    )
+                )
             }
         }
         return entity
@@ -106,12 +107,18 @@ class FilingEntityBootstrapper(
         filingEntityManager.saveFilingEntity(entity)
         try {
             factBase.bootstrapFacts(cik)
-            val updatedEntity = entity.copy(lastUpdated = Instant.now().toString(), statusMessage = FilingEntityManager.Completed)
+            val updatedEntity =
+                entity.copy(lastUpdated = Instant.now().toString(), statusMessage = FilingEntityManager.Completed)
             filingEntityManager.saveFilingEntity(updatedEntity)
             log.info("Completed bootstrapping and initial model building cik=${entity.cik}")
         } catch (e: Exception) {
             log.error("Unable to complete bootstrapping and initial model building cik=${entity.cik}", e)
-            filingEntityManager.saveFilingEntity(entity.copy(lastUpdated = Instant.now().toString(), statusMessage = e.message))
+            filingEntityManager.saveFilingEntity(
+                entity.copy(
+                    lastUpdated = Instant.now().toString(),
+                    statusMessage = e.message
+                )
+            )
         }
         return entity
     }

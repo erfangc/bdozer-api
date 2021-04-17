@@ -69,7 +69,7 @@ class FactBase(
         fun <R, K> List<R>.distinctOrThrow(fn: (R) -> K):K {
             val r = distinctBy(fn)
             if (r.isEmpty() || r.size > 1) {
-                error("...")
+                error("Non distinct set found $r")
             } else {
                 return r.first().let(fn)
             }

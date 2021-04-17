@@ -257,7 +257,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         this can be complicated by the fact that there might not be an Fact backing this Item
          */
         val labels = conceptManager.getConcept(arc.conceptHref)?.id?.let { labelManager.getLabel(it) }
-        val dimensionlessItem = if (dimensionlessFact == null) {
+        val dimensionlessItem = if (dimensionlessFact == null && dimensionalFacts.isNotEmpty()) {
             /*
             If no fact can be found to support the dimensionless item
             we must create one from scratch, this happens if the filing entity
@@ -265,11 +265,11 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
              */
             val historicalValue = historicalValue(dimensionalFacts)
             Item(
-                name = arc.conceptName,
+                name = itemNameGenerator.itemName(arc.conceptName),
                 description = labelWaterfall(labels),
                 historicalValue = historicalValue
             )
-        } else {
+        } else if (dimensionlessFact != null) {
             /*
             Else, we are in the case where there is a Fact that backs
             this dimensionless item
@@ -279,6 +279,11 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
                 name = itemNameGenerator.itemName(dimensionlessFact),
                 description = labelWaterfall(labels),
                 historicalValue = historicalValue,
+            )
+        } else {
+            Item(
+                name = itemNameGenerator.itemName(arc.conceptName),
+                description = labelWaterfall(labels),
             )
         }
 

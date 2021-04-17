@@ -56,7 +56,7 @@ class StockAnalyzer(
     Concept name resolution
     -----------------------
      */
-    val totalRevenueItemName = generatedItems.revenue?.name
+    val totalRevenueItemName = generatedItems.revenue?.name ?: error("totalRevenueItemName not found")
     val sharesOutstandingItem =
         generatedItems.basicAndDilutedSharesOutstanding
             ?: generatedItems.dilutedSharesOutstanding
