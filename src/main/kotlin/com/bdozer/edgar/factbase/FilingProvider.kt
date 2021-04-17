@@ -28,10 +28,10 @@ interface FilingProvider {
     fun conceptManager(): ConceptManager
     fun labelManager(): LabelManager
     fun factsParser(): FactsParser
-    fun filingCalculationsParser(): FilingCalculationsParser
+    fun filingArcsParser(): FilingArcsParser
 
     fun incomeStatementDeclaredDimensions(): List<Dimension> {
-        return declaredDimensions(filingCalculationsParser().parseCalculations().incomeStatement)
+        return declaredDimensions(filingArcsParser().parseFilingArcs().incomeStatement)
     }
 
     /**

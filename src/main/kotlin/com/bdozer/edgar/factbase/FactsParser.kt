@@ -14,7 +14,10 @@ import com.bdozer.xml.XmlElement
 import com.bdozer.xml.XmlNode
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Node
+import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.Period
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 /**
@@ -31,7 +34,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
     /*
     create a look up of the Xbrl context objects for each fact to refer back to
      */
-    private val contexts = instanceDocument
+    val contexts = instanceDocument
         .getElementsByTag(xbrl, "context")
         .associate { it.attr("id") to toContext(it) }
 
@@ -49,7 +52,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
          */
         var relevant = 0
         var irrelevantTag = 0 // ex: xlink:footnote
-        var irrelevantPeriod = 0 // ex: facts with context from past period
+        var irrelevantContext = 0 // ex: anything outside of the current period
         var elementDefinitionNotFound = 0 // ex: other misc problems
 
         // get some document level information
@@ -60,97 +63,102 @@ class FactsParser(private val filingProvider: FilingProvider) {
         /*
         now begin processing each element as a potential fact we can create and store
          */
-        val facts = instanceDocument.childNodes().mapNotNull { node ->
-            val context = getContext(node.attr("contextRef"))
-            val conceptDefinition = lookupConceptDefinition(node.nodeName)
-            val adsh = filingProvider.adsh()
-
-            /*
-            filter the node, if it is not one of the relevant ones, then don't process it
-             */
-            if (!isNodeRelevant(node) || context == null) {
-                irrelevantTag++
-                null // return null to skip
-            } else if (!isFactInPeriod(context) && conceptDefinition?.conceptName != "EntityCommonStockSharesOutstanding") {
-                irrelevantPeriod++
-                null // return null to skip
-            } else if (conceptDefinition == null) {
-                elementDefinitionNotFound++
-                null // return null to skip
-            } else {
-                relevant++
-                val content = node.textContent
-                val labels = getLabels(conceptDefinition.id)
-
-                val explicitMembers = context.entity.segment?.explicitMembers ?: emptyList()
-                val conceptName = conceptDefinition.conceptName
+        val contextRelevanceValidator = ContextRelevanceValidator(filingProvider)
+        val facts = instanceDocument
+            .childNodes()
+            .mapNotNull { node ->
+                val context = getContext(node.attr("contextRef"))
+                val conceptDefinition = lookupConceptDefinition(node.nodeName)
+                val adsh = filingProvider.adsh()
 
                 /*
-                generate idempotent identifiers if the same information
-                repeats across documents, this way there are no duplicates for the same piece of information
-                */
-                val factIdGenerator = FactIdGenerator()
-                val id = factIdGenerator.generateId(
-                    conceptName = conceptName,
-                    context = context,
-                    documentPeriodEndDate = documentPeriodEndDate,
-                    documentFiscalPeriodFocus = documentFiscalPeriodFocus,
-                )
-
-                val instanceDocumentElementId = node.attr("id") ?: "N/A"
-                val cik = cik()
-                val entityName = entityRegistrantName(instanceDocument)
-                val primarySymbol = primarySymbol(instanceDocument)
-                val formType = instanceDocument.formType()
-
-                /*
-                Create the Fact instance we just parsed
+                filter the node, if it is not one of the relevant ones, then don't process it
                  */
-                Fact(
-                    _id = id,
-                    instanceDocumentElementId = instanceDocumentElementId,
-                    instanceDocumentElementName = node.nodeName,
-                    cik = cik,
-                    adsh = adsh,
-                    entityName = entityName,
-                    primarySymbol = primarySymbol,
-                    formType = formType,
+                if (!isNodeRelevant(node) || context == null) {
+                    irrelevantTag++
+                    null // return null to skip
+                } else if (conceptDefinition == null) {
+                    elementDefinitionNotFound++
+                    null // return null to skip
+                } else if (!contextRelevanceValidator.isContextRelevant(context)) {
+                    irrelevantContext++
+                    null
+                } else {
+                    relevant++
+                    val content = node.textContent
+                    val labels = getLabels(conceptDefinition.id)
 
-                    documentFiscalPeriodFocus = documentFiscalPeriodFocus,
-                    documentFiscalYearFocus = documentFiscalYearFocus,
-                    documentPeriodEndDate = documentPeriodEndDate,
+                    val explicitMembers = context.entity.segment?.explicitMembers ?: emptyList()
+                    val conceptName = conceptDefinition.conceptName
 
-                    conceptName = conceptName,
-                    conceptHref = conceptDefinition.conceptHref,
-                    namespace = conceptDefinition.targetNamespace,
+                    /*
+                    generate idempotent identifiers if the same information
+                    repeats across documents, this way there are no duplicates for the same piece of information
+                    */
+                    val factIdGenerator = FactIdGenerator()
+                    val id = factIdGenerator.generateId(
+                        conceptName = conceptName,
+                        context = context,
+                        documentFiscalPeriodFocus = documentFiscalPeriodFocus,
+                    )
 
-                    startDate = context.period.startDate,
-                    endDate = context.period.endDate,
-                    instant = context.period.instant,
-                    explicitMembers = explicitMembers,
+                    val instanceDocumentElementId = node.attr("id") ?: "N/A"
+                    val cik = cik()
+                    val entityName = entityRegistrantName(instanceDocument)
+                    val primarySymbol = primarySymbol(instanceDocument)
+                    val formType = instanceDocument.formType()
 
-                    sourceDocument = sourceDocument(node),
+                    /*
+                    Create the Fact instance we just parsed
+                     */
+                    Fact(
+                        _id = id,
+                        instanceDocumentElementId = instanceDocumentElementId,
+                        instanceDocumentElementName = node.nodeName,
+                        cik = cik,
+                        adsh = adsh,
+                        entityName = entityName,
+                        primarySymbol = primarySymbol,
+                        formType = formType,
 
-                    label = labels?.label,
-                    labelTerse = labels?.terseLabel,
-                    verboseLabel = labels?.verboseLabel,
-                    documentation = labels?.documentation,
+                        documentFiscalPeriodFocus = documentFiscalPeriodFocus,
+                        documentFiscalYearFocus = documentFiscalYearFocus,
+                        documentPeriodEndDate = documentPeriodEndDate,
 
-                    stringValue = content,
-                    doubleValue = content.toDoubleOrNull(),
+                        conceptName = conceptName,
+                        conceptHref = conceptDefinition.conceptHref,
+                        namespace = conceptDefinition.targetNamespace,
 
-                    lastUpdated = Instant.now().toString(),
-                )
+                        startDate = context.period.startDate,
+                        endDate = context.period.endDate,
+                        instant = context.period.instant,
+                        explicitMembers = explicitMembers,
+
+                        sourceDocument = sourceDocument(node),
+
+                        label = labels?.label,
+                        labelTerse = labels?.terseLabel,
+                        verboseLabel = labels?.verboseLabel,
+                        documentation = labels?.documentation,
+
+                        stringValue = content,
+                        doubleValue = content.toDoubleOrNull(),
+
+                        lastUpdated = Instant.now().toString(),
+                    )
+                }
             }
-        }
-        // the XMLs sometimes contain duplicates
+
+        /*
+        the XMLs sometimes contain duplicates
+         */
         val distinctFacts = facts.distinctBy { it._id }
         log.info(
             "$instanceDocumentFilename has ${distinctFacts.size} distinct relevant facts, " +
                     "totalRelevantFacts=${facts.size}, " +
                     "relevant=$relevant, " +
                     "irrelevantTag=$irrelevantTag, " +
-                    "irrelevantPeriod=$irrelevantPeriod, " +
+                    "irrelevantContext=$irrelevantContext, " +
                     "elementDefinitionNotFound=$elementDefinitionNotFound"
         )
 
@@ -160,37 +168,6 @@ class FactsParser(private val filingProvider: FilingProvider) {
             documentPeriodEndDate = documentPeriodEndDate,
             documentFiscalYearFocus = documentFiscalYearFocus,
         )
-
-    }
-
-    /**
-     * Determines if the fact being reported is for the period
-     * it is intended to be reported and not a restatement of some historical period
-     */
-    private fun isFactInPeriod(context: XbrlContext): Boolean {
-
-        val endDate = instanceDocument.documentPeriodEndDate() ?: error("...")
-
-        /*
-        figure out the correct period start date
-        a canonical must be for this period
-         */
-        val formType = instanceDocument.formType()
-        val startDate = if (formType == "10-K") {
-            endDate
-                .minusYears(1)
-                .plusDays(1)
-        } else {
-            endDate
-                .minusMonths(3)
-                .with(lastDayOfMonth())
-                .plusDays(1)
-        }
-
-        val period = context.period
-
-        return period.instant == endDate
-                || (period.startDate == startDate && period.endDate == endDate)
 
     }
 

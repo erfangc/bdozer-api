@@ -37,7 +37,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
     Declare helpers
      */
     private val itemNameGenerator = ItemNameGenerator()
-    private val filingCalculationsParser = filingProvider.filingCalculationsParser()
+    private val filingArcsParser = filingProvider.filingArcsParser()
     private val conceptManager = filingProvider.conceptManager()
     private val labelManager = filingProvider.labelManager()
 
@@ -46,18 +46,22 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
      */
     private val facts = facts(filingProvider)
     private val dimensions = filingProvider.incomeStatementDeclaredDimensions()
-    private val calculations = filingCalculationsParser.parseCalculations()
+    private val calculations = filingArcsParser.parseFilingArcs()
 
     /*
     The follow statements translate Arcs -> Items
      */
-    private val incomeStatementItems = calculations.incomeStatement.flatMap { arc ->
-        arcToItems(arc)
-    }
+    private val incomeStatementItems = calculations
+        .incomeStatement
+        .flatMap { arc ->
+            arcToItems(arc)
+        }
 
-    private val balanceSheetItems = calculations.balanceSheet.flatMap { arc ->
-        arcToItems(arc)
-    }
+    private val balanceSheetItems = calculations
+        .balanceSheet
+        .flatMap { arc ->
+            arcToItems(arc)
+        }
 
     /*
     ---------------------
@@ -75,14 +79,15 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         "NetIncomeLossAvailableToCommonStockholdersBasic",
         "ProfitLoss",
     )
+
     /*
     Find the net income / revenue item etc.
      */
     private val netIncomeItem = incomeStatementItems
         .reversed()
-        .find { netIncomeLossConceptNameCandidates.contains(it.name) }
+        .find { netIncomeLossConceptNameCandidates.contains(it.name) } ?: error("netincome item cannot be found")
 
-    private val revenueItem = revenueItemReverseBfs(incomeStatementItems)
+    private val revenueItem = revenueItemReverseBfs(incomeStatementItems) ?: error("revenue item cannot be found")
 
     private val avgSharesOutstandingBasicAndDiluted = "WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
     private val avgSharesOutstandingBasic = "WeightedAverageNumberOfSharesOutstandingBasic"
@@ -107,20 +112,20 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         val epsDiluted = earningsPerShareDiluted()
         val epsBasicAndDiluted = earningsPerShareBasicAndDiluted()
 
-        val incomeStatementItemsWithEpsReplaced = listOfNotNull(epsBasic, epsDiluted, epsBasicAndDiluted).fold(incomeStatementItems) {
-            acc, item ->
-            if (acc.any { it.name == item.name }) {
-                acc.map {
-                    if (it.name == item.name) {
-                        item
-                    } else {
-                        it
+        val incomeStatementItemsWithEpsReplaced =
+            listOfNotNull(epsBasic, epsDiluted, epsBasicAndDiluted).fold(incomeStatementItems) { acc, item ->
+                if (acc.any { it.name == item.name }) {
+                    acc.map {
+                        if (it.name == item.name) {
+                            item
+                        } else {
+                            it
+                        }
                     }
+                } else {
+                    acc
                 }
-            } else {
-                acc
             }
-        }
 
 
         /*
@@ -152,7 +157,8 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         val lookup = (incomeStatementItemsWithSharesOutstanding + balanceSheetItems).associateBy { it.name }
         val cleanedIncomeStatement = incomeStatementItemsWithSharesOutstanding.map { item ->
             if (item.sumOfOtherItems != null) {
-                val filtered = item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
+                val filtered =
+                    item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
                 item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered))
             } else {
                 item
@@ -161,7 +167,8 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
 
         val cleanedBalanceSheet = balanceSheetItems.map { item ->
             if (item.sumOfOtherItems != null) {
-                val filtered = item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
+                val filtered =
+                    item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
                 item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered))
             } else {
                 item
@@ -423,7 +430,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         }
 
         val queue = ArrayDeque<Item>()
-        queue.addAll(componentsToItem(netIncomeItem?.sumOfOtherItems?.components))
+        queue.addAll(componentsToItem(netIncomeItem.sumOfOtherItems?.components))
         var revenueItem: Item? = null
         while (queue.isNotEmpty()) {
             val item = queue.removeFirst()
@@ -434,6 +441,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             val itemName = item.name
             if (revenueConceptNameCandidates.contains(itemName)) {
                 revenueItem = item
+                break
             } else {
                 queue.addAll(componentsToItem(item.sumOfOtherItems?.components))
             }
@@ -477,7 +485,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerBasicShare" }
         return ret?.copy(
             type = ItemType.Custom,
-            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasic)}",
+            formula = "${netIncomeItem.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasic)}",
         )
     }
 
@@ -487,7 +495,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerDilutedShare" }
         return ret?.copy(
             type = ItemType.Custom,
-            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingDiluted)}",
+            formula = "${netIncomeItem.name}/${itemNameGenerator.itemName(avgSharesOutstandingDiluted)}",
         )
     }
 
@@ -496,7 +504,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         val ret = items.find { item -> item.name == "EarningsPerShareBasicAndDiluted" }
         return ret?.copy(
             type = ItemType.Custom,
-            formula = "${netIncomeItem?.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasicAndDiluted)}",
+            formula = "${netIncomeItem.name}/${itemNameGenerator.itemName(avgSharesOutstandingBasicAndDiluted)}",
         )
     }
 

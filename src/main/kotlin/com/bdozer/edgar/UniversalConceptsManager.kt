@@ -4,6 +4,7 @@ import com.bdozer.edgar.XbrlNamespaces.xsd
 import com.bdozer.edgar.dataclasses.Concept
 import com.bdozer.xml.HttpClientExtensions.readXml
 import com.bdozer.xml.XmlElement
+import com.github.benmanes.caffeine.cache.Caffeine
 import org.apache.http.impl.client.HttpClientBuilder
 import org.slf4j.LoggerFactory
 import java.net.URI

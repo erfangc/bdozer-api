@@ -108,8 +108,8 @@ object FilingProviderProvider {
             return FactsParser(this)
         }
 
-        override fun filingCalculationsParser(): FilingCalculationsParser {
-            return FilingCalculationsParser(this)
+        override fun filingArcsParser(): FilingArcsParser {
+            return FilingArcsParser(this)
         }
 
     }
@@ -216,8 +216,8 @@ object FilingProviderProvider {
             return FactsParser(this)
         }
 
-        override fun filingCalculationsParser(): FilingCalculationsParser {
-            return FilingCalculationsParser(this)
+        override fun filingArcsParser(): FilingArcsParser {
+            return FilingArcsParser(this)
         }
     }
 
@@ -323,8 +323,8 @@ object FilingProviderProvider {
             return FactsParser(this)
         }
 
-        override fun filingCalculationsParser(): FilingCalculationsParser {
-            return FilingCalculationsParser(this)
+        override fun filingArcsParser(): FilingArcsParser {
+            return FilingArcsParser(this)
         }
     }
 

@@ -2,7 +2,6 @@ package com.bdozer.edgar.factbase.core
 
 import com.bdozer.edgar.factbase.dataclasses.AggregatedFact
 import com.bdozer.edgar.factbase.dataclasses.Fact
-import com.bdozer.edgar.factbase.dataclasses.FilingCalculations
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -13,11 +12,6 @@ class FactBaseUnsecuredController(private val factBase: FactBase) {
     @GetMapping("{factId}")
     fun getFact(@PathVariable factId: String): Fact? {
         return factBase.getFact(factId)
-    }
-
-    @GetMapping("{cik}/calculations")
-    fun calculations(@PathVariable cik: String): FilingCalculations {
-        return factBase.calculations(cik.padStart(10, '0'))
     }
 
     @GetMapping("time-series")

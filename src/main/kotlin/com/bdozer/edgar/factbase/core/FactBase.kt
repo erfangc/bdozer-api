@@ -1,12 +1,15 @@
 package com.bdozer.edgar.factbase.core
 
-import com.mongodb.client.MongoDatabase
 import com.bdozer.edgar.factbase.FactExtensions.dimensions
 import com.bdozer.edgar.factbase.FactExtensions.filterForDimensions
 import com.bdozer.edgar.factbase.FactExtensions.filterForDimensionsWithFallback
-import com.bdozer.edgar.factbase.dataclasses.*
 import com.bdozer.edgar.factbase.core.support.FactsBootstrapper
+import com.bdozer.edgar.factbase.dataclasses.AggregatedFact
+import com.bdozer.edgar.factbase.dataclasses.Dimension
+import com.bdozer.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
+import com.bdozer.edgar.factbase.dataclasses.Fact
 import com.bdozer.extensions.DoubleExtensions.orZero
+import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.*
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
@@ -19,14 +22,8 @@ class FactBase(
 ) {
 
     private val facts = mongoDatabase.getCollection<Fact>()
-    private val filingCalculations = mongoDatabase.getCollection<FilingCalculations>()
 
     fun bootstrapFacts(cik: String) = factsBootstrapper.bootstrapFacts(cik)
-
-    fun calculations(cik: String) = filingCalculations
-        .find(and(FilingCalculations::cik eq cik, FilingCalculations::formType eq "10-K"))
-        .sort(descending(FilingCalculations::documentPeriodEndDate))
-        .first() ?: error("no 10-K based calculation found for $cik")
 
     fun getFacts(cik: String): List<Fact> = facts.find(Fact::cik eq cik).toList()
 
@@ -66,7 +63,7 @@ class FactBase(
         val originalFacts = facts.find(Fact::_id `in` factIds).toList()
         val dimensions = originalFacts.dimensions()
 
-        fun <R, K> List<R>.distinctOrThrow(fn: (R) -> K):K {
+        fun <R, K> List<R>.distinctOrThrow(fn: (R) -> K): K {
             val r = distinctBy(fn)
             if (r.isEmpty() || r.size > 1) {
                 error("Non distinct set found $r")

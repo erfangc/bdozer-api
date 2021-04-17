@@ -44,8 +44,8 @@ class StockAnalyzer(
     val filingEntity = dataProvider.filingEntity
     val factBase = dataProvider.factBase
     val conceptManager = filingProvider.conceptManager()
-    val filingCalculationsParser = filingProvider.filingCalculationsParser()
-    val calculations = filingCalculationsParser.parseCalculations()
+    val filingCalculationsParser = filingProvider.filingArcsParser()
+    val calculations = filingCalculationsParser.parseFilingArcs()
     val alphaVantageService = dataProvider.alphaVantageService
     private val evaluator = ModelEvaluator()
 

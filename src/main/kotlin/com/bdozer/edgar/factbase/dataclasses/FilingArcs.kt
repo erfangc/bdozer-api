@@ -3,7 +3,7 @@ package com.bdozer.edgar.factbase.dataclasses
 import java.time.Instant
 import java.time.LocalDate
 
-data class FilingCalculations(
+data class FilingArcs(
     val _id: String,
     val cik: String,
     val adsh: String,

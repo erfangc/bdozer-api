@@ -104,7 +104,7 @@ class FilingProviderFactory(
             private val conceptManager = ConceptManager(this)
             private val labelManager = LabelManager(this)
             private val factsParser = FactsParser(this)
-            private val filingCalculationsParser = FilingCalculationsParser(this)
+            private val filingCalculationsParser = FilingArcsParser(this)
 
             override fun adsh(): String {
                 return adsh
@@ -182,7 +182,7 @@ class FilingProviderFactory(
                 return factsParser
             }
 
-            override fun filingCalculationsParser(): FilingCalculationsParser {
+            override fun filingArcsParser(): FilingArcsParser {
                 return filingCalculationsParser
             }
 

@@ -12,7 +12,6 @@ class FactIdGenerator {
     fun generateId(
         conceptName: String,
         context: XbrlContext,
-        documentPeriodEndDate: LocalDate,
         documentFiscalPeriodFocus: DocumentFiscalPeriodFocus,
     ): String {
 
@@ -35,7 +34,7 @@ class FactIdGenerator {
         return Hashing
             .sha256()
             .hashString(
-                "$conceptName$entityId$documentFiscalPeriodFocus$documentPeriodEndDate$instant$startDate$endDate$explicitMembers",
+                "$conceptName$entityId$documentFiscalPeriodFocus$instant$startDate$endDate$explicitMembers",
                 StandardCharsets.UTF_8
             )
             .toString()

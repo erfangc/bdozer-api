@@ -1,11 +1,11 @@
 package com.bdozer.edgar.factbase.ingestor
 
-import com.mongodb.client.MongoDatabase
-import com.mongodb.client.model.ReplaceOptions
 import com.bdozer.edgar.dataclasses.*
+import com.bdozer.edgar.factbase.FactIdGenerator
 import com.bdozer.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.bdozer.edgar.factbase.dataclasses.Fact
-import com.bdozer.edgar.factbase.FactIdGenerator
+import com.mongodb.client.MongoDatabase
+import com.mongodb.client.model.ReplaceOptions
 import org.litote.kmongo.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -92,7 +92,7 @@ class Q4FactFinder(mongoDatabase: MongoDatabase) {
                     }
 
                     fyFact.copy(
-                        _id = generateId(fyFact),
+                        _id = generateQ4FactId(fyFact),
                         formType = "10-Q",
                         documentFiscalPeriodFocus = DocumentFiscalPeriodFocus.Q4,
                         startDate = q4Context.period.startDate,
@@ -108,10 +108,10 @@ class Q4FactFinder(mongoDatabase: MongoDatabase) {
                 }
             } else {
                 /*
-                No need to derive Q4 values
+                No need to derive Q4 values because the fact is instantaneous or not of double type
                  */
                 fyFact.copy(
-                    _id = generateId(fyFact),
+                    _id = generateQ4FactId(fyFact),
                     formType = "10-Q",
                     documentFiscalPeriodFocus = DocumentFiscalPeriodFocus.Q4,
                     startDate = q4Context.period.startDate,
@@ -128,17 +128,16 @@ class Q4FactFinder(mongoDatabase: MongoDatabase) {
         log.info("Saved ${q4Facts.size} Q4 facts for cik=$cik, fiscalYear=$fiscalYear")
     }
 
-    private fun generateId(fyFact: Fact): String {
+    private fun generateQ4FactId(fyFact: Fact): String {
         /*
         copy the context of fyFact but change the start date
          */
         val fyCtx = toFyContext(fyFact)
         return FactIdGenerator()
             .generateId(
-                fyFact.conceptName,
-                q4Context(fyCtx),
-                fyFact.documentPeriodEndDate,
-                fyFact.documentFiscalPeriodFocus,
+                conceptName = fyFact.conceptName,
+                context = q4Context(fyCtx),
+                documentFiscalPeriodFocus = DocumentFiscalPeriodFocus.Q4,
             )
     }
 
