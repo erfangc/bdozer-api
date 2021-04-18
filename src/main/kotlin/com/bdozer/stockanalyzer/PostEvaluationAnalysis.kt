@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer.analyzers.extensions
+package com.bdozer.stockanalyzer
 
 import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.extensions.DoubleExtensions.orZero

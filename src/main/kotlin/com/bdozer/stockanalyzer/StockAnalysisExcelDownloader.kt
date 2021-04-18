@@ -1,7 +1,6 @@
 package com.bdozer.stockanalyzer
 
 import com.bdozer.models.CellGenerator
-import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -12,7 +11,7 @@ class StockAnalysisExcelDownloader(
 ) {
 
     fun download(id: String): HttpEntity<ByteArray> {
-        val stockAnalysis = stockAnalysisService.get(id) ?: error("...")
+        val stockAnalysis = stockAnalysisService.getStockAnalysis(id) ?: error("...")
         val headers = HttpHeaders()
         headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel")
         headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${stockAnalysis.cik}.xlsx")

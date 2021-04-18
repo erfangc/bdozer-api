@@ -13,7 +13,7 @@ class PublishedStockAnalysisController(
 
     @GetMapping("{id}")
     fun getPublishedStockAnalysis(@PathVariable id: String): StockAnalysis2? {
-        return stockAnalysisService.get(id)
+        return stockAnalysisService.getStockAnalysis(id)
     }
 
     @GetMapping

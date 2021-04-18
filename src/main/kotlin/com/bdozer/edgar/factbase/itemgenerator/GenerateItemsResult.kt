@@ -1,8 +1,8 @@
-package com.bdozer.stockanalyzer.itemgenerator
+package com.bdozer.edgar.factbase.itemgenerator
 
 import com.bdozer.models.dataclasses.Item
 
-data class GenerateItemsResponse(
+data class GenerateItemsResult(
     val incomeStatementItems: List<Item> = emptyList(),
     val balanceSheetItems: List<Item> = emptyList(),
 

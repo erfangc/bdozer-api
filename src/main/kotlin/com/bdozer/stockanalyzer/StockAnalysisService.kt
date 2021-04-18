@@ -1,27 +1,48 @@
 package com.bdozer.stockanalyzer
 
+import com.bdozer.stockanalyzer.dataclasses.EvaluateModelRequest
+import com.bdozer.stockanalyzer.dataclasses.EvaluateModelResponse
 import com.bdozer.stockanalyzer.dataclasses.FindStockAnalysisResponse
 import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.TextSearchOptions
+import io.swagger.v3.oas.annotations.Operation
 import org.litote.kmongo.*
 import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import java.time.Instant
 
 @Service
-class StockAnalysisService(mongoDatabase: MongoDatabase) {
+class StockAnalysisService(
+    mongoDatabase: MongoDatabase,
+    private val statelessModelEvaluator: StatelessModelEvaluator,
+) {
 
     val col = mongoDatabase.getCollection<StockAnalysis2>()
 
-    fun save(analysis: StockAnalysis2) {
+    fun refreshStockAnalysis(stockAnalysis: StockAnalysis2): StockAnalysis2 {
+        val request = EvaluateModelRequest(model = stockAnalysis.model)
+        val evaluateModelResponse = statelessModelEvaluator.evaluate(request = request)
+        return stockAnalysis.copy(
+            derivedStockAnalytics = evaluateModelResponse.derivedStockAnalytics,
+            cells = evaluateModelResponse.cells,
+        )
+    }
+
+    fun evaluateStockAnalysis(request: EvaluateModelRequest): EvaluateModelResponse {
+        return statelessModelEvaluator.evaluate(request)
+    }
+
+    fun saveStockAnalysis(analysis: StockAnalysis2) {
         col.save(analysis.copy(lastUpdated = Instant.now()))
     }
 
-    fun delete(id: String) {
+    fun deleteStockAnalysis(id: String) {
         col.deleteOneById(id)
     }
 
-    fun get(id: String): StockAnalysis2? {
+    fun getStockAnalysis(id: String): StockAnalysis2? {
         return col.findOneById(id)
     }
 
@@ -60,16 +81,16 @@ class StockAnalysisService(mongoDatabase: MongoDatabase) {
     }
 
     fun publish(id: String): StockAnalysis2 {
-        val stockAnalysis = (get(id) ?: error("..."))
+        val stockAnalysis = (getStockAnalysis(id) ?: error("..."))
             .copy(published = true, lastUpdated = Instant.now())
-        save(stockAnalysis)
+        saveStockAnalysis(stockAnalysis)
         return stockAnalysis
     }
 
     fun unpublish(id: String): StockAnalysis2 {
-        val stockAnalysis = (get(id) ?: error("..."))
+        val stockAnalysis = (getStockAnalysis(id) ?: error("..."))
             .copy(published = false, lastUpdated = Instant.now())
-        save(stockAnalysis)
+        saveStockAnalysis(stockAnalysis)
         return stockAnalysis
     }
 

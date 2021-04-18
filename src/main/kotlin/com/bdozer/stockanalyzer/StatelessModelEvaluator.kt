@@ -6,8 +6,8 @@ import com.bdozer.models.Utility.PresentValuePerShare
 import com.bdozer.models.Utility.TerminalValuePerShare
 import com.bdozer.models.dataclasses.Item
 import com.bdozer.models.dataclasses.Model
-import com.bdozer.stockanalyzer.analyzers.extensions.PostEvaluationAnalyzer
 import com.bdozer.stockanalyzer.dataclasses.EvaluateModelRequest
+import com.bdozer.stockanalyzer.dataclasses.EvaluateModelResponse
 import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
 import org.springframework.stereotype.Service
 
@@ -20,11 +20,10 @@ class StatelessModelEvaluator(private val postEvaluationAnalyzer: PostEvaluation
         }
     }
 
-
     /**
      * Evaluate the given model and return a [StockAnalysis2]
      */
-    fun evaluate(request: EvaluateModelRequest): StockAnalysis2 {
+    fun evaluate(request: EvaluateModelRequest): EvaluateModelResponse {
         /*
         perform validation
          */
@@ -46,27 +45,21 @@ class StatelessModelEvaluator(private val postEvaluationAnalyzer: PostEvaluation
             ?: error("There must be an Item named ${request.model.sharesOutstandingConceptName} in your model")
 
 
-        val model = request.model.copy(otherItems = dcfItems(request.model))
+        val model = request.model.copy(otherItems = otherItems(request.model))
         val evaluateModelResult = ModelEvaluator().evaluate(model)
         val derivedStockAnalytics = postEvaluationAnalyzer.computeDerivedAnalytics(evaluateModelResult)
 
-        return StockAnalysis2(
-            name = request.name,
-            model = model,
-            description = request.description,
+        return EvaluateModelResponse(
             cells = evaluateModelResult.cells,
-            cik = model.cik,
-            ticker = model.ticker,
             derivedStockAnalytics = derivedStockAnalytics,
         )
-
     }
 
 
     /**
      * Create items that would end up computing the NPV of the investment
      */
-    private fun dcfItems(model: Model): List<Item> {
+    private fun otherItems(model: Model): List<Item> {
         val epsConceptName = model.epsConceptName
         val periods = model.periods
         val discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate

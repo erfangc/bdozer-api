@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer.itemgenerator
+package com.bdozer.edgar.factbase.itemgenerator
 
 import com.bdozer.edgar.factbase.dataclasses.Fact
 

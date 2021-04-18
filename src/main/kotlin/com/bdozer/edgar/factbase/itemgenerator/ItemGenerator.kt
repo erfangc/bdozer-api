@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer.itemgenerator
+package com.bdozer.edgar.factbase.itemgenerator
 
 import com.bdozer.edgar.dataclasses.Labels
 import com.bdozer.edgar.dataclasses.XbrlExplicitMember
@@ -101,9 +101,9 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
 
     /**
      *  Parse the filing to create [Item]s from the calculation arcs
-     *  declared on the Xbrl files [GenerateItemsResponse]
+     *  declared on the Xbrl files [GenerateItemsResult]
      */
-    fun generateItems(): GenerateItemsResponse {
+    fun generateItems(): GenerateItemsResult {
 
         /*
         create and then replace existing EPS item(s) with the ones below
@@ -175,7 +175,7 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
             }
         }
 
-        return GenerateItemsResponse(
+        return GenerateItemsResult(
             revenue = revenueItem,
             netIncome = netIncomeItem,
             incomeStatementItems = cleanedIncomeStatement,

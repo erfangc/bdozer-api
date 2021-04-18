@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer.itemgenerator
+package com.bdozer.edgar.factbase.itemgenerator
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
