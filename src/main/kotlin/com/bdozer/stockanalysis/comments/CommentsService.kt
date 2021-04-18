@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer.comments
+package com.bdozer.stockanalysis.comments
 
 import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.eq

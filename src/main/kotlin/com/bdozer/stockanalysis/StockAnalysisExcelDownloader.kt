@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer
+package com.bdozer.stockanalysis
 
 import com.bdozer.models.CellGenerator
 import org.springframework.http.HttpEntity

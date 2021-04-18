@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer
+package com.bdozer.stockanalysis
 
 import org.springframework.http.HttpEntity
 import org.springframework.web.bind.annotation.*

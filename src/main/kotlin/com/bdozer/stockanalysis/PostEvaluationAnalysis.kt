@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer
+package com.bdozer.stockanalysis
 
 import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.extensions.DoubleExtensions.orZero
@@ -6,9 +6,9 @@ import com.bdozer.models.EvaluateModelResult
 import com.bdozer.models.dataclasses.Item
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.spreadsheet.Cell
-import com.bdozer.stockanalyzer.StatelessModelEvaluator.Companion.allItems
-import com.bdozer.stockanalyzer.dataclasses.DerivedStockAnalytics
-import com.bdozer.stockanalyzer.dataclasses.Waterfall
+import com.bdozer.stockanalysis.StatelessModelEvaluator.Companion.allItems
+import com.bdozer.stockanalysis.dataclasses.DerivedStockAnalytics
+import com.bdozer.stockanalysis.dataclasses.Waterfall
 import org.springframework.stereotype.Service
 import kotlin.math.pow
 

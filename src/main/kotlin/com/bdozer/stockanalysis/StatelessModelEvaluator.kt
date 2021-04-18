@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer
+package com.bdozer.stockanalysis
 
 import com.bdozer.models.ModelEvaluator
 import com.bdozer.models.Utility
@@ -6,9 +6,9 @@ import com.bdozer.models.Utility.PresentValuePerShare
 import com.bdozer.models.Utility.TerminalValuePerShare
 import com.bdozer.models.dataclasses.Item
 import com.bdozer.models.dataclasses.Model
-import com.bdozer.stockanalyzer.dataclasses.EvaluateModelRequest
-import com.bdozer.stockanalyzer.dataclasses.EvaluateModelResponse
-import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
+import com.bdozer.stockanalysis.dataclasses.EvaluateModelRequest
+import com.bdozer.stockanalysis.dataclasses.EvaluateModelResponse
+import com.bdozer.stockanalysis.dataclasses.StockAnalysis2
 import org.springframework.stereotype.Service
 
 @Service

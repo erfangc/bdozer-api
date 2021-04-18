@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer.comments
+package com.bdozer.stockanalysis.comments
 
 import java.time.Instant
 import java.util.*

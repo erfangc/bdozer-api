@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer.dataclasses
+package com.bdozer.stockanalysis.dataclasses
 
 data class FindStockAnalysisResponse(
     val totalCount: Int = 0,
