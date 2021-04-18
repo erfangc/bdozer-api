@@ -1,4 +1,4 @@
-package com.bdozer.stockanalysis
+package com.bdozer.stockanalysis.excel
 
 import org.springframework.http.HttpEntity
 import org.springframework.web.bind.annotation.*

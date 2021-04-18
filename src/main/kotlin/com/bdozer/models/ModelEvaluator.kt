@@ -5,9 +5,6 @@ import com.bdozer.models.dataclasses.Model
 import com.bdozer.spreadsheet.evaluation.CellEvaluator
 import org.springframework.stereotype.Service
 
-/**
- * [ModelEvaluator] evaluates a model and return the cells and target price
- */
 @Service
 class ModelEvaluator {
     /*

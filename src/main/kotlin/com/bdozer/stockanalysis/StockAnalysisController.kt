@@ -81,7 +81,7 @@ class StockAnalysisController(private val stockAnalysisService: StockAnalysisSer
         @RequestParam(required = false) limit: Int? = null,
         @RequestParam(required = false) term: String? = null,
     ): FindStockAnalysisResponse {
-        return stockAnalysisService.find(
+        return stockAnalysisService.findStockAnalyses(
             userId = userId,
             cik = cik,
             ticker = ticker,

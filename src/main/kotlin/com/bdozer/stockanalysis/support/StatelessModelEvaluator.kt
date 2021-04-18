@@ -1,7 +1,9 @@
-package com.bdozer.stockanalysis
+package com.bdozer.stockanalysis.support
 
 import com.bdozer.models.ModelEvaluator
-import com.bdozer.models.Utility
+import com.bdozer.models.Utility.DiscountFactor
+import com.bdozer.models.Utility.PresentValueOfEarningsPerShare
+import com.bdozer.models.Utility.PresentValueOfTerminalValuePerShare
 import com.bdozer.models.Utility.PresentValuePerShare
 import com.bdozer.models.Utility.TerminalValuePerShare
 import com.bdozer.models.dataclasses.Item
@@ -12,7 +14,7 @@ import com.bdozer.stockanalysis.dataclasses.StockAnalysis2
 import org.springframework.stereotype.Service
 
 @Service
-class StatelessModelEvaluator(private val postEvaluationAnalyzer: PostEvaluationAnalyzer) {
+class StatelessModelEvaluator(private val derivedAnalyticsAnalyzer: DerivedAnalyticsAnalyzer) {
 
     companion object {
         fun Model.allItems(): List<Item> {
@@ -47,7 +49,7 @@ class StatelessModelEvaluator(private val postEvaluationAnalyzer: PostEvaluation
 
         val model = request.model.copy(otherItems = otherItems(request.model))
         val evaluateModelResult = ModelEvaluator().evaluate(model)
-        val derivedStockAnalytics = postEvaluationAnalyzer.computeDerivedAnalytics(evaluateModelResult)
+        val derivedStockAnalytics = derivedAnalyticsAnalyzer.computeDerivedAnalytics(evaluateModelResult)
 
         return EvaluateModelResponse(
             cells = evaluateModelResult.cells,
@@ -67,7 +69,7 @@ class StatelessModelEvaluator(private val postEvaluationAnalyzer: PostEvaluation
 
         return listOf(
             Item(
-                name = Utility.DiscountFactor,
+                name = DiscountFactor,
                 formula = "1 / (1.0 + $discountRate)^period",
             ),
             Item(
@@ -75,16 +77,16 @@ class StatelessModelEvaluator(private val postEvaluationAnalyzer: PostEvaluation
                 formula = "if(period=$periods,$epsConceptName * $terminalPeMultiple,0.0)",
             ),
             Item(
-                name = Utility.PresentValueOfTerminalValuePerShare,
-                formula = "${Utility.DiscountFactor} * $TerminalValuePerShare",
+                name = PresentValueOfTerminalValuePerShare,
+                formula = "$DiscountFactor * $TerminalValuePerShare",
             ),
             Item(
-                name = Utility.PresentValueOfEarningsPerShare,
-                formula = "${Utility.DiscountFactor} * $epsConceptName",
+                name = PresentValueOfEarningsPerShare,
+                formula = "$DiscountFactor * $epsConceptName",
             ),
             Item(
                 name = PresentValuePerShare,
-                formula = "${Utility.PresentValueOfEarningsPerShare} + ${Utility.PresentValueOfTerminalValuePerShare}",
+                formula = "$PresentValueOfEarningsPerShare + $PresentValueOfTerminalValuePerShare",
             )
         )
     }

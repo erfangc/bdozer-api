@@ -4,6 +4,7 @@ import com.bdozer.stockanalysis.dataclasses.EvaluateModelRequest
 import com.bdozer.stockanalysis.dataclasses.EvaluateModelResponse
 import com.bdozer.stockanalysis.dataclasses.FindStockAnalysisResponse
 import com.bdozer.stockanalysis.dataclasses.StockAnalysis2
+import com.bdozer.stockanalysis.support.StatelessModelEvaluator
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.TextSearchOptions
 import org.litote.kmongo.*
@@ -43,7 +44,7 @@ class StockAnalysisService(
         return col.findOneById(id)
     }
 
-    fun find(
+    fun findStockAnalyses(
         userId: String? = null,
         cik: String? = null,
         ticker: String? = null,

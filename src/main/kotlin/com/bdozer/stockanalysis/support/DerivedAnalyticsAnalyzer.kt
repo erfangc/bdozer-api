@@ -1,4 +1,4 @@
-package com.bdozer.stockanalysis
+package com.bdozer.stockanalysis.support
 
 import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.extensions.DoubleExtensions.orZero
@@ -6,14 +6,14 @@ import com.bdozer.models.EvaluateModelResult
 import com.bdozer.models.dataclasses.Item
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.spreadsheet.Cell
-import com.bdozer.stockanalysis.StatelessModelEvaluator.Companion.allItems
+import com.bdozer.stockanalysis.support.StatelessModelEvaluator.Companion.allItems
 import com.bdozer.stockanalysis.dataclasses.DerivedStockAnalytics
 import com.bdozer.stockanalysis.dataclasses.Waterfall
 import org.springframework.stereotype.Service
 import kotlin.math.pow
 
 @Service
-class PostEvaluationAnalyzer(private val alphaVantageService: AlphaVantageService) {
+class DerivedAnalyticsAnalyzer(private val alphaVantageService: AlphaVantageService) {
 
     fun computeDerivedAnalytics(evaluateModelResult: EvaluateModelResult): DerivedStockAnalytics {
         val model = evaluateModelResult.model
