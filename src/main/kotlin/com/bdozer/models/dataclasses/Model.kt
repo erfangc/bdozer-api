@@ -22,8 +22,6 @@ data class Model(
     val totalRevenueConceptName: String? = null,
     val epsConceptName: String? = null,
     val netIncomeConceptName: String? = null,
-    val ebitConceptName: String? = null,
-    val operatingCostConceptName: String? = null,
     val sharesOutstandingConceptName: String? = null,
 
     /**

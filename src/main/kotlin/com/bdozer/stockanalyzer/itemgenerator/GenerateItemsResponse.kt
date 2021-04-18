@@ -1,4 +1,4 @@
-package com.bdozer.stockanalyzer.analyzers.support.itemgenerator
+package com.bdozer.stockanalyzer.itemgenerator
 
 import com.bdozer.models.dataclasses.Item
 
