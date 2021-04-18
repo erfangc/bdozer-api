@@ -1,4 +1,4 @@
-package com.bdozer.edgar.factbase
+package com.bdozer.edgar.factbase.filing
 
 import com.bdozer.edgar.XbrlNamespaces.link
 import com.bdozer.edgar.XbrlNamespaces.xlink
@@ -19,11 +19,11 @@ import com.bdozer.xml.XmlNode
 import java.net.URI
 import java.util.*
 
-class FilingArcsParser(private val filingProvider: FilingProvider) {
+class FilingArcsParser(private val SECFiling: SECFiling) {
 
     private val incomeStatementRootHref = "us-gaap_IncomeStatementAbstract"
     private val balanceSheetRootHref = "us-gaap_StatementOfFinancialPositionAbstract"
-    private val conceptManager = filingProvider.conceptManager()
+    private val conceptManager = SECFiling.conceptManager
 
     /**
      * Parse filing calculations
@@ -32,9 +32,9 @@ class FilingArcsParser(private val filingProvider: FilingProvider) {
         val incomeStatement = traversePresentation(incomeStatementRootHref)
         val balanceSheet = traversePresentation(balanceSheetRootHref)
 
-        val instanceDocument = filingProvider.instanceDocument()
-        val cik = filingProvider.cik()
-        val adsh = filingProvider.adsh()
+        val instanceDocument = SECFiling.instanceDocument
+        val cik = SECFiling.cik
+        val adsh = SECFiling.adsh
 
         return FilingArcs(
             _id = "$cik:$adsh",
@@ -55,7 +55,7 @@ class FilingArcsParser(private val filingProvider: FilingProvider) {
      */
     private fun traversePresentation(rootLocator: String): List<Arc> {
 
-        val presentation = filingProvider.presentationLinkbase()
+        val presentation = SECFiling.presentationLinkbase
 
         /*
         Find the presentationLink that contains the given root locator
@@ -178,7 +178,7 @@ class FilingArcsParser(private val filingProvider: FilingProvider) {
      * between concepts and their calculations
      */
     private fun parseCalculationArcs(preferredRole: String): Map<String, List<Calculation>> {
-        val calculationLinkbase = filingProvider.calculationLinkbase()
+        val calculationLinkbase = SECFiling.calculationLinkbase
 
         /**
          * Nested function to help turn a specific calculationLink
@@ -232,7 +232,7 @@ class FilingArcsParser(private val filingProvider: FilingProvider) {
             }
             .groupBy { it.first }
             .map { (conceptHref, roles) ->
-                val role = (roles.find { it.second == preferredRole } ?: roles.first())?.second
+                val role = (roles.find { it.second == preferredRole } ?: roles.first()).second
                 conceptHref to allLookups[role]?.get(conceptHref)!!
             }
             .toMap()

@@ -1,37 +1,39 @@
-package com.bdozer.edgar.factbase
+package com.bdozer.edgar.factbase.filing
 
+import com.bdozer.edgar.factbase.FactsParser
 import com.bdozer.edgar.factbase.dataclasses.Arc
 import com.bdozer.edgar.factbase.dataclasses.Dimension
+import com.bdozer.edgar.factbase.itemgenerator.ItemGenerator
 import com.bdozer.xml.XmlElement
 
-interface FilingProvider {
-    fun adsh(): String
-    fun cik(): String
+class SECFiling(
+    val adsh: String,
+    val cik: String,
+    val baseUrl: String,
+    val inlineHtml: String,
+    val schema: XmlElement,
+    val calculationLinkbase: XmlElement,
+    val definitionLinkbase: XmlElement,
+    val labelLinkbase: XmlElement,
+    val presentationLinkbase: XmlElement,
+    val instanceDocument: XmlElement,
+    val schemaExtensionFilename: String,
+    val calculationLinkbaseFilename: String,
+    val definitionLinkbaseFilename: String,
+    val labelLinkbaseFilename: String,
+    val presentationLinkbaseFilename: String,
+    val instanceDocumentFilename: String,
 
-    fun baseUrl(): String
+) {
 
-    fun inlineHtml(): String
-    fun schema(): XmlElement
-    fun calculationLinkbase(): XmlElement
-    fun definitionLinkbase(): XmlElement
-    fun labelLinkbase(): XmlElement
-    fun presentationLinkbase(): XmlElement
-    fun instanceDocument(): XmlElement
-
-    fun schemaExtensionFilename(): String
-    fun calculationLinkbaseFilename(): String
-    fun definitionLinkbaseFilename(): String
-    fun labelLinkbaseFilename(): String
-    fun presentationLinkbaseFilename(): String
-    fun instanceDocumentFilename(): String
-
-    fun conceptManager(): ConceptManager
-    fun labelManager(): LabelManager
-    fun factsParser(): FactsParser
-    fun filingArcsParser(): FilingArcsParser
+    val conceptManager: ConceptManager = ConceptManager(this)
+    val labelManager: LabelManager = LabelManager(this)
+    val factsParser: FactsParser = FactsParser(this)
+    val filingArcsParser: FilingArcsParser = FilingArcsParser(this)
+    val itemGenerator: ItemGenerator = ItemGenerator(this)
 
     fun incomeStatementDeclaredDimensions(): List<Dimension> {
-        return declaredDimensions(filingArcsParser().parseFilingArcs().incomeStatement)
+        return declaredDimensions(filingArcsParser.parseFilingArcs().incomeStatement)
     }
 
     /**
@@ -52,8 +54,8 @@ interface FilingProvider {
                 it.parentHref?.endsWith("StatementTable") == true
                         && !it.conceptHref.endsWith("StatementLineItems")
             }
-        val instanceDocument = instanceDocument()
-        val conceptManager = conceptManager()
+        val instanceDocument = instanceDocument
+        val conceptManager = conceptManager
 
         return dimensionsArcs.map { dimension ->
             val dimensionHref = dimension.conceptHref

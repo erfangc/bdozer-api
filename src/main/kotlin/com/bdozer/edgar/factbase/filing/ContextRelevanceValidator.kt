@@ -1,18 +1,16 @@
-package com.bdozer.edgar.factbase
+package com.bdozer.edgar.factbase.filing
 
 import com.bdozer.edgar.dataclasses.XbrlContext
 import com.bdozer.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
-import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalYearFocus
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
-import com.bdozer.xml.XmlElement
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 
-class ContextRelevanceValidator(filingProvider: FilingProvider) {
+class ContextRelevanceValidator(SECFiling: SECFiling) {
 
-    val factsParser = filingProvider.factsParser()
-    val instanceDocument = filingProvider.instanceDocument()
+    val factsParser = SECFiling.factsParser
+    val instanceDocument = SECFiling.instanceDocument
     val documentPeriodEndDate = instanceDocument.documentPeriodEndDate()
     val documentFiscalPeriodFocus = instanceDocument.documentFiscalPeriodFocus()
 

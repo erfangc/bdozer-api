@@ -1,4 +1,4 @@
-package com.bdozer.edgar.factbase
+package com.bdozer.edgar.factbase.filing
 
 import com.bdozer.edgar.XbrlNamespaces.link
 import com.bdozer.edgar.XbrlNamespaces.xlink
@@ -6,14 +6,14 @@ import com.bdozer.edgar.dataclasses.Labels
 import java.net.URI
 
 /**
- * Traverses the [FilingProvider.labelLinkbase] XML document for labels
+ * Traverses the [SECFiling.labelLinkbase] XML document for labels
  * given a element id from the instance file
  */
-class LabelManager(filingProvider: FilingProvider) {
+class LabelManager(secFiling: SECFiling) {
 
-    private val labelElement = filingProvider.labelLinkbase()
+    private val labelElement = secFiling.labelLinkbase
     private val node = labelElement.getElementByTag(link, "labelLink")
-        ?: error("${filingProvider.labelLinkbaseFilename()} does not contain labelLink")
+        ?: error("${secFiling.labelLinkbaseFilename} does not contain labelLink")
 
     /*
     we have loc = locators, label (which is what we want) and labelArc

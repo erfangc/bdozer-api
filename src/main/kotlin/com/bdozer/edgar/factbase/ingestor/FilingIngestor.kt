@@ -1,6 +1,6 @@
 package com.bdozer.edgar.factbase.ingestor
 
-import com.bdozer.edgar.factbase.FilingProviderFactory
+import com.bdozer.edgar.factbase.filing.SECFilingFactory
 import com.bdozer.edgar.factbase.dataclasses.Fact
 import com.bdozer.edgar.factbase.ingestor.dataclasses.FilingIngestionResponse
 import com.mongodb.client.MongoDatabase
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 @Service
 class FilingIngestor(
     mongoDatabase: MongoDatabase,
-    private val filingProviderFactory: FilingProviderFactory,
+    private val SECFilingFactory: SECFilingFactory,
     private val q4FactFinder: Q4FactFinder,
 ) {
     private val log = LoggerFactory.getLogger(FilingIngestor::class.java)
@@ -25,13 +25,13 @@ class FilingIngestor(
      * given the [cik] and [adsh]
      */
     fun ingestFiling(cik: String, adsh: String): FilingIngestionResponse {
-        val filingProvider = filingProviderFactory.createFilingProvider(cik, adsh)
+        val secFiling = SECFilingFactory.createSECFiling(cik, adsh)
 
         /*
         Parse and save the facts
          */
         log.info("Parsing facts from cik=$cik and adsh=$adsh")
-        val factsParser = filingProvider.factsParser()
+        val factsParser = secFiling.factsParser
         val resp = factsParser.parseFacts()
         val facts = resp.facts
         val distinctIds = facts.distinctBy { it._id }.size

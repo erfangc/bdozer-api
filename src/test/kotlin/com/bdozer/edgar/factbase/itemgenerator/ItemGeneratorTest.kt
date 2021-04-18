@@ -3,7 +3,7 @@ package com.bdozer.edgar.factbase.itemgenerator
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import com.bdozer.edgar.explorer.EdgarExplorer
-import com.bdozer.edgar.factbase.FilingProviderFactory
+import com.bdozer.edgar.factbase.filing.SECFilingFactory
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.apache.http.impl.client.HttpClientBuilder
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ internal class ItemGeneratorTest {
     @Test
     fun run() {
         val http = HttpClientBuilder.create().build()
-        val factory = FilingProviderFactory(http)
+        val factory = SECFilingFactory(http)
         val objectMapper = jacksonObjectMapper().findAndRegisterModules()
         val edgarExplorer = EdgarExplorer(http = http, objectMapper = objectMapper)
 
@@ -40,7 +40,7 @@ internal class ItemGeneratorTest {
             try {
                 val adsh = edgarExplorer.latestFiscalFiling(cik)?.adsh ?: error("no adsh found")
                 try {
-                    val filingProvider = factory.createFilingProvider(cik = cik, adsh = adsh)
+                    val filingProvider = factory.createSECFiling(cik = cik, adsh = adsh)
                     val generator = ItemGenerator(filingProvider)
                     val generateItemsResponse = generator.generateItems()
                     println("$ticker done")

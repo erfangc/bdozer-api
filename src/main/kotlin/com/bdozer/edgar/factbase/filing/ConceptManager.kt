@@ -1,4 +1,4 @@
-package com.bdozer.edgar.factbase
+package com.bdozer.edgar.factbase.filing
 
 import com.bdozer.edgar.UniversalConceptsManager
 import com.bdozer.edgar.UniversalConceptsManager.getBySchemaLocationAndName
@@ -19,11 +19,11 @@ import com.bdozer.edgar.dataclasses.Concept
  * since [ConceptManager] is agnostic of how local namespaces are declared in the Instance document
  * [ConceptManager] require full namespace
  */
-class ConceptManager(filingProvider: FilingProvider) {
+class ConceptManager(SECFiling: SECFiling) {
 
-    private val schemaFilename = filingProvider.schemaExtensionFilename()
+    private val schemaFilename = SECFiling.schemaExtensionFilename
     private val schemaLocations: Map<String, String>
-    private val schema = filingProvider.schema()
+    private val schema = SECFiling.schema
 
     init {
         /*
@@ -42,7 +42,7 @@ class ConceptManager(filingProvider: FilingProvider) {
                 namespace to schemaLocation
             }.plus(targetNamespace to schemaFilename)
 
-        putSchemaDocument(schemaFilename, filingProvider.schema())
+        putSchemaDocument(schemaFilename, SECFiling.schema)
     }
 
     fun getConcept(conceptHref: String) = UniversalConceptsManager.getConcept(conceptHref)

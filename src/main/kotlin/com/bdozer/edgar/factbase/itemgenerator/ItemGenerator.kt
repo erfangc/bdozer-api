@@ -3,7 +3,7 @@ package com.bdozer.edgar.factbase.itemgenerator
 import com.bdozer.edgar.dataclasses.Labels
 import com.bdozer.edgar.dataclasses.XbrlExplicitMember
 import com.bdozer.edgar.factbase.FactExtensions.filterForDimension
-import com.bdozer.edgar.factbase.FilingProvider
+import com.bdozer.edgar.factbase.filing.SECFiling
 import com.bdozer.edgar.factbase.dataclasses.Arc
 import com.bdozer.edgar.factbase.dataclasses.Dimension
 import com.bdozer.edgar.factbase.dataclasses.Fact
@@ -31,21 +31,21 @@ import com.bdozer.models.dataclasses.*
  *  - Generated [Item] instances with calculations defined must have those calculations populated
  *
  */
-class ItemGenerator(private val filingProvider: FilingProvider) {
+class ItemGenerator(private val secFiling: SECFiling) {
 
     /*
     Declare helpers
      */
     private val itemNameGenerator = ItemNameGenerator()
-    private val filingArcsParser = filingProvider.filingArcsParser()
-    private val conceptManager = filingProvider.conceptManager()
-    private val labelManager = filingProvider.labelManager()
+    private val filingArcsParser = secFiling.filingArcsParser
+    private val conceptManager = secFiling.conceptManager
+    private val labelManager = secFiling.labelManager
 
     /*
     Declare frequently used reference data
      */
-    private val facts = facts(filingProvider)
-    private val dimensions = filingProvider.incomeStatementDeclaredDimensions()
+    private val facts = facts(secFiling)
+    private val dimensions = secFiling.incomeStatementDeclaredDimensions()
     private val calculations = filingArcsParser.parseFilingArcs()
 
     /*
@@ -324,8 +324,8 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
         val parts = fact.explicitMembers.first().value.split(":")
         val namespace = parts[0]
         val conceptName = parts[1]
-        val longNs = filingProvider.instanceDocument().shortNamespaceToLongNamespaceMap()[namespace]
-        val conceptId = filingProvider.conceptManager().getConcept(longNs!!, conceptName)?.id
+        val longNs = secFiling.instanceDocument.shortNamespaceToLongNamespaceMap()[namespace]
+        val conceptId = secFiling.conceptManager.getConcept(longNs!!, conceptName)?.id
         return conceptId?.let { labelManager.getLabel(it) }
     }
 
@@ -391,8 +391,8 @@ class ItemGenerator(private val filingProvider: FilingProvider) {
     /**
      * Get the latest facts for a given concept for a given filer
      */
-    private fun facts(filingProvider: FilingProvider): List<Fact> {
-        return filingProvider.factsParser().parseFacts().facts
+    private fun facts(SECFiling: SECFiling): List<Fact> {
+        return SECFiling.factsParser.parseFacts().facts
     }
 
 

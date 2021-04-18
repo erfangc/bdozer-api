@@ -9,26 +9,24 @@ import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFis
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
 import com.bdozer.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
+import com.bdozer.edgar.factbase.filing.ContextRelevanceValidator
+import com.bdozer.edgar.factbase.filing.SECFiling
 import com.bdozer.xml.LocalDateExtensions.toLocalDate
 import com.bdozer.xml.XmlElement
 import com.bdozer.xml.XmlNode
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Node
-import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate
-import java.time.Period
-import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 /**
- * Goes through a single filing as provided by the [FilingProvider]
+ * Goes through a single filing as provided by the [secFiling]
  * and returns the list of [Fact]s contained within
  */
-class FactsParser(private val filingProvider: FilingProvider) {
+class FactsParser(private val secFiling: SECFiling) {
 
-    private val conceptManager = filingProvider.conceptManager()
-    private val labelManager = filingProvider.labelManager()
-    private val instanceDocument = filingProvider.instanceDocument()
+    private val conceptManager = secFiling.conceptManager
+    private val labelManager = secFiling.labelManager
+    private val instanceDocument = secFiling.instanceDocument
     private val log = LoggerFactory.getLogger(FactsParser::class.java)
 
     /*
@@ -44,7 +42,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
         go through the instance document and
         reverse lookup everything else
          */
-        val instanceDocumentFilename = filingProvider.instanceDocumentFilename()
+        val instanceDocumentFilename = secFiling.instanceDocumentFilename
         log.info("Parsing instance document $instanceDocumentFilename for facts")
 
         /*
@@ -63,13 +61,13 @@ class FactsParser(private val filingProvider: FilingProvider) {
         /*
         now begin processing each element as a potential fact we can create and store
          */
-        val contextRelevanceValidator = ContextRelevanceValidator(filingProvider)
+        val contextRelevanceValidator = ContextRelevanceValidator(secFiling)
         val facts = instanceDocument
             .childNodes()
             .mapNotNull { node ->
                 val context = getContext(node.attr("contextRef"))
                 val conceptDefinition = lookupConceptDefinition(node.nodeName)
-                val adsh = filingProvider.adsh()
+                val adsh = secFiling.adsh
 
                 /*
                 filter the node, if it is not one of the relevant ones, then don't process it
@@ -172,9 +170,9 @@ class FactsParser(private val filingProvider: FilingProvider) {
     }
 
     private fun sourceDocument(node: XmlNode): String {
-        val cik = filingProvider.cik()
-        val adsh = filingProvider.adsh().replace("-", "")
-        val fileName = filingProvider.inlineHtml()
+        val cik = secFiling.cik
+        val adsh = secFiling.adsh.replace("-", "")
+        val fileName = secFiling.inlineHtml
         val id = node.attr("id")
         return if (id == null) {
             "https://www.sec.gov/ix?doc=/Archives/edgar/data/$cik/$adsh/$fileName"
@@ -206,13 +204,13 @@ class FactsParser(private val filingProvider: FilingProvider) {
     }
 
     private fun cik(): String {
-        return filingProvider.cik().padStart(10, '0')
+        return secFiling.cik.padStart(10, '0')
     }
 
     private fun parseInstanceNodeName(nodeName: String?): Pair<String, String> {
         if (nodeName == null)
             error("nodeName cannot be null")
-        val instanceDocument = filingProvider.instanceDocument()
+        val instanceDocument = secFiling.instanceDocument
         val parts = nodeName.split(":".toRegex(), 2)
         return if (parts.size == 1) {
             Pair(instanceDocument.defaultLongNamespace() ?: "", nodeName)
@@ -246,7 +244,7 @@ class FactsParser(private val filingProvider: FilingProvider) {
         this node is a fact if it's
         namespace is one of the ones that matter
          */
-        val isExternalNamespace = namespace == filingProvider.schema().targetNamespace()
+        val isExternalNamespace = namespace == secFiling.schema.targetNamespace()
         val lookup = instanceDocument.longNamespaceToShortNamespaceMap()
         return isRelevantElementDefinition(isExternalNamespace, lookup, namespace)
     }
