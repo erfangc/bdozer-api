@@ -1,6 +1,10 @@
 package com.bdozer.models.dataclasses
 
 data class Model(
+
+    val ticker: String? = null,
+    val cik: String? = null,
+
     /**
      * The SEC filing adsh from
      * which the automated model generate from

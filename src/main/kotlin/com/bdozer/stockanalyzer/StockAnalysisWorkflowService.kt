@@ -2,13 +2,16 @@ package com.bdozer.stockanalyzer
 
 import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.edgar.explorer.EdgarExplorer
-import com.bdozer.edgar.factbase.core.FactBase
 import com.bdozer.edgar.factbase.FilingProviderFactory
+import com.bdozer.edgar.factbase.core.FactBase
 import com.bdozer.filingentity.FilingEntityManager
 import com.bdozer.filingentity.dataclasses.FilingEntity
 import com.bdozer.models.CellGenerator
+import com.bdozer.models.ModelEvaluator
 import com.bdozer.stockanalyzer.analyzers.StockAnalyzer
+import com.bdozer.stockanalyzer.analyzers.extensions.PostEvaluationAnalyzer
 import com.bdozer.stockanalyzer.analyzers.support.StockAnalyzerDataProvider
+import com.bdozer.stockanalyzer.dataclasses.EvaluateModelRequest
 import com.bdozer.stockanalyzer.dataclasses.StockAnalysis2
 import com.bdozer.zacks.se.ZacksEstimatesService
 import org.springframework.http.HttpEntity
@@ -50,7 +53,7 @@ class StockAnalysisWorkflowService(
         val adsh = latestAdsh(filingEntity)
         val dataProvider = createDataProvider(filingEntity, adsh)
 
-        return StockAnalyzer(dataProvider = dataProvider,originalAnalysis = stockAnalysis)
+        return StockAnalyzer(dataProvider = dataProvider, originalAnalysis = stockAnalysis)
             .analyze()
     }
 
@@ -65,5 +68,22 @@ class StockAnalysisWorkflowService(
         zacksEstimatesService = zacksEstimatesService,
         alphaVantageService = alphaVantageService,
     )
+
+    fun evaluate(request: EvaluateModelRequest): StockAnalysis2 {
+        val postEvaluationAnalyzer = PostEvaluationAnalyzer(alphaVantageService)
+        val model = request.model
+        val evaluateModelResult = ModelEvaluator().evaluate(model)
+        val derivedStockAnalytics = postEvaluationAnalyzer
+            .computeDerivedAnalytics(evaluateModelResult)
+        return StockAnalysis2(
+            name = request.name,
+            model = model,
+            description = request.description,
+            cells = evaluateModelResult.cells,
+            cik = model.cik,
+            ticker = model.ticker,
+            derivedStockAnalytics = derivedStockAnalytics,
+        )
+    }
 
 }

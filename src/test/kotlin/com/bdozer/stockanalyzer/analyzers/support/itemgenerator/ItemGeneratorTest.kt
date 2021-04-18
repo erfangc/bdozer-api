@@ -57,11 +57,3 @@ internal class ItemGeneratorTest {
         writer.close()
     }
 }
-
-fun main() {
-    val http = HttpClientBuilder.create().build()
-    val factory = FilingProviderFactory(http)
-    val filingProvider = factory.createFilingProvider(cik = "0000101829", adsh = "000010182921000008")
-    val result = ItemGenerator(filingProvider).generateItems()
-    println(result)
-}
