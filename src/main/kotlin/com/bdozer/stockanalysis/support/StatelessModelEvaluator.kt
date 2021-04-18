@@ -40,9 +40,6 @@ class StatelessModelEvaluator(private val derivedAnalyticsComputer: DerivedAnaly
         )
     }
 
-    class BadRequestException(message: String):Exception(message = message)
-    private fun badRequest(message: String): Nothing = throw BadRequestException(message)
-
     private fun validateRequestOrThrow(request: EvaluateModelRequest) {
         request.model.epsConceptName ?: error("Please define ${Model::epsConceptName.name} on the model")
         request.model.allItems().find { it.name == request.model.epsConceptName }
