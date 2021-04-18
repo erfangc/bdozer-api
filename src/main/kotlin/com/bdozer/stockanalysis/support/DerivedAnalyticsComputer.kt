@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import kotlin.math.pow
 
 @Service
-class DerivedAnalyticsAnalyzer(private val alphaVantageService: AlphaVantageService) {
+class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageService) {
 
     fun computeDerivedAnalytics(evaluateModelResult: EvaluateModelResult): DerivedStockAnalytics {
         val model = evaluateModelResult.model
@@ -35,6 +35,7 @@ class DerivedAnalyticsAnalyzer(private val alphaVantageService: AlphaVantageServ
             discountRate = discountRate(evaluateModelResult),
             revenueCAGR = revenueCAGR(evaluateModelResult),
             targetPrice = evaluateModelResult.targetPrice,
+            // FIXME
             zeroGrowthPrice = 0.0,
         )
     }

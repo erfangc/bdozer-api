@@ -14,7 +14,7 @@ import com.bdozer.stockanalysis.dataclasses.StockAnalysis2
 import org.springframework.stereotype.Service
 
 @Service
-class StatelessModelEvaluator(private val derivedAnalyticsAnalyzer: DerivedAnalyticsAnalyzer) {
+class StatelessModelEvaluator(private val derivedAnalyticsComputer: DerivedAnalyticsComputer) {
 
     companion object {
         fun Model.allItems(): List<Item> {
@@ -29,6 +29,21 @@ class StatelessModelEvaluator(private val derivedAnalyticsAnalyzer: DerivedAnaly
         /*
         perform validation
          */
+        validateRequestOrThrow(request)
+        val model = request.model.copy(otherItems = otherItems(request.model))
+        val evaluateModelResult = ModelEvaluator().evaluate(model)
+        val derivedStockAnalytics = derivedAnalyticsComputer.computeDerivedAnalytics(evaluateModelResult)
+
+        return EvaluateModelResponse(
+            cells = evaluateModelResult.cells,
+            derivedStockAnalytics = derivedStockAnalytics,
+        )
+    }
+
+    class BadRequestException(message: String):Exception(message = message)
+    private fun badRequest(message: String): Nothing = throw BadRequestException(message)
+
+    private fun validateRequestOrThrow(request: EvaluateModelRequest) {
         request.model.epsConceptName ?: error("Please define ${Model::epsConceptName.name} on the model")
         request.model.allItems().find { it.name == request.model.epsConceptName }
             ?: error("There must be an Item named ${request.model.epsConceptName} in your model")
@@ -37,7 +52,8 @@ class StatelessModelEvaluator(private val derivedAnalyticsAnalyzer: DerivedAnaly
         request.model.allItems().find { it.name == request.model.netIncomeConceptName }
             ?: error("There must be an Item named ${request.model.netIncomeConceptName} in your model")
 
-        request.model.totalRevenueConceptName ?: error("Please define ${Model::totalRevenueConceptName.name} on the model")
+        request.model.totalRevenueConceptName
+            ?: error("Please define ${Model::totalRevenueConceptName.name} on the model")
         request.model.allItems().find { it.name == request.model.totalRevenueConceptName }
             ?: error("There must be an Item named ${request.model.totalRevenueConceptName} in your model")
 
@@ -45,16 +61,6 @@ class StatelessModelEvaluator(private val derivedAnalyticsAnalyzer: DerivedAnaly
             ?: error("Please define ${Model::sharesOutstandingConceptName.name} on the model")
         request.model.allItems().find { it.name == request.model.sharesOutstandingConceptName }
             ?: error("There must be an Item named ${request.model.sharesOutstandingConceptName} in your model")
-
-
-        val model = request.model.copy(otherItems = otherItems(request.model))
-        val evaluateModelResult = ModelEvaluator().evaluate(model)
-        val derivedStockAnalytics = derivedAnalyticsAnalyzer.computeDerivedAnalytics(evaluateModelResult)
-
-        return EvaluateModelResponse(
-            cells = evaluateModelResult.cells,
-            derivedStockAnalytics = derivedStockAnalytics,
-        )
     }
 
 
