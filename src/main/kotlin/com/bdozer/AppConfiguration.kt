@@ -11,6 +11,7 @@ import java.lang.System.getenv
 
 @Configuration
 class AppConfiguration {
+
     @Bean
     fun httpClient(): HttpClient {
         return HttpClientBuilder.create().build()
