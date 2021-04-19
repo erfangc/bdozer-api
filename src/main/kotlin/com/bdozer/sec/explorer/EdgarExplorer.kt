@@ -91,8 +91,8 @@ class EdgarExplorer(
         }
     }
 
-    fun latestFiscalFiling(ciK: String): EdgarFilingMetadata? {
-        return searchFilings(ciK)
+    fun latestFiscalFiling(cik: String): EdgarFilingMetadata? {
+        return searchFilings(cik)
             .filter { it.form == "10-K" }
             .maxByOrNull { it.period_ending }
     }
