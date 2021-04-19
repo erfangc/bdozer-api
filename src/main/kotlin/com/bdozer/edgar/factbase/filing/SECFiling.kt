@@ -3,12 +3,19 @@ package com.bdozer.edgar.factbase.filing
 import com.bdozer.edgar.factbase.FactsParser
 import com.bdozer.edgar.factbase.dataclasses.Arc
 import com.bdozer.edgar.factbase.dataclasses.Dimension
-import com.bdozer.edgar.factbase.itemgenerator.ItemGenerator
+import com.bdozer.edgar.factbase.dataclasses.DocumentFiscalPeriodFocus
+import com.bdozer.edgar.factbase.itemgenerator.ModelBuilder
 import com.bdozer.xml.XmlElement
+import java.time.LocalDate
 
 class SECFiling(
     val adsh: String,
     val cik: String,
+    val tradingSymbol: String,
+    val entityRegistrantName: String,
+    val documentFiscalPeriodFocus: DocumentFiscalPeriodFocus,
+    val documentPeriodEndDate: LocalDate?,
+    val formType: String,
     val baseUrl: String,
     val inlineHtml: String,
     val schema: XmlElement,
@@ -24,13 +31,13 @@ class SECFiling(
     val presentationLinkbaseFilename: String,
     val instanceDocumentFilename: String,
 
-) {
+    ) {
 
     val conceptManager: ConceptManager = ConceptManager(this)
     val labelManager: LabelManager = LabelManager(this)
     val factsParser: FactsParser = FactsParser(this)
     val filingArcsParser: FilingArcsParser = FilingArcsParser(this)
-    val itemGenerator: ItemGenerator = ItemGenerator(this)
+    val modelBuilder: ModelBuilder = ModelBuilder(this)
 
     fun incomeStatementDeclaredDimensions(): List<Dimension> {
         return declaredDimensions(filingArcsParser.parseFilingArcs().incomeStatement)

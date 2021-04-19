@@ -12,7 +12,7 @@ import com.bdozer.models.dataclasses.*
 
 /**
  * # Overview
- * [ItemGenerator] is responsible for turning a single presentation Arc
+ * [ModelBuilder] is responsible for turning a single presentation Arc
  * into one or more [Item] instances. A presentation arc typically represents a single concept.
  *
  * ## Simple translation
@@ -31,7 +31,7 @@ import com.bdozer.models.dataclasses.*
  *  - Generated [Item] instances with calculations defined must have those calculations populated
  *
  */
-class ItemGenerator(private val secFiling: SECFiling) {
+class ModelBuilder(private val secFiling: SECFiling) {
 
     /*
     Declare helpers
@@ -51,13 +51,13 @@ class ItemGenerator(private val secFiling: SECFiling) {
     /*
     The follow statements translate Arcs -> Items
      */
-    private val incomeStatementItems = calculations
+    private val rawIncomeStatementItems = calculations
         .incomeStatement
         .flatMap { arc ->
             arcToItems(arc)
         }
 
-    private val balanceSheetItems = calculations
+    private val rawBalanceSheetItems = calculations
         .balanceSheet
         .flatMap { arc ->
             arcToItems(arc)
@@ -83,11 +83,11 @@ class ItemGenerator(private val secFiling: SECFiling) {
     /*
     Find the net income / revenue item etc.
      */
-    private val netIncomeItem = incomeStatementItems
+    private val netIncomeItem = rawIncomeStatementItems
         .reversed()
-        .find { netIncomeLossConceptNameCandidates.contains(it.name) } ?: error("netincome item cannot be found")
+        .find { netIncomeLossConceptNameCandidates.contains(it.name) }
 
-    private val revenueItem = revenueItemReverseBfs(incomeStatementItems) ?: error("revenue item cannot be found")
+    private val revenueItem = revenueItemReverseBfs(rawIncomeStatementItems)
 
     private val avgSharesOutstandingBasicAndDiluted = "WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
     private val avgSharesOutstandingBasic = "WeightedAverageNumberOfSharesOutstandingBasic"
@@ -103,7 +103,7 @@ class ItemGenerator(private val secFiling: SECFiling) {
      *  Parse the filing to create [Item]s from the calculation arcs
      *  declared on the Xbrl files [GenerateItemsResult]
      */
-    fun generateItems(): GenerateItemsResult {
+    fun model(): Model {
 
         /*
         create and then replace existing EPS item(s) with the ones below
@@ -113,7 +113,7 @@ class ItemGenerator(private val secFiling: SECFiling) {
         val epsBasicAndDiluted = earningsPerShareBasicAndDiluted()
 
         val incomeStatementItemsWithEpsReplaced =
-            listOfNotNull(epsBasic, epsDiluted, epsBasicAndDiluted).fold(incomeStatementItems) { acc, item ->
+            listOfNotNull(epsBasic, epsDiluted, epsBasicAndDiluted).fold(rawIncomeStatementItems) { acc, item ->
                 if (acc.any { it.name == item.name }) {
                     acc.map {
                         if (it.name == item.name) {
@@ -154,7 +154,7 @@ class ItemGenerator(private val secFiling: SECFiling) {
         /*
         clean up references that does not exist
          */
-        val lookup = (incomeStatementItemsWithSharesOutstanding + balanceSheetItems).associateBy { it.name }
+        val lookup = (incomeStatementItemsWithSharesOutstanding + rawBalanceSheetItems).associateBy { it.name }
         val cleanedIncomeStatement = incomeStatementItemsWithSharesOutstanding.map { item ->
             if (item.sumOfOtherItems != null) {
                 val filtered =
@@ -165,7 +165,7 @@ class ItemGenerator(private val secFiling: SECFiling) {
             }
         }
 
-        val cleanedBalanceSheet = balanceSheetItems.map { item ->
+        val cleanedBalanceSheet = rawBalanceSheetItems.map { item ->
             if (item.sumOfOtherItems != null) {
                 val filtered =
                     item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
@@ -175,19 +175,18 @@ class ItemGenerator(private val secFiling: SECFiling) {
             }
         }
 
-        return GenerateItemsResult(
-            revenue = revenueItem,
-            netIncome = netIncomeItem,
+        return Model(
+            ticker = secFiling.tradingSymbol,
+            cik = secFiling.cik,
+            adsh = secFiling.adsh,
+            name = secFiling.entityRegistrantName,
+            itemOverrides = emptyList(),
+            totalRevenueConceptName = revenueItem?.name,
+            epsConceptName = (epsBasicAndDiluted?:epsDiluted?:epsBasic)?.name,
+            netIncomeConceptName = netIncomeItem?.name,
+            sharesOutstandingConceptName = (basicAndDilutedSharesOutstanding?:dilutedSharesOutstanding?:basicSharesOutstanding)?.name,
             incomeStatementItems = cleanedIncomeStatement,
-            balanceSheetItems = cleanedBalanceSheet,
-
-            epsBasic = epsBasic,
-            epsDiluted = epsDiluted,
-            epsBasicAndDiluted = epsBasicAndDiluted,
-
-            basicSharesOutstanding = basicSharesOutstanding,
-            dilutedSharesOutstanding = dilutedSharesOutstanding,
-            basicAndDilutedSharesOutstanding = basicAndDilutedSharesOutstanding,
+            balanceSheetItems =  cleanedBalanceSheet,
         )
 
     }
@@ -430,7 +429,7 @@ class ItemGenerator(private val secFiling: SECFiling) {
         }
 
         val queue = ArrayDeque<Item>()
-        queue.addAll(componentsToItem(netIncomeItem.sumOfOtherItems?.components))
+        queue.addAll(componentsToItem(netIncomeItem?.sumOfOtherItems?.components))
         var revenueItem: Item? = null
         while (queue.isNotEmpty()) {
             val item = queue.removeFirst()
@@ -452,7 +451,7 @@ class ItemGenerator(private val secFiling: SECFiling) {
     /**
      * # What is this?
      * Creates an [Item] from the given concept name
-     * if an [Item] has not been created by this instance of [ItemGenerator]
+     * if an [Item] has not been created by this instance of [ModelBuilder]
      * during constructor invocation
      *
      * # Why is it used?
@@ -461,7 +460,7 @@ class ItemGenerator(private val secFiling: SECFiling) {
      * automatically created when we looped through income statement arcs to create items
      */
     private fun findOrCreate(conceptName: String): Item? {
-        val found = (incomeStatementItems + balanceSheetItems).find { item -> item.name == conceptName }
+        val found = (rawIncomeStatementItems + rawBalanceSheetItems).find { item -> item.name == conceptName }
         val itemName = itemNameGenerator.itemName(conceptName)
         // no need to create this item
         return if (found != null) {
@@ -480,7 +479,8 @@ class ItemGenerator(private val secFiling: SECFiling) {
     }
 
     private fun earningsPerShareBasic(): Item? {
-        val items = incomeStatementItems.reversed()
+        if (netIncomeItem == null) return null
+        val items = rawIncomeStatementItems.reversed()
         val ret = items.find { item -> item.name == "EarningsPerShareBasic" }
             ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerBasicShare" }
         return ret?.copy(
@@ -490,7 +490,8 @@ class ItemGenerator(private val secFiling: SECFiling) {
     }
 
     private fun earningsPerShareDiluted(): Item? {
-        val items = incomeStatementItems.reversed()
+        if (netIncomeItem == null) return null
+        val items = rawIncomeStatementItems.reversed()
         val ret = items.find { item -> item.name == "EarningsPerShareDiluted" }
             ?: items.find { item -> item.name == "IncomeLossFromContinuingOperationsPerDilutedShare" }
         return ret?.copy(
@@ -500,7 +501,8 @@ class ItemGenerator(private val secFiling: SECFiling) {
     }
 
     private fun earningsPerShareBasicAndDiluted(): Item? {
-        val items = incomeStatementItems.reversed()
+        if (netIncomeItem == null) return null
+        val items = rawIncomeStatementItems.reversed()
         val ret = items.find { item -> item.name == "EarningsPerShareBasicAndDiluted" }
         return ret?.copy(
             type = ItemType.Custom,

@@ -1,11 +1,6 @@
 package com.bdozer.stockanalysis.support
 
 import com.bdozer.models.ModelEvaluator
-import com.bdozer.models.Utility.DiscountFactor
-import com.bdozer.models.Utility.PresentValueOfEarningsPerShare
-import com.bdozer.models.Utility.PresentValueOfTerminalValuePerShare
-import com.bdozer.models.Utility.PresentValuePerShare
-import com.bdozer.models.Utility.TerminalValuePerShare
 import com.bdozer.models.dataclasses.Item
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.stockanalysis.dataclasses.EvaluateModelRequest
@@ -30,7 +25,7 @@ class StatelessModelEvaluator(private val derivedAnalyticsComputer: DerivedAnaly
         perform validation
          */
         validateRequestOrThrow(request)
-        val model = request.model.copy(otherItems = otherItems(request.model))
+        val model = request.model.copy(otherItems = request.model.generateOtherItems())
         val evaluateModelResult = ModelEvaluator().evaluate(model)
         val derivedStockAnalytics = derivedAnalyticsComputer.computeDerivedAnalytics(evaluateModelResult)
 
@@ -59,40 +54,6 @@ class StatelessModelEvaluator(private val derivedAnalyticsComputer: DerivedAnaly
             ?: error("Please define ${Model::sharesOutstandingConceptName.name} on the model")
         request.model.allItems().find { it.name == request.model.sharesOutstandingConceptName }
             ?: error("There must be an Item named ${request.model.sharesOutstandingConceptName} in your model")
-    }
-
-
-    /**
-     * Create items that would end up computing the NPV of the investment
-     */
-    private fun otherItems(model: Model): List<Item> {
-        val epsConceptName = model.epsConceptName
-        val periods = model.periods
-        val discountRate = (model.equityRiskPremium * model.beta) + model.riskFreeRate
-        val terminalPeMultiple = 1.0 / (discountRate - model.terminalGrowthRate)
-
-        return listOf(
-            Item(
-                name = DiscountFactor,
-                formula = "1 / (1.0 + $discountRate)^period",
-            ),
-            Item(
-                name = TerminalValuePerShare,
-                formula = "if(period=$periods,$epsConceptName * $terminalPeMultiple,0.0)",
-            ),
-            Item(
-                name = PresentValueOfTerminalValuePerShare,
-                formula = "$DiscountFactor * $TerminalValuePerShare",
-            ),
-            Item(
-                name = PresentValueOfEarningsPerShare,
-                formula = "$DiscountFactor * $epsConceptName",
-            ),
-            Item(
-                name = PresentValuePerShare,
-                formula = "$PresentValueOfEarningsPerShare + $PresentValueOfTerminalValuePerShare",
-            )
-        )
     }
 
 }

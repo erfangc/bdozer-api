@@ -19,11 +19,11 @@ import com.bdozer.xml.XmlNode
 import java.net.URI
 import java.util.*
 
-class FilingArcsParser(private val SECFiling: SECFiling) {
+class FilingArcsParser(private val secFiling: SECFiling) {
 
     private val incomeStatementRootHref = "us-gaap_IncomeStatementAbstract"
     private val balanceSheetRootHref = "us-gaap_StatementOfFinancialPositionAbstract"
-    private val conceptManager = SECFiling.conceptManager
+    private val conceptManager = secFiling.conceptManager
 
     /**
      * Parse filing calculations
@@ -32,9 +32,9 @@ class FilingArcsParser(private val SECFiling: SECFiling) {
         val incomeStatement = traversePresentation(incomeStatementRootHref)
         val balanceSheet = traversePresentation(balanceSheetRootHref)
 
-        val instanceDocument = SECFiling.instanceDocument
-        val cik = SECFiling.cik
-        val adsh = SECFiling.adsh
+        val instanceDocument = secFiling.instanceDocument
+        val cik = secFiling.cik
+        val adsh = secFiling.adsh
 
         return FilingArcs(
             _id = "$cik:$adsh",
@@ -55,7 +55,7 @@ class FilingArcsParser(private val SECFiling: SECFiling) {
      */
     private fun traversePresentation(rootLocator: String): List<Arc> {
 
-        val presentation = SECFiling.presentationLinkbase
+        val presentation = secFiling.presentationLinkbase
 
         /*
         Find the presentationLink that contains the given root locator
@@ -178,7 +178,7 @@ class FilingArcsParser(private val SECFiling: SECFiling) {
      * between concepts and their calculations
      */
     private fun parseCalculationArcs(preferredRole: String): Map<String, List<Calculation>> {
-        val calculationLinkbase = SECFiling.calculationLinkbase
+        val calculationLinkbase = secFiling.calculationLinkbase
 
         /**
          * Nested function to help turn a specific calculationLink

@@ -3,6 +3,11 @@ package com.bdozer.edgar.factbase.filing
 import com.bdozer.edgar.XbrlNamespaces.link
 import com.bdozer.edgar.XbrlNamespaces.xlink
 import com.bdozer.edgar.XbrlNamespaces.xsd
+import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
+import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
+import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.entityRegistrantName
+import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
+import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.tradingSymbol
 import com.bdozer.xml.HttpClientExtensions.readXml
 import com.bdozer.xml.XmlElement
 import org.apache.http.client.HttpClient
@@ -104,6 +109,11 @@ class SECFilingFactory(
         return SECFiling(
             adsh = adsh,
             cik = cik,
+            tradingSymbol = instanceDocument.tradingSymbol(),
+            entityRegistrantName = instanceDocument.entityRegistrantName(),
+            documentFiscalPeriodFocus = instanceDocument.documentFiscalPeriodFocus(),
+            documentPeriodEndDate = instanceDocument.documentPeriodEndDate(),
+            formType = instanceDocument.formType(),
             baseUrl = baseUrl,
             inlineHtml = instanceHtmlFilename,
             schema = schema,

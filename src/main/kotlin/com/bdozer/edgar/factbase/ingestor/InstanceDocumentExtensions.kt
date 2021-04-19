@@ -16,6 +16,25 @@ object InstanceDocumentExtensions {
             .toIntOrNull() ?: 0
     }
 
+    fun XmlElement.tradingSymbol(): String {
+        val found = getElementsByTag("dei:TradingSymbol")
+        if (found.isEmpty()) {
+            return "N/A"
+        }
+        return found
+            .first()
+            .textContent ?: "N/A"
+    }
+
+    fun XmlElement.entityRegistrantName(): String {
+        val found = getElementsByTag("dei:EntityRegistrantName")
+        if (found.isEmpty()) {
+            return "N/A"
+        }
+        return found
+            .first()
+            .textContent ?: "N/A"
+    }
 
     fun XmlElement.documentFiscalPeriodFocus(): DocumentFiscalPeriodFocus {
         val found = getElementsByTag("dei:DocumentFiscalPeriodFocus")

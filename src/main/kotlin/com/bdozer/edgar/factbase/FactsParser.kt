@@ -4,15 +4,16 @@ import com.bdozer.edgar.XbrlNamespaces.xbrl
 import com.bdozer.edgar.XbrlNamespaces.xbrldi
 import com.bdozer.edgar.dataclasses.*
 import com.bdozer.edgar.factbase.dataclasses.Fact
+import com.bdozer.edgar.factbase.filing.ContextRelevanceValidator
+import com.bdozer.edgar.factbase.filing.SECFiling
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentFiscalYearFocus
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
+import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.entityRegistrantName
 import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.formType
+import com.bdozer.edgar.factbase.ingestor.InstanceDocumentExtensions.tradingSymbol
 import com.bdozer.edgar.factbase.ingestor.dataclasses.ParseFactsResponse
-import com.bdozer.edgar.factbase.filing.ContextRelevanceValidator
-import com.bdozer.edgar.factbase.filing.SECFiling
 import com.bdozer.xml.LocalDateExtensions.toLocalDate
-import com.bdozer.xml.XmlElement
 import com.bdozer.xml.XmlNode
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Node
@@ -101,9 +102,7 @@ class FactsParser(private val secFiling: SECFiling) {
                     )
 
                     val instanceDocumentElementId = node.attr("id") ?: "N/A"
-                    val cik = cik()
-                    val entityName = entityRegistrantName(instanceDocument)
-                    val primarySymbol = primarySymbol(instanceDocument)
+                    val cik = secFiling.cik
                     val formType = instanceDocument.formType()
 
                     /*
@@ -115,8 +114,8 @@ class FactsParser(private val secFiling: SECFiling) {
                         instanceDocumentElementName = node.nodeName,
                         cik = cik,
                         adsh = adsh,
-                        entityName = entityName,
-                        primarySymbol = primarySymbol,
+                        entityName = instanceDocument.entityRegistrantName(),
+                        primarySymbol = instanceDocument.tradingSymbol(),
                         formType = formType,
 
                         documentFiscalPeriodFocus = documentFiscalPeriodFocus,
@@ -179,32 +178,6 @@ class FactsParser(private val secFiling: SECFiling) {
         } else {
             "https://www.sec.gov/ix?doc=/Archives/edgar/data/$cik/$adsh/$fileName#$id"
         }
-    }
-
-    private fun primarySymbol(instanceDocument: XmlElement): String {
-        val found = instanceDocument
-            .getElementsByTag("dei:TradingSymbol")
-        if (found.isEmpty()) {
-            return "N/A"
-        }
-        return found
-            .first()
-            .textContent ?: "N/A"
-    }
-
-    private fun entityRegistrantName(instanceDocument: XmlElement): String {
-        val found = instanceDocument
-            .getElementsByTag("dei:EntityRegistrantName")
-        if (found.isEmpty()) {
-            return "N/A"
-        }
-        return found
-            .first()
-            .textContent ?: "N/A"
-    }
-
-    private fun cik(): String {
-        return secFiling.cik.padStart(10, '0')
     }
 
     private fun parseInstanceNodeName(nodeName: String?): Pair<String, String> {

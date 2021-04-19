@@ -1,5 +1,7 @@
 package com.bdozer.models.dataclasses
 
+import com.bdozer.models.Utility
+
 data class Model(
 
     val ticker: String? = null,
@@ -10,6 +12,8 @@ data class Model(
      * which the automated model generate from
      */
     val adsh: String? = null,
+
+    val name: String? = null,
 
     /**
      * Manual overrides for items
@@ -50,4 +54,34 @@ data class Model(
      */
     val excelColumnOffset: Int = 1,
     val excelRowOffset: Int = 1,
-)
+) {
+    fun generateOtherItems(): List<Item> {
+        val epsConceptName = epsConceptName
+        val periods = periods
+        val discountRate = (equityRiskPremium * beta) + riskFreeRate
+        val terminalPeMultiple = 1.0 / (discountRate - terminalGrowthRate)
+
+        return listOf(
+            Item(
+                name = Utility.DiscountFactor,
+                formula = "1 / (1.0 + $discountRate)^period",
+            ),
+            Item(
+                name = Utility.TerminalValuePerShare,
+                formula = "if(period=$periods,$epsConceptName * $terminalPeMultiple,0.0)",
+            ),
+            Item(
+                name = Utility.PresentValueOfTerminalValuePerShare,
+                formula = "${Utility.DiscountFactor} * ${Utility.TerminalValuePerShare}",
+            ),
+            Item(
+                name = Utility.PresentValueOfEarningsPerShare,
+                formula = "${Utility.DiscountFactor} * $epsConceptName",
+            ),
+            Item(
+                name = Utility.PresentValuePerShare,
+                formula = "${Utility.PresentValueOfEarningsPerShare} + ${Utility.PresentValueOfTerminalValuePerShare}",
+            )
+        )
+    }
+}
