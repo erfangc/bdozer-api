@@ -10,7 +10,7 @@ class IssuesController(
     private val issueGenerator: IssueGenerator,
     private val issueManager: IssueManager,
 ) {
-    @PostMapping
+    @PostMapping("generate-issues")
     fun generateIssues(@RequestBody stockAnalysis: StockAnalysis2): List<Issue> {
         return issueGenerator.generateIssues(stockAnalysis)
     }
