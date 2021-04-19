@@ -91,8 +91,8 @@ class StockAnalysisService(
             .map {
                 doc ->
                 val derivedAnalytics = doc.get(StockAnalysis2::derivedStockAnalytics.name, Document::class.java)
-                val targetPrice = derivedAnalytics.getDouble(DerivedStockAnalytics::targetPrice.name)
-                val currentPrice = derivedAnalytics.getDouble(DerivedStockAnalytics::currentPrice.name)
+                val targetPrice = derivedAnalytics?.getDouble(DerivedStockAnalytics::targetPrice.name)
+                val currentPrice = derivedAnalytics?.getDouble(DerivedStockAnalytics::currentPrice.name)
                 StockAnalysisProjection(
                     _id = doc.getString(StockAnalysis2::_id.name),
                     name = doc.getString(StockAnalysis2::name.name),
