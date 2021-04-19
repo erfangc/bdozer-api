@@ -1,21 +1,13 @@
 package com.bdozer.filingentity
 
 import com.mongodb.client.MongoDatabase
-import com.bdozer.edgar.factbase.core.FactBase
-import com.bdozer.filingentity.dataclasses.Address
+import com.bdozer.sec.factbase.core.FactBase
 import com.bdozer.filingentity.dataclasses.FilingEntity
-import com.bdozer.filingentity.dataclasses.ModelTemplate
-import com.bdozer.filingentity.internal.SECEntity
-import com.bdozer.xml.HttpClientExtensions.readEntity
-import org.apache.http.client.HttpClient
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.Instant
-import java.util.concurrent.Executors
 
 @Service
 class FilingEntityManager(

@@ -1,6 +1,6 @@
 package com.bdozer.filingentity
 
-import com.bdozer.edgar.factbase.core.FactBase
+import com.bdozer.sec.factbase.core.FactBase
 import com.bdozer.filingentity.dataclasses.Address
 import com.bdozer.filingentity.dataclasses.FilingEntity
 import com.bdozer.filingentity.dataclasses.ModelTemplate
