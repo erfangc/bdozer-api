@@ -6,6 +6,7 @@ import com.bdozer.stockanalysis.dataclasses.StockAnalysisProjection
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Projections
 import com.mongodb.client.model.TextSearchOptions
+import org.bson.Document
 import org.litote.kmongo.*
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -87,14 +88,17 @@ class StockAnalysisService(
             .sort(descending(StockAnalysis2::lastUpdated))
             .map {
                 doc ->
+                val derivedAnalytics = doc.get(StockAnalysis2::derivedStockAnalytics.name, Document::class.java)
+                val targetPrice = derivedAnalytics.getDouble(DerivedStockAnalytics::targetPrice.name)
+                val currentPrice = derivedAnalytics.getDouble(DerivedStockAnalytics::currentPrice.name)
                 StockAnalysisProjection(
                     _id = doc.getString(StockAnalysis2::_id.name),
                     name = doc.getString(StockAnalysis2::name.name),
                     description = doc.getString(StockAnalysis2::description.name),
                     cik = doc.getString(StockAnalysis2::cik.name),
                     ticker = doc.getString(StockAnalysis2::ticker.name),
-                    currentPrice = doc.getDouble((StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::currentPrice).name),
-                    targetPrice = doc.getDouble((StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::targetPrice).name),
+                    currentPrice = currentPrice,
+                    targetPrice = targetPrice,
                     published = doc.getBoolean(StockAnalysis2::published.name),
                     lastUpdated = doc.getDate(StockAnalysis2::lastUpdated.name).toInstant(),
                 )
