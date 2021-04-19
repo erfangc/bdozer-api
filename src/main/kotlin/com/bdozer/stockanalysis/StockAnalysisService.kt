@@ -1,11 +1,10 @@
 package com.bdozer.stockanalysis
 
-import com.bdozer.stockanalysis.dataclasses.EvaluateModelRequest
-import com.bdozer.stockanalysis.dataclasses.EvaluateModelResponse
-import com.bdozer.stockanalysis.dataclasses.FindStockAnalysisResponse
-import com.bdozer.stockanalysis.dataclasses.StockAnalysis2
+import com.bdozer.stockanalysis.dataclasses.*
 import com.bdozer.stockanalysis.support.StatelessModelEvaluator
+import com.bdozer.stockanalysis.dataclasses.StockAnalysisProjection
 import com.mongodb.client.MongoDatabase
+import com.mongodb.client.model.Projections
 import com.mongodb.client.model.TextSearchOptions
 import org.litote.kmongo.*
 import org.springframework.stereotype.Service
@@ -18,6 +17,7 @@ class StockAnalysisService(
 ) {
 
     val col = mongoDatabase.getCollection<StockAnalysis2>()
+    val collection = mongoDatabase.getCollection("stockAnalysis2")
 
     fun refreshStockAnalysis(stockAnalysis: StockAnalysis2): StockAnalysis2 {
         val request = EvaluateModelRequest(model = stockAnalysis.model)
@@ -61,14 +61,44 @@ class StockAnalysisService(
             ticker?.let { StockAnalysis2::ticker eq it },
             term?.let { text(it, TextSearchOptions().caseSensitive(false)) },
         )
+        val iterable = collection
+            .find(filter)
+            .projection(
+                Projections.fields(
+                    Projections.include(
+                        StockAnalysis2::_id.name,
+                        StockAnalysis2::name.name,
+                        StockAnalysis2::description.name,
+                        StockAnalysis2::cik.name,
+                        StockAnalysis2::ticker.name,
+                        (StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::currentPrice).name,
+                        (StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::targetPrice).name,
+                        StockAnalysis2::published.name,
+                        StockAnalysis2::lastUpdated.name,
+                    )
+                )
+            )
 
-        val found = col.find(filter)
-        val totalCount = found.count()
+        val totalCount = iterable.count()
 
-        val stockAnalyses = found
+        val stockAnalyses = iterable
             .skip(skip ?: 0)
             .limit(limit ?: 10)
             .sort(descending(StockAnalysis2::lastUpdated))
+            .map {
+                doc ->
+                StockAnalysisProjection(
+                    _id = doc.getString(StockAnalysis2::_id.name),
+                    name = doc.getString(StockAnalysis2::name.name),
+                    description = doc.getString(StockAnalysis2::description.name),
+                    cik = doc.getString(StockAnalysis2::cik.name),
+                    ticker = doc.getString(StockAnalysis2::ticker.name),
+                    currentPrice = doc.getDouble((StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::currentPrice).name),
+                    targetPrice = doc.getDouble((StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::targetPrice).name),
+                    published = doc.getBoolean(StockAnalysis2::published.name),
+                    lastUpdated = doc.getDate(StockAnalysis2::lastUpdated.name).toInstant(),
+                )
+            }
             .toList()
 
         return FindStockAnalysisResponse(
