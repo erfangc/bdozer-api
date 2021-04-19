@@ -1,5 +1,7 @@
 package com.bdozer.sec.factbase.modelbuilder
 
+import com.bdozer.extensions.DoubleExtensions.orZero
+import com.bdozer.models.dataclasses.*
 import com.bdozer.sec.dataclasses.Labels
 import com.bdozer.sec.dataclasses.XbrlExplicitMember
 import com.bdozer.sec.factbase.FactExtensions.filterForDimension
@@ -7,13 +9,11 @@ import com.bdozer.sec.factbase.dataclasses.Arc
 import com.bdozer.sec.factbase.dataclasses.Dimension
 import com.bdozer.sec.factbase.dataclasses.Fact
 import com.bdozer.sec.factbase.filing.SECFiling
-import com.bdozer.extensions.DoubleExtensions.orZero
-import com.bdozer.models.dataclasses.*
 
 /**
  * # Overview
- * [ModelBuilder] is responsible for turning a single presentation Arc
- * into one or more [Item] instances. A presentation arc typically represents a single concept.
+ * [ModelBuilder] is responsible for turning presentation Arc(s) declared on [SECFiling] instances
+ * into one or more [Item] instances. A presentation arc typically represents a single concept
  *
  * ## Simple translation
  *
@@ -38,30 +38,27 @@ class ModelBuilder(private val secFiling: SECFiling) {
      */
     private val itemNameGenerator = ItemNameGenerator()
     private val filingArcsParser = secFiling.filingArcsParser
+    private val factsParser = secFiling.factsParser
     private val conceptManager = secFiling.conceptManager
     private val labelManager = secFiling.labelManager
 
     /*
     Declare frequently used reference data
      */
-    private val facts = facts(secFiling)
+    private val facts = factsParser.parseFacts().facts
     private val dimensions = secFiling.incomeStatementDeclaredDimensions()
-    private val calculations = filingArcsParser.parseFilingArcs()
+    private val filingArcs = filingArcsParser.parseFilingArcs()
 
     /*
     The follow statements translate Arcs -> Items
      */
-    private val rawIncomeStatementItems = calculations
+    private val rawIncomeStatementItems = filingArcs
         .incomeStatement
-        .flatMap { arc ->
-            arcToItems(arc)
-        }
+        .flatMap { arc -> arcToItems(arc) }
 
-    private val rawBalanceSheetItems = calculations
+    private val rawBalanceSheetItems = filingArcs
         .balanceSheet
-        .flatMap { arc ->
-            arcToItems(arc)
-        }
+        .flatMap { arc -> arcToItems(arc) }
 
     /*
     ---------------------
@@ -389,14 +386,6 @@ class ModelBuilder(private val secFiling: SECFiling) {
                     && dimension.memberConcepts.contains(explicitMember.value))
         }
     }
-
-    /**
-     * Get the latest facts for a given concept for a given filer
-     */
-    private fun facts(SECFiling: SECFiling): List<Fact> {
-        return SECFiling.factsParser.parseFacts().facts
-    }
-
 
     /**
      * ## What is this?

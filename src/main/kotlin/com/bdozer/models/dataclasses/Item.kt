@@ -29,8 +29,6 @@ data class Item(
     val compoundedGrowth: CompoundedGrowth? = null,
     val fixedCost: FixedCost? = null,
 
-    val stockBasedCompensation: Boolean? = null,
-    val nonCashExpense: Boolean? = null,
     val commentaries: Commentary? = null,
     val subtotal: Boolean = false,
 
