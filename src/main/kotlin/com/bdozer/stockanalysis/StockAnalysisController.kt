@@ -80,6 +80,7 @@ class StockAnalysisController(private val stockAnalysisService: StockAnalysisSer
         @RequestParam(required = false) skip: Int? = null,
         @RequestParam(required = false) limit: Int? = null,
         @RequestParam(required = false) term: String? = null,
+        @RequestParam(required = false) tags: List<String>? = null,
     ): FindStockAnalysisResponse {
         return stockAnalysisService.findStockAnalyses(
             userId = userId,
@@ -88,7 +89,8 @@ class StockAnalysisController(private val stockAnalysisService: StockAnalysisSer
             skip = skip,
             limit = limit,
             term = term,
-            published = published
+            published = published,
+            tags = tags,
         )
     }
 

@@ -53,11 +53,13 @@ class StockAnalysisService(
         skip: Int? = null,
         limit: Int? = null,
         term: String? = null,
+        tags: List<String>? = null,
     ): FindStockAnalysisResponse {
 
         val filter = and(
             userId?.let { StockAnalysis2::userId eq it },
             published?.let { StockAnalysis2::published eq it },
+            tags?.let { tgs -> or(tgs.map { StockAnalysis2::tags contains it  }) },
             cik?.let { StockAnalysis2::cik eq it.padStart(10, '0') },
             ticker?.let { StockAnalysis2::ticker eq it },
             term?.let { text(it, TextSearchOptions().caseSensitive(false)) },
