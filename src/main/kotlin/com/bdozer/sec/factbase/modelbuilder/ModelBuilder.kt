@@ -54,11 +54,11 @@ class ModelBuilder(private val secFiling: SECFiling) {
      */
     private val rawIncomeStatementItems = filingArcs
         .incomeStatement
-        .flatMap { arc -> arcToItems(arc) }
+        .flatMap { arc -> arcToItems(arc, filingArcs.incomeStatement) }
 
     private val rawBalanceSheetItems = filingArcs
         .balanceSheet
-        .flatMap { arc -> arcToItems(arc) }
+        .flatMap { arc -> arcToItems(arc, filingArcs.balanceSheet) }
 
     /*
     ---------------------
@@ -193,7 +193,17 @@ class ModelBuilder(private val secFiling: SECFiling) {
      *
      * @param arc the [Arc] to be turned into [Item]
      */
-    private fun arcToItems(arc: Arc): List<Item> {
+    private fun arcToItems(arc: Arc, incomeStatement: List<Arc>): List<Item> {
+
+        /*
+        Filter out any arcs that refers to calculations that is not declared
+        in the statement itself
+         */
+        if (arc.calculations.any { calculation -> incomeStatement.none { otherArc -> otherArc.conceptHref == calculation.conceptHref } }) {
+            return emptyList()
+        }
+
+
         /*
         Step 1 - find the facts that we will itemize associated with this Arc's concept
         this is either the dimensionless item or we've split it up by some dimension
