@@ -205,7 +205,10 @@ class ModelBuilder(private val secFiling: SECFiling) {
             findDimensionToUse(dimensions, facts)
                 ?.let { facts.filter { fact -> fact.conceptName == arc.conceptName }.filterForDimension(it) }
                 ?: emptyList()
-        val dimensionlessFact = facts.filter { it.conceptName == arc.conceptName }.find { it.explicitMembers.isEmpty() }
+
+        val dimensionlessFact = facts
+            .filter { it.conceptName == arc.conceptName }
+            .find { it.explicitMembers.isEmpty() }
 
         /*
         short circuit the process if dimensional and dimensionless facts
