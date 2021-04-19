@@ -45,8 +45,9 @@ class ItemOrphanedIssueGenerator {
         while (itemsToVisit.isNotEmpty()) {
             val item = itemsToVisit.pop()
             visited.add(item)
-            val elements = parents[item] ?: emptyList()
-            itemsToVisit.addAll(elements.filter { !visited.contains(it) })
+            // links = children + parents of this node
+            val parentItems = (parents[item] ?: emptyList()) + children(item)
+            itemsToVisit.addAll(parentItems.filter { !visited.contains(it) })
         }
 
         if (visited.contains(netIncomeItem)) {
