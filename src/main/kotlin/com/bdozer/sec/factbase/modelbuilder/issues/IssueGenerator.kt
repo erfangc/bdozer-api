@@ -24,8 +24,6 @@ import org.springframework.stereotype.Service
 @Service
 class IssueGenerator {
 
-    private val itemMissingLogicIssueGenerator = ItemOrphanedIssueGenerator()
-
     fun generateIssues(stockAnalysis: StockAnalysis2):List<Issue> {
         val stockAnalysisId = stockAnalysis._id
         val model = stockAnalysis.model
@@ -84,8 +82,7 @@ class IssueGenerator {
                     } else {
                         emptyList()
                     }
-                IssueType.OrphanItem ->
-                    itemMissingLogicIssueGenerator.generateIssues(stockAnalysis)
+
             }
         }
     }

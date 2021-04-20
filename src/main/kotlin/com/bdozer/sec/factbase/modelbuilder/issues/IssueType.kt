@@ -5,5 +5,4 @@ enum class IssueType {
     NetIncomeItemNotFound,
     SharesOutstandingItemNotFound,
     EpsItemNotFound,
-    OrphanItem,
 }

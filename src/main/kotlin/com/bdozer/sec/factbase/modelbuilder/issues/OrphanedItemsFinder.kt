@@ -4,9 +4,14 @@ import com.bdozer.models.dataclasses.Item
 import com.bdozer.stockanalysis.dataclasses.StockAnalysis2
 import java.util.*
 
-class ItemOrphanedIssueGenerator {
+/**
+ * This class traverses the income statement of an model
+ * in search for orphaned items. These are items that are not referenced by
+ * any other items and thus likely indicate a data issue
+ */
+class OrphanedItemsFinder {
 
-    fun generateIssues(stockAnalysis: StockAnalysis2): List<Issue> {
+    fun findOrphanedItems(stockAnalysis: StockAnalysis2): List<Item> {
 
         val model = stockAnalysis.model
         val incomeStatement = model.incomeStatementItems
@@ -72,16 +77,7 @@ class ItemOrphanedIssueGenerator {
             is an orphan
              */
             val allItems = incomeStatement.subList(revenueIndex, netIncomeIndex).toSet()
-            val orphans = allItems.minus(visited)
-            return orphans.map { item ->
-                Issue(
-                    _id = "${stockAnalysis._id}${IssueType.OrphanItem}${item.name}",
-                    stockAnalysisId = stockAnalysis._id,
-                    itemName = item.name,
-                    issueType = IssueType.OrphanItem,
-                    message = "${item.name} is an orphan (not referenced by any calculations)",
-                )
-            }
+            return allItems.minus(visited).toList()
         }
 
     }
