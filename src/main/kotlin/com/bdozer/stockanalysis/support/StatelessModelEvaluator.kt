@@ -25,7 +25,9 @@ class StatelessModelEvaluator(private val derivedAnalyticsComputer: DerivedAnaly
         perform validation
          */
         validateRequestOrThrow(request)
-        val model = request.model.copy(otherItems = request.model.generateOtherItems())
+        val model = request
+            .model
+            .copy(otherItems = request.model.generateOtherItems())
         val evaluateModelResult = ModelEvaluator().evaluate(model)
         val derivedStockAnalytics = derivedAnalyticsComputer.computeDerivedAnalytics(evaluateModelResult)
 

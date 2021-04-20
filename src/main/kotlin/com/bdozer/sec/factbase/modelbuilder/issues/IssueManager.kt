@@ -19,6 +19,9 @@ class IssueManager(
     }
 
     fun saveIssues(documents: List<Issue>) {
+        if (documents.isEmpty()) {
+            return
+        }
         val bulk = documents.map { replaceOne(Issue::_id eq it._id, it, ReplaceOptions().upsert(true)) }
         issues.bulkWrite(bulk)
     }
