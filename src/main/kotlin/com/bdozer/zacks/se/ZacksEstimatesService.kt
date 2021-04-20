@@ -2,6 +2,7 @@ package com.bdozer.zacks.se
 
 import com.mongodb.client.MongoDatabase
 import com.bdozer.extensions.DoubleExtensions.orZero
+import com.bdozer.models.dataclasses.Discrete
 import com.bdozer.models.dataclasses.Item
 import org.litote.kmongo.div
 import org.litote.kmongo.eq
@@ -24,7 +25,7 @@ class ZacksEstimatesService(mongoDatabase: MongoDatabase) {
     /**
      * Creates a revenue [Item] using Zack's estimates
      */
-    fun revenueProjections(ticker: String): Map<Int, Double> {
+    fun revenueProjections(ticker: String): Discrete {
         /*
         turn sales estimates into revenue assumptions
          */
@@ -52,12 +53,13 @@ class ZacksEstimatesService(mongoDatabase: MongoDatabase) {
             )
         }
 
-        return relevantEstimates
-            .mapIndexed { index, zacksSalesEstimates ->
-                zacksSalesEstimates.per_end_date?.year!! to zacksSalesEstimates.sales_median_est?.times(1_000_000.0)
-                    .orZero()
+        val formulas = relevantEstimates
+            .mapIndexed { _, zacksSalesEstimates ->
+                (zacksSalesEstimates.per_end_date?.year
+                    ?: error("...")) to zacksSalesEstimates.sales_median_est?.times(1_000_000.0).orZero().toString()
             }
             .toMap()
+        return Discrete(formulas = formulas)
     }
 
 }

@@ -20,7 +20,7 @@ class FactAutoFiller(private val factBase: FactBase) {
     /**
      * Percent of Revenue autofill options
      *
-     * @param factId the factId to autofill based on
+     * @param itemName the factId to autofill based on
      * @param model the [Model]
      */
     fun getPercentOfRevenueAutoFills(
@@ -30,7 +30,7 @@ class FactAutoFiller(private val factBase: FactBase) {
 
         val item =
             (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
-                .find { item -> item.name == itemName } ?: error("...")
+                .find { item -> item.name == itemName } ?: error("")
 
         val revenueFactId = model
             .incomeStatementItems
