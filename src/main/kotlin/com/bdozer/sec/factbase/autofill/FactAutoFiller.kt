@@ -9,6 +9,7 @@ import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.models.dataclasses.FixedCost
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.models.dataclasses.PercentOfRevenue
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class FactAutoFiller(private val factBase: FactBase) {
 
+    private val log = LoggerFactory.getLogger(FactAutoFiller::class.java)
     /**
      * Percent of Revenue autofill options
      *
@@ -27,38 +29,42 @@ class FactAutoFiller(private val factBase: FactBase) {
         itemName: String,
         model: Model,
     ): List<PercentOfRevenueAutoFill> {
+        try {
+            val item =
+                (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
+                    .find { item -> item.name == itemName } ?: error("")
 
-        val item =
-            (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
-                .find { item -> item.name == itemName } ?: error("")
+            val revenueFactId = model
+                .incomeStatementItems
+                .find { item -> item.name == model.totalRevenueConceptName }
+                ?.historicalValue
+                ?.factId ?: error("unable to determine revenue factId")
 
-        val revenueFactId = model
-            .incomeStatementItems
-            .find { item -> item.name == model.totalRevenueConceptName }
-            ?.historicalValue
-            ?.factId ?: error("unable to determine revenue factId")
+            val factIds = item.historicalValue?.factId?.let { listOf(it) }
+                ?: item.historicalValue?.factIds
+                ?: error("cannot determine factId on item $itemName")
 
-        val factIds = item.historicalValue?.factId?.let { listOf(it) }
-            ?: item.historicalValue?.factIds
-            ?: error("cannot determine factId on item $itemName")
+            val timeSeries = factBase.getAnnualTimeSeries(factIds)
 
-        val timeSeries = factBase.getAnnualTimeSeries(factIds)
+            val revenueTimeSeries = factBase.getAnnualTimeSeries(revenueFactId)
+            val pairs = toPairs(revenueTimeSeries, timeSeries)
+            val average = pairs.map { it[1] / it[0] }.average()
+            val latest = pairs.last().let { it[1] / it[0] }
 
-        val revenueTimeSeries = factBase.getAnnualTimeSeries(revenueFactId)
-        val pairs = toPairs(revenueTimeSeries, timeSeries)
-        val average = pairs.map { it[1] / it[0] }.average()
-        val latest = pairs.last().let { it[1] / it[0] }
-
-        return listOf(
-            PercentOfRevenueAutoFill(
-                label = "Historical Average",
-                percentOfRevenue = PercentOfRevenue(percentOfRevenue = average)
-            ),
-            PercentOfRevenueAutoFill(
-                label = "Latest",
-                percentOfRevenue = PercentOfRevenue(percentOfRevenue = latest)
-            ),
-        )
+            return listOf(
+                PercentOfRevenueAutoFill(
+                    label = "Historical Average",
+                    percentOfRevenue = PercentOfRevenue(percentOfRevenue = average)
+                ),
+                PercentOfRevenueAutoFill(
+                    label = "Latest",
+                    percentOfRevenue = PercentOfRevenue(percentOfRevenue = latest)
+                ),
+            )
+        } catch (e: Exception) {
+            log.error("error occurred", e)
+            return emptyList()
+        }
     }
 
     /**
@@ -68,32 +74,36 @@ class FactAutoFiller(private val factBase: FactBase) {
      * @param model the [Model]
      */
     fun getFixedCostAutoFills(itemName: String, model: Model): List<FixedCostAutoFill> {
+        try {
+            val item =
+                (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
+                    .find { item -> item.name == itemName } ?: error("...")
 
-        val item =
-            (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
-                .find { item -> item.name == itemName } ?: error("...")
+            val factIds = item.historicalValue?.factId?.let { listOf(it) }
+                ?: item.historicalValue?.factIds
+                ?: error("cannot determine factId on item $itemName")
 
-        val factIds = item.historicalValue?.factId?.let { listOf(it) }
-            ?: item.historicalValue?.factIds
-            ?: error("cannot determine factId on item $itemName")
+            val timeSeries = factBase.getAnnualTimeSeries(factIds)
 
-        val timeSeries = factBase.getAnnualTimeSeries(factIds)
+            val values = timeSeries.map { it.value.orZero() }
 
-        val values = timeSeries.map { it.value.orZero() }
+            val average = values.average()
+            val latest = values.last().orZero()
 
-        val average = values.average()
-        val latest = values.last().orZero()
-
-        return listOf(
-            FixedCostAutoFill(
-                label = "Historical Average",
-                fixedCost = FixedCost(cost = average)
-            ),
-            FixedCostAutoFill(
-                label = "Latest",
-                fixedCost = FixedCost(cost = latest)
-            ),
-        )
+            return listOf(
+                FixedCostAutoFill(
+                    label = "Historical Average",
+                    fixedCost = FixedCost(cost = average)
+                ),
+                FixedCostAutoFill(
+                    label = "Latest",
+                    fixedCost = FixedCost(cost = latest)
+                ),
+            )
+        } catch (e: Exception) {
+            log.error("error occurred", e)
+            return emptyList()
+        }
     }
 
     private fun toPairs(x: List<Fact>, y: List<AggregatedFact>): Array<DoubleArray> {
