@@ -19,6 +19,11 @@ data class Model(
      * Manual overrides for items
      */
     val itemOverrides: List<Item> = emptyList(),
+    /**
+     * Items that should be removed from calculation
+     * altogether
+     */
+    val suppressedItems: List<String> = emptyList(),
 
     /**
      * Crucial Item / concept names
