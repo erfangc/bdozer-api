@@ -4,11 +4,12 @@ import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.models.EvaluateModelResult
 import com.bdozer.models.dataclasses.Item
+import com.bdozer.models.dataclasses.ItemType
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.spreadsheet.Cell
-import com.bdozer.stockanalysis.support.StatelessModelEvaluator.Companion.allItems
 import com.bdozer.stockanalysis.dataclasses.DerivedStockAnalytics
 import com.bdozer.stockanalysis.dataclasses.Waterfall
+import com.bdozer.stockanalysis.support.StatelessModelEvaluator.Companion.allItems
 import org.springframework.stereotype.Service
 import java.util.*
 import kotlin.math.pow
@@ -78,8 +79,10 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 /*
                 Find total revenue revenue
                  */
-                val revenue = cellLookupByItemName[totalRevenueItemName] ?: error("no revenue cell found for period $period")
-                val netIncome = cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
+                val revenue =
+                    cellLookupByItemName[totalRevenueItemName] ?: error("no revenue cell found for period $period")
+                val netIncome =
+                    cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
 
                 /*
                 Find all the expenses
@@ -98,12 +101,18 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                         break
                     }
                     found.add(dependentCell?.name)
-                    dependentCellNames.addAll(dependentCell?.dependentCellNames?.filter { !found.contains(it) } ?: emptyList())
+                    dependentCellNames.addAll(dependentCell?.dependentCellNames?.filter { !found.contains(it) }
+                        ?: emptyList())
                 }
 
-                val expenses = found.filterNotNull().map {
-                    cellName -> cellLookupByCellName[cellName]!!
-                }
+                val expenses = found
+                    .filterNotNull()
+                    .map { cellName ->
+                        cellLookupByCellName[cellName]!!
+                    }
+                    .filter { cell ->
+                        cell.item.type != ItemType.SumOfOtherItems
+                    }
 
                 val cutoff = 5
 
@@ -127,7 +136,8 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 /*
                 profit
                  */
-                val profit = cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
+                val profit =
+                    cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
 
                 period to Waterfall(revenue = revenue, expenses = condensedExpenses, profit = profit)
             }.toMap()
