@@ -1,4 +1,4 @@
-package com.bdozer.sec.factbase.modelbuilder.issues
+package com.bdozer.orphaneditemsfinder
 
 import com.bdozer.models.dataclasses.Item
 import com.bdozer.stockanalysis.dataclasses.StockAnalysis2
@@ -13,7 +13,7 @@ class OrphanedItemsFinder {
 
     fun findOrphanedItems(stockAnalysis: StockAnalysis2): List<Item> {
 
-        val model = stockAnalysis.model
+        val model = stockAnalysis.model.override()
         val incomeStatement = model.incomeStatementItems
 
         val revenueItemName = model.totalRevenueConceptName ?: return emptyList()

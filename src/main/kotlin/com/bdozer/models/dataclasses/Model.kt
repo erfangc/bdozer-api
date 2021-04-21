@@ -60,6 +60,22 @@ data class Model(
     val excelColumnOffset: Int = 1,
     val excelRowOffset: Int = 1,
 ) {
+
+    fun override(): Model {
+        val suppressedItems = suppressedItems.toSet()
+        val overrideLookup = itemOverrides.associateBy { it.name }
+        fun overrideItems(items:List<Item>): List<Item> {
+            return items
+                .filter { item -> !suppressedItems.contains(item.name) }
+                .map { item -> overrideLookup[item.name] ?: item }
+        }
+        return copy(
+            incomeStatementItems = overrideItems(incomeStatementItems),
+            balanceSheetItems = overrideItems(balanceSheetItems),
+            cashFlowStatementItems = overrideItems(cashFlowStatementItems),
+        )
+    }
+
     fun generateOtherItems(): List<Item> {
         val epsConceptName = epsConceptName
         val periods = periods

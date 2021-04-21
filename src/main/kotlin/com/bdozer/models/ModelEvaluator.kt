@@ -9,14 +9,6 @@ import org.springframework.stereotype.Service
 @Service
 class ModelEvaluator {
 
-    private fun Model.override(items: List<Item>): List<Item> {
-        val suppressedItems = suppressedItems.toSet()
-        val overrideLookup = itemOverrides.associateBy { it.name }
-        return items
-            .filter { item -> !suppressedItems.contains(item.name) }
-            .map { item -> overrideLookup[item.name] ?: item }
-    }
-
     /*
     Run the model
      */
@@ -24,12 +16,7 @@ class ModelEvaluator {
         /*
         overlay items form the override to model
          */
-        val overriddenModel = model.copy(
-            incomeStatementItems = model.override(model.incomeStatementItems),
-            balanceSheetItems = model.override(model.balanceSheetItems),
-            cashFlowStatementItems = model.override(model.cashFlowStatementItems),
-            otherItems = model.override(model.otherItems),
-        )
+        val overriddenModel = model.override()
         val cells = CellGenerator().generateCells(overriddenModel)
         val evaluatedCells = CellEvaluator().evaluate(cells)
         val targetPrice = evaluatedCells
