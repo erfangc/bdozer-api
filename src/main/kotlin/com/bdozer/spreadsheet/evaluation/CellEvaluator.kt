@@ -127,6 +127,7 @@ class CellEvaluator {
     }
 
     private fun checkCircularReference(stack: Stack<Cell>, headCell: Cell) {
+        return
         // TODO get this to become better
         val lst = stack.toList()
         val withoutHeadCell = lst.subList(1, lst.size)

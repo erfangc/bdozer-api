@@ -10,6 +10,7 @@ import com.bdozer.stockanalysis.support.StatelessModelEvaluator.Companion.allIte
 import com.bdozer.stockanalysis.dataclasses.DerivedStockAnalytics
 import com.bdozer.stockanalysis.dataclasses.Waterfall
 import org.springframework.stereotype.Service
+import java.util.*
 import kotlin.math.pow
 
 @Service
@@ -72,19 +73,38 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
             .cells
             .groupBy { it.period }
             .map { (period, cells) ->
-                val cellsLookup = cells.associateBy { it.item.name }
+                val cellLookupByItemName = cells.associateBy { it.item.name }
+                val cellLookupByCellName = cells.associateBy { it.name }
                 /*
                 Find total revenue revenue
                  */
-                val revenue = cellsLookup[totalRevenueItemName] ?: error("no revenue cell found for period $period")
+                val revenue = cellLookupByItemName[totalRevenueItemName] ?: error("no revenue cell found for period $period")
+                val netIncome = cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
 
                 /*
                 Find all the expenses
                 TODO figure this out
                  */
-                val revenueIdx = model.incomeStatementItems.indexOfFirst { it.name == totalRevenueItemName }
-                val netIncomeIdx = model.incomeStatementItems.indexOfFirst { it.name == netIncomeItemName }
-                val expenses = cells.subList(revenueIdx + 1, netIncomeIdx)
+                // find all the cells between revenue and net income
+                val found = hashSetOf<String?>()
+
+                val dependentCellNames = Stack<String>()
+                dependentCellNames.addAll(netIncome.dependentCellNames)
+
+                while (dependentCellNames.isNotEmpty()) {
+                    val dependentCellName = dependentCellNames.pop()
+                    val dependentCell = cellLookupByCellName[dependentCellName]
+                    if (dependentCell?.name == revenue.name) {
+                        break
+                    }
+                    found.add(dependentCell?.name)
+                    dependentCellNames.addAll(dependentCell?.dependentCellNames?.filter { !found.contains(it) } ?: emptyList())
+                }
+
+                val expenses = found.filterNotNull().map {
+                    cellName -> cellLookupByCellName[cellName]!!
+                }
+
                 val cutoff = 5
 
                 /*
@@ -92,10 +112,11 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                  */
                 val condensedExpenses = if (expenses.size > cutoff) {
                     val top5Expenses = expenses.subList(0, cutoff)
-                    val others = expenses.subList(cutoff, expenses.size)
+                    val sumOfTop5 = top5Expenses.sumByDouble { it.value.orZero() }
+                    val plug = revenue.value.orZero() - sumOfTop5 - netIncome.value.orZero()
                     top5Expenses + Cell(
                         name = "Others",
-                        value = others.sumByDouble { cell -> cell.value ?: 0.0 },
+                        value = plug,
                         period = period,
                         item = Item(name = "Others")
                     )
@@ -106,7 +127,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 /*
                 profit
                  */
-                val profit = cellsLookup[netIncomeItemName] ?: error("no revenue cell found for period $period")
+                val profit = cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
 
                 period to Waterfall(revenue = revenue, expenses = condensedExpenses, profit = profit)
             }.toMap()
