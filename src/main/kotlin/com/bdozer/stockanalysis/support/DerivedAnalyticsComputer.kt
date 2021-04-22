@@ -4,7 +4,6 @@ import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.models.EvaluateModelResult
 import com.bdozer.models.dataclasses.Item
-import com.bdozer.models.dataclasses.ItemType
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.spreadsheet.Cell
 import com.bdozer.stockanalysis.dataclasses.DerivedStockAnalytics
@@ -12,6 +11,7 @@ import com.bdozer.stockanalysis.dataclasses.Waterfall
 import com.bdozer.stockanalysis.support.StatelessModelEvaluator.Companion.allItems
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.pow
 
 @Service
@@ -74,6 +74,10 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
             .cells
             .groupBy { it.period }
             .map { (period, cells) ->
+                /*
+                process the business waterfall for this period
+                 */
+
                 val cellLookupByItemName = cells.associateBy { it.item.name }
                 val cellLookupByCellName = cells.associateBy { it.name }
                 /*
@@ -85,11 +89,10 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                     cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
 
                 /*
-                Find all the expenses
-                TODO figure this out
+                Find all the expenses by traversing its dependency tree between
+                net income and revenue
                  */
-                // find all the cells between revenue and net income
-                val found = hashSetOf<String?>()
+                val visited = hashSetOf<String?>()
 
                 val dependentCellNames = Stack<String>()
                 dependentCellNames.addAll(netIncome.dependentCellNames)
@@ -97,21 +100,21 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 while (dependentCellNames.isNotEmpty()) {
                     val dependentCellName = dependentCellNames.pop()
                     val dependentCell = cellLookupByCellName[dependentCellName]
-                    if (dependentCell?.name == revenue.name) {
-                        break
+                    // skip if this is the revenue cell
+                    if (dependentCell?.name != revenue.name) {
+                        visited.add(dependentCell?.name)
+                        val unvisited = dependentCell
+                            ?.dependentCellNames
+                            ?.filter { !visited.contains(it) }
+                            ?: emptyList()
+                        dependentCellNames.addAll(unvisited)
                     }
-                    found.add(dependentCell?.name)
-                    dependentCellNames.addAll(dependentCell?.dependentCellNames?.filter { !found.contains(it) }
-                        ?: emptyList())
                 }
 
-                val expenses = found
+                val expenses = visited
                     .filterNotNull()
                     .map { cellName ->
                         cellLookupByCellName[cellName]!!
-                    }
-                    .filter { cell ->
-                        cell.item.type != ItemType.SumOfOtherItems
                     }
 
                 val cutoff = 5
@@ -120,7 +123,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 top 5 expenses and then lump everything else into Other
                  */
                 val condensedExpenses = if (expenses.size > cutoff) {
-                    val top5Expenses = expenses.subList(0, cutoff)
+                    val top5Expenses = expenses.sortedByDescending { abs(it.value.orZero()) }.subList(0, cutoff)
                     val sumOfTop5 = top5Expenses.sumByDouble { it.value.orZero() }
                     val plug = revenue.value.orZero() - sumOfTop5 - netIncome.value.orZero()
                     top5Expenses + Cell(
