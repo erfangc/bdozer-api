@@ -81,27 +81,29 @@ class FilingArcsParser(private val secFiling: SECFiling) {
     private fun traversePresentationLink(
         presentationLink: XmlNode,
         rootLocator: String? = null
-    ): MutableList<Arc> {
+    ): List<Arc> {
         /*
         For some reason this keeps happening
          */
         val role = presentationLink.role() ?: error("presentationLink has no role attribute")
-        val arcs = presentationLink
+        val xmlNodes = presentationLink
             .getElementsByTag(link, "presentationArc")
             .groupBy { it.from() }
         val locators = presentationLink
             .getElementsByTag(link, "loc")
 
-        val locatorHrefs = locators
+        val hrefLookupByLabel = locators
             .associate {
                 it.label() to it.href()
             }
+        val locatorByHref = locators
+            .associateBy { it.href() }
 
         /*
         CalculationArcs is a lookup take for Calculations given the href
         of a single locator
          */
-        val calculationArcs = parseCalculationArcs(role)
+        val calculationsLookup = parseCalculationArcs(role)
 
         if (locators.isEmpty()) {
             return mutableListOf()
@@ -132,45 +134,51 @@ class FilingArcsParser(private val secFiling: SECFiling) {
         using xlink:from -> xlink:to, as we encounter new nodes
         we derive the corresponding concept's calculation shallowly
          */
-        val graphNodes = mutableListOf<Arc>()
+        val arcs = mutableListOf<Arc>()
         while (stack.isNotEmpty()) {
-            val currLocLabel = stack.pop()
-            val conceptHref = locatorHrefs[currLocLabel] ?: error("cannot find $currLocLabel in locators")
+            val currentLocLabel = stack.pop()
+            val conceptHref = hrefLookupByLabel[currentLocLabel] ?: error("cannot find $currentLocLabel in locators")
 
             /*
             Add the graph node into it's appropriate place in the final
             data structure
              */
-            graphNodes.add(
+            val calculations = calculationsLookup[conceptHref] ?: emptyList()
+            /*
+            if conceptHrefs referenced by calculations do not exist
+            then remove them
+             */
+            arcs.add(
                 Arc(
                     conceptHref = conceptHref,
-                    calculations = calculationArcs[conceptHref] ?: emptyList(),
-                    parentHref = if (parents.isNotEmpty()) locatorHrefs[parents.peek()] else null,
-                    conceptName = conceptManager.getConcept(conceptHref)?.conceptName!!,
+                    calculations = if (calculations.any { calculation -> locatorByHref[calculation.conceptHref] == null }) emptyList() else calculations,
+                    parentHref = if (parents.isNotEmpty()) hrefLookupByLabel[parents.peek()] else null,
+                    conceptName = conceptManager.getConcept(conceptHref)?.conceptName
+                        ?: error("concept $conceptHref not found"),
                 )
             )
 
             /*
             We've processed all the children for the current parent
              */
-            if (lastSiblings.isNotEmpty() && lastSiblings.peek() == currLocLabel) {
+            if (lastSiblings.isNotEmpty() && lastSiblings.peek() == currentLocLabel) {
                 lastSiblings.pop()
                 if (parents.isNotEmpty()) {
                     parents.pop()
                 }
             }
 
-            val children = arcs[currLocLabel]
+            val children = xmlNodes[currentLocLabel]
             if (!children.isNullOrEmpty()) {
                 val elements = children.map { it.attr(xlink, "to") }.reversed()
                 stack.addAll(elements)
                 val lastSibling = elements.first()
-                parents.add(currLocLabel)
+                parents.add(currentLocLabel)
                 lastSiblings.add(lastSibling)
             }
         }
 
-        return graphNodes
+        return arcs
     }
 
     /**
@@ -224,7 +232,7 @@ class FilingArcsParser(private val secFiling: SECFiling) {
         preferential treatment to the default calculationLink that match
         the passed in role
          */
-        val toMap = allLookups
+        return allLookups
             .flatMap { (role, lookup) ->
                 lookup.map { (conceptHref, _) ->
                     conceptHref to role
@@ -236,6 +244,5 @@ class FilingArcsParser(private val secFiling: SECFiling) {
                 conceptHref to allLookups[role]?.get(conceptHref)!!
             }
             .toMap()
-        return toMap
     }
 }

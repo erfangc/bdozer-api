@@ -52,6 +52,11 @@ class ModelBuilder(private val secFiling: SECFiling) {
     /*
     The follow statements translate Arcs -> Items
      */
+
+    /*
+    NOTE - sometimes arcs refers to concepts that are not part of the statement
+    we must tact on those
+     */
     private val rawIncomeStatementItems = filingArcs
         .incomeStatement
         .flatMap { arc -> arcToItems(arc, filingArcs.incomeStatement) }
