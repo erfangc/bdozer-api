@@ -4,6 +4,7 @@ import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.models.EvaluateModelResult
 import com.bdozer.models.dataclasses.Item
+import com.bdozer.models.dataclasses.ItemType
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.spreadsheet.Cell
 import com.bdozer.stockanalysis.dataclasses.DerivedStockAnalytics
@@ -116,6 +117,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                     .map { cellName ->
                         cellLookupByCellName[cellName]!!
                     }
+                    .filter { it.item.type != ItemType.SumOfOtherItems }
 
                 val cutoff = 5
 
