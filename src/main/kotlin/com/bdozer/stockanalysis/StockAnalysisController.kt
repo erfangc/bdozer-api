@@ -39,7 +39,8 @@ class StockAnalysisController(private val stockAnalysisService: StockAnalysisSer
         of the original analysis
         
         This API does not persist (save) the new analysis. This API is a stateless calculator
-        """
+        """,
+        summary = """Refresh a stock analysis by rerunning the model"""
     )
     @PostMapping("refresh")
     fun refreshStockAnalysis(@RequestBody stockAnalysis: StockAnalysis2): StockAnalysis2 {

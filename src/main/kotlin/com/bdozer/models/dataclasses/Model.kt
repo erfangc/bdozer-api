@@ -64,7 +64,7 @@ data class Model(
     fun override(): Model {
         val suppressedItems = suppressedItems.toSet()
         val overrideLookup = itemOverrides.associateBy { it.name }
-        fun overrideItems(items:List<Item>): List<Item> {
+        fun overrideItems(items: List<Item>): List<Item> {
             return items
                 .filter { item -> !suppressedItems.contains(item.name) }
                 .map { item -> overrideLookup[item.name] ?: item }
@@ -105,4 +105,9 @@ data class Model(
             )
         )
     }
+
+    fun allItems(): List<Item> {
+        return (incomeStatementItems + balanceSheetItems + cashFlowStatementItems + otherItems)
+    }
+
 }

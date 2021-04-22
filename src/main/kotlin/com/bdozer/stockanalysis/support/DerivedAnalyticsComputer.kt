@@ -9,7 +9,6 @@ import com.bdozer.models.dataclasses.Model
 import com.bdozer.spreadsheet.Cell
 import com.bdozer.stockanalysis.dataclasses.DerivedStockAnalytics
 import com.bdozer.stockanalysis.dataclasses.Waterfall
-import com.bdozer.stockanalysis.support.StatelessModelEvaluator.Companion.allItems
 import org.springframework.stereotype.Service
 import java.util.*
 import kotlin.math.abs
@@ -18,6 +17,9 @@ import kotlin.math.pow
 @Service
 class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageService) {
 
+    /**
+     * Compute derived analytics given the [EvaluateModelResult] from running the stock analyzer
+     */
     fun computeDerivedAnalytics(evaluateModelResult: EvaluateModelResult): DerivedStockAnalytics {
         val model = evaluateModelResult.model
 
@@ -79,7 +81,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 val cellLookupByItemName = cells.associateBy { it.item.name }
 
                 /*
-                Find total revenue revenue
+                find total revenue revenue
                  */
                 val revenue = cellLookupByItemName[model.totalRevenueConceptName]
                     ?: error("no revenue cell found for period $period")
@@ -88,6 +90,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 val expenses = expenses(cells, evaluateModelResult)
 
                 val cutoff = 5
+
                 /*
                 top 5 expenses and then lump everything else into Other
                  */
@@ -99,7 +102,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                         name = "Others",
                         value = plug,
                         period = period,
-                        item = Item(name = "Others")
+                        item = Item(name = "Others"),
                     )
                 } else {
                     expenses
@@ -109,9 +112,15 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 profit
                  */
                 val profit =
-                    cellLookupByItemName[model.netIncomeConceptName] ?: error("no revenue cell found for period $period")
+                    cellLookupByItemName[model.netIncomeConceptName]
+                        ?: error("no revenue cell found for period $period")
 
-                period to Waterfall(revenue = revenue, expenses = condensedExpenses, profit = profit)
+                period to Waterfall(
+                    revenue = revenue,
+                    expenses = condensedExpenses,
+                    profit = profit,
+                )
+
             }.toMap()
     }
 
@@ -127,7 +136,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
         val revenue = cells.find { cell -> cell.item.name == model.totalRevenueConceptName }
 
         /*
-        Find all the expenses by traversing its dependency tree between
+        find all the expenses by traversing its dependency tree between
         net income and revenue
          */
         val visited = hashSetOf<String?>()
@@ -138,7 +147,9 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
         while (dependentCellNames.isNotEmpty()) {
             val dependentCellName = dependentCellNames.pop()
             val dependentCell = cellLookupByCellName[dependentCellName]
-            // skip if this is the revenue cell
+            /*
+            skip if this is the revenue cell
+             */
             if (dependentCell?.name != revenue?.name) {
                 visited.add(dependentCell?.name)
                 val unvisited = dependentCell
@@ -148,11 +159,9 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 dependentCellNames.addAll(unvisited)
             }
         }
+
         return visited
-            .filterNotNull()
-            .map { cellName ->
-                cellLookupByCellName[cellName]!!
-            }
+            .mapNotNull { cellName -> cellLookupByCellName[cellName] }
             .filter { it.item.type != ItemType.SumOfOtherItems }
     }
 }

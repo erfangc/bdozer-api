@@ -1,7 +1,6 @@
 package com.bdozer.stockanalysis.support
 
 import com.bdozer.models.ModelEvaluator
-import com.bdozer.models.dataclasses.Item
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.stockanalysis.dataclasses.EvaluateModelRequest
 import com.bdozer.stockanalysis.dataclasses.EvaluateModelResponse
@@ -10,12 +9,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class StatelessModelEvaluator(private val derivedAnalyticsComputer: DerivedAnalyticsComputer) {
-
-    companion object {
-        fun Model.allItems(): List<Item> {
-            return (incomeStatementItems + balanceSheetItems + cashFlowStatementItems + otherItems)
-        }
-    }
 
     /**
      * Evaluate the given model and return a [StockAnalysis2]
