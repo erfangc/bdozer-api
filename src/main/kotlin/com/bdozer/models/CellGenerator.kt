@@ -197,9 +197,6 @@ class CellGenerator {
              */
             else {
                 when (item.type) {
-                    ItemType.SubscriptionRevenue -> SubscriptionRevenueTranslator(ctx)
-                        .resolveExpression(cell)
-
                     ItemType.PercentOfRevenue -> PercentOfRevenueTranslator(ctx)
                         .translateFormula(cell)
 
