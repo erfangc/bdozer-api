@@ -203,6 +203,9 @@ class CellGenerator {
                     ItemType.PercentOfTotalAsset -> PercentOfTotalAssetTranslator(ctx)
                         .translateFormula(cell)
 
+                    ItemType.PercentOfAnotherItem -> PercentOfAnotherItemTranslator(ctx)
+                        .translateFormula(cell)
+
                     ItemType.FixedCost -> FixedCostTranslator()
                         .translateFormula(cell)
 

@@ -7,6 +7,7 @@ enum class ItemType {
     UnitSalesRevenue,
     Custom,
     PercentOfRevenue,
+    PercentOfAnotherItem,
     PercentOfTotalAsset,
     FixedCost,
 }
