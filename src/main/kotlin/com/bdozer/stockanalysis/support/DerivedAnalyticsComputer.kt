@@ -67,60 +67,27 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
      * This method computes the [Waterfall] for every period. A [Waterfall] groups - for 1 period -
      * the major expenses into at most 5 categories for ease of display
      */
-    fun businessWaterfall(evalResult: EvaluateModelResult): Map<Int, Waterfall> {
-        val model = evalResult.model
-        val totalRevenueItemName = model.totalRevenueConceptName
-        val netIncomeItemName = model.netIncomeConceptName
-        return evalResult
+    fun businessWaterfall(evaluateModelResult: EvaluateModelResult): Map<Int, Waterfall> {
+        val model = evaluateModelResult.model
+        return evaluateModelResult
             .cells
             .groupBy { it.period }
             .map { (period, cells) ->
                 /*
                 process the business waterfall for this period
                  */
-
                 val cellLookupByItemName = cells.associateBy { it.item.name }
-                val cellLookupByCellName = cells.associateBy { it.name }
+
                 /*
                 Find total revenue revenue
                  */
-                val revenue =
-                    cellLookupByItemName[totalRevenueItemName] ?: error("no revenue cell found for period $period")
-                val netIncome =
-                    cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
-
-                /*
-                Find all the expenses by traversing its dependency tree between
-                net income and revenue
-                 */
-                val visited = hashSetOf<String?>()
-
-                val dependentCellNames = Stack<String>()
-                dependentCellNames.addAll(netIncome.dependentCellNames)
-
-                while (dependentCellNames.isNotEmpty()) {
-                    val dependentCellName = dependentCellNames.pop()
-                    val dependentCell = cellLookupByCellName[dependentCellName]
-                    // skip if this is the revenue cell
-                    if (dependentCell?.name != revenue.name) {
-                        visited.add(dependentCell?.name)
-                        val unvisited = dependentCell
-                            ?.dependentCellNames
-                            ?.filter { !visited.contains(it) }
-                            ?: emptyList()
-                        dependentCellNames.addAll(unvisited)
-                    }
-                }
-
-                val expenses = visited
-                    .filterNotNull()
-                    .map { cellName ->
-                        cellLookupByCellName[cellName]!!
-                    }
-                    .filter { it.item.type != ItemType.SumOfOtherItems }
+                val revenue = cellLookupByItemName[model.totalRevenueConceptName]
+                    ?: error("no revenue cell found for period $period")
+                val netIncome = cellLookupByItemName[model.netIncomeConceptName]
+                    ?: error("no revenue cell found for period $period")
+                val expenses = expenses(cells, evaluateModelResult)
 
                 val cutoff = 5
-
                 /*
                 top 5 expenses and then lump everything else into Other
                  */
@@ -142,9 +109,50 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
                 profit
                  */
                 val profit =
-                    cellLookupByItemName[netIncomeItemName] ?: error("no revenue cell found for period $period")
+                    cellLookupByItemName[model.netIncomeConceptName] ?: error("no revenue cell found for period $period")
 
                 period to Waterfall(revenue = revenue, expenses = condensedExpenses, profit = profit)
             }.toMap()
+    }
+
+    private fun expenses(
+        cells: List<Cell>,
+        evaluateModelResult: EvaluateModelResult
+    ): List<Cell> {
+        /*
+        find net income/revenue cells
+         */
+        val model = evaluateModelResult.model
+        val netIncome = cells.find { cell -> cell.item.name == model.netIncomeConceptName }
+        val revenue = cells.find { cell -> cell.item.name == model.totalRevenueConceptName }
+
+        /*
+        Find all the expenses by traversing its dependency tree between
+        net income and revenue
+         */
+        val visited = hashSetOf<String?>()
+        val cellLookupByCellName = cells.associateBy { it.name }
+        val dependentCellNames = Stack<String>()
+        dependentCellNames.addAll(netIncome?.dependentCellNames ?: emptyList())
+
+        while (dependentCellNames.isNotEmpty()) {
+            val dependentCellName = dependentCellNames.pop()
+            val dependentCell = cellLookupByCellName[dependentCellName]
+            // skip if this is the revenue cell
+            if (dependentCell?.name != revenue?.name) {
+                visited.add(dependentCell?.name)
+                val unvisited = dependentCell
+                    ?.dependentCellNames
+                    ?.filter { !visited.contains(it) }
+                    ?: emptyList()
+                dependentCellNames.addAll(unvisited)
+            }
+        }
+        return visited
+            .filterNotNull()
+            .map { cellName ->
+                cellLookupByCellName[cellName]!!
+            }
+            .filter { it.item.type != ItemType.SumOfOtherItems }
     }
 }
