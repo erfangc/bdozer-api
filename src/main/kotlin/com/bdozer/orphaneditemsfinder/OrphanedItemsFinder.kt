@@ -76,8 +76,12 @@ class OrphanedItemsFinder {
             every thing that is unvisited (except those that cuts off after NetIncome)
             is an orphan
              */
-            val allItems = incomeStatement.subList(revenueIndex, netIncomeIndex).toSet()
-            return allItems.minus(visited).toList()
+            return if (netIncomeIndex > revenueIndex) {
+                val allItems = incomeStatement.subList(revenueIndex, netIncomeIndex).toSet()
+                allItems.minus(visited).toList()
+            } else {
+                emptyList()
+            }
         }
 
     }
