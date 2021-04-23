@@ -110,4 +110,8 @@ data class Model(
         return (incomeStatementItems + balanceSheetItems + cashFlowStatementItems + otherItems)
     }
 
+    fun item(itemName: String?): Item? {
+        return allItems().find { it.name == itemName }
+    }
+
 }

@@ -1,14 +1,15 @@
 package com.bdozer.sec.factbase.autofill
 
-import com.bdozer.sec.factbase.core.FactBase
-import com.bdozer.sec.factbase.autofill.dataclasses.FixedCostAutoFill
-import com.bdozer.sec.factbase.autofill.dataclasses.PercentOfRevenueAutoFill
-import com.bdozer.sec.factbase.dataclasses.AggregatedFact
-import com.bdozer.sec.factbase.dataclasses.Fact
 import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.models.dataclasses.FixedCost
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.models.dataclasses.PercentOfRevenue
+import com.bdozer.sec.factbase.autofill.dataclasses.FixedCostAutoFill
+import com.bdozer.sec.factbase.autofill.dataclasses.PercentOfAnotherItemAutoFill
+import com.bdozer.sec.factbase.autofill.dataclasses.PercentOfRevenueAutoFill
+import com.bdozer.sec.factbase.core.FactBase
+import com.bdozer.sec.factbase.dataclasses.AggregatedFact
+import com.bdozer.sec.factbase.dataclasses.Fact
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service
 class FactAutoFiller(private val factBase: FactBase) {
 
     private val log = LoggerFactory.getLogger(FactAutoFiller::class.java)
+
     /**
      * Percent of Revenue autofill options
      *
@@ -30,13 +32,10 @@ class FactAutoFiller(private val factBase: FactBase) {
         model: Model,
     ): List<PercentOfRevenueAutoFill> {
         try {
-            val item =
-                (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
-                    .find { item -> item.name == itemName } ?: error("")
+            val item = model.item(itemName) ?: error("unable to find item $itemName")
 
             val revenueFactId = model
-                .incomeStatementItems
-                .find { item -> item.name == model.totalRevenueConceptName }
+                .item(model.totalRevenueConceptName)
                 ?.historicalValue
                 ?.factId ?: error("unable to determine revenue factId")
 
@@ -104,6 +103,11 @@ class FactAutoFiller(private val factBase: FactBase) {
             log.error("error occurred", e)
             return emptyList()
         }
+    }
+
+    fun getPercentOfAnotherItemAutoFills(itemName: String, dependentItemName: String, model: Model): List<PercentOfAnotherItemAutoFill> {
+
+        TODO("Not yet implemented")
     }
 
     private fun toPairs(x: List<Fact>, y: List<AggregatedFact>): Array<DoubleArray> {
