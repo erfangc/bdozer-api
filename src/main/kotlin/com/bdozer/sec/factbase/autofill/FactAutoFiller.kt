@@ -74,9 +74,7 @@ class FactAutoFiller(private val factBase: FactBase) {
      */
     fun getFixedCostAutoFills(itemName: String, model: Model): List<FixedCostAutoFill> {
         try {
-            val item =
-                (model.incomeStatementItems + model.balanceSheetItems + model.cashFlowStatementItems + model.otherItems)
-                    .find { item -> item.name == itemName } ?: error("...")
+            val item = model.item(itemName) ?: error("...")
 
             val factIds = item.historicalValue?.factId?.let { listOf(it) }
                 ?: item.historicalValue?.factIds
