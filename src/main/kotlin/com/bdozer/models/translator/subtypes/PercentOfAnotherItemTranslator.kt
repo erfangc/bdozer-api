@@ -18,7 +18,7 @@ class PercentOfAnotherItemTranslator(
         if (dependentItem == null) {
             error("$dependentItemName required by ${item.name} cannot be found")
         } else {
-            val dependentCellName = "${dependentItemName}_$period"
+            val dependentCellName = "${dependentItemName}_Period$period"
             return cell.copy(
                 formula = "$dependentCellName*$percent",
                 dependentCellNames = listOf(dependentCellName),
