@@ -160,7 +160,7 @@ class ModelBuilder(private val secFiling: SECFiling) {
             if (item.sumOfOtherItems != null) {
                 val filtered =
                     item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
-                item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered))
+                item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered),)
             } else {
                 item
             }
@@ -288,7 +288,7 @@ class ModelBuilder(private val secFiling: SECFiling) {
             Item(
                 name = itemNameGenerator.itemName(arc.conceptName),
                 description = labelWaterfall(labels),
-                historicalValue = historicalValue
+                historicalValue = historicalValue,
             )
         } else if (dimensionlessFact != null) {
             /*
@@ -317,10 +317,9 @@ class ModelBuilder(private val secFiling: SECFiling) {
             dimensionlessItem.copy(
                 type = ItemType.FixedCost,
                 fixedCost = FixedCost(dimensionlessItem.historicalValue?.value.orZero()),
-                subtotal = false
             )
         } else {
-            dimensionlessItem.copy(type = ItemType.SumOfOtherItems, sumOfOtherItems = sum, subtotal = true)
+            dimensionlessItem.copy(type = ItemType.SumOfOtherItems, sumOfOtherItems = sum)
         }
 
         return dimensionalItems + dlessItemWithFormula

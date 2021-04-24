@@ -29,7 +29,5 @@ data class Item(
     val fixedCost: FixedCost? = null,
 
     val commentaries: Commentary? = null,
-    val subtotal: Boolean = false,
-
-    )
+)
 
