@@ -1,7 +1,7 @@
 package com.bdozer.sec.factbase.core
 
 import com.bdozer.sec.factbase.ingestor.FilingIngestor
-import com.bdozer.sec.factbase.ingestor.RssFilingIngestor
+import com.bdozer.sec.factbase.ingestor.rss.RssIngestor
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.Executors
 
@@ -10,18 +10,16 @@ import java.util.concurrent.Executors
 @CrossOrigin
 class FactBaseController(
     private val filingIngestor: FilingIngestor,
-    private val rssFilingIngestor: RssFilingIngestor,
+    private val rssIngestor: RssIngestor,
 ) {
 
     private val executor = Executors.newCachedThreadPool()
 
-    @PostMapping("rss-filing-ingestor")
-    fun runRssFilingIngestor(
-        @RequestParam(required = false) numYearsToLookback: Int? = null,
-    ) {
+    @PostMapping("latest")
+    fun latest() {
         executor.execute {
             try {
-                rssFilingIngestor.run(numYearsToLookback = numYearsToLookback)
+                rssIngestor.processLatest()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
