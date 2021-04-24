@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ofPattern
+import java.util.concurrent.TimeUnit
 
 @Service
 class RssIngestor(
@@ -29,7 +30,7 @@ class RssIngestor(
     private val col = mongoDatabase.getCollection<XbrlRssItem>()
     private val q4FactFinder = Q4FactFinder(mongoDatabase)
 
-    @Scheduled(cron = "*/30 * * * * MON-FRI")
+    @Scheduled(fixedRate = 1800000L)
     fun processLatest() {
         val url = "https://www.sec.gov/Archives/edgar/usgaap.rss.xml"
         val xml = httpClient.readXml(url)
