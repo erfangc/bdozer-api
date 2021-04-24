@@ -60,52 +60,56 @@ class FactBase(
      * @param factIds
      */
     fun getAnnualTimeSeries(factIds: List<String>): List<AggregatedFact> {
-        val originalFacts = facts.find(Fact::_id `in` factIds).toList()
-        val dimensions = originalFacts.dimensions()
+        try {
+            val originalFacts = facts.find(Fact::_id `in` factIds).toList()
+            val dimensions = originalFacts.dimensions()
 
-        fun <R, K> List<R>.distinctOrThrow(fn: (R) -> K): K {
-            val r = distinctBy(fn)
-            when {
-                r.isEmpty() -> {
-                    error("set is empty")
-                }
-                r.size > 1 -> {
-                    error("non distinct set found $r")
-                }
-                else -> {
-                    return r.first().let(fn)
+            fun <R, K> List<R>.distinctOrThrow(fn: (R) -> K): K {
+                val r = distinctBy(fn)
+                when {
+                    r.isEmpty() -> {
+                        error("set is empty")
+                    }
+                    r.size > 1 -> {
+                        error("non distinct set found $r")
+                    }
+                    else -> {
+                        return r.first().let(fn)
+                    }
                 }
             }
+
+            val cik = originalFacts.distinctOrThrow { it.cik }
+            val conceptName = originalFacts.distinctOrThrow { it.conceptName }
+            val documentFiscalPeriodFocus = originalFacts.distinctOrThrow { it.documentFiscalPeriodFocus }
+
+            /*
+            First gather all the facts
+            */
+            return facts
+                .find(
+                    and(
+                        Fact::cik eq cik,
+                        Fact::conceptName eq conceptName,
+                        Fact::documentFiscalPeriodFocus eq documentFiscalPeriodFocus,
+                    )
+                )
+                .toList()
+                .filterForDimensions(dimensions)
+                .groupBy { it.documentPeriodEndDate }
+                .map { (documentPeriodEndDate, values) ->
+                    AggregatedFact(
+                        factIds = values.map { it._id },
+                        value = values.sumByDouble { it.doubleValue.orZero() }.orZero(),
+                        conceptName = conceptName,
+                        documentFiscalPeriodFocus = documentFiscalPeriodFocus,
+                        documentPeriodEndDate = documentPeriodEndDate
+                    )
+                }
+                .sortedByDescending { it.documentPeriodEndDate }
+        } catch (e: Exception) {
+            return emptyList()
         }
-
-        val cik = originalFacts.distinctOrThrow { it.cik }
-        val conceptName = originalFacts.distinctOrThrow { it.conceptName }
-        val documentFiscalPeriodFocus = originalFacts.distinctOrThrow { it.documentFiscalPeriodFocus }
-
-        /*
-        First gather all the facts
-        */
-        return facts
-            .find(
-                and(
-                    Fact::cik eq cik,
-                    Fact::conceptName eq conceptName,
-                    Fact::documentFiscalPeriodFocus eq documentFiscalPeriodFocus,
-                )
-            )
-            .toList()
-            .filterForDimensions(dimensions)
-            .groupBy { it.documentPeriodEndDate }
-            .map { (documentPeriodEndDate, values) ->
-                AggregatedFact(
-                    factIds = values.map { it._id },
-                    value = values.sumByDouble { it.doubleValue.orZero() }.orZero(),
-                    conceptName = conceptName,
-                    documentFiscalPeriodFocus = documentFiscalPeriodFocus,
-                    documentPeriodEndDate = documentPeriodEndDate
-                )
-            }
-            .sortedByDescending { it.documentPeriodEndDate }
     }
 
     /**
