@@ -17,7 +17,6 @@ import java.time.temporal.TemporalAdjusters.lastDayOfMonth
  * missing the pure Q4 figures - for that we must actually retrieve
  * the 10-K figure and the past 3 10-Qs
  */
-@Service
 class Q4FactFinder(mongoDatabase: MongoDatabase) {
 
     private val col = mongoDatabase.getCollection<Fact>()

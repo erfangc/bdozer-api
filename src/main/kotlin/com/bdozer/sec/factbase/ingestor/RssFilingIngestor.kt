@@ -17,7 +17,6 @@ import java.time.format.DateTimeFormatter
 class RssFilingIngestor(
     private val httpClient: HttpClient,
     private val ingestor: FilingIngestor,
-    private val q4FactFinder: Q4FactFinder,
     private val filingEntityManager: FilingEntityManager,
     private val filingEntityBootstrapper: FilingEntityBootstrapper,
     mongoDatabase: MongoDatabase,
@@ -25,6 +24,7 @@ class RssFilingIngestor(
 
     private val log = LoggerFactory.getLogger(RssFilingIngestor::class.java)
     private val col = mongoDatabase.getCollection<XbrlItem>()
+    private val q4FactFinder = Q4FactFinder(mongoDatabase)
 
     enum class Status {
         Processed, Pending, Error
