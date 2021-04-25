@@ -74,14 +74,15 @@ class RssIngestor(
 
         for (item in items) {
             try {
-                if (col.findOneById(item._id)?.status != Status.Processed) {
+                val status = col.findOneById(item._id)?.status
+                if (status != Status.Processed && status != Status.Error) {
                     col.save(item.copy(status = Status.Pending))
                     val accessionNumber = item.accessionNumber
                     val cikNumber = item.cikNumber
                     ingestor.ingestFiling(cik = cikNumber, adsh = accessionNumber)
                     col.save(item.copy(status = Status.Processed))
                 } else {
-                    log.info("Skipping processing cikNumber=${item.cikNumber}, item.accessionNumber=${item.accessionNumber}, status=${item.status}")
+                    log.info("Skipping processing cikNumber=${item.cikNumber}, item.accessionNumber=${item.accessionNumber}, status=${status}")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -145,14 +146,15 @@ class RssIngestor(
 
         for (item in items) {
             try {
-                if (col.findOneById(item._id)?.status != Status.Processed) {
+                val status = col.findOneById(item._id)?.status
+                if (status != Status.Processed) {
                     col.save(item.copy(status = Status.Pending))
                     val accessionNumber = item.accessionNumber
                     val cikNumber = item.cikNumber
                     ingestor.ingestFiling(cik = cikNumber, adsh = accessionNumber)
                     col.save(item.copy(status = Status.Processed))
                 } else {
-                    log.info("Skipping processing cikNumber=${item.cikNumber}, item.accessionNumber=${item.accessionNumber}, status=${item.status}")
+                    log.info("Skipping processing cikNumber=${item.cikNumber}, item.accessionNumber=${item.accessionNumber}, status=${status}")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
