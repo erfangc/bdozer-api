@@ -19,6 +19,7 @@ data class Model(
      * Manual overrides for items
      */
     val itemOverrides: List<Item> = emptyList(),
+
     /**
      * Items that should be removed from calculation
      * altogether
@@ -77,8 +78,9 @@ data class Model(
     }
 
     fun generateOtherItems(): List<Item> {
-        val epsConceptName = epsConceptName
+
         val periods = periods
+        val epsConceptName = epsConceptName
         val discountRate = (equityRiskPremium * beta) + riskFreeRate
         val terminalPeMultiple = 1.0 / (discountRate - terminalGrowthRate)
 
