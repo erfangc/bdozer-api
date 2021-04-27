@@ -24,6 +24,7 @@ data class DerivedStockAnalytics(
      */
     val targetPrice: Double,
     val discountRate: Double,
-    val revenueCAGR: Double,
+    val revenueCAGR: Double = 0.0,
     val currentPrice: Double,
+    val irr: Double? = null,
 )

@@ -1,6 +1,11 @@
 package com.bdozer.models.dataclasses
 
 import com.bdozer.models.Utility
+import com.bdozer.models.Utility.DiscountFactor
+import com.bdozer.models.Utility.PresentValueOfEarningsPerShare
+import com.bdozer.models.Utility.PresentValueOfTerminalValuePerShare
+import com.bdozer.models.Utility.PresentValuePerShare
+import com.bdozer.models.Utility.TerminalValuePerShare
 
 data class Model(
 
@@ -86,24 +91,24 @@ data class Model(
 
         return listOf(
             Item(
-                name = Utility.DiscountFactor,
+                name = DiscountFactor,
                 formula = "1 / (1.0 + $discountRate)^period",
             ),
             Item(
-                name = Utility.TerminalValuePerShare,
+                name = TerminalValuePerShare,
                 formula = "if(period=$periods,$epsConceptName * $terminalPeMultiple,0.0)",
             ),
             Item(
-                name = Utility.PresentValueOfTerminalValuePerShare,
-                formula = "${Utility.DiscountFactor} * ${Utility.TerminalValuePerShare}",
+                name = PresentValueOfTerminalValuePerShare,
+                formula = "$DiscountFactor * $TerminalValuePerShare",
             ),
             Item(
-                name = Utility.PresentValueOfEarningsPerShare,
-                formula = "${Utility.DiscountFactor} * $epsConceptName",
+                name = PresentValueOfEarningsPerShare,
+                formula = "$DiscountFactor * $epsConceptName",
             ),
             Item(
-                name = Utility.PresentValuePerShare,
-                formula = "${Utility.PresentValueOfEarningsPerShare} + ${Utility.PresentValueOfTerminalValuePerShare}",
+                name = PresentValuePerShare,
+                formula = "$PresentValueOfEarningsPerShare + $PresentValueOfTerminalValuePerShare",
             )
         )
     }

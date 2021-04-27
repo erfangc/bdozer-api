@@ -2,9 +2,10 @@ package com.bdozer.stockanalysis.support
 
 import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.extensions.DoubleExtensions.orZero
+import com.bdozer.irr.IRRCalculator
 import com.bdozer.models.EvaluateModelResult
+import com.bdozer.models.Utility.TerminalValuePerShare
 import com.bdozer.models.dataclasses.Item
-import com.bdozer.models.dataclasses.ItemType
 import com.bdozer.models.dataclasses.Model
 import com.bdozer.spreadsheet.Cell
 import com.bdozer.stockanalysis.dataclasses.DerivedStockAnalytics
@@ -32,16 +33,32 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
         val shareOutstanding = model.allItems().find { it.name == model.sharesOutstandingConceptName }
             ?: error("There must be an Item named ${model.sharesOutstandingConceptName} in your model")
 
+        val currentPrice = currentPrice(model).orZero()
+        /*
+        compute IRR
+         */
+        val epsConceptName = model.epsConceptName
+        val cells = evaluateModelResult.cells
+        val terminalValues = cells.filter { it.item.name == TerminalValuePerShare }.associateBy { it.period }
+        val irr = IRRCalculator.irr(income = doubleArrayOf(-currentPrice, *cells.filter { it.item.name == epsConceptName }.map { cell ->
+            val terminalValue = terminalValues[cell.period]?.value.orZero()
+            cell.value.orZero() + terminalValue
+        }.toDoubleArray()))
+        /*
+        end of IRR compute
+         */
+
         return DerivedStockAnalytics(
             profitPerShare = profitPerShare,
             shareOutstanding = shareOutstanding,
             businessWaterfall = businessWaterfall(evaluateModelResult),
-            currentPrice = currentPrice(model).orZero(),
+            currentPrice = currentPrice,
             discountRate = discountRate(evaluateModelResult),
             revenueCAGR = revenueCAGR(evaluateModelResult),
             targetPrice = evaluateModelResult.targetPrice,
             // FIXME
             zeroGrowthPrice = 0.0,
+            irr = irr,
         )
     }
 
@@ -80,7 +97,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
          */
         val expenseItems = hashSetOf<Item>()
         val queue = LinkedList<Item>()
-        queue.addAll(netIncomeItem?.sumOfOtherItems?.components?.mapNotNull { lookup[it.itemName] }?: emptyList())
+        queue.addAll(netIncomeItem?.sumOfOtherItems?.components?.mapNotNull { lookup[it.itemName] } ?: emptyList())
         var latest: Item?
 
         while (queue.isNotEmpty()) {
