@@ -12,7 +12,9 @@ class DiscreteTranslator(val ctx: FormulaTranslationContext) : FormulaTranslator
         val item = cell.item
         val itemName = item.name
         val discrete = item.discrete ?: error("discrete must be specified")
-        // if a formula cannot be found for this period, use the previous period's values
+        /*
+        if a formula cannot be found for this period, use the previous period's values
+         */
         val documentPeriodEndDate = cell.item.historicalValue?.documentPeriodEndDate
 
         return if (documentPeriodEndDate == null) {
@@ -31,26 +33,35 @@ class DiscreteTranslator(val ctx: FormulaTranslationContext) : FormulaTranslator
     }
 
     private fun interpolate(discrete: Discrete, currentPeriod: Int): String? {
-        // if there are more periods than there are projections
-        // fill the rest with a linearly decreasing growth rate that match the long-term growth rate
+        /*
+        if there are more periods than there are projections
+        fill the rest with a linearly decreasing growth rate that match the long-term growth rate
+         */
         val modelPeriods = ctx.model.periods
         val terminalGrowthRate = ctx.model.terminalGrowthRate
         val maxProjectionPeriod = discrete.formulas.keys.maxOrNull() ?: modelPeriods
         val periodDifference = modelPeriods - maxProjectionPeriod
-        // find the most recent growth rate in the projected period
+        /*
+        find the most recent growth rate in the projected period
+         */
         val lastTwoEntries = discrete.formulas.entries.sortedByDescending { it.key }.take(2)
+        val latestValue = lastTwoEntries.first().value.toDouble()
         val lastGrowth = if (lastTwoEntries.size != 2) {
             0.0
         } else {
-            lastTwoEntries.first().value.toDouble() / lastTwoEntries.last().value.toDouble() - 1.0
+            latestValue / lastTwoEntries.last().value.toDouble() - 1.0
         }
-        val lastProjection = lastTwoEntries.first().value.toDouble()
 
-        // compute the slope
+        /*
+        compute the slope
+         */
         val slope = (lastGrowth - terminalGrowthRate) / periodDifference
         val growthRates = (1..(currentPeriod - maxProjectionPeriod)).map { period -> (lastGrowth - (slope * period)) }
-        // compound the growth rates out
-        return growthRates.fold(lastProjection) { acc, growthRate -> acc * (growthRate + 1) }.toString()
+
+        /*
+        compound the growth rates out
+         */
+        return growthRates.fold(latestValue) { acc, growthRate -> acc * (growthRate + 1) }.toString()
     }
 
 }
