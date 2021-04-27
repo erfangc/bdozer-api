@@ -16,14 +16,16 @@ class DiscreteTranslator(val ctx: FormulaTranslationContext) : FormulaTranslator
         if a formula cannot be found for this period, use the previous period's values
          */
         val documentPeriodEndDate = cell.item.historicalValue?.documentPeriodEndDate
-
+        val modelPeriods = ctx.model.periods
         return if (documentPeriodEndDate == null) {
-            val formula = discrete.formulas[currentPeriod] ?: interpolate(discrete, currentPeriod) ?: "${itemName}_Period${currentPeriod}"
+            val formula = discrete.formulas[currentPeriod] ?: interpolate(discrete, modelPeriods, currentPeriod)
+            ?: "${itemName}_Period${currentPeriod}"
             cell.copy(formula = formula)
         } else {
             val documentEndYear = LocalDate.parse(documentPeriodEndDate).year
             val year = documentEndYear + currentPeriod
-            val formula = discrete.formulas[year] ?: interpolate(discrete, documentEndYear +currentPeriod) ?: "${itemName}_Period${currentPeriod - 1}"
+            val formula = discrete.formulas[year] ?: interpolate(discrete, documentEndYear + modelPeriods,documentEndYear + currentPeriod)
+            ?: "${itemName}_Period${currentPeriod - 1}"
 
             cell.copy(
                 formula = formula
@@ -32,12 +34,15 @@ class DiscreteTranslator(val ctx: FormulaTranslationContext) : FormulaTranslator
 
     }
 
-    private fun interpolate(discrete: Discrete, currentPeriod: Int): String? {
+    private fun interpolate(
+        discrete: Discrete,
+        modelPeriods: Int,
+        currentPeriod: Int
+    ): String? {
         /*
         if there are more periods than there are projections
         fill the rest with a linearly decreasing growth rate that match the long-term growth rate
          */
-        val modelPeriods = ctx.model.periods
         val terminalGrowthRate = ctx.model.terminalGrowthRate
         val maxProjectionPeriod = discrete.formulas.keys.maxOrNull() ?: modelPeriods
         val periodDifference = modelPeriods - maxProjectionPeriod
