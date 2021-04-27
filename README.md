@@ -1,4 +1,4 @@
-# Equity Valuation Server
+# bdozer-api
 
 The purpose of this server is to expose a Model for valuation of companies
 
@@ -35,4 +35,25 @@ openapi-generator-cli generate \
   -i http://localhost:8080/v3/api-docs \
   -g typescript-axios \
   -o ~/equity-model-builder-ui/client
+```
+
+## Sync data from environments
+
+To dump:
+
+```bash
+mongodump \
+--uri='mongodb+srv://<user>:<pass>@<host>/?retryWrites=true&w=majority' \
+-d '<from env>' \
+-c '<table>'
+```
+
+To restore:
+
+```bash
+mongorestore \
+--uri='mongodb+srv://<user>:<pass>@<host>/?retryWrites=true&w=majority' \
+-d '<to env>' \
+-c '<table>' \
+'dump/<from env>/<table>.bson'
 ```
