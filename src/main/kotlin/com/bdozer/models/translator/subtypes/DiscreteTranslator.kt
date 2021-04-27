@@ -19,8 +19,9 @@ class DiscreteTranslator(val ctx: FormulaTranslationContext) : FormulaTranslator
             val formula = discrete.formulas[currentPeriod] ?: interpolate(discrete, currentPeriod) ?: "${itemName}_Period${currentPeriod}"
             cell.copy(formula = formula)
         } else {
-            val year = LocalDate.parse(documentPeriodEndDate).year + currentPeriod
-            val formula = discrete.formulas[year] ?: interpolate(discrete, currentPeriod) ?: "${itemName}_Period${currentPeriod - 1}"
+            val documentEndYear = LocalDate.parse(documentPeriodEndDate).year
+            val year = documentEndYear + currentPeriod
+            val formula = discrete.formulas[year] ?: interpolate(discrete, documentEndYear +currentPeriod) ?: "${itemName}_Period${currentPeriod - 1}"
 
             cell.copy(
                 formula = formula
