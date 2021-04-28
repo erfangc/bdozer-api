@@ -55,7 +55,7 @@ class CellGenerator {
                 val yearStyle = yearStyle(wb)
                 val yearRow = this.createRow(model.excelRowOffset - 1)
                 for (period in 0..periods) {
-                    val year = LocalDate.now().year + period
+                    val year = LocalDate.now().year + period - 1
                     val cell = yearRow
                         .createCell(period + model.excelColumnOffset)
                     cell.setCellValue("FY$year")
