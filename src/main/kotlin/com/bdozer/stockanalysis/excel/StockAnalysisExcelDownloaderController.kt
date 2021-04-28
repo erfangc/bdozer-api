@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin
-@RequestMapping("api/stock-analyzer/workflow")
+@RequestMapping("public/stock-analyzer/workflow")
 class StockAnalysisExcelDownloaderController(
     private val stockAnalysisExcelDownloader: StockAnalysisExcelDownloader
 ) {
