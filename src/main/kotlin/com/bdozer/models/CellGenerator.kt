@@ -217,6 +217,7 @@ class CellGenerator {
 
                     ItemType.Custom -> CustomTranslator(ctx)
                         .translateFormula(cell)
+                    else -> TODO()
                 }
             }
             updatedCell

@@ -4,6 +4,7 @@ enum class ItemType {
     CompoundedGrowth,
     SumOfOtherItems,
     Custom,
+    Discrete,
     ManualProjections,
     PercentOfRevenue,
     PercentOfAnotherItem,
