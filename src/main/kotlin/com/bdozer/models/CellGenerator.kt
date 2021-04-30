@@ -206,9 +206,6 @@ class CellGenerator {
                     ItemType.FixedCost -> FixedCostTranslator()
                         .translateFormula(cell)
 
-                    ItemType.Discrete -> DiscreteTranslator(ctx)
-                        .translateFormula(cell)
-
                     ItemType.CompoundedGrowth -> CompoundedGrowthTranslator(ctx)
                         .translateFormula(cell)
 

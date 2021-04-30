@@ -1,6 +1,7 @@
 package com.bdozer.revenuemodeler
 
-import com.bdozer.models.dataclasses.Discrete
+import com.bdozer.models.dataclasses.ManualProjections
+import com.bdozer.revenuemodeler.dataclasses.ModelRevenueRequest
 import com.bdozer.revenuemodeler.dataclasses.RevenueModel
 import org.springframework.web.bind.annotation.*
 
@@ -24,7 +25,7 @@ class RevenueModelerController(private val revenueModeler: RevenueModeler) {
     }
 
     @PostMapping("model-revenue")
-    fun modelRevenue(@RequestBody revenueModel: RevenueModel): Discrete {
-        return revenueModeler.modelRevenue(revenueModel)
+    fun modelRevenue(@RequestBody request: ModelRevenueRequest): ManualProjections {
+        return revenueModeler.modelRevenue(request)
     }
 }

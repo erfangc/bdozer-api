@@ -1,6 +1,9 @@
 package com.bdozer.revenuemodeler
 
-import com.bdozer.models.dataclasses.Discrete
+import com.bdozer.extensions.DoubleExtensions.orZero
+import com.bdozer.models.dataclasses.ManualProjection
+import com.bdozer.models.dataclasses.ManualProjections
+import com.bdozer.revenuemodeler.dataclasses.ModelRevenueRequest
 import com.bdozer.revenuemodeler.dataclasses.RevenueDriverType
 import com.bdozer.revenuemodeler.dataclasses.RevenueModel
 import com.bdozer.stockanalysis.StockAnalysisService
@@ -11,6 +14,7 @@ import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 /**
  * [RevenueModeler] model revenues by creating a linear combination
@@ -25,26 +29,36 @@ class RevenueModeler(
 
     val col = mongoDatabase.getCollection<RevenueModel>()
 
-    fun modelRevenue(revenueModel: RevenueModel): Discrete {
+    fun modelRevenue(
+        request: ModelRevenueRequest
+    ): ManualProjections {
+        val (revenueModel, model) = request
         return when (revenueModel.revenueDriverType) {
             RevenueDriverType.AverageRevenuePerUserTimesActiveUser -> {
+                val totalRevenueItem = model.item(model.totalRevenueConceptName)
 
-                val ticker = stockAnalysisService
-                    .getStockAnalysis(revenueModel.stockAnalysisId)
-                    ?.ticker
-                    ?: error("...")
+                val fy0Revenue = totalRevenueItem?.historicalValue?.value.orZero()
+                val fy0 = totalRevenueItem?.historicalValue?.documentFiscalYearFocus
+                    ?: totalRevenueItem?.historicalValue?.documentPeriodEndDate?.let { LocalDate.parse(it).year }
+                    ?: LocalDate.now().year
 
-                val zackEstimates = zacksEstimatesService.revenueProjections(ticker = ticker)
-                val terminalYearActiveUser = revenueModel.terminalYearActiveUser
-                val terminalYearAverageRevenuePerUser = revenueModel.terminalYearAverageRevenuePerUser
-                val terminalYear = revenueModel.terminalYear
+                val fyTerminal = revenueModel.terminalFiscalYear ?: error("terminalFiscalYear must be specified")
+                val terminalYearActiveUser = revenueModel.terminalYearActiveUser.orZero()
+                val terminalYearAverageRevenuePerUser = revenueModel.terminalYearAverageRevenuePerUser.orZero()
+                val fyTerminalRevenue = terminalYearActiveUser * terminalYearAverageRevenuePerUser
+
+                val slope = (fyTerminalRevenue - fy0Revenue) / (fyTerminal - fy0)
 
                 /*
-                see if we can find Zack's estimate for that year
+                project revenue from fy0 -> terminal year
+                each period's revenue
                  */
-                val finalZacksEstimate = zackEstimates.formulas[terminalYear].toString().toDoubleOrNull()
+                val manualProjections = (fy0..fyTerminal).map { fiscalYear ->
+                    val value = (fiscalYear - fy0) * slope + fy0Revenue
+                    ManualProjection(fiscalYear = fiscalYear, value = value)
+                }
 
-                TODO()
+                ManualProjections(manualProjections)
             }
             RevenueDriverType.ZacksEstimates -> {
                 val ticker = stockAnalysisService.getStockAnalysis(revenueModel.stockAnalysisId)?.ticker

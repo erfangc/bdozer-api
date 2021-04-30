@@ -21,7 +21,6 @@ data class Item(
     val formula: String = "0.0",
 
     val sumOfOtherItems: SumOfOtherItems? = null,
-    val discrete: Discrete? = null,
     val manualProjections: ManualProjections? = null,
     val percentOfRevenue: PercentOfRevenue? = null,
     val percentOfAnotherItem: PercentOfAnotherItem? = null,

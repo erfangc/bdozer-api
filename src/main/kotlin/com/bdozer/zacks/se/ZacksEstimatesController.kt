@@ -1,6 +1,6 @@
 package com.bdozer.zacks.se
 
-import com.bdozer.models.dataclasses.Discrete
+import com.bdozer.models.dataclasses.ManualProjections
 import org.springframework.web.bind.annotation.*
 
 @CrossOrigin
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class ZacksEstimatesController(private val zacksEstimatesService: ZacksEstimatesService) {
     @GetMapping("revenue-projections")
-    fun revenueProjections(@RequestParam ticker: String): Discrete {
+    fun revenueProjections(@RequestParam ticker: String): ManualProjections {
         return zacksEstimatesService.revenueProjections(ticker)
     }
 }

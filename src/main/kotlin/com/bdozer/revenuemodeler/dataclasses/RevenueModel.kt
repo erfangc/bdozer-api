@@ -6,9 +6,10 @@ data class RevenueModel(
     val stockAnalysisId: String,
 
     /**
-     *
+     * properties responsible for build a business that relies on
+     * average revenue per user * active user
      */
-    val terminalYear: Int? = null,
+    val terminalFiscalYear: Int? = null,
     val terminalYearAverageRevenuePerUser: Double? = null,
     val terminalYearActiveUser: Double? = null,
 )

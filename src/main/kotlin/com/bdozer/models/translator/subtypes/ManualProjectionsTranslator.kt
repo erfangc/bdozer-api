@@ -1,8 +1,8 @@
 package com.bdozer.models.translator.subtypes
 
-import com.bdozer.models.dataclasses.ManualProjections
 import com.bdozer.models.translator.FormulaTranslationContext
 import com.bdozer.spreadsheet.Cell
+import java.time.LocalDate
 
 /**
  * [ManualProjectionsTranslator]
@@ -12,43 +12,52 @@ class ManualProjectionsTranslator(val ctx: FormulaTranslationContext) : FormulaT
     override fun translateFormula(cell: Cell): Cell {
         val currentPeriod = cell.period
         val item = cell.item
+        val fy0FiscalYear = item.historicalValue?.documentFiscalYearFocus ?: LocalDate.now().year
+        val fiscalYear = fy0FiscalYear + currentPeriod
         val manualProjections = item.manualProjections ?: error("manualProjections must be specified")
-        val lookup = manualProjections.manualProjections.associateBy { it.period }
-        val manualProjection = lookup[currentPeriod]
+        if (manualProjections.manualProjections.isEmpty()) {
+            error("manualProjections must not be empty for item ${item.name}")
+        }
+        val manualProjection = manualProjections.manualProjections.find { it.fiscalYear == fiscalYear }
 
         return if (manualProjection != null) {
-            cell.copy(
-                formula = manualProjection.value.toString()
-            )
+            cell.copy(formula = manualProjection.value.toString())
         } else {
+            /*
+            if we cannot find a manual projection (i.e. outside the projection period)
+            but we still have periods left in the model to project, then decay toward
+            terminal growth rate via interpolation
+             */
             cell.copy(
-                formula = interpolate(
-                    manualProjections = manualProjections,
-                    modelPeriods = ctx.model.periods,
-                    currentPeriod = currentPeriod,
-                )
+                formula = interpolate(cell)
             )
         }
     }
 
     private fun interpolate(
-        manualProjections: ManualProjections,
-        modelPeriods: Int,
-        currentPeriod: Int
+        cell: Cell,
     ): String {
+        val modelPeriods = ctx.model.periods
+        val currentPeriod = cell.period
+        val item = cell.item
+        val manualProjections = item.manualProjections!!
+        val fy0FiscalYear = item.historicalValue?.documentFiscalYearFocus ?: LocalDate.now().year
+        val lastModelFiscalYear = modelPeriods + fy0FiscalYear
+
         /*
         if there are more periods than there are projections
         fill the rest with a linearly decreasing growth rate that match the long-term growth rate
          */
         val terminalGrowthRate = ctx.model.terminalGrowthRate
-        val lastValue = manualProjections.manualProjections.maxByOrNull { it.period } ?: error("...")
-        val maxProjectionPeriod = lastValue.period
-        val periodDifference = modelPeriods - maxProjectionPeriod
+        val lastValue = manualProjections.manualProjections.maxByOrNull { it.fiscalYear } ?: error("...")
+        val lastFyWithProjection = lastValue.fiscalYear
+        val lastPeriodWithProjection = lastFyWithProjection - fy0FiscalYear
+        val numUnprojectedYears = lastModelFiscalYear - lastFyWithProjection
 
         /*
         find the most recent growth rate in the projected period
          */
-        val lastTwoEntries = manualProjections.manualProjections.sortedByDescending { it.period }.take(2)
+        val lastTwoEntries = manualProjections.manualProjections.sortedByDescending { it.fiscalYear }.take(2)
         val latestValue = lastTwoEntries.first().value
         val lastGrowth = if (lastTwoEntries.size != 2) {
             0.0
@@ -59,8 +68,8 @@ class ManualProjectionsTranslator(val ctx: FormulaTranslationContext) : FormulaT
         /*
         compute the slope
          */
-        val slope = (lastGrowth - terminalGrowthRate) / periodDifference
-        val growthRates = (1..(currentPeriod - maxProjectionPeriod)).map { period -> (lastGrowth - (slope * period)) }
+        val slope = (lastGrowth - terminalGrowthRate) / numUnprojectedYears
+        val growthRates = (1..(currentPeriod - lastPeriodWithProjection)).map { period -> (lastGrowth - (slope * period)) }
 
         /*
         compound the growth rates out

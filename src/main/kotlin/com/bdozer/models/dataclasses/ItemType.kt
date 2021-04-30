@@ -1,7 +1,6 @@
 package com.bdozer.models.dataclasses
 
 enum class ItemType {
-    Discrete,
     CompoundedGrowth,
     SumOfOtherItems,
     Custom,
@@ -10,12 +9,3 @@ enum class ItemType {
     PercentOfAnotherItem,
     FixedCost,
 }
-
-data class ManualProjections(
-    val manualProjections: List<ManualProjection>,
-)
-
-data class ManualProjection(
-    val period: Int,
-    val value: Double,
-)

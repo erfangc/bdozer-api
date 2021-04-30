@@ -6,6 +6,7 @@ import com.bdozer.models.translator.FormulaTranslationContext
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
+import java.time.LocalDate
 
 internal class ManualProjectionsTranslatorTest {
 
@@ -95,19 +96,7 @@ internal class ManualProjectionsTranslatorTest {
         return Model(
             periods = 5,
             terminalGrowthRate = 0.05,
-            incomeStatementItems = listOf(
-                Item(
-                    name = "Test",
-                    type = ItemType.ManualProjections,
-                    manualProjections = ManualProjections(
-                        manualProjections = listOf(
-                            ManualProjection(period = 1, value = 100.0),
-                            ManualProjection(period = 2, value = 200.0),
-                            ManualProjection(period = 3, value = 300.0),
-                        )
-                    ),
-                )
-            )
+            incomeStatementItems = listOf(item())
         )
     }
 
@@ -115,19 +104,7 @@ internal class ManualProjectionsTranslatorTest {
         return Model(
             periods = 2,
             terminalGrowthRate = 0.05,
-            incomeStatementItems = listOf(
-                Item(
-                    name = "Test",
-                    type = ItemType.ManualProjections,
-                    manualProjections = ManualProjections(
-                        manualProjections = listOf(
-                            ManualProjection(period = 1, value = 100.0),
-                            ManualProjection(period = 2, value = 200.0),
-                            ManualProjection(period = 3, value = 300.0),
-                        )
-                    ),
-                )
-            )
+            incomeStatementItems = listOf(item())
         )
     }
 
@@ -135,19 +112,26 @@ internal class ManualProjectionsTranslatorTest {
         return Model(
             periods = 3,
             terminalGrowthRate = 0.05,
-            incomeStatementItems = listOf(
-                Item(
-                    name = "Test",
-                    type = ItemType.ManualProjections,
-                    manualProjections = ManualProjections(
-                        manualProjections = listOf(
-                            ManualProjection(period = 1, value = 100.0),
-                            ManualProjection(period = 2, value = 200.0),
-                            ManualProjection(period = 3, value = 300.0),
-                        )
-                    ),
-                )
-            )
+            incomeStatementItems = listOf(item())
         )
     }
+
+    private fun item() = Item(
+        name = "Test",
+        type = ItemType.ManualProjections,
+        /*
+        for these tests, our fy0 is set to 2020,
+        this period 1 = 2021
+        this period 2 = 2022
+        and so on
+         */
+        historicalValue = HistoricalValue(documentFiscalYearFocus = 2020),
+        manualProjections = ManualProjections(
+            manualProjections = listOf(
+                ManualProjection(fiscalYear = 2021, value = 100.0),
+                ManualProjection(fiscalYear = 2022, value = 200.0),
+                ManualProjection(fiscalYear = 2023, value = 300.0),
+            )
+        ),
+    )
 }
