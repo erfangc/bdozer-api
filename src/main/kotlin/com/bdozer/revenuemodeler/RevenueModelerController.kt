@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*
 
 @CrossOrigin
 @RestController
-@RequestMapping("api/revenue-modeler")
+@RequestMapping("public/revenue-modeler")
 class RevenueModelerController(private val revenueModeler: RevenueModeler) {
     @GetMapping("{id}")
     fun getRevenueModel(@PathVariable id: String): RevenueModel? {
