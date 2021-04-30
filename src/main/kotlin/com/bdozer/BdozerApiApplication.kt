@@ -18,36 +18,36 @@ class BdozerApiApplication {
     @Bean
     fun commandLineRunner(stockAnalysisService: StockAnalysisService): CommandLineRunner {
         return CommandLineRunner {
-            stockAnalysisService.findStockAnalyses(limit = 1000).stockAnalyses.map { stockAnalysisProjection ->
-                try {
-                    val stockAnalysis =
-                        stockAnalysisService.getStockAnalysis(stockAnalysisProjection._id) ?: error("...")
-                    val item = stockAnalysis.model.item(stockAnalysis.model.totalRevenueConceptName) ?: error("...")
-                    val newItem = item.copy(
-                        type = ItemType.ManualProjections,
-                        manualProjections = ManualProjections(
-                            item.discrete!!.formulas.map { (period, value) ->
-                                ManualProjection(period - 2020, value.toDouble())
-                            }
-                        )
-                    )
-                    val updatedStockAnalysis = stockAnalysis.copy(
-                        model = stockAnalysis.model.copy(
-                            incomeStatementItems = stockAnalysis.model.incomeStatementItems.map {
-                                if (it.name === newItem.name) {
-                                    newItem
-                                } else {
-                                    it
-                                }
-                            }
-                        )
-                    )
-                    stockAnalysisService.saveStockAnalysis(updatedStockAnalysis)
-                    println("Updated ${stockAnalysis.ticker}")
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
+//            stockAnalysisService.findStockAnalyses(limit = 1000).stockAnalyses.map { stockAnalysisProjection ->
+//                try {
+//                    val stockAnalysis =
+//                        stockAnalysisService.getStockAnalysis(stockAnalysisProjection._id) ?: error("...")
+//                    val item = stockAnalysis.model.item(stockAnalysis.model.totalRevenueConceptName) ?: error("...")
+//                    val newItem = item.copy(
+//                        type = ItemType.ManualProjections,
+//                        manualProjections = ManualProjections(
+//                            item.discrete!!.formulas.map { (period, value) ->
+//                                ManualProjection(period - 2020, value.toDouble())
+//                            }
+//                        )
+//                    )
+//                    val updatedStockAnalysis = stockAnalysis.copy(
+//                        model = stockAnalysis.model.copy(
+//                            incomeStatementItems = stockAnalysis.model.incomeStatementItems.map {
+//                                if (it.name === newItem.name) {
+//                                    newItem
+//                                } else {
+//                                    it
+//                                }
+//                            }
+//                        )
+//                    )
+//                    stockAnalysisService.saveStockAnalysis(updatedStockAnalysis)
+//                    println("Updated ${stockAnalysis.ticker}")
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                }
+//            }
         }
     }
 }
