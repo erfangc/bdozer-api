@@ -22,6 +22,7 @@ data class Item(
 
     val sumOfOtherItems: SumOfOtherItems? = null,
     val discrete: Discrete? = null,
+    val manualProjections: ManualProjections? = null,
     val percentOfRevenue: PercentOfRevenue? = null,
     val percentOfAnotherItem: PercentOfAnotherItem? = null,
     val compoundedGrowth: CompoundedGrowth? = null,

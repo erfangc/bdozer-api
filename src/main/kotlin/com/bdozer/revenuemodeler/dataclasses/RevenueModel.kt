@@ -4,5 +4,11 @@ data class RevenueModel(
     val _id: String,
     val revenueDriverType: RevenueDriverType? = null,
     val stockAnalysisId: String,
-    val drivers: List<RevenueDriver>,
+
+    /**
+     *
+     */
+    val terminalYear: Int? = null,
+    val terminalYearAverageRevenuePerUser: Double? = null,
+    val terminalYearActiveUser: Double? = null,
 )

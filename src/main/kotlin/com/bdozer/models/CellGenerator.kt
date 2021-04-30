@@ -215,6 +215,9 @@ class CellGenerator {
                     ItemType.SumOfOtherItems -> SumOfOtherItemsTranslator(ctx)
                         .translateFormula(cell)
 
+                    ItemType.ManualProjections -> ManualProjectionsTranslator(ctx)
+                        .translateFormula(cell)
+
                     ItemType.Custom -> CustomTranslator(ctx)
                         .translateFormula(cell)
                 }
