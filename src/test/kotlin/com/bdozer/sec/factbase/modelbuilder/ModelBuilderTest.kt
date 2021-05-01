@@ -22,7 +22,7 @@ internal class ModelBuilderTest {
 //        val objectMapper = jacksonObjectMapper().findAndRegisterModules()
 //        val edgarExplorer = EdgarExplorer(http = http, objectMapper = objectMapper)
 //
-//        val lines = ClassPathResource("snp500.txt").inputStream.bufferedReader().readLines()
+//        val lines = ClassPathResource("rs3000.txt").inputStream.bufferedReader().readLines()
 //        val writer = File("output.txt").printWriter()
 //
 //        lines.forEach { line ->

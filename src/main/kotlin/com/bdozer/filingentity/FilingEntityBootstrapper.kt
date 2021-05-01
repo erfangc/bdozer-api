@@ -2,7 +2,6 @@ package com.bdozer.filingentity
 
 import com.bdozer.filingentity.dataclasses.Address
 import com.bdozer.filingentity.dataclasses.FilingEntity
-import com.bdozer.filingentity.dataclasses.ModelTemplate
 import com.bdozer.filingentity.internal.SECEntity
 import com.bdozer.sec.factbase.core.FactBase
 import com.bdozer.xml.HttpClientExtensions.readEntity
@@ -59,10 +58,6 @@ class FilingEntityBootstrapper(
             phone = secEntity.phone,
             lastUpdated = Instant.now().toString(),
             statusMessage = FilingEntityManager.Created,
-            modelTemplate = ModelTemplate(
-                name = "Normal",
-                template = "Normal",
-            ),
         )
         filingEntityManager.saveFilingEntity(entity)
         log.info("Created filing entity cik=${entity.cik}")

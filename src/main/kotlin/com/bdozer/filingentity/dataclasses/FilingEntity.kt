@@ -31,6 +31,5 @@ data class FilingEntity(
     val lastUpdated: String,
     val latestAdsh: String? = null,
 
-    val modelTemplate: ModelTemplate? = null,
-)
+    )
 
