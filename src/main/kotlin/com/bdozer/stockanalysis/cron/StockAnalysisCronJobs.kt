@@ -13,7 +13,11 @@ class StockAnalysisCronJobs(
     private val iexService: IEXService
 ) {
 
-    @Scheduled(cron = "0 0 9-17 * * MON-FRI")
+    /**
+     * Run price updates for all analyses
+     * at 4pm each Mon day through Friday
+     */
+    @Scheduled(cron = "0 0 16 * * MON-FRI")
     fun updatePrices() {
         stockAnalysisService.findStockAnalyses(limit = Int.MAX_VALUE).stockAnalyses.forEach {
             try {
