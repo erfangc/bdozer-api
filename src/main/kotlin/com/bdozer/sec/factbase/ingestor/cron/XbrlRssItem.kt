@@ -1,4 +1,4 @@
-package com.bdozer.sec.factbase.ingestor.rss
+package com.bdozer.sec.factbase.ingestor.cron
 
 import java.time.LocalDate
 

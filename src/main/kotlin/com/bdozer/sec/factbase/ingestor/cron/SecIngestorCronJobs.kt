@@ -1,4 +1,4 @@
-package com.bdozer.sec.factbase.ingestor.rss
+package com.bdozer.sec.factbase.ingestor.cron
 
 import com.bdozer.filingentity.FilingEntityBootstrapper
 import com.bdozer.filingentity.FilingEntityManager
@@ -15,10 +15,9 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ofPattern
-import java.util.concurrent.TimeUnit
 
 @Service
-class RssIngestor(
+class SecIngestorCronJobs(
     private val httpClient: HttpClient,
     private val ingestor: FilingIngestor,
     private val filingEntityManager: FilingEntityManager,
@@ -26,11 +25,11 @@ class RssIngestor(
     mongoDatabase: MongoDatabase,
 ) {
 
-    private val log = LoggerFactory.getLogger(RssIngestor::class.java)
+    private val log = LoggerFactory.getLogger(SecIngestorCronJobs::class.java)
     private val col = mongoDatabase.getCollection<XbrlRssItem>()
     private val q4FactFinder = Q4FactFinder(mongoDatabase)
 
-    @Scheduled(fixedRate = 1800000L)
+    @Scheduled(cron = "0 0 9-17 * * MON-FRI")
     fun processLatest() {
         val url = "https://www.sec.gov/Archives/edgar/usgaap.rss.xml"
         val xml = httpClient.readXml(url)

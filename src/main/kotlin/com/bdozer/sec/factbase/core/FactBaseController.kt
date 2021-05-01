@@ -1,7 +1,7 @@
 package com.bdozer.sec.factbase.core
 
 import com.bdozer.sec.factbase.ingestor.FilingIngestor
-import com.bdozer.sec.factbase.ingestor.rss.RssIngestor
+import com.bdozer.sec.factbase.ingestor.cron.SecIngestorCronJobs
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.Executors
 
@@ -10,7 +10,7 @@ import java.util.concurrent.Executors
 @CrossOrigin
 class FactBaseController(
     private val filingIngestor: FilingIngestor,
-    private val rssIngestor: RssIngestor,
+    private val secIngestorCronJobs: SecIngestorCronJobs,
 ) {
 
     private val executor = Executors.newCachedThreadPool()
@@ -19,7 +19,7 @@ class FactBaseController(
     fun latest() {
         executor.execute {
             try {
-                rssIngestor.processLatest()
+                secIngestorCronJobs.processLatest()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

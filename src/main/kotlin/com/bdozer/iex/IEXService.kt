@@ -26,7 +26,10 @@ class IEXService(
     }
 
     @Cacheable("stockPrice")
-    fun price(ticker: String): Double {
+    fun price(ticker: String? = null): Double? {
+        if (ticker == null) {
+            return null
+        }
         return iexCloudClient
             .executeRequest(PriceRequestBuilder().withSymbol(ticker).build())
             .toDouble()
