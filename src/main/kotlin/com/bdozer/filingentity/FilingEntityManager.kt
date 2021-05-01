@@ -1,8 +1,8 @@
 package com.bdozer.filingentity
 
-import com.mongodb.client.MongoDatabase
-import com.bdozer.sec.factbase.core.FactBase
 import com.bdozer.filingentity.dataclasses.FilingEntity
+import com.bdozer.sec.factbase.core.FactBase
+import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection

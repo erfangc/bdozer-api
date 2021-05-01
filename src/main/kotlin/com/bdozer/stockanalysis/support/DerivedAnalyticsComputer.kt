@@ -40,10 +40,15 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
         val epsConceptName = model.epsConceptName
         val cells = evaluateModelResult.cells
         val terminalValues = cells.filter { it.item.name == TerminalValuePerShare }.associateBy { it.period }
-        val irr = IRRCalculator.irr(income = doubleArrayOf(-currentPrice, *cells.filter { it.item.name == epsConceptName }.map { cell ->
-            val terminalValue = terminalValues[cell.period]?.value.orZero()
-            cell.value.orZero() + terminalValue
-        }.toDoubleArray()))
+        val irr = IRRCalculator.irr(
+            income = doubleArrayOf(
+                -currentPrice,
+                *cells.filter { it.item.name == epsConceptName }.map { cell ->
+                    val terminalValue = terminalValues[cell.period]?.value.orZero()
+                    cell.value.orZero() + terminalValue
+                }.toDoubleArray()
+            )
+        )
         /*
         end of IRR compute
          */

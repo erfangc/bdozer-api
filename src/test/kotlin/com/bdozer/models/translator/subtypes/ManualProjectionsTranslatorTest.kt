@@ -3,10 +3,8 @@ package com.bdozer.models.translator.subtypes
 import com.bdozer.models.CellGenerator
 import com.bdozer.models.dataclasses.*
 import com.bdozer.models.translator.FormulaTranslationContext
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
-import java.time.LocalDate
 
 internal class ManualProjectionsTranslatorTest {
 

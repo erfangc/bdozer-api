@@ -7,7 +7,7 @@ import java.time.LocalDate
 /**
  * [ManualProjectionsTranslator]
  */
-class ManualProjectionsTranslator(val ctx: FormulaTranslationContext) : FormulaTranslator  {
+class ManualProjectionsTranslator(val ctx: FormulaTranslationContext) : FormulaTranslator {
 
     override fun translateFormula(cell: Cell): Cell {
         val currentPeriod = cell.period
@@ -69,7 +69,8 @@ class ManualProjectionsTranslator(val ctx: FormulaTranslationContext) : FormulaT
         compute the slope
          */
         val slope = (lastGrowth - terminalGrowthRate) / numUnprojectedYears
-        val growthRates = (1..(currentPeriod - lastPeriodWithProjection)).map { period -> (lastGrowth - (slope * period)) }
+        val growthRates =
+            (1..(currentPeriod - lastPeriodWithProjection)).map { period -> (lastGrowth - (slope * period)) }
 
         /*
         compound the growth rates out

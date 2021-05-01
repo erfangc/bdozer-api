@@ -1,6 +1,5 @@
 package com.bdozer.models.dataclasses
 
-import com.bdozer.models.Utility
 import com.bdozer.models.Utility.DiscountFactor
 import com.bdozer.models.Utility.PresentValueOfEarningsPerShare
 import com.bdozer.models.Utility.PresentValueOfTerminalValuePerShare

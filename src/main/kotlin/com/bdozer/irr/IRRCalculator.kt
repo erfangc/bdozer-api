@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 object IRRCalculator {
 
     private val log = LoggerFactory.getLogger(IRRCalculator::class.java)
+
     /**
      * Computes the internal rate of return using an estimated irr of 10 percent.
      *

@@ -103,7 +103,11 @@ class FactAutoFiller(private val factBase: FactBase) {
         }
     }
 
-    fun getPercentOfAnotherItemAutoFills(itemName: String, dependentItemName: String, model: Model): List<PercentOfAnotherItemAutoFill> {
+    fun getPercentOfAnotherItemAutoFills(
+        itemName: String,
+        dependentItemName: String,
+        model: Model
+    ): List<PercentOfAnotherItemAutoFill> {
 
         TODO("Not yet implemented")
     }

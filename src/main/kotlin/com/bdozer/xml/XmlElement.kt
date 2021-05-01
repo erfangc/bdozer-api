@@ -120,7 +120,7 @@ class XmlElement(element: Element) : Element by element {
     }
 
     fun getElementByTag(namespace: String, tag: String): XmlNode? {
-        val ret =  if (defaultLongNamespace == namespace) {
+        val ret = if (defaultLongNamespace == namespace) {
             this.getElementByTag(tag)
         } else {
             val newTag = longNamespaceToShortNamespaceMap[namespace]?.let { "$it:$tag" } ?: tag

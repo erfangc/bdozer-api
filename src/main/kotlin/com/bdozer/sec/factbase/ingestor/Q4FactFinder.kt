@@ -8,7 +8,6 @@ import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.ReplaceOptions
 import org.litote.kmongo.*
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 

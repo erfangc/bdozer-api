@@ -2,7 +2,6 @@ package com.bdozer.stockanalysis
 
 import com.bdozer.stockanalysis.dataclasses.*
 import com.bdozer.stockanalysis.support.StatelessModelEvaluator
-import com.bdozer.stockanalysis.dataclasses.StockAnalysisProjection
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Projections
 import com.mongodb.client.model.TextSearchOptions
@@ -59,7 +58,7 @@ class StockAnalysisService(
         val filter = and(
             userId?.let { StockAnalysis2::userId eq it },
             published?.let { StockAnalysis2::published eq it },
-            tags?.let { tgs -> or(tgs.map { StockAnalysis2::tags contains it  }) },
+            tags?.let { tgs -> or(tgs.map { StockAnalysis2::tags contains it }) },
             cik?.let { StockAnalysis2::cik eq it.padStart(10, '0') },
             ticker?.let { StockAnalysis2::ticker eq it },
             term?.let { text(it, TextSearchOptions().caseSensitive(false)) },
@@ -88,8 +87,7 @@ class StockAnalysisService(
             .skip(skip ?: 0)
             .limit(limit ?: 10)
             .sort(descending(StockAnalysis2::lastUpdated))
-            .map {
-                doc ->
+            .map { doc ->
                 val derivedAnalytics = doc.get(StockAnalysis2::derivedStockAnalytics.name, Document::class.java)
                 val targetPrice = derivedAnalytics?.getDouble(DerivedStockAnalytics::targetPrice.name)
                 val currentPrice = derivedAnalytics?.getDouble(DerivedStockAnalytics::currentPrice.name)

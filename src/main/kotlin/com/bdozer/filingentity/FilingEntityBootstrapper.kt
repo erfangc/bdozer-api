@@ -1,10 +1,10 @@
 package com.bdozer.filingentity
 
-import com.bdozer.sec.factbase.core.FactBase
 import com.bdozer.filingentity.dataclasses.Address
 import com.bdozer.filingentity.dataclasses.FilingEntity
 import com.bdozer.filingentity.dataclasses.ModelTemplate
 import com.bdozer.filingentity.internal.SECEntity
+import com.bdozer.sec.factbase.core.FactBase
 import com.bdozer.xml.HttpClientExtensions.readEntity
 import org.apache.http.client.HttpClient
 import org.slf4j.LoggerFactory

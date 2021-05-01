@@ -1,12 +1,10 @@
 package com.bdozer.stockanalysis.cron
 
-import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.iex.IEXService
 import com.bdozer.stockanalysis.StockAnalysisService
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.lang.Exception
 
 @Service
 class StockAnalysisCronJobs(

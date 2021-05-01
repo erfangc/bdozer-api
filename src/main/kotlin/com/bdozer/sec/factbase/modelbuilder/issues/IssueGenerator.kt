@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service
 @Service
 class IssueGenerator {
 
-    fun generateIssues(stockAnalysis: StockAnalysis2):List<Issue> {
+    fun generateIssues(stockAnalysis: StockAnalysis2): List<Issue> {
         val stockAnalysisId = stockAnalysis._id
         val model = stockAnalysis.model
         return IssueType.values().flatMap { issueType ->

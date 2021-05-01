@@ -1,9 +1,9 @@
 package com.bdozer.sec.factbase.autofill
 
-import com.bdozer.sec.factbase.autofill.dataclasses.FixedCostAutoFill
-import com.bdozer.sec.factbase.autofill.dataclasses.PercentOfRevenueAutoFill
 import com.bdozer.models.dataclasses.Model
+import com.bdozer.sec.factbase.autofill.dataclasses.FixedCostAutoFill
 import com.bdozer.sec.factbase.autofill.dataclasses.PercentOfAnotherItemAutoFill
+import com.bdozer.sec.factbase.autofill.dataclasses.PercentOfRevenueAutoFill
 import org.springframework.web.bind.annotation.*
 
 @RestController

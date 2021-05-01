@@ -1,10 +1,10 @@
 package com.bdozer.sec.explorer
 
+import com.bdozer.sec.explorer.dataclasses.EdgarEntity
+import com.bdozer.sec.explorer.dataclasses.EdgarFilingMetadata
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import com.bdozer.sec.explorer.dataclasses.EdgarEntity
-import com.bdozer.sec.explorer.dataclasses.EdgarFilingMetadata
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.BasicHttpEntity

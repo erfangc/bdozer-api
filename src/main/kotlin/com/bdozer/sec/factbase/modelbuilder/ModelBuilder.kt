@@ -160,7 +160,7 @@ class ModelBuilder(private val secFiling: SECFiling) {
             if (item.sumOfOtherItems != null) {
                 val filtered =
                     item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
-                item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered),)
+                item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered))
             } else {
                 item
             }
