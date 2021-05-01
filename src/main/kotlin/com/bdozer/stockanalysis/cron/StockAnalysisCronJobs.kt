@@ -3,6 +3,7 @@ package com.bdozer.stockanalysis.cron
 import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.iex.IEXService
 import com.bdozer.stockanalysis.StockAnalysisService
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.lang.Exception
@@ -13,21 +14,29 @@ class StockAnalysisCronJobs(
     private val iexService: IEXService
 ) {
 
+    private val log = LoggerFactory.getLogger(StockAnalysisCronJobs::class.java)
+
     /**
      * Run price updates for all analyses
      * at 4pm each Mon day through Friday
      */
     @Scheduled(cron = "0 0 16 * * MON-FRI")
     fun updatePrices() {
-        stockAnalysisService.findStockAnalyses(limit = Int.MAX_VALUE).stockAnalyses.forEach {
+        val stockAnalyses = stockAnalysisService.findStockAnalyses(limit = Int.MAX_VALUE).stockAnalyses
+        val tickers = stockAnalyses.mapNotNull { it.ticker }.distinct()
+        val prices = iexService.prices(tickers = tickers)
+        stockAnalyses.forEach {
+            val id = it._id
             try {
-                val stockAnalysis = stockAnalysisService.getStockAnalysis(it._id) ?: error("...")
+                val stockAnalysis = stockAnalysisService.getStockAnalysis(id) ?: error("stock analysis not found")
+                val currentPrice = prices[it.ticker] ?: error("no prices found for ticker=${it.ticker}")
                 val updatedDerivedStockAnalytics = stockAnalysis
                     .derivedStockAnalytics
-                    ?.copy(currentPrice = iexService.price(stockAnalysis.ticker).orZero())
+                    ?.copy(currentPrice = currentPrice)
                 stockAnalysisService.saveStockAnalysis(stockAnalysis.copy(derivedStockAnalytics = updatedDerivedStockAnalytics))
+                log.info("Updated stock analysis id=$id ticker=${stockAnalysis.ticker}")
             } catch (e: Exception) {
-                // TODO report the failure somewhere
+                log.error("Unable to update stock analysis id=$id, error: ${e.message}")
             }
         }
     }
