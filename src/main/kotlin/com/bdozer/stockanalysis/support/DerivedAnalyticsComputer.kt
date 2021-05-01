@@ -1,7 +1,7 @@
 package com.bdozer.stockanalysis.support
 
-import com.bdozer.alphavantage.AlphaVantageService
 import com.bdozer.extensions.DoubleExtensions.orZero
+import com.bdozer.iex.IEXService
 import com.bdozer.irr.IRRCalculator
 import com.bdozer.models.EvaluateModelResult
 import com.bdozer.models.Utility.TerminalValuePerShare
@@ -16,7 +16,7 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 @Service
-class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageService) {
+class DerivedAnalyticsComputer(private val iexService: IEXService) {
 
     /**
      * Compute derived analytics given the [EvaluateModelResult] from running the stock analyzer
@@ -64,7 +64,7 @@ class DerivedAnalyticsComputer(private val alphaVantageService: AlphaVantageServ
 
     private fun currentPrice(model: Model): Double? {
         return model.ticker?.let { ticker ->
-            alphaVantageService.latestPrice(ticker)
+            iexService.price(ticker)
         }
     }
 
