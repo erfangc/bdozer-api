@@ -1,6 +1,6 @@
 package com.bdozer.api.factbase.core.support
 
-import com.bdozer.api.common.dataclasses.sec.Concept
+import com.bdozer.api.factbase.core.dataclasses.Concept
 import com.bdozer.api.factbase.core.SECFiling
 import com.bdozer.api.factbase.core.support.UniversalConceptsManager.getBySchemaLocationAndName
 import com.bdozer.api.factbase.core.support.UniversalConceptsManager.putSchemaDocument

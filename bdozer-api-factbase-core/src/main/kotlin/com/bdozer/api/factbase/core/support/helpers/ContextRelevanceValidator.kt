@@ -1,7 +1,7 @@
 package com.bdozer.api.factbase.core.support.helpers
 
-import com.bdozer.api.common.dataclasses.sec.XbrlContext
-import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
+import com.bdozer.api.factbase.core.dataclasses.XbrlContext
+import com.bdozer.api.factbase.core.dataclasses.DocumentFiscalPeriodFocus
 import com.bdozer.api.factbase.core.SECFiling
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.documentFiscalPeriodFocus
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.documentPeriodEndDate

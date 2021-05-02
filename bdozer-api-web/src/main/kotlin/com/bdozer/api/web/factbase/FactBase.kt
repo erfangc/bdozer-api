@@ -1,9 +1,9 @@
 package com.bdozer.api.web.factbase
 
-import com.bdozer.api.common.dataclasses.sec.AggregatedFact
-import com.bdozer.api.common.dataclasses.sec.Dimension
-import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.AggregatedFact
+import com.bdozer.api.factbase.core.dataclasses.Dimension
+import com.bdozer.api.factbase.core.dataclasses.DocumentFiscalPeriodFocus
+import com.bdozer.api.factbase.core.dataclasses.Fact
 import com.bdozer.api.factbase.core.extensions.FactExtensions.dimensions
 import com.bdozer.api.factbase.core.extensions.FactExtensions.filterForDimensions
 import com.bdozer.api.factbase.core.extensions.FactExtensions.filterForDimensionsWithFallback

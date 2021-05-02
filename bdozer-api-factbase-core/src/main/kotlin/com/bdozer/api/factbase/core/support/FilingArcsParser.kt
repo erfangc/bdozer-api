@@ -1,8 +1,8 @@
 package com.bdozer.api.factbase.core.support
 
-import com.bdozer.api.common.dataclasses.sec.Arc
-import com.bdozer.api.common.dataclasses.sec.Calculation
-import com.bdozer.api.common.dataclasses.sec.FilingArcs
+import com.bdozer.api.factbase.core.dataclasses.Arc
+import com.bdozer.api.factbase.core.dataclasses.Calculation
+import com.bdozer.api.factbase.core.dataclasses.FilingArcs
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.documentFiscalPeriodFocus
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.documentFiscalYearFocus
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.documentPeriodEndDate

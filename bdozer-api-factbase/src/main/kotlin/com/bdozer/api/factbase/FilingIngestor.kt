@@ -1,8 +1,8 @@
 package com.bdozer.api.factbase
 
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.Fact
 import com.bdozer.api.factbase.core.SECFilingFactory
-import com.bdozer.api.factbase.core.dataclasses.FilingIngestionResponse
+import com.bdozer.api.factbase.core.support.dataclasses.FilingIngestionResponse
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.ReplaceOptions
 import org.litote.kmongo.eq

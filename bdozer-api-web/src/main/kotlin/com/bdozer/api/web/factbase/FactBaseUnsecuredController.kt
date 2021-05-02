@@ -1,7 +1,7 @@
 package com.bdozer.api.web.factbase
 
-import com.bdozer.api.common.dataclasses.sec.AggregatedFact
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.AggregatedFact
+import com.bdozer.api.factbase.core.dataclasses.Fact
 import org.springframework.web.bind.annotation.*
 
 @RestController

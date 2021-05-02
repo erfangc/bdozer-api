@@ -1,7 +1,7 @@
 package com.bdozer.api.factbase.core.support
 
-import com.bdozer.api.common.dataclasses.sec.*
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.*
+import com.bdozer.api.factbase.core.dataclasses.Fact
 import com.bdozer.api.factbase.core.support.helpers.ContextRelevanceValidator
 import com.bdozer.api.factbase.core.support.helpers.FactIdGenerator
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.documentFiscalPeriodFocus
@@ -10,7 +10,7 @@ import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.docume
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.entityRegistrantName
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.formType
 import com.bdozer.api.factbase.core.extensions.InstanceDocumentExtensions.tradingSymbol
-import com.bdozer.api.factbase.core.dataclasses.ParseFactsResponse
+import com.bdozer.api.factbase.core.support.dataclasses.ParseFactsResponse
 import com.bdozer.api.factbase.core.SECFiling
 import com.bdozer.api.factbase.core.constants.XbrlNamespaces.xbrl
 import com.bdozer.api.factbase.core.constants.XbrlNamespaces.xbrldi

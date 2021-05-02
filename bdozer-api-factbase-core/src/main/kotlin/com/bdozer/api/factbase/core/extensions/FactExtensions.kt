@@ -1,7 +1,7 @@
 package com.bdozer.api.factbase.core.extensions
 
-import com.bdozer.api.common.dataclasses.sec.Dimension
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.Dimension
+import com.bdozer.api.factbase.core.dataclasses.Fact
 
 
 object FactExtensions {

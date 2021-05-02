@@ -1,8 +1,16 @@
 package com.bdozer.api.factbase
 
+import com.bdozer.api.factbase.core.dataclasses.ProcessSECFilingRequest
+import com.bdozer.api.factbase.core.dataclasses.ProcessedSECFiling
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.rabbitmq.client.CancelCallback
 import com.rabbitmq.client.DeliverCallback
+import org.litote.kmongo.findOneById
+import org.litote.kmongo.getCollection
+import org.litote.kmongo.save
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 class BdozerFactbaseApplication
 
@@ -21,7 +29,9 @@ fun main(args: Array<String>) {
     val secFilingFactory = cfg.secFilingFactory(httpClient)
     val mongoClient = cfg.mongoClient()
     val mongoDatabase = cfg.mongoDatabase(mongoClient)
+    val objectMapper = jacksonObjectMapper().findAndRegisterModules()
     val filingIngestor = FilingIngestor(mongoDatabase, secFilingFactory)
+    val processedSECFilings = mongoDatabase.getCollection<ProcessedSECFiling>()
 
     /*
     AMQP infrastructure init code
@@ -35,8 +45,8 @@ fun main(args: Array<String>) {
      */
     channel.queueDeclare(
         QUEUE_NAME,
-        // durable
-        true,
+        // not durable
+        false,
         // not-exclusive to this connection
         false,
         // do not auto delete queue
@@ -53,19 +63,83 @@ fun main(args: Array<String>) {
         connection.close()
     })
 
-    val deliverCallback = DeliverCallback { _, message ->
-        // TODO implement business logic here
-        log.info(message?.body?.decodeToString())
+    /*
+    This is the main processing loop logic for every event this worker receives
+     */
+    val deliverCallback = DeliverCallback { consumerTag, message ->
 
         /*
-        ack the message ONLY after the work is complete, explicit ack is enabled
-        this prevents too many messages from being processed by a given worker
+        parse the request from binaries off the message queue
          */
-        channel.basicAck(message.envelope.deliveryTag, false)
+        val request = try {
+            objectMapper.readValue<ProcessSECFilingRequest>(message?.body!!)
+        } catch (e: Exception) {
+            log.error(
+                "Unable to deserialize message deliveryTag=${message.envelope.deliveryTag}, consumerTag=$consumerTag, message=${e.message}",
+                e
+            )
+            channel.basicAck(message.envelope.deliveryTag, false)
+            return@DeliverCallback
+        }
+
+        /*
+        Attempt to process the request
+         */
+        try {
+            val processedSECFiling = processedSECFilings.findOneById(request.adsh)
+            if (processedSECFiling == null) {
+                /*
+                The request has not been processed before
+                 */
+                val response = filingIngestor.ingestFiling(request.cik, request.adsh)
+                processedSECFilings.save(
+                    ProcessedSECFiling(
+                        _id = request.adsh,
+                        cik = request.cik,
+                        adsh = request.adsh,
+                        numberOfFactsFound = response.numberOfFactsFound,
+                        documentFiscalYearFocus = response.documentFiscalYearFocus,
+                        documentPeriodEndDate = response.documentPeriodEndDate,
+                        documentFiscalPeriodFocus = response.documentFiscalPeriodFocus,
+                        timestamp = Instant.now()
+                    )
+                )
+            } else {
+                /*
+                Skip processing the request
+                 */
+                log.info("Skipping the processing of adsh=${request.adsh}, cik=${request.cik}, it's already been processed")
+            }
+        } catch (e: Exception) {
+            /*
+            Error encountered while processing request
+             */
+            processedSECFilings.save(
+                ProcessedSECFiling(
+                    _id = request.adsh,
+                    cik = request.cik,
+                    adsh = request.adsh,
+                    timestamp = Instant.now(),
+                    error = e.message,
+                )
+            )
+        } finally {
+            /*
+            ack the message ONLY after the work is complete, explicit ack is enabled
+            this prevents too many messages from being processed by a given worker
+
+            while processing of SEC filings is idempotent, processing failure
+            count as message processed, as we cannot know in advance
+            whether the failure will be indefinitely repeated or not if added back onto the message
+            queue
+            */
+            channel.basicAck(message.envelope.deliveryTag, false)
+        }
     }
 
     /*
     Start the consumer code
      */
-    channel.basicConsume(QUEUE_NAME, false, deliverCallback, CancelCallback {  })
+    channel.basicConsume(QUEUE_NAME, false, deliverCallback, CancelCallback { })
+    log.info("Worker started and listening to messages")
 }

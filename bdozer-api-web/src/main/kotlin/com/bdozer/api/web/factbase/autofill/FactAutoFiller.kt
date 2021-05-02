@@ -7,8 +7,8 @@ import com.bdozer.api.web.models.dataclasses.PercentOfRevenue
 import com.bdozer.api.web.factbase.autofill.dataclasses.FixedCostAutoFill
 import com.bdozer.api.web.factbase.autofill.dataclasses.PercentOfAnotherItemAutoFill
 import com.bdozer.api.web.factbase.autofill.dataclasses.PercentOfRevenueAutoFill
-import com.bdozer.api.common.dataclasses.sec.AggregatedFact
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.AggregatedFact
+import com.bdozer.api.factbase.core.dataclasses.Fact
 import com.bdozer.api.web.factbase.FactBase
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

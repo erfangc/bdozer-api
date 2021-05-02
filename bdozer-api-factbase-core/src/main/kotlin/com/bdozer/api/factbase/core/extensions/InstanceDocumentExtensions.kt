@@ -1,6 +1,6 @@
 package com.bdozer.api.factbase.core.extensions
 
-import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
+import com.bdozer.api.factbase.core.dataclasses.DocumentFiscalPeriodFocus
 import com.bdozer.api.factbase.core.xml.XmlElement
 import java.time.LocalDate
 

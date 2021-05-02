@@ -1,4 +1,4 @@
-package com.bdozer.api.common.dataclasses.sec
+package com.bdozer.api.factbase.core.dataclasses
 
 enum class DocumentFiscalPeriodFocus {
     FY,

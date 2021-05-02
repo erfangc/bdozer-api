@@ -1,8 +1,8 @@
 package com.bdozer.api.factbase
 
-import com.bdozer.api.common.dataclasses.sec.*
-import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.*
+import com.bdozer.api.factbase.core.dataclasses.DocumentFiscalPeriodFocus
+import com.bdozer.api.factbase.core.dataclasses.Fact
 import com.bdozer.api.factbase.core.support.helpers.FactIdGenerator
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.ReplaceOptions

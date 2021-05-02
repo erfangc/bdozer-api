@@ -1,11 +1,11 @@
 package com.bdozer.api.web.factbase.modelbuilder
 
 import com.bdozer.api.web.extensions.DoubleExtensions.orZero
-import com.bdozer.api.common.dataclasses.sec.Labels
-import com.bdozer.api.common.dataclasses.sec.XbrlExplicitMember
-import com.bdozer.api.common.dataclasses.sec.Arc
-import com.bdozer.api.common.dataclasses.sec.Dimension
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.Labels
+import com.bdozer.api.factbase.core.dataclasses.XbrlExplicitMember
+import com.bdozer.api.factbase.core.dataclasses.Arc
+import com.bdozer.api.factbase.core.dataclasses.Dimension
+import com.bdozer.api.factbase.core.dataclasses.Fact
 import com.bdozer.api.factbase.core.SECFiling
 import com.bdozer.api.factbase.core.extensions.FactExtensions.filterForDimension
 import com.bdozer.api.web.models.dataclasses.*

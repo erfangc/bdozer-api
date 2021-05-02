@@ -1,6 +1,6 @@
 package com.bdozer.api.factbase.core.support
 
-import com.bdozer.api.common.dataclasses.sec.Concept
+import com.bdozer.api.factbase.core.dataclasses.Concept
 import com.bdozer.api.factbase.core.constants.XbrlNamespaces
 import com.bdozer.api.factbase.core.constants.XbrlNamespaces.xsd
 import com.bdozer.api.factbase.core.extensions.HttpClientExtensions.readXml

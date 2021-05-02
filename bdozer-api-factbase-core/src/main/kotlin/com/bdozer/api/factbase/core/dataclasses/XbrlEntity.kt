@@ -1,4 +1,4 @@
-package com.bdozer.api.common.dataclasses.sec
+package com.bdozer.api.factbase.core.dataclasses
 
 data class XbrlEntity(
     val identifier: XbrlIdentifier,

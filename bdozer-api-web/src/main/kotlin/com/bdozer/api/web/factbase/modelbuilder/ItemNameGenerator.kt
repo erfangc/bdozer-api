@@ -1,6 +1,6 @@
 package com.bdozer.api.web.factbase.modelbuilder
 
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.Fact
 
 class ItemNameGenerator {
 

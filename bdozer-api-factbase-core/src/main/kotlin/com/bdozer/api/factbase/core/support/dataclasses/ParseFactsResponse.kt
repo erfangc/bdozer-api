@@ -1,7 +1,7 @@
-package com.bdozer.api.factbase.core.dataclasses
+package com.bdozer.api.factbase.core.support.dataclasses
 
-import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
-import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.factbase.core.dataclasses.DocumentFiscalPeriodFocus
+import com.bdozer.api.factbase.core.dataclasses.Fact
 import java.time.LocalDate
 
 data class ParseFactsResponse(

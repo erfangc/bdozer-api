@@ -1,6 +1,6 @@
 package com.bdozer.api.factbase.core.support
 
-import com.bdozer.api.common.dataclasses.sec.Labels
+import com.bdozer.api.factbase.core.dataclasses.Labels
 import com.bdozer.api.factbase.core.SECFiling
 import com.bdozer.api.factbase.core.constants.XbrlNamespaces.link
 import com.bdozer.api.factbase.core.constants.XbrlNamespaces.xlink
