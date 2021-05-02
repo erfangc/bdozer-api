@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin
-@RequestMapping("api/filing-entity-manager")
+@RequestMapping("public/filing-entity-manager")
 class FilingEntityManagerController(
     private val filingEntityManager: FilingEntityManager,
     private val filingEntityBootstrapper: FilingEntityBootstrapper,
