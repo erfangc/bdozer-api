@@ -9,9 +9,7 @@ import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.replaceOne
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
 
-@Service
 class FilingIngestor(
     mongoDatabase: MongoDatabase,
     private val secFilingFactory: SECFilingFactory,
