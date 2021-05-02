@@ -1,5 +1,6 @@
 package com.bdozer.api.web
 
+import com.bdozer.api.factbase.core.SECFilingFactory
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoDatabase
 import org.apache.http.client.HttpClient
@@ -18,6 +19,11 @@ class AppConfiguration {
     @Bean
     fun httpClient(): HttpClient {
         return HttpClientBuilder.create().build()
+    }
+
+    @Bean
+    fun secFilingFactory(httpClient: HttpClient): SECFilingFactory {
+        return SECFilingFactory(httpClient)
     }
 
     @Bean

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("public/filing-entity-manager")
 class FilingEntityManagerController(
     private val filingEntityManager: FilingEntityManager,
-    private val filingEntityBootstrapper: FilingEntityBootstrapper,
 ) {
 
     @PostMapping
@@ -18,17 +17,7 @@ class FilingEntityManagerController(
 
     @PostMapping("{cik}/create")
     fun createFilingEntity(@PathVariable cik: String): FilingEntity {
-        return filingEntityBootstrapper.createFilingEntity(cik)
-    }
-
-    @PostMapping("{cik}")
-    fun bootstrapFilingEntity(@PathVariable cik: String): FilingEntity {
-        return filingEntityBootstrapper.bootstrapFilingEntity(cik)
-    }
-
-    @PostMapping("{cik}/sync")
-    fun bootstrapFilingEntitySync(@PathVariable cik: String): FilingEntity {
-        return filingEntityBootstrapper.bootstrapFilingEntitySync(cik)
+        return filingEntityManager.createFilingEntity(cik)
     }
 
 }

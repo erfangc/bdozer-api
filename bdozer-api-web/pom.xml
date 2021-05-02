@@ -34,7 +34,11 @@
     </repositories>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.bdozer</groupId>
+            <artifactId>bdozer-api-factbase-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>com.bdozer</groupId>
             <artifactId>bdozer-api-common</artifactId>
