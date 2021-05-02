@@ -41,7 +41,12 @@ fun main(args: Array<String>) {
     val channel = connection.createChannel()
 
     /*
-    Reminder MQ queue declaration is idempotent
+    Prefetch set to 1 to avoid imbalance in processing
+     */
+    channel.basicQos(1)
+
+    /*
+    MQ queue declaration is idempotent
      */
     channel.queueDeclare(
         QUEUE_NAME,
