@@ -79,23 +79,25 @@
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>appassembler-maven-plugin</artifactId>
-                <version>1.1.1</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
-                    <assembleDirectory>target</assembleDirectory>
-                    <programs>
-                        <program>
+                    <archive>
+                        <manifest>
                             <mainClass>com.bdozer.api.factbase.BdozerFactbaseApplicationKt</mainClass>
-                            <name>worker</name>
-                        </program>
-                    </programs>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>assemble</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
