@@ -1,9 +1,9 @@
 package com.bdozer.api.web.filingentity
 
+import com.bdozer.api.factbase.core.extensions.HttpClientExtensions.readEntity
 import com.bdozer.api.web.filingentity.dataclasses.Address
 import com.bdozer.api.web.filingentity.dataclasses.FilingEntity
 import com.bdozer.api.web.filingentity.internal.SECEntity
-import com.bdozer.api.web.xml.HttpClientExtensions.readEntity
 import com.mongodb.client.MongoDatabase
 import org.apache.http.client.HttpClient
 import org.litote.kmongo.findOneById

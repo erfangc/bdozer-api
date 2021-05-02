@@ -35,6 +35,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.12.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.bdozer</groupId>
             <artifactId>bdozer-api-factbase-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>

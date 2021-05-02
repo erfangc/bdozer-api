@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("public/fact-base")
 @CrossOrigin
-class FactBaseUnsecuredController(private val factBase: FactBase) {
+class FactBaseController(private val factBase: FactBase) {
 
     @GetMapping("{factId}")
     fun getFact(@PathVariable factId: String): Fact? {
