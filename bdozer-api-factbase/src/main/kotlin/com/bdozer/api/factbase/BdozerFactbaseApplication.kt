@@ -90,18 +90,19 @@ fun main(args: Array<String>) {
         /*
         Attempt to process the request
          */
+        val normalizedAdsh = request.adsh.replace("-", "")
         try {
-            val processedSECFiling = processedSECFilings.findOneById(request.adsh)
+            val processedSECFiling = processedSECFilings.findOneById(normalizedAdsh)
             if (processedSECFiling == null) {
                 /*
                 The request has not been processed before
                  */
-                val response = filingIngestor.ingestFiling(request.cik, request.adsh)
+                val response = filingIngestor.ingestFiling(request.cik, normalizedAdsh)
                 processedSECFilings.save(
                     ProcessedSECFiling(
-                        _id = request.adsh,
+                        _id = normalizedAdsh,
                         cik = request.cik,
-                        adsh = request.adsh,
+                        adsh = normalizedAdsh,
                         numberOfFactsFound = response.numberOfFactsFound,
                         documentFiscalYearFocus = response.documentFiscalYearFocus,
                         documentPeriodEndDate = response.documentPeriodEndDate,
@@ -113,7 +114,7 @@ fun main(args: Array<String>) {
                 /*
                 Skip processing the request
                  */
-                log.info("Skipping the processing of adsh=${request.adsh}, cik=${request.cik}, it's already been processed")
+                log.info("Skipping the processing of adsh=$normalizedAdsh, cik=${request.cik}, it's already been processed")
             }
         } catch (e: Exception) {
             /*
@@ -121,9 +122,9 @@ fun main(args: Array<String>) {
              */
             processedSECFilings.save(
                 ProcessedSECFiling(
-                    _id = request.adsh,
+                    _id = normalizedAdsh,
                     cik = request.cik,
-                    adsh = request.adsh,
+                    adsh = normalizedAdsh,
                     timestamp = Instant.now(),
                     error = e.message,
                 )
