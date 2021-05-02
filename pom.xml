@@ -9,8 +9,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>bdozer-api-web</module>
         <module>bdozer-api-common</module>
+        <module>bdozer-api-web</module>
+        <module>bdozer-api-factbase</module>
     </modules>
 
 </project>
