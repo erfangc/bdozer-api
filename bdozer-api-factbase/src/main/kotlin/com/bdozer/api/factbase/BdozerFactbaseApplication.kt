@@ -13,11 +13,13 @@ private val log = LoggerFactory.getLogger(BdozerFactbaseApplication::class.java)
 fun main(args: Array<String>) {
 
     val cfg = AppConfiguration()
+
     val httpClient = cfg.httpClient()
     val secFilingFactory = cfg.secFilingFactory(httpClient)
     val mongoClient = cfg.mongoClient()
     val mongoDatabase = cfg.mongoDatabase(mongoClient)
     val filingIngestor = FilingIngestor(mongoDatabase, secFilingFactory)
+
     val connectionFactory = cfg.connectionFactory()
     val connection = connectionFactory.newConnection()
     val channel = connection.createChannel()
