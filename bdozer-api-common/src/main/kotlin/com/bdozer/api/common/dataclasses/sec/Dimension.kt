@@ -1,4 +1,4 @@
-package com.bdozer.sec.factbase.dataclasses
+package com.bdozer.api.common.dataclasses.sec
 
 data class Dimension(
     val dimensionConcept: String,

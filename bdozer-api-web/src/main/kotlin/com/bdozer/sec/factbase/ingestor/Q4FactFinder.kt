@@ -1,9 +1,10 @@
 package com.bdozer.sec.factbase.ingestor
 
-import com.bdozer.sec.dataclasses.*
+import com.bdozer.api.common.dataclasses.sec.*
 import com.bdozer.sec.factbase.FactIdGenerator
-import com.bdozer.sec.factbase.dataclasses.DocumentFiscalPeriodFocus
-import com.bdozer.sec.factbase.dataclasses.Fact
+import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
+import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.extensions.DoubleExtensions.orZero
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.ReplaceOptions
 import org.litote.kmongo.*
@@ -81,7 +82,7 @@ class Q4FactFinder(mongoDatabase: MongoDatabase) {
                     /*
                     Try to sum over the past 3 quarter's data and then subtract them from the 10-K
                      */
-                    val value = fyFact.doubleValue - listOf(
+                    val value = fyFact.doubleValue.orZero() - listOf(
                         DocumentFiscalPeriodFocus.Q1,
                         DocumentFiscalPeriodFocus.Q2,
                         DocumentFiscalPeriodFocus.Q3,

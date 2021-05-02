@@ -1,4 +1,4 @@
-package com.bdozer.sec.dataclasses
+package com.bdozer.api.common.dataclasses.sec
 
 data class XbrlIdentifier(
     val scheme: String? = null,

@@ -1,6 +1,5 @@
-package com.bdozer.sec.factbase.dataclasses
+package com.bdozer.api.common.dataclasses.sec
 
-import com.bdozer.sec.dataclasses.XbrlExplicitMember
 import java.time.LocalDate
 
 /**

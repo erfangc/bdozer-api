@@ -34,6 +34,13 @@
     </repositories>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.bdozer</groupId>
+            <artifactId>bdozer-api-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>pl.zankowski</groupId>
             <artifactId>iextrading4j-all</artifactId>

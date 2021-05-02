@@ -1,6 +1,6 @@
 package com.bdozer.sec.factbase.ingestor
 
-import com.bdozer.sec.factbase.dataclasses.DocumentFiscalPeriodFocus
+import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
 import com.bdozer.xml.XmlElement
 import java.time.LocalDate
 

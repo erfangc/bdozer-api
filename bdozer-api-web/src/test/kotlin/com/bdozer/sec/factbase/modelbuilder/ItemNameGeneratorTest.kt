@@ -1,8 +1,8 @@
 package com.bdozer.sec.factbase.modelbuilder
 
-import com.bdozer.sec.dataclasses.XbrlExplicitMember
-import com.bdozer.sec.factbase.dataclasses.DocumentFiscalPeriodFocus
-import com.bdozer.sec.factbase.dataclasses.Fact
+import com.bdozer.api.common.dataclasses.sec.XbrlExplicitMember
+import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
+import com.bdozer.api.common.dataclasses.sec.Fact
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Instant

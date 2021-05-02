@@ -5,10 +5,10 @@ import com.bdozer.sec.factbase.FactExtensions.dimensions
 import com.bdozer.sec.factbase.FactExtensions.filterForDimensions
 import com.bdozer.sec.factbase.FactExtensions.filterForDimensionsWithFallback
 import com.bdozer.sec.factbase.core.support.FactsBootstrapper
-import com.bdozer.sec.factbase.dataclasses.AggregatedFact
-import com.bdozer.sec.factbase.dataclasses.Dimension
-import com.bdozer.sec.factbase.dataclasses.DocumentFiscalPeriodFocus
-import com.bdozer.sec.factbase.dataclasses.Fact
+import com.bdozer.api.common.dataclasses.sec.AggregatedFact
+import com.bdozer.api.common.dataclasses.sec.Dimension
+import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
+import com.bdozer.api.common.dataclasses.sec.Fact
 import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.*
 import org.springframework.cache.annotation.Cacheable

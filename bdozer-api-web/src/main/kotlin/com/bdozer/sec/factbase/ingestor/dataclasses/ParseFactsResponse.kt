@@ -1,7 +1,7 @@
 package com.bdozer.sec.factbase.ingestor.dataclasses
 
-import com.bdozer.sec.factbase.dataclasses.DocumentFiscalPeriodFocus
-import com.bdozer.sec.factbase.dataclasses.Fact
+import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
+import com.bdozer.api.common.dataclasses.sec.Fact
 import java.time.LocalDate
 
 data class ParseFactsResponse(

@@ -1,4 +1,4 @@
-package com.bdozer.sec.factbase.dataclasses
+package com.bdozer.api.common.dataclasses.sec
 
 import java.time.Instant
 import java.time.LocalDate

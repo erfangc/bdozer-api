@@ -8,9 +8,9 @@ import com.bdozer.sec.factbase.XLinkExtentions.label
 import com.bdozer.sec.factbase.XLinkExtentions.role
 import com.bdozer.sec.factbase.XLinkExtentions.to
 import com.bdozer.sec.factbase.XLinkExtentions.weight
-import com.bdozer.sec.factbase.dataclasses.Arc
-import com.bdozer.sec.factbase.dataclasses.Calculation
-import com.bdozer.sec.factbase.dataclasses.FilingArcs
+import com.bdozer.api.common.dataclasses.sec.Arc
+import com.bdozer.api.common.dataclasses.sec.Calculation
+import com.bdozer.api.common.dataclasses.sec.FilingArcs
 import com.bdozer.sec.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
 import com.bdozer.sec.factbase.ingestor.InstanceDocumentExtensions.documentFiscalYearFocus
 import com.bdozer.sec.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate

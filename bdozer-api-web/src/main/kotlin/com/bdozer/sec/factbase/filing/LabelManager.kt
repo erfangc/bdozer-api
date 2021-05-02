@@ -2,7 +2,7 @@ package com.bdozer.sec.factbase.filing
 
 import com.bdozer.sec.XbrlNamespaces.link
 import com.bdozer.sec.XbrlNamespaces.xlink
-import com.bdozer.sec.dataclasses.Labels
+import com.bdozer.api.common.dataclasses.sec.Labels
 import java.net.URI
 
 /**

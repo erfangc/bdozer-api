@@ -4,7 +4,7 @@ import com.bdozer.sec.UniversalConceptsManager
 import com.bdozer.sec.UniversalConceptsManager.getBySchemaLocationAndName
 import com.bdozer.sec.UniversalConceptsManager.putSchemaDocument
 import com.bdozer.sec.XbrlNamespaces.xsd
-import com.bdozer.sec.dataclasses.Concept
+import com.bdozer.api.common.dataclasses.sec.Concept
 
 /**
  * The goal is to take the standard and extension XSDs of the filing

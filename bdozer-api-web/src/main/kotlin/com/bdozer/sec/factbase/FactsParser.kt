@@ -2,8 +2,8 @@ package com.bdozer.sec.factbase
 
 import com.bdozer.sec.XbrlNamespaces.xbrl
 import com.bdozer.sec.XbrlNamespaces.xbrldi
-import com.bdozer.sec.dataclasses.*
-import com.bdozer.sec.factbase.dataclasses.Fact
+import com.bdozer.api.common.dataclasses.sec.*
+import com.bdozer.api.common.dataclasses.sec.Fact
 import com.bdozer.sec.factbase.filing.ContextRelevanceValidator
 import com.bdozer.sec.factbase.filing.SECFiling
 import com.bdozer.sec.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus

@@ -2,12 +2,12 @@ package com.bdozer.sec.factbase.modelbuilder
 
 import com.bdozer.extensions.DoubleExtensions.orZero
 import com.bdozer.models.dataclasses.*
-import com.bdozer.sec.dataclasses.Labels
-import com.bdozer.sec.dataclasses.XbrlExplicitMember
+import com.bdozer.api.common.dataclasses.sec.Labels
+import com.bdozer.api.common.dataclasses.sec.XbrlExplicitMember
 import com.bdozer.sec.factbase.FactExtensions.filterForDimension
-import com.bdozer.sec.factbase.dataclasses.Arc
-import com.bdozer.sec.factbase.dataclasses.Dimension
-import com.bdozer.sec.factbase.dataclasses.Fact
+import com.bdozer.api.common.dataclasses.sec.Arc
+import com.bdozer.api.common.dataclasses.sec.Dimension
+import com.bdozer.api.common.dataclasses.sec.Fact
 import com.bdozer.sec.factbase.filing.SECFiling
 
 /**

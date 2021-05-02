@@ -1,7 +1,7 @@
 package com.bdozer.sec.factbase.filing
 
-import com.bdozer.sec.dataclasses.XbrlContext
-import com.bdozer.sec.factbase.dataclasses.DocumentFiscalPeriodFocus
+import com.bdozer.api.common.dataclasses.sec.XbrlContext
+import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
 import com.bdozer.sec.factbase.ingestor.InstanceDocumentExtensions.documentFiscalPeriodFocus
 import com.bdozer.sec.factbase.ingestor.InstanceDocumentExtensions.documentPeriodEndDate
 import java.time.temporal.ChronoUnit

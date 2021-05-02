@@ -1,7 +1,7 @@
 package com.bdozer.sec
 
+import com.bdozer.api.common.dataclasses.sec.Concept
 import com.bdozer.sec.XbrlNamespaces.xsd
-import com.bdozer.sec.dataclasses.Concept
 import com.bdozer.xml.HttpClientExtensions.readXml
 import com.bdozer.xml.XmlElement
 import org.apache.http.impl.client.HttpClientBuilder

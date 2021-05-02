@@ -1,4 +1,4 @@
-package com.bdozer.sec.dataclasses
+package com.bdozer.api.common.dataclasses.sec
 
 data class XbrlContext(
     val id: String,

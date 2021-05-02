@@ -1,7 +1,7 @@
 package com.bdozer.sec.factbase
 
-import com.bdozer.sec.dataclasses.XbrlContext
-import com.bdozer.sec.factbase.dataclasses.DocumentFiscalPeriodFocus
+import com.bdozer.api.common.dataclasses.sec.XbrlContext
+import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
 import com.google.common.hash.Hashing
 import java.nio.charset.StandardCharsets
 

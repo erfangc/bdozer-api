@@ -1,6 +1,6 @@
 package com.bdozer.sec.factbase.ingestor
 
-import com.bdozer.sec.factbase.dataclasses.Fact
+import com.bdozer.api.common.dataclasses.sec.Fact
 import com.bdozer.sec.factbase.filing.SECFilingFactory
 import com.bdozer.sec.factbase.ingestor.dataclasses.FilingIngestionResponse
 import com.mongodb.client.MongoDatabase

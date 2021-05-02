@@ -10,6 +10,7 @@
 
     <modules>
         <module>bdozer-api-web</module>
+        <module>bdozer-api-common</module>
     </modules>
 
 </project>
