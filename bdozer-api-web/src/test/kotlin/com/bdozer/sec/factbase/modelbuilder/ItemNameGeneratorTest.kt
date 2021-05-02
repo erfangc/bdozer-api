@@ -3,6 +3,7 @@ package com.bdozer.sec.factbase.modelbuilder
 import com.bdozer.api.common.dataclasses.sec.XbrlExplicitMember
 import com.bdozer.api.common.dataclasses.sec.DocumentFiscalPeriodFocus
 import com.bdozer.api.common.dataclasses.sec.Fact
+import com.bdozer.api.web.sec.factbase.modelbuilder.ItemNameGenerator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Instant
