@@ -19,13 +19,14 @@ fun main(args: Array<String>) {
     val mongoDatabase = cfg.mongoDatabase(mongoClient)
     val filingIngestor = FilingIngestor(mongoDatabase, secFilingFactory)
     val connectionFactory = cfg.connectionFactory()
+    val connection = connectionFactory.newConnection()
+    val channel = connection.createChannel()
 
     Runtime.getRuntime().addShutdownHook(Thread {
         mongoClient.close()
+        channel.close()
+        connection.close()
     })
-
-    val connection = connectionFactory.newConnection()
-    val channel = connection.createChannel()
 
     channel.queueDeclare(
         QUEUE_NAME,
