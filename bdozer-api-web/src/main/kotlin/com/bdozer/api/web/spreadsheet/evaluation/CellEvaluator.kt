@@ -1,6 +1,6 @@
 package com.bdozer.api.web.spreadsheet.evaluation
 
-import com.bdozer.api.web.spreadsheet.Cell
+import bdozer.api.common.spreadsheet.Cell
 import org.mariuszgromada.math.mxparser.Argument
 import org.mariuszgromada.math.mxparser.Expression
 import org.slf4j.LoggerFactory

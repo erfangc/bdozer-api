@@ -1,5 +1,6 @@
 package com.bdozer.api.web.factbase.modelbuilder
 
+import bdozer.api.common.model.*
 import com.bdozer.api.web.extensions.DoubleExtensions.orZero
 import com.bdozer.api.factbase.core.dataclasses.Labels
 import com.bdozer.api.factbase.core.dataclasses.XbrlExplicitMember
@@ -8,7 +9,6 @@ import com.bdozer.api.factbase.core.dataclasses.Dimension
 import com.bdozer.api.factbase.core.dataclasses.Fact
 import com.bdozer.api.factbase.core.SECFiling
 import com.bdozer.api.factbase.core.extensions.FactExtensions.filterForDimension
-import com.bdozer.api.web.models.dataclasses.*
 
 /**
  * # Overview
@@ -159,8 +159,8 @@ class ModelBuilder(private val secFiling: SECFiling) {
         val cleanedIncomeStatement = incomeStatementItemsWithSharesOutstanding.map { item ->
             if (item.sumOfOtherItems != null) {
                 val filtered =
-                    item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
-                item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered))
+                    item.sumOfOtherItems?.components?.filter { component -> lookup[component.itemName] != null } ?: emptyList()
+                item.copy(sumOfOtherItems = item.sumOfOtherItems?.copy(components = filtered))
             } else {
                 item
             }
@@ -169,8 +169,8 @@ class ModelBuilder(private val secFiling: SECFiling) {
         val cleanedBalanceSheet = rawBalanceSheetItems.map { item ->
             if (item.sumOfOtherItems != null) {
                 val filtered =
-                    item.sumOfOtherItems.components.filter { component -> lookup[component.itemName] != null }
-                item.copy(sumOfOtherItems = item.sumOfOtherItems.copy(components = filtered))
+                    item.sumOfOtherItems?.components?.filter { component -> lookup[component.itemName] != null } ?: emptyList()
+                item.copy(sumOfOtherItems = item.sumOfOtherItems?.copy(components = filtered))
             } else {
                 item
             }

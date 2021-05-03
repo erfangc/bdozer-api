@@ -1,4 +1,4 @@
-package com.bdozer.api.web.models
+package bdozer.api.common.model
 
 object Utility {
     const val Period = "Period"

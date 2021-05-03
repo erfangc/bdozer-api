@@ -1,10 +1,10 @@
-package com.bdozer.api.web.models.dataclasses
+package bdozer.api.common.model
 
-import com.bdozer.api.web.models.Utility.DiscountFactor
-import com.bdozer.api.web.models.Utility.PresentValueOfEarningsPerShare
-import com.bdozer.api.web.models.Utility.PresentValueOfTerminalValuePerShare
-import com.bdozer.api.web.models.Utility.PresentValuePerShare
-import com.bdozer.api.web.models.Utility.TerminalValuePerShare
+import bdozer.api.common.model.Utility.DiscountFactor
+import bdozer.api.common.model.Utility.PresentValueOfEarningsPerShare
+import bdozer.api.common.model.Utility.PresentValueOfTerminalValuePerShare
+import bdozer.api.common.model.Utility.PresentValuePerShare
+import bdozer.api.common.model.Utility.TerminalValuePerShare
 
 data class Model(
 

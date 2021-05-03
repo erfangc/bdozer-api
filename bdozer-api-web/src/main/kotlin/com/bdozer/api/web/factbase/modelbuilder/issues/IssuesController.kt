@@ -1,6 +1,6 @@
 package com.bdozer.api.web.factbase.modelbuilder.issues
 
-import com.bdozer.api.web.stockanalysis.dataclasses.StockAnalysis2
+import bdozer.api.common.stockanalysis.StockAnalysis2
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("api/issues")

@@ -1,6 +1,6 @@
 package com.bdozer.api.web.stockanalysis
 
-import com.bdozer.api.web.stockanalysis.dataclasses.*
+import bdozer.api.common.stockanalysis.*
 import com.bdozer.api.web.stockanalysis.support.StatelessModelEvaluator
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Projections

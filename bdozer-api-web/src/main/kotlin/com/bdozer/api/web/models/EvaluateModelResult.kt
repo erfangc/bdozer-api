@@ -1,7 +1,7 @@
 package com.bdozer.api.web.models
 
-import com.bdozer.api.web.models.dataclasses.Model
-import com.bdozer.api.web.spreadsheet.Cell
+import bdozer.api.common.model.Model
+import bdozer.api.common.spreadsheet.Cell
 
 data class EvaluateModelResult(
     val model: Model,

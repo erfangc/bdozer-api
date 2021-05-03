@@ -1,4 +1,4 @@
-package com.bdozer.api.web.stockanalysis.dataclasses
+package bdozer.api.common.stockanalysis
 
 import java.time.Instant
 

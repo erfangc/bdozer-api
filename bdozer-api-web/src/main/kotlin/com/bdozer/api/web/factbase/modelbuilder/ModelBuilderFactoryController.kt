@@ -1,6 +1,6 @@
 package com.bdozer.api.web.factbase.modelbuilder
 
-import com.bdozer.api.web.models.dataclasses.Model
+import bdozer.api.common.model.Model
 import org.springframework.web.bind.annotation.*
 
 @CrossOrigin

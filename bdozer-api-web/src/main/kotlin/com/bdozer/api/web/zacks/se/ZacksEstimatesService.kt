@@ -1,9 +1,9 @@
 package com.bdozer.api.web.zacks.se
 
 import com.bdozer.api.web.extensions.DoubleExtensions.orZero
-import com.bdozer.api.web.models.dataclasses.Item
-import com.bdozer.api.web.models.dataclasses.ManualProjection
-import com.bdozer.api.web.models.dataclasses.ManualProjections
+import bdozer.api.common.model.Item
+import bdozer.api.common.model.ManualProjection
+import bdozer.api.common.model.ManualProjections
 import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.div
 import org.litote.kmongo.eq

@@ -30,6 +30,5 @@ data class FilingEntity(
     val statusMessage: String? = null,
     val lastUpdated: String,
     val latestAdsh: String? = null,
-
-    )
+)
 

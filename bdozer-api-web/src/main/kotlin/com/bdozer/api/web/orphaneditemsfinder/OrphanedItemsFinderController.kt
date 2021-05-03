@@ -1,7 +1,7 @@
 package com.bdozer.api.web.orphaneditemsfinder
 
-import com.bdozer.api.web.models.dataclasses.Item
-import com.bdozer.api.web.stockanalysis.dataclasses.StockAnalysis2
+import bdozer.api.common.model.Item
+import bdozer.api.common.stockanalysis.StockAnalysis2
 import org.springframework.web.bind.annotation.*
 
 @RestController

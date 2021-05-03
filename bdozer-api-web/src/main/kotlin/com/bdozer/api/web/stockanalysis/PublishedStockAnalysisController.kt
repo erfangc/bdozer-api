@@ -1,7 +1,7 @@
 package com.bdozer.api.web.stockanalysis
 
-import com.bdozer.api.web.stockanalysis.dataclasses.FindStockAnalysisResponse
-import com.bdozer.api.web.stockanalysis.dataclasses.StockAnalysis2
+import bdozer.api.common.stockanalysis.FindStockAnalysisResponse
+import bdozer.api.common.stockanalysis.StockAnalysis2
 import org.springframework.web.bind.annotation.*
 
 @RestController

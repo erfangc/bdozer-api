@@ -1,12 +1,19 @@
 package com.bdozer.api.web.stockanalysis.support
 
 import com.bdozer.api.web.models.ModelEvaluator
-import com.bdozer.api.web.models.dataclasses.Model
-import com.bdozer.api.web.stockanalysis.dataclasses.EvaluateModelRequest
-import com.bdozer.api.web.stockanalysis.dataclasses.EvaluateModelResponse
-import com.bdozer.api.web.stockanalysis.dataclasses.StockAnalysis2
+import bdozer.api.common.model.Model
+import bdozer.api.common.stockanalysis.EvaluateModelRequest
+import bdozer.api.common.stockanalysis.EvaluateModelResponse
+import bdozer.api.common.stockanalysis.StockAnalysis2
 import org.springframework.stereotype.Service
 
+/**
+ * [StatelessModelEvaluator] evaluates the provided [Model] and runs [DerivedAnalyticsComputer]
+ * on the output forming a [StockAnalysis2]
+ *
+ * It is stateless in the sense that this service does not CRUD or manage the lifecycle of the analysis
+ * which makes it ideal for on-the-fly reruns
+ */
 @Service
 class StatelessModelEvaluator(private val derivedAnalyticsComputer: DerivedAnalyticsComputer) {
 

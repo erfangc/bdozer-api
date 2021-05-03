@@ -1,6 +1,6 @@
-package com.bdozer.api.web.spreadsheet
+package bdozer.api.common.spreadsheet
 
-import com.bdozer.api.web.models.dataclasses.Item
+import bdozer.api.common.model.Item
 
 data class Cell(
     val period: Int,

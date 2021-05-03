@@ -1,5 +1,6 @@
 package com.bdozer.api.web.spreadsheet
 
+import bdozer.api.common.spreadsheet.Cell
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token
 

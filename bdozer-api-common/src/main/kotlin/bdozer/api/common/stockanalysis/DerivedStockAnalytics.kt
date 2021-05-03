@@ -1,6 +1,6 @@
-package com.bdozer.api.web.stockanalysis.dataclasses
+package bdozer.api.common.stockanalysis
 
-import com.bdozer.api.web.models.dataclasses.Item
+import bdozer.api.common.model.Item
 
 /**
  * After a valuation model has been run,

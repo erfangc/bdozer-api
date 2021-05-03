@@ -1,9 +1,9 @@
 package com.bdozer.api.web.models.translator.subtypes
 
-import com.bdozer.api.web.models.Utility.previous
-import com.bdozer.api.web.models.dataclasses.Item
+import bdozer.api.common.model.Utility.previous
+import bdozer.api.common.model.Item
 import com.bdozer.api.web.models.translator.FormulaTranslationContext
-import com.bdozer.api.web.spreadsheet.Cell
+import bdozer.api.common.spreadsheet.Cell
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.parsertokens.Token.NOT_MATCHED
 

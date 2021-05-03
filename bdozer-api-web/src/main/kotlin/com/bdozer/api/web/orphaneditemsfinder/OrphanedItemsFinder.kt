@@ -1,7 +1,7 @@
 package com.bdozer.api.web.orphaneditemsfinder
 
-import com.bdozer.api.web.models.dataclasses.Item
-import com.bdozer.api.web.stockanalysis.dataclasses.StockAnalysis2
+import bdozer.api.common.model.Item
+import bdozer.api.common.stockanalysis.StockAnalysis2
 import java.util.*
 
 /**
@@ -25,9 +25,9 @@ class OrphanedItemsFinder {
             return if (item?.sumOfOtherItems == null) {
                 emptyList()
             } else {
-                item.sumOfOtherItems.components.mapNotNull { component ->
+                item.sumOfOtherItems?.components?.mapNotNull { component ->
                     incomeStatement.find { it.name == component.itemName }
-                }
+                } ?: emptyList()
             }
         }
 

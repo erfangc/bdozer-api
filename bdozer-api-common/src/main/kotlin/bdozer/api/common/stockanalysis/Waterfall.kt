@@ -1,6 +1,6 @@
-package com.bdozer.api.web.stockanalysis.dataclasses
+package bdozer.api.common.stockanalysis
 
-import com.bdozer.api.web.spreadsheet.Cell
+import bdozer.api.common.spreadsheet.Cell
 
 data class Waterfall(
     val revenue: Cell,

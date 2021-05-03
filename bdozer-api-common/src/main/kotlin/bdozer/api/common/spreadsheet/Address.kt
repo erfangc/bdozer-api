@@ -1,4 +1,4 @@
-package com.bdozer.api.web.spreadsheet
+package bdozer.api.common.spreadsheet
 
 data class Address(
     val sheet: Int,

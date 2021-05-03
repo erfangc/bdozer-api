@@ -1,4 +1,4 @@
-package com.bdozer.api.web.models.dataclasses
+package bdozer.api.common.model
 
 data class Commentary(
     val commentary: String?,

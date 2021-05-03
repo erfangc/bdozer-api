@@ -1,7 +1,7 @@
 package com.bdozer.api.web.models.translator.subtypes
 
 import com.bdozer.api.web.models.translator.FormulaTranslationContext
-import com.bdozer.api.web.spreadsheet.Cell
+import bdozer.api.common.spreadsheet.Cell
 
 class PercentOfAnotherItemTranslator(
     private val ctx: FormulaTranslationContext
@@ -13,7 +13,7 @@ class PercentOfAnotherItemTranslator(
             .percentOfAnotherItem
             ?.itemName ?: error("${item::percentOfAnotherItem.name} must be provided")
 
-        val percent = item.percentOfAnotherItem.percent
+        val percent = item.percentOfAnotherItem?.percent
         val dependentItem = ctx.model.allItems().find { it.name == dependentItemName }
         if (dependentItem == null) {
             error("$dependentItemName required by ${item.name} cannot be found")

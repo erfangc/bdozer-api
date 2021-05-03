@@ -1,6 +1,6 @@
 package com.bdozer.api.web.models.translator.subtypes
 
-import com.bdozer.api.web.spreadsheet.Cell
+import bdozer.api.common.spreadsheet.Cell
 
 interface FormulaTranslator {
     fun translateFormula(cell: Cell): Cell

@@ -1,6 +1,6 @@
 package com.bdozer.api.web.revenuemodeler
 
-import com.bdozer.api.web.models.dataclasses.ManualProjections
+import bdozer.api.common.model.ManualProjections
 import com.bdozer.api.web.revenuemodeler.dataclasses.ModelRevenueRequest
 import com.bdozer.api.web.revenuemodeler.dataclasses.RevenueModel
 import org.springframework.web.bind.annotation.*

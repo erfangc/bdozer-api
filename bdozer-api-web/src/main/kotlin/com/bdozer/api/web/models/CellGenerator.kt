@@ -1,12 +1,12 @@
 package com.bdozer.api.web.models
 
-import com.bdozer.api.web.models.dataclasses.Item
-import com.bdozer.api.web.models.dataclasses.ItemType
-import com.bdozer.api.web.models.dataclasses.Model
+import bdozer.api.common.model.Item
+import bdozer.api.common.model.ItemType
+import bdozer.api.common.model.Model
 import com.bdozer.api.web.models.translator.FormulaTranslationContext
 import com.bdozer.api.web.models.translator.subtypes.*
-import com.bdozer.api.web.spreadsheet.Address
-import com.bdozer.api.web.spreadsheet.Cell
+import bdozer.api.common.spreadsheet.Address
+import bdozer.api.common.spreadsheet.Cell
 import com.bdozer.api.web.spreadsheet.ExcelFormulaTranslator
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
