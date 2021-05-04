@@ -1,12 +1,12 @@
 package com.bdozer.api.web.revenuemodeler
 
 import bdozer.api.common.extensions.DoubleExtensions.orZero
-import bdozer.api.common.model.ManualProjection
-import bdozer.api.common.model.ManualProjections
+import com.bdozer.api.models.dataclasses.ManualProjection
+import com.bdozer.api.models.dataclasses.ManualProjections
 import com.bdozer.api.web.revenuemodeler.dataclasses.ModelRevenueRequest
 import com.bdozer.api.web.revenuemodeler.dataclasses.RevenueDriverType
 import com.bdozer.api.web.revenuemodeler.dataclasses.RevenueModel
-import com.bdozer.api.web.stockanalysis.StockAnalysisService
+import com.bdozer.api.stockanalysis.StockAnalysisService
 import com.bdozer.api.web.zacks.se.ZacksEstimatesService
 import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.deleteOneById

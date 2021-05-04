@@ -1,6 +1,6 @@
 package com.bdozer.api.web.factbase.autofill.dataclasses
 
-import bdozer.api.common.model.PercentOfRevenue
+import com.bdozer.api.models.dataclasses.PercentOfRevenue
 
 /**
  * [FactAutoFillService] provides methods that automatically determines

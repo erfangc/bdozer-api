@@ -1,9 +1,10 @@
 package com.bdozer.api.web.stockanalysis
 
-import bdozer.api.common.stockanalysis.EvaluateModelRequest
-import bdozer.api.common.stockanalysis.EvaluateModelResponse
-import bdozer.api.common.stockanalysis.FindStockAnalysisResponse
-import bdozer.api.common.stockanalysis.StockAnalysis2
+import com.bdozer.api.stockanalysis.*
+import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelRequest
+import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelResponse
+import com.bdozer.api.stockanalysis.dataclasses.FindStockAnalysisResponse
+import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.web.bind.annotation.*
 

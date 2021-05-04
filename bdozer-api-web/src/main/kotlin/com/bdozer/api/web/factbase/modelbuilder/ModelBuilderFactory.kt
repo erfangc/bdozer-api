@@ -1,7 +1,7 @@
 package com.bdozer.api.web.factbase.modelbuilder
 
 import com.bdozer.api.factbase.core.SECFilingFactory
-import bdozer.api.common.model.Model
+import com.bdozer.api.models.dataclasses.Model
 import org.springframework.stereotype.Service
 
 @Service

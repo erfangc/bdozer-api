@@ -1,9 +1,9 @@
 package com.bdozer.api.web.factbase.autofill
 
 import bdozer.api.common.extensions.DoubleExtensions.orZero
-import bdozer.api.common.model.FixedCost
-import bdozer.api.common.model.Model
-import bdozer.api.common.model.PercentOfRevenue
+import com.bdozer.api.models.dataclasses.FixedCost
+import com.bdozer.api.models.dataclasses.Model
+import com.bdozer.api.models.dataclasses.PercentOfRevenue
 import com.bdozer.api.web.factbase.autofill.dataclasses.FixedCostAutoFill
 import com.bdozer.api.web.factbase.autofill.dataclasses.PercentOfAnotherItemAutoFill
 import com.bdozer.api.web.factbase.autofill.dataclasses.PercentOfRevenueAutoFill

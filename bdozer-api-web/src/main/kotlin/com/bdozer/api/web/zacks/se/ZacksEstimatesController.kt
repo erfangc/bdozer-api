@@ -1,6 +1,6 @@
 package com.bdozer.api.web.zacks.se
 
-import bdozer.api.common.model.ManualProjections
+import com.bdozer.api.models.dataclasses.ManualProjections
 import org.springframework.web.bind.annotation.*
 
 @CrossOrigin

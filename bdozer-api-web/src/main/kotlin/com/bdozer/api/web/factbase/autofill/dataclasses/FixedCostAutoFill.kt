@@ -1,6 +1,6 @@
 package com.bdozer.api.web.factbase.autofill.dataclasses
 
-import bdozer.api.common.model.FixedCost
+import com.bdozer.api.models.dataclasses.FixedCost
 
 /**
  * [FactAutoFillService] provides methods that automatically determines

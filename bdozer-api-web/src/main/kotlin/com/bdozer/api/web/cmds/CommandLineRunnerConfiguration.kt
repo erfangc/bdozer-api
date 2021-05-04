@@ -1,13 +1,12 @@
 package com.bdozer.api.web.cmds
 
-import bdozer.api.common.stockanalysis.EvaluateModelRequest
-import bdozer.api.common.stockanalysis.StockAnalysis2
+import com.bdozer.api.stockanalysis.StockAnalysisService
+import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelRequest
+import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import com.bdozer.api.web.factbase.modelbuilder.ModelBuilderFactory
 import com.bdozer.api.web.filingentity.FilingEntityManager
-import com.bdozer.api.web.stockanalysis.StockAnalysisService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.io.File
 
@@ -16,7 +15,6 @@ class CommandLineRunnerConfiguration {
 
     private val log = LoggerFactory.getLogger(CommandLineRunnerConfiguration::class.java)
 
-    @Bean
     fun commandLineRunner(
         stockAnalysisService: StockAnalysisService,
         modelBuilderFactory: ModelBuilderFactory,

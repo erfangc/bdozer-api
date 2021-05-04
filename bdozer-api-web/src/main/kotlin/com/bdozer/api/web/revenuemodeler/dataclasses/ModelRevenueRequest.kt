@@ -1,6 +1,6 @@
 package com.bdozer.api.web.revenuemodeler.dataclasses
 
-import bdozer.api.common.model.Model
+import com.bdozer.api.models.dataclasses.Model
 
 data class ModelRevenueRequest(
     val revenueModel: RevenueModel,

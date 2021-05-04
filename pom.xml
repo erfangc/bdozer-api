@@ -12,6 +12,7 @@
         <module>bdozer-api-common</module>
         <module>bdozer-api-factbase-core</module>
         <module>bdozer-api-models</module>
+        <module>bdozer-api-stockanalysis</module>
         <module>bdozer-api-web</module>
         <module>bdozer-api-factbase-worker</module>
     </modules>

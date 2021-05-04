@@ -1,9 +1,9 @@
 package com.bdozer.models.translator.subtypes
 
-import bdozer.api.common.model.*
-import com.bdozer.api.web.models.CellGenerator
-import com.bdozer.api.web.models.translator.FormulaTranslationContext
-import com.bdozer.api.web.models.translator.subtypes.ManualProjectionsTranslator
+import com.bdozer.api.models.dataclasses.*
+import com.bdozer.api.models.CellGenerator
+import com.bdozer.api.models.translator.FormulaTranslationContext
+import com.bdozer.api.models.translator.subtypes.ManualProjectionsTranslator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

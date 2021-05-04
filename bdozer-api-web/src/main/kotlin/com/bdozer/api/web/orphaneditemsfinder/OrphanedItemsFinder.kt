@@ -1,7 +1,7 @@
 package com.bdozer.api.web.orphaneditemsfinder
 
-import bdozer.api.common.model.Item
-import bdozer.api.common.stockanalysis.StockAnalysis2
+import com.bdozer.api.models.dataclasses.Item
+import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import java.util.*
 
 /**
