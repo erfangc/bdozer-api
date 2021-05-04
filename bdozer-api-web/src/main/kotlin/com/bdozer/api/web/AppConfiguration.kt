@@ -37,17 +37,6 @@ class AppConfiguration {
     }
 
     @Bean
-    fun iexCloudClient(mongoClient: MongoClient): IEXCloudClient {
-
-        val token = IEXCloudTokenBuilder()
-            .withPublishableToken("pk_d66bdb23bae6444e85c16fbb4fff2e29")
-            .withSecretToken(getenv("IEX_SECRET_TOKEN") ?: error("environment IEX_SECRET_TOKEN not defined"))
-            .build()
-
-        return IEXTradingClient.create(token)
-    }
-
-    @Bean
     fun connectionFactory(): ConnectionFactory {
         val rabbitMqUrl = URI(getenv("CLOUDAMQP_URL") ?: error("environment CLOUDAMQP_URL not defined"))
         val path = rabbitMqUrl.path

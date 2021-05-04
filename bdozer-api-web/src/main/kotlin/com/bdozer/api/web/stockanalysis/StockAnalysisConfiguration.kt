@@ -5,14 +5,26 @@ import com.bdozer.api.stockanalysis.StockAnalysisService
 import com.bdozer.api.stockanalysis.iex.IEXService
 import com.bdozer.api.stockanalysis.support.DerivedAnalyticsComputer
 import com.bdozer.api.stockanalysis.support.StatelessModelEvaluator
+import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoDatabase
 import org.apache.http.client.HttpClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import pl.zankowski.iextrading4j.client.IEXCloudClient
+import pl.zankowski.iextrading4j.client.IEXCloudTokenBuilder
+import pl.zankowski.iextrading4j.client.IEXTradingClient
 
 @Configuration
 class StockAnalysisConfiguration {
+
+    @Bean
+    fun iexCloudClient(mongoClient: MongoClient): IEXCloudClient {
+        val token = IEXCloudTokenBuilder()
+            .withPublishableToken("pk_d66bdb23bae6444e85c16fbb4fff2e29")
+            .withSecretToken(System.getenv("IEX_SECRET_TOKEN") ?: error("environment IEX_SECRET_TOKEN not defined"))
+            .build()
+        return IEXTradingClient.create(token)
+    }
 
     @Bean
     fun stockAnalysisService(mongoDatabase: MongoDatabase, iexService: IEXService): StockAnalysisService {
