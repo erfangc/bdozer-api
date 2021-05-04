@@ -1,4 +1,4 @@
-package com.bdozer.api.stockanalysis
+package com.bdozer.api.stockanalysis.dataclasses
 
 import com.bdozer.api.models.dataclasses.spreadsheet.Cell
 

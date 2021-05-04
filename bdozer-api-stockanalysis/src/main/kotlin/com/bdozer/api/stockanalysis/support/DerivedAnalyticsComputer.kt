@@ -9,7 +9,7 @@ import com.bdozer.api.models.dataclasses.Item
 import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.models.dataclasses.spreadsheet.Cell
 import com.bdozer.api.stockanalysis.dataclasses.DerivedStockAnalytics
-import com.bdozer.api.stockanalysis.Waterfall
+import com.bdozer.api.stockanalysis.dataclasses.Waterfall
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.pow

@@ -1,7 +1,6 @@
 package com.bdozer.api.stockanalysis.dataclasses
 
 import com.bdozer.api.models.dataclasses.Item
-import com.bdozer.api.stockanalysis.Waterfall
 
 /**
  * After a valuation model has been run,
