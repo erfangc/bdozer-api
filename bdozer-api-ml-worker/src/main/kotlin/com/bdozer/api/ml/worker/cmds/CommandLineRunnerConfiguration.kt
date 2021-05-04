@@ -32,7 +32,7 @@ class CommandLineRunnerConfiguration {
                 val adsh = split[1]
                 val formType = split[2]
                 val period = split[3]
-                Row(cik, adsh, formType, period)
+                Row(cik = cik, adsh = adsh, formType = formType, period = period)
             }
             .groupBy { it.cik }
             .mapValues { entry ->
