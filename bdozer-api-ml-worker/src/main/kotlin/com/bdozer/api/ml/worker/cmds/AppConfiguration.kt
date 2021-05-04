@@ -61,4 +61,5 @@ class AppConfiguration {
         }
         return connectionFactory
     }
+
 }
