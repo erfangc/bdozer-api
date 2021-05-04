@@ -1,4 +1,4 @@
-package com.bdozer.api.web.filingentity.internal
+package com.bdozer.api.filing.entity.internal
 
 data class SECEntityAddresses(
     val mailing: SECEntityAddress? = null,

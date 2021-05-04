@@ -12,11 +12,12 @@
         <module>bdozer-api-common</module>
         <module>bdozer-api-factbase-core</module>
         <module>bdozer-api-models</module>
+        <module>bdozer-api-filing-entity</module>
         <module>bdozer-api-stockanalysis</module>
-        <module>bdozer-api-web</module>
         <module>bdozer-api-factbase-worker</module>
         <module>bdozer-api-ml-worker</module>
         <module>bdozer-api-factbase-modelbuilder</module>
+        <module>bdozer-api-web</module>
     </modules>
 
 </project>

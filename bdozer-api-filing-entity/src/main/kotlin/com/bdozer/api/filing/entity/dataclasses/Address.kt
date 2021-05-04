@@ -1,6 +1,6 @@
-package com.bdozer.api.web.filingentity.internal
+package com.bdozer.api.filing.entity.dataclasses
 
-data class SECEntityAddress(
+data class Address(
     val street1: String? = null,
     val street2: String? = null,
     val city: String? = null,

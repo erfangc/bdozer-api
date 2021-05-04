@@ -1,6 +1,7 @@
 package com.bdozer.api.web.filingentity
 
-import com.bdozer.api.web.filingentity.dataclasses.FilingEntity
+import com.bdozer.api.filing.entity.FilingEntityManager
+import com.bdozer.api.filing.entity.dataclasses.FilingEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController

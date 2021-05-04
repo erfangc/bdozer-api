@@ -20,7 +20,6 @@
         <jwks-rsa.version>0.15.0</jwks-rsa.version>
         <java-jwt.version>3.13.0</java-jwt.version>
         <guava.version>30.0-jre</guava.version>
-        <httpclient.version>4.5.12</httpclient.version>
         <kmongo.version>4.2.4</kmongo.version>
         <MathParser.org-mXparser.version>4.4.2</MathParser.org-mXparser.version>
     </properties>
@@ -43,12 +42,18 @@
         <dependency>
             <groupId>com.bdozer</groupId>
             <artifactId>bdozer-api-factbase-modelbuilder</artifactId>
-            <version>${project.version}</version>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.bdozer</groupId>
             <artifactId>bdozer-api-factbase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.bdozer</groupId>
+            <artifactId>bdozer-api-filing-entity</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
@@ -86,7 +91,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
+            <version>4.5.12</version>
         </dependency>
 
         <!--	validate auth0 issued JWT tokens	-->

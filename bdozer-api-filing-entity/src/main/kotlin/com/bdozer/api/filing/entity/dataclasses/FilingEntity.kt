@@ -1,4 +1,4 @@
-package com.bdozer.api.web.filingentity.dataclasses
+package com.bdozer.api.filing.entity.dataclasses
 
 data class FilingEntity(
     val _id: String,

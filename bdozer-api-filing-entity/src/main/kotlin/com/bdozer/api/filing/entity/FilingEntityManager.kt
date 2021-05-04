@@ -1,18 +1,16 @@
-package com.bdozer.api.web.filingentity
+package com.bdozer.api.filing.entity
 
-import com.bdozer.api.factbase.core.extensions.HttpClientExtensions.readEntity
-import com.bdozer.api.web.filingentity.dataclasses.Address
-import com.bdozer.api.web.filingentity.dataclasses.FilingEntity
-import com.bdozer.api.web.filingentity.internal.SECEntity
+import com.bdozer.api.filing.entity.HttpClientExtensions.readEntity
+import com.bdozer.api.filing.entity.dataclasses.Address
+import com.bdozer.api.filing.entity.internal.SECEntity
 import com.mongodb.client.MongoDatabase
+import com.bdozer.api.filing.entity.dataclasses.FilingEntity
 import org.apache.http.client.HttpClient
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
-import org.springframework.stereotype.Service
 import java.time.Instant
 
-@Service
 class FilingEntityManager(
     mongoDatabase: MongoDatabase,
     private val httpClient: HttpClient,

@@ -4,15 +4,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.bdozer</groupId>
-    <artifactId>bdozer-api-factbase-modelbuilder</artifactId>
+    <artifactId>bdozer-api-filing-entity</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>bdozer-api-factbase-modelbuilder</name>
+    <name>bdozer-api-filing-entity</name>
 
     <properties>
         <java.version>1.8</java.version>
         <resource.delimiter>@</resource.delimiter>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <kmongo.version>4.2.4</kmongo.version>
         <kotlin.version>1.4.21</kotlin.version>
         <httpclient.version>4.5.12</httpclient.version>
     </properties>
@@ -27,6 +28,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>2.12.1</version>
@@ -36,25 +42,11 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.5</version>
         </dependency>
-
-        <!-- Project dependency -->
         <dependency>
-            <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-stockanalysis</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.litote.kmongo</groupId>
+            <artifactId>kmongo</artifactId>
+            <version>${kmongo.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-factbase-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-models</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- End of project dependency -->
-
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
