@@ -7,7 +7,7 @@ import com.bdozer.api.factbase.core.dataclasses.Fact
 import com.bdozer.api.factbase.core.extensions.FactExtensions.dimensions
 import com.bdozer.api.factbase.core.extensions.FactExtensions.filterForDimensions
 import com.bdozer.api.factbase.core.extensions.FactExtensions.filterForDimensionsWithFallback
-import com.bdozer.api.web.extensions.DoubleExtensions.orZero
+import bdozer.api.common.extensions.DoubleExtensions.orZero
 import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.*
 import org.springframework.cache.annotation.Cacheable

@@ -1,4 +1,4 @@
-package com.bdozer.api.web.spreadsheet.evaluation
+package com.bdozer.api.web.models
 
 import bdozer.api.common.spreadsheet.Cell
 import org.mariuszgromada.math.mxparser.Argument
@@ -127,8 +127,7 @@ class CellEvaluator {
     }
 
     private fun checkCircularReference(stack: Stack<Cell>, headCell: Cell) {
-        return
-        // TODO get this to become better
+        // FIXME
         val lst = stack.toList()
         val withoutHeadCell = lst.subList(1, lst.size)
         val circularReferenceDetected = withoutHeadCell.contains(headCell)

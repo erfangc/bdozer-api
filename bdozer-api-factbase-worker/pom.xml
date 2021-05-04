@@ -11,9 +11,9 @@
     </parent>
 
     <groupId>com.bdozer</groupId>
-    <artifactId>bdozer-api-factbase</artifactId>
+    <artifactId>bdozer-api-factbase-worker</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>bdozer-api-factbase</name>
+    <name>bdozer-api-factbase-worker</name>
 
     <properties>
         <kotlin.version>1.4.21</kotlin.version>

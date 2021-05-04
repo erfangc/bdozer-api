@@ -1,4 +1,4 @@
-package com.bdozer.api.web.irr
+package com.bdozer.api.core.irr
 
 import org.slf4j.LoggerFactory
 

@@ -1,6 +1,6 @@
 package com.bdozer.api.web.revenuemodeler
 
-import com.bdozer.api.web.extensions.DoubleExtensions.orZero
+import bdozer.api.common.extensions.DoubleExtensions.orZero
 import bdozer.api.common.model.ManualProjection
 import bdozer.api.common.model.ManualProjections
 import com.bdozer.api.web.revenuemodeler.dataclasses.ModelRevenueRequest

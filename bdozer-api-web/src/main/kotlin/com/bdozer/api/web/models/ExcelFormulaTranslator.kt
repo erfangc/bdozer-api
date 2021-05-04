@@ -1,4 +1,4 @@
-package com.bdozer.api.web.spreadsheet
+package com.bdozer.api.web.models
 
 import bdozer.api.common.spreadsheet.Cell
 import org.mariuszgromada.math.mxparser.Expression

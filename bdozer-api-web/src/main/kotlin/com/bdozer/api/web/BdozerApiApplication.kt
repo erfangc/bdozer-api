@@ -13,4 +13,3 @@ class BdozerApiApplication
 fun main(args: Array<String>) {
     runApplication<BdozerApiApplication>(*args)
 }
-

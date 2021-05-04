@@ -1,7 +1,7 @@
 package com.bdozer.api.web.factbase.modelbuilder
 
 import bdozer.api.common.model.*
-import com.bdozer.api.web.extensions.DoubleExtensions.orZero
+import bdozer.api.common.extensions.DoubleExtensions.orZero
 import com.bdozer.api.factbase.core.dataclasses.Labels
 import com.bdozer.api.factbase.core.dataclasses.XbrlExplicitMember
 import com.bdozer.api.factbase.core.dataclasses.Arc

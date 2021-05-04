@@ -1,8 +1,8 @@
 package com.bdozer.api.web.models
 
+import bdozer.api.common.model.EvaluateModelResult
 import bdozer.api.common.model.Utility.PresentValuePerShare
 import bdozer.api.common.model.Model
-import com.bdozer.api.web.spreadsheet.evaluation.CellEvaluator
 import org.springframework.stereotype.Service
 
 @Service

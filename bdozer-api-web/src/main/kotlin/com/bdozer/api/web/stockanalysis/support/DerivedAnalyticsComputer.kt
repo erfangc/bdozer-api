@@ -1,9 +1,9 @@
 package com.bdozer.api.web.stockanalysis.support
 
-import com.bdozer.api.web.extensions.DoubleExtensions.orZero
+import bdozer.api.common.extensions.DoubleExtensions.orZero
 import com.bdozer.api.web.iex.IEXService
-import com.bdozer.api.web.irr.IRRCalculator
-import com.bdozer.api.web.models.EvaluateModelResult
+import com.bdozer.api.core.irr.IRRCalculator
+import bdozer.api.common.model.EvaluateModelResult
 import bdozer.api.common.model.Utility.TerminalValuePerShare
 import bdozer.api.common.model.Item
 import bdozer.api.common.model.Model

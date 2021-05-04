@@ -1,6 +1,5 @@
-package com.bdozer.api.web.models
+package bdozer.api.common.model
 
-import bdozer.api.common.model.Model
 import bdozer.api.common.spreadsheet.Cell
 
 data class EvaluateModelResult(
