@@ -15,6 +15,8 @@
         <module>bdozer-api-stockanalysis</module>
         <module>bdozer-api-web</module>
         <module>bdozer-api-factbase-worker</module>
+        <module>bdozer-api-ml-worker</module>
+        <module>bdozer-api-factbase-modelbuilder</module>
     </modules>
 
 </project>

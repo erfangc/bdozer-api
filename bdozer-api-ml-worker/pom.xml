@@ -11,9 +11,9 @@
     </parent>
 
     <groupId>com.bdozer</groupId>
-    <artifactId>bdozer-api-web</artifactId>
+    <artifactId>bdozer-api-ml-worker</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>bdozer-api-web</name>
+    <name>bdozer-api-ml-worker</name>
 
     <properties>
         <kotlin.version>1.4.21</kotlin.version>
@@ -42,32 +42,14 @@
 
         <dependency>
             <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-factbase-modelbuilder</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.bdozer</groupId>
             <artifactId>bdozer-api-factbase-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>pl.zankowski</groupId>
             <artifactId>iextrading4j-all</artifactId>
             <version>3.4.3</version>
-        </dependency>
-
-        <!--	poi	-->
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>5.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>5.0.0</version>
         </dependency>
 
         <!--	this is so we can read XBRL documents	-->
@@ -89,46 +71,10 @@
             <version>${httpclient.version}</version>
         </dependency>
 
-        <!--	validate auth0 issued JWT tokens	-->
-        <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>${java-jwt.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>jwks-rsa</artifactId>
-            <version>${jwks-rsa.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>2.12.1</version>
-        </dependency>
-
-        <!--	mxparser is used to evaluate cell formulas	-->
-        <dependency>
-            <groupId>org.mariuszgromada.math</groupId>
-            <artifactId>MathParser.org-mXparser</artifactId>
-            <version>${MathParser.org-mXparser.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-kotlin</artifactId>
-            <version>1.5.7</version>
         </dependency>
 
         <dependency>

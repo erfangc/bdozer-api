@@ -1,4 +1,4 @@
-package com.bdozer.api.web.factbase.modelbuilder.issues
+package com.bdozer.api.factbase.modelbuilder.issues
 
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.ReplaceOptions
@@ -6,12 +6,9 @@ import org.litote.kmongo.deleteOneById
 import org.litote.kmongo.eq
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.replaceOne
-import org.springframework.stereotype.Service
 
-@Service
-class IssueManager(
-    mongoDatabase: MongoDatabase
-) {
+class IssueManager(mongoDatabase: MongoDatabase) {
+
     val issues = mongoDatabase.getCollection<Issue>()
 
     fun findIssues(stockAnalysisId: String): List<Issue> {

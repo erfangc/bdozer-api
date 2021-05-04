@@ -6,11 +6,18 @@
   Shared data and domain classes
 - `bdozer-api-web`
   Spring Boot server that exposes REST APIs
-- `bdozer-api-factbase`
+- `bdozer-api-factbase-worker`
   Worker program that listens on MQ queues for SEC filings to parse
 - `bdozer-api-factbase-core`
   The business logic code that knows how to parse SEC filings and save them as `Fact` objects
-
+- `bdozer-api-models`
+  Core `Model` and `Cell` translation and evaluation logic. Akin to spreadsheet graph calculation
+- `bdozer-api-stockanalysis`
+  Uses `bdozer-api-models` to perform stock analysis and post-processing and derived analytics  
+- `bdozer-api-ml-worker`
+  Console applications that runs in the background to prepare models and perform other tasks that 
+  prepare data for automation and machine learning
+  
 ## Generating the TypeScript SDK
 
 ```bash
@@ -20,7 +27,7 @@ openapi-generator-cli generate \
   -o ~/bdozer/client
 ```
 
-## Sync data from environments
+## Sync Data from Environments
 
 To dump:
 

@@ -1,4 +1,4 @@
-package com.bdozer.api.web.factbase.modelbuilder
+package com.bdozer.api.factbase.modelbuilder
 
 import com.bdozer.api.models.dataclasses.*
 import bdozer.api.common.extensions.DoubleExtensions.orZero

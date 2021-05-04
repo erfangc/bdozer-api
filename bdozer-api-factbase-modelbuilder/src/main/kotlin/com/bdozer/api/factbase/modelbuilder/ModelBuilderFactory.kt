@@ -1,10 +1,8 @@
-package com.bdozer.api.web.factbase.modelbuilder
+package com.bdozer.api.factbase.modelbuilder
 
 import com.bdozer.api.factbase.core.SECFilingFactory
 import com.bdozer.api.models.dataclasses.Model
-import org.springframework.stereotype.Service
 
-@Service
 class ModelBuilderFactory(
     private val secFilingFactory: SECFilingFactory,
 ) {

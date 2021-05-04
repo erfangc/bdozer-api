@@ -1,4 +1,4 @@
-package com.bdozer.api.web.factbase.modelbuilder.issues
+package com.bdozer.api.factbase.modelbuilder.issues
 
 import java.time.Instant
 

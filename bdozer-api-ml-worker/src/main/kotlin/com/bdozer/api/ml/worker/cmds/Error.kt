@@ -1,4 +1,4 @@
-package com.bdozer.api.web.cmds
+package com.bdozer.api.ml.worker.cmds
 
 data class Error(
     val cik: String,

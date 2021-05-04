@@ -1,5 +1,6 @@
-package com.bdozer.api.web.factbase.modelbuilder
+package com.bdozer.api.web.factbase
 
+import com.bdozer.api.factbase.modelbuilder.ModelBuilderFactory
 import com.bdozer.api.models.dataclasses.Model
 import org.springframework.web.bind.annotation.*
 

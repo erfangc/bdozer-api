@@ -1,7 +1,6 @@
-package com.bdozer.api.web.factbase.modelbuilder.issues
+package com.bdozer.api.factbase.modelbuilder.issues
 
 import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
-import org.springframework.stereotype.Service
 
 /**
  * # Overview
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service
  * To prevent against issues from being resolved prematurely, repeated invocations to [generateIssues]
  * on [IssueGenerator] can re-generate and resurface issues that are actually not resolved
  */
-@Service
 class IssueGenerator {
 
     fun generateIssues(stockAnalysis: StockAnalysis2): List<Issue> {

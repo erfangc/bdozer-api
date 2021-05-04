@@ -21,7 +21,6 @@ class FilingEntityManager(
     companion object {
         const val Completed = "Completed"
         const val Created = "Created"
-        const val Bootstrapping = "Bootstrapping"
     }
 
     private val col = mongoDatabase.getCollection<FilingEntity>()
