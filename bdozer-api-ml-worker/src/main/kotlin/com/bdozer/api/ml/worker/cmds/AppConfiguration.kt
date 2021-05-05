@@ -19,10 +19,10 @@ import java.net.URI
 
 class AppConfiguration {
 
-    fun iexCloudClient(mongoClient: MongoClient): IEXCloudClient {
+    fun iexCloudClient(): IEXCloudClient {
         val token = IEXCloudTokenBuilder()
             .withPublishableToken("pk_d66bdb23bae6444e85c16fbb4fff2e29")
-            .withSecretToken(System.getenv("IEX_SECRET_TOKEN") ?: error("environment IEX_SECRET_TOKEN not defined"))
+            .withSecretToken(getenv("IEX_SECRET_TOKEN") ?: error("environment IEX_SECRET_TOKEN not defined"))
             .build()
         return IEXTradingClient.create(token)
     }
@@ -36,10 +36,6 @@ class AppConfiguration {
                 )
             )
         )
-    }
-
-    fun iexService(iexCloudClient: IEXCloudClient): IEXService {
-        return IEXService(iexCloudClient = iexCloudClient)
     }
 
     fun httpClient(): HttpClient {
@@ -70,7 +66,7 @@ class AppConfiguration {
         val password = if (userInfo != null && userInfo.size > 1) userInfo[1] else null
         val host = rabbitMqUrl.host
         val port = rabbitMqUrl.port
-        val virtualHost =  if (path != null && path.length > 1) path.substring(1) else null
+        val virtualHost = if (path != null && path.length > 1) path.substring(1) else null
         val connectionFactory = ConnectionFactory()
         if (username != null) {
             connectionFactory.username = username

@@ -18,7 +18,7 @@ private const val QUEUE_NAME = "FILING_TO_PROCESS"
 
 private val log = LoggerFactory.getLogger(BdozerFactbaseApplication::class.java)
 
-fun main(args: Array<String>) {
+fun main() {
 
     val cfg = AppConfiguration()
 

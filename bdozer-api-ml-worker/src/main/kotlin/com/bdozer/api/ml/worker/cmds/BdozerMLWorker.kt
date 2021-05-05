@@ -18,10 +18,9 @@ private const val QUEUE_NAME = "MODELS_TO_UPSERT"
 
 private val log = LoggerFactory.getLogger(BdozerMLWorker::class.java)
 
-fun main(args: Array<String>) {
+fun main() {
 
     val cfg = AppConfiguration()
-
     /*
     Domain object construction code
      */
@@ -29,11 +28,9 @@ fun main(args: Array<String>) {
     val mongoClient = cfg.mongoClient()
     val mongoDatabase = cfg.mongoDatabase(mongoClient)
     val objectMapper = jacksonObjectMapper().findAndRegisterModules()
-    val iexCloudClient = cfg.iexCloudClient(mongoClient)
+    val iexCloudClient = cfg.iexCloudClient()
     val stockAnalysisService = cfg.stockAnalysisService(
-        iexService = IEXService(
-            iexCloudClient = iexCloudClient
-        ),
+        iexService = IEXService(iexCloudClient = iexCloudClient),
         mongoDatabase = mongoDatabase
     )
     val secFilingFactory = cfg.secFilingFactory(httpClient = httpClient)
