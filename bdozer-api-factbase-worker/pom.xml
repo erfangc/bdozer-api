@@ -3,6 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.4.2</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
     <groupId>com.bdozer</groupId>
     <artifactId>bdozer-api-factbase-worker</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -35,7 +42,7 @@
         <dependency>
             <groupId>com.bdozer</groupId>
             <artifactId>bdozer-api-factbase-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.bdozer</groupId>
