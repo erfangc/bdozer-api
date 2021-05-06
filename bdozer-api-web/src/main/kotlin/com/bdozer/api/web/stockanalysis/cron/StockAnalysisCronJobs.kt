@@ -20,7 +20,7 @@ class StockAnalysisCronJobs(
      */
     @Scheduled(cron = "0 0 16 * * MON-FRI")
     fun updatePrices() {
-        val stockAnalyses = stockAnalysisService.findStockAnalyses(limit = Int.MAX_VALUE).stockAnalyses
+        val stockAnalyses = stockAnalysisService.findStockAnalyses(limit = 5000).stockAnalyses
         val tickers = stockAnalyses.mapNotNull { it.ticker }.distinct()
         val prices = iexService.prices(tickers = tickers)
         stockAnalyses.forEach {
@@ -28,9 +28,7 @@ class StockAnalysisCronJobs(
             try {
                 val stockAnalysis = stockAnalysisService.getStockAnalysis(id) ?: error("stock analysis not found")
                 val currentPrice = prices[it.ticker] ?: error("no prices found for ticker=${it.ticker}")
-                val updatedDerivedStockAnalytics = stockAnalysis
-                    .derivedStockAnalytics
-                    ?.copy(currentPrice = currentPrice)
+                val updatedDerivedStockAnalytics = stockAnalysis.derivedStockAnalytics?.copy(currentPrice = currentPrice)
                 stockAnalysisService.saveStockAnalysis(stockAnalysis.copy(derivedStockAnalytics = updatedDerivedStockAnalytics))
                 log.info("Updated stock analysis id=$id ticker=${stockAnalysis.ticker}")
             } catch (e: Exception) {
