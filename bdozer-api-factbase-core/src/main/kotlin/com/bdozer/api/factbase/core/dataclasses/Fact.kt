@@ -41,4 +41,8 @@ data class Fact(
     val doubleValue: Double? = null,
 
     val lastUpdated: String,
-)
+) {
+    fun label(): String {
+        return label ?: labelTerse ?: verboseLabel ?: conceptName
+    }
+}
