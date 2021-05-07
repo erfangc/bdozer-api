@@ -18,7 +18,7 @@ class TimeSeriesService(mongoDatabase: MongoDatabase) {
     /**
      * Grab time series
      */
-    fun getTimeSeries(
+    fun getTimeSeriesForFact(
         cik: String,
         factId: String,
         conceptNames: List<String>,

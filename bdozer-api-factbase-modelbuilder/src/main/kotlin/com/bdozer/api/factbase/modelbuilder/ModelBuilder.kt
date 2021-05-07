@@ -46,7 +46,7 @@ class ModelBuilder(private val secFiling: SECFiling) {
     Declare frequently used reference data
      */
     private val facts = factsParser.parseFacts().facts
-    private val dimensions = secFiling.incomeStatementDeclaredDimensions()
+    private val dimensions = secFiling.declaredDimensionsOnIncomeStatement()
     private val filingArcs = filingArcsParser.parseFilingArcs()
 
     /*
@@ -82,15 +82,6 @@ class ModelBuilder(private val secFiling: SECFiling) {
         "ProfitLoss",
     )
 
-    /*
-    Find the net income / revenue item etc.
-     */
-    private val netIncomeItem = rawIncomeStatementItems
-        .reversed()
-        .find { netIncomeLossConceptNameCandidates.contains(it.name) }
-
-    private val revenueItem = revenueItemReverseBfs(rawIncomeStatementItems)
-
     private val avgSharesOutstandingBasicAndDiluted = "WeightedAverageNumberOfShareOutstandingBasicAndDiluted"
     private val avgSharesOutstandingBasic = "WeightedAverageNumberOfSharesOutstandingBasic"
     private val avgSharesOutstandingDiluted = "WeightedAverageNumberOfDilutedSharesOutstanding"
@@ -101,81 +92,89 @@ class ModelBuilder(private val secFiling: SECFiling) {
     ----------------------------
      */
 
+    /*
+    Find the net income / revenue item etc.
+     */
+    private val netIncomeItem = rawIncomeStatementItems
+        .reversed()
+        .find { netIncomeLossConceptNameCandidates.contains(it.name) }
+
+    private val revenueItem = revenueItemReverseBfs(rawIncomeStatementItems)
+
+    /*
+    create and then replace existing EPS item(s) with the ones below
+     */
+    val epsBasic = earningsPerShareBasic()
+    val epsDiluted = earningsPerShareDiluted()
+    val epsBasicAndDiluted = earningsPerShareBasicAndDiluted()
+
+    val incomeStatementItemsWithEpsReplaced =
+        listOfNotNull(epsBasic, epsDiluted, epsBasicAndDiluted).fold(rawIncomeStatementItems) { acc, item ->
+            if (acc.any { it.name == item.name }) {
+                acc.map {
+                    if (it.name == item.name) {
+                        item
+                    } else {
+                        it
+                    }
+                }
+            } else {
+                acc
+            }
+        }
+
+
+    /*
+    if any of the shares outstanding item is newly created
+    then tag them onto the end of the income statement
+     */
+    val basicSharesOutstanding = epsBasic
+        ?.let { findOrCreate(avgSharesOutstandingBasic) }
+    val dilutedSharesOutstanding = epsDiluted
+        ?.let { findOrCreate(avgSharesOutstandingDiluted) }
+    val basicAndDilutedSharesOutstanding = epsBasicAndDiluted
+        ?.let { findOrCreate(avgSharesOutstandingBasicAndDiluted) }
+
+    val incomeStatementItemsWithSharesOutstanding = listOfNotNull(
+        basicSharesOutstanding,
+        dilutedSharesOutstanding,
+        basicAndDilutedSharesOutstanding,
+    ).fold(incomeStatementItemsWithEpsReplaced) { acc, item ->
+        if (acc.any { it.name == item.name }) {
+            acc
+        } else {
+            acc + item
+        }
+    }
+
+    /*
+    clean up references that does not exist
+     */
+    val lookup = (incomeStatementItemsWithSharesOutstanding + rawBalanceSheetItems).associateBy { it.name }
+    val cleanedIncomeStatement = incomeStatementItemsWithSharesOutstanding.map { item ->
+        if (item.sumOfOtherItems != null) {
+            val filtered =
+                item.sumOfOtherItems?.components?.filter { component -> lookup[component.itemName] != null } ?: emptyList()
+            item.copy(sumOfOtherItems = item.sumOfOtherItems?.copy(components = filtered))
+        } else {
+            item
+        }
+    }
+
+    val cleanedBalanceSheet = rawBalanceSheetItems.map { item ->
+        if (item.sumOfOtherItems != null) {
+            val filtered =
+                item.sumOfOtherItems?.components?.filter { component -> lookup[component.itemName] != null } ?: emptyList()
+            item.copy(sumOfOtherItems = item.sumOfOtherItems?.copy(components = filtered))
+        } else {
+            item
+        }
+    }
+
     /**
      * Converts a [SECFiling] into a [Model] to the best of it's ability
      */
     fun bestEffortModel(): Model {
-
-        /*
-        create and then replace existing EPS item(s) with the ones below
-         */
-        val epsBasic = earningsPerShareBasic()
-        val epsDiluted = earningsPerShareDiluted()
-        val epsBasicAndDiluted = earningsPerShareBasicAndDiluted()
-
-        val incomeStatementItemsWithEpsReplaced =
-            listOfNotNull(epsBasic, epsDiluted, epsBasicAndDiluted).fold(rawIncomeStatementItems) { acc, item ->
-                if (acc.any { it.name == item.name }) {
-                    acc.map {
-                        if (it.name == item.name) {
-                            item
-                        } else {
-                            it
-                        }
-                    }
-                } else {
-                    acc
-                }
-            }
-
-
-        /*
-        if any of the shares outstanding item is newly created
-        then tag them onto the end of the income statement
-         */
-        val basicSharesOutstanding = epsBasic
-            ?.let { findOrCreate(avgSharesOutstandingBasic) }
-        val dilutedSharesOutstanding = epsDiluted
-            ?.let { findOrCreate(avgSharesOutstandingDiluted) }
-        val basicAndDilutedSharesOutstanding = epsBasicAndDiluted
-            ?.let { findOrCreate(avgSharesOutstandingBasicAndDiluted) }
-
-        val incomeStatementItemsWithSharesOutstanding = listOfNotNull(
-            basicSharesOutstanding,
-            dilutedSharesOutstanding,
-            basicAndDilutedSharesOutstanding,
-        ).fold(incomeStatementItemsWithEpsReplaced) { acc, item ->
-            if (acc.any { it.name == item.name }) {
-                acc
-            } else {
-                acc + item
-            }
-        }
-
-        /*
-        clean up references that does not exist
-         */
-        val lookup = (incomeStatementItemsWithSharesOutstanding + rawBalanceSheetItems).associateBy { it.name }
-        val cleanedIncomeStatement = incomeStatementItemsWithSharesOutstanding.map { item ->
-            if (item.sumOfOtherItems != null) {
-                val filtered =
-                    item.sumOfOtherItems?.components?.filter { component -> lookup[component.itemName] != null } ?: emptyList()
-                item.copy(sumOfOtherItems = item.sumOfOtherItems?.copy(components = filtered))
-            } else {
-                item
-            }
-        }
-
-        val cleanedBalanceSheet = rawBalanceSheetItems.map { item ->
-            if (item.sumOfOtherItems != null) {
-                val filtered =
-                    item.sumOfOtherItems?.components?.filter { component -> lookup[component.itemName] != null } ?: emptyList()
-                item.copy(sumOfOtherItems = item.sumOfOtherItems?.copy(components = filtered))
-            } else {
-                item
-            }
-        }
-
         return Model(
             ticker = secFiling.tradingSymbol,
             cik = secFiling.cik,
@@ -190,7 +189,6 @@ class ModelBuilder(private val secFiling: SECFiling) {
             incomeStatementItems = cleanedIncomeStatement,
             balanceSheetItems = cleanedBalanceSheet,
         )
-
     }
 
     /**
@@ -199,7 +197,6 @@ class ModelBuilder(private val secFiling: SECFiling) {
      * @param arc the [Arc] to be turned into [Item]
      */
     private fun arcToItems(arc: Arc, incomeStatement: List<Arc>): List<Item> {
-
         /*
         Filter out any arcs that refers to calculations that is not declared
         in the statement itself
@@ -260,7 +257,6 @@ class ModelBuilder(private val secFiling: SECFiling) {
 
         - Explicitly declared dependency on other Concepts via the calculationArcs
         - Dimensional items found above
-
          */
         val explicitCalculationComponents = arc
             .calculations
@@ -313,20 +309,23 @@ class ModelBuilder(private val secFiling: SECFiling) {
         if it has components (either explicitly declared or through dimensional decomposition) then
         we assign it a [Sum] property otherwise it's formula will be set to its most recent historical value
          */
-        val dlessItemWithFormula = if (sum.components.isEmpty()) {
-            dimensionlessItem.copy(
-                type = ItemType.FixedCost,
-                fixedCost = FixedCost(dimensionlessItem.historicalValue?.value.orZero()),
+        return if (sum.components.size <= 1) {
+            // we do not need to create a dimensionless item
+            // with only 1 dimensional component
+            listOf(
+                dimensionlessItem.copy(
+                    type = ItemType.FixedCost,
+                    fixedCost = FixedCost(dimensionlessItem.historicalValue?.value.orZero()),
+                )
             )
         } else {
-            dimensionlessItem.copy(type = ItemType.SumOfOtherItems, sumOfOtherItems = sum)
+            dimensionalItems + dimensionlessItem.copy(type = ItemType.SumOfOtherItems, sumOfOtherItems = sum)
         }
 
-        return dimensionalItems + dlessItemWithFormula
     }
 
     private fun labelWaterfall(labels: Labels?) =
-        labels?.terseLabel ?: labels?.label ?: labels?.verboseLabel
+        labels?.label ?: labels?.terseLabel ?: labels?.verboseLabel
 
     /**
      * Derive [Labels] from the [Fact], assuming the fact

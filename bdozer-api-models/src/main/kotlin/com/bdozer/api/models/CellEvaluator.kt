@@ -44,8 +44,21 @@ class CellEvaluator {
          * this requires the loop up
          */
         fun unmetDependencies(cell: Cell): List<Cell> {
-            return cell.dependentCellNames.map { dep ->
-                cellLookupByName[dep] ?: error("referenced cell $dep does not exist")
+            return cell.dependentCellNames.mapNotNull { dep ->
+                val dependentCell = cellLookupByName[dep]
+                when {
+                    dependentCell == null -> {
+                        error("referenced cell $dep does not exist")
+                    }
+                    // if the dependent cell is already in the stack then ignore it
+                    // this enables circular reference checks to work
+                    stack.contains(dependentCell) -> {
+                        null
+                    }
+                    else -> {
+                        dependentCell
+                    }
+                }
             }.filter { it.value == null }
         }
 
@@ -109,7 +122,7 @@ class CellEvaluator {
                         stack.push(dependentCell)
                         // circular dependency handling code
                         val s = System.currentTimeMillis()
-                        checkCircularReference(stack, headCell)
+                        checkCircularReference(stack, cell)
                         val e = System.currentTimeMillis()
                         timeSpentCheckingCircularDependency += e - s
                     }
@@ -127,7 +140,6 @@ class CellEvaluator {
     }
 
     private fun checkCircularReference(stack: Stack<Cell>, headCell: Cell) {
-        // FIXME
         val lst = stack.toList()
         val withoutHeadCell = lst.subList(1, lst.size)
         val circularReferenceDetected = withoutHeadCell.contains(headCell)

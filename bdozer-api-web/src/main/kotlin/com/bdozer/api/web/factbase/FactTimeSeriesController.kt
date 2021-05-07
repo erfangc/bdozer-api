@@ -21,7 +21,7 @@ class FactTimeSeriesController(
         @RequestParam(required = false) documentFiscalPeriodFocus: DocumentFiscalPeriodFocus? = null,
         @RequestParam(required = false) prune: Boolean? = null,
     ): List<FactTimeSeries> {
-        return timeSeriesService.getTimeSeries(
+        return timeSeriesService.getTimeSeriesForFact(
             cik = cik,
             factId = factId,
             conceptNames = conceptNames,

@@ -65,6 +65,7 @@ class ModelBuilderWorker(
                 stockAnalysisService.saveStockAnalysis(
                     StockAnalysis2(
                         _id = stockAnalysisId,
+                        cik = cik,
                         cells = resp.cells,
                         ticker = filingEntity.tradingSymbol,
                         name = filingEntity.name,

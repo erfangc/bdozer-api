@@ -40,7 +40,11 @@ class SECFiling(
     val factsParser: FactsParser = FactsParser(this)
     val filingArcsParser: FilingArcsParser = FilingArcsParser(this)
 
-    fun incomeStatementDeclaredDimensions(): List<Dimension> {
+    /**
+     * These are the explicit declared dimensions on the income statement
+     * before the StatementLineItems parent arc
+     */
+    fun declaredDimensionsOnIncomeStatement(): List<Dimension> {
         return declaredDimensions(filingArcsParser.parseFilingArcs().incomeStatement)
     }
 
