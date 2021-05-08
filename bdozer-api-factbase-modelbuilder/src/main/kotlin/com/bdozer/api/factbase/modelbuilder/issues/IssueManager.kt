@@ -27,4 +27,8 @@ class IssueManager(mongoDatabase: MongoDatabase) {
         issues.deleteOneById(id)
     }
 
+    fun deleteAllIssues(stockAnalysisId: String) {
+        issues.deleteMany(Issue::stockAnalysisId eq stockAnalysisId)
+    }
+
 }
