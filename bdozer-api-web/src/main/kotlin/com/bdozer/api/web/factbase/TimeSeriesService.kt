@@ -125,9 +125,12 @@ class TimeSeriesService(mongoDatabase: MongoDatabase) {
     }
 
     private fun pruneFts(factTimeSeries: List<FactTimeSeries>): List<FactTimeSeries> {
+        if (factTimeSeries.isEmpty()) {
+            return emptyList()
+        }
         /*
-            prune the time series so they align
-             */
+        prune the time series so they align
+         */
         val uniqueDates = factTimeSeries.map { fts ->
             fts.facts.map { it.documentPeriodEndDate }.toSet()
         }.reduceRight { set, acc ->

@@ -61,7 +61,7 @@ class FactAutoFiller(private val factBase: FactBase) {
                 ),
             )
         } catch (e: Exception) {
-            log.error("error occurred", e)
+            log.error("error occurred message=${e.message}")
             return emptyList()
         }
     }
