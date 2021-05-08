@@ -1,6 +1,7 @@
 package com.bdozer.api.ml.worker.cmds
 
 import com.bdozer.api.factbase.modelbuilder.ModelBuilderFactory
+import com.bdozer.api.factbase.modelbuilder.issues.IssueManager
 import com.bdozer.api.filing.entity.FilingEntityManager
 import com.bdozer.api.stockanalysis.iex.IEXService
 import com.rabbitmq.client.CancelCallback
@@ -97,6 +98,7 @@ fun main() {
         stockAnalysisService = stockAnalysisService,
         modelBuilderFactory = modelBuilderFactory,
         channel = channel,
+        issueManager = IssueManager(mongoDatabase),
     )
     val priceUpdateWorker = PriceUpdateWorker(
         channel = channel,
