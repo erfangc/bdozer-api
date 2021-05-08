@@ -2,6 +2,7 @@ package com.bdozer.api.stockanalysis
 
 import com.bdozer.api.stockanalysis.dataclasses.*
 import com.bdozer.api.stockanalysis.support.StatelessModelEvaluator
+import com.mongodb.client.FindIterable
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Projections
 import com.mongodb.client.model.TextSearchOptions
@@ -14,8 +15,8 @@ class StockAnalysisService(
     private val statelessModelEvaluator: StatelessModelEvaluator,
 ) {
 
-    val col = mongoDatabase.getCollection<StockAnalysis2>()
-    val collection = mongoDatabase.getCollection("stockAnalysis2")
+    private val stockAnalyses = mongoDatabase.getCollection<StockAnalysis2>()
+    private val collectionStockAnalyses = mongoDatabase.getCollection("stockAnalysis2")
 
     fun refreshStockAnalysis(stockAnalysis: StockAnalysis2): StockAnalysis2 {
         val request = EvaluateModelRequest(model = stockAnalysis.model)
@@ -31,15 +32,19 @@ class StockAnalysisService(
     }
 
     fun saveStockAnalysis(analysis: StockAnalysis2) {
-        col.save(analysis.copy(lastUpdated = Instant.now()))
+        stockAnalyses.save(analysis.copy(lastUpdated = Instant.now()))
     }
 
     fun deleteStockAnalysis(id: String) {
-        col.deleteOneById(id)
+        stockAnalyses.deleteOneById(id)
     }
 
     fun getStockAnalysis(id: String): StockAnalysis2? {
-        return col.findOneById(id)
+        return stockAnalyses.findOneById(id)
+    }
+
+    fun allAnalyses(): FindIterable<StockAnalysis2> {
+        return stockAnalyses.find()
     }
 
     fun findStockAnalyses(
@@ -61,7 +66,7 @@ class StockAnalysisService(
             ticker?.let { StockAnalysis2::ticker eq it },
             term?.let { text(it, TextSearchOptions().caseSensitive(false)) },
         )
-        val iterable = collection
+        val iterable = collectionStockAnalyses
             .find(filter)
             .projection(
                 Projections.fields(

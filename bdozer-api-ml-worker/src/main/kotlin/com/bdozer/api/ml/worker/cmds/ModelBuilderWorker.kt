@@ -4,6 +4,7 @@ import com.bdozer.api.factbase.core.dataclasses.ProcessSECFilingRequest
 import com.bdozer.api.factbase.modelbuilder.ModelBuilderFactory
 import com.bdozer.api.filing.entity.FilingEntityManager
 import com.bdozer.api.stockanalysis.StockAnalysisService
+import com.bdozer.api.stockanalysis.dataclasses.DerivedStockAnalytics
 import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelRequest
 import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -61,19 +62,34 @@ class ModelBuilderWorker(
                     cik = cik,
                     adsh = adsh
                 )
-                val resp = stockAnalysisService.evaluateStockAnalysis(EvaluateModelRequest(model))
-                stockAnalysisService.saveStockAnalysis(
-                    StockAnalysis2(
-                        _id = stockAnalysisId,
-                        cik = cik,
-                        cells = resp.cells,
-                        ticker = filingEntity.tradingSymbol,
-                        name = filingEntity.name,
-                        derivedStockAnalytics = resp.derivedStockAnalytics,
-                        model = resp.model.copy(adsh = adsh),
-                        tags = listOf("RS3000", "Automated")
+                try {
+                    val resp = stockAnalysisService.evaluateStockAnalysis(EvaluateModelRequest(model))
+                    stockAnalysisService.saveStockAnalysis(
+                        StockAnalysis2(
+                            _id = stockAnalysisId,
+                            cik = cik,
+                            cells = resp.cells,
+                            ticker = filingEntity.tradingSymbol,
+                            name = filingEntity.name,
+                            derivedStockAnalytics = resp.derivedStockAnalytics,
+                            model = resp.model.copy(adsh = adsh),
+                            tags = listOf("RS3000", "Automated")
+                        )
                     )
-                )
+                } catch (e: Exception) {
+                    stockAnalysisService.saveStockAnalysis(
+                        StockAnalysis2(
+                            _id = stockAnalysisId,
+                            cik = cik,
+                            cells = emptyList(),
+                            ticker = filingEntity.tradingSymbol,
+                            name = filingEntity.name,
+                            derivedStockAnalytics = null,
+                            model = model,
+                            tags = listOf("RS3000", "Automated")
+                        )
+                    )
+                }
                 log.info("Created stock analysis $stockAnalysisId")
             } else {
                 /*
