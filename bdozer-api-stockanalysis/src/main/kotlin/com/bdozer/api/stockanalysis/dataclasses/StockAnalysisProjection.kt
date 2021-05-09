@@ -12,4 +12,5 @@ data class StockAnalysisProjection(
     val targetPrice: Double? = null,
     val published: Boolean? = null,
     val lastUpdated: Instant? = null,
+    val tags: List<String> = emptyList(),
 )

@@ -66,10 +66,19 @@ class StockAnalysisService(
                         BsonArray(
                             listOf(
                                 BsonString(StockAnalysis2::name.name),
-                                BsonString(StockAnalysis2::ticker.name)
                             )
                         )
                     )
+            )
+        }
+
+        val tickerTermCondition = term?.let { it ->
+            BsonDocument(
+                "text",
+                BsonDocument()
+                    .append("query", BsonString(it.toUpperCase()))
+                    .append("path", BsonString(StockAnalysis2::ticker.name))
+                    .append("score", BsonDocument("boost", BsonDocument("value", BsonInt32(3))))
             )
         }
 
@@ -95,7 +104,7 @@ class StockAnalysisService(
             BsonDocument(
                 "text",
                 BsonDocument()
-                    .append("query", BsonString(it))
+                    .append("query", BsonString(it.toUpperCase()))
                     .append("path", BsonString(StockAnalysis2::ticker.name))
             )
         }
@@ -119,27 +128,29 @@ class StockAnalysisService(
         }
 
         val musts = listOfNotNull(
-            termCondition,
             tickerCondition,
             publishedCondition,
             cikCondition,
             userIdCondition,
         ) + tagsConditions
 
+        val shoulds = listOfNotNull(termCondition, tickerTermCondition)
 
-        val search = if (musts.isNotEmpty()) BsonDocument()
-            .append(
-                "\$search",
-                BsonDocument(
-                    "compound",
-                    BsonDocument(
-                        "must",
-                        BsonArray(musts)
-                    )
-                )
-            )
-        else
+        val search = if (musts.isNotEmpty() || shoulds.isNotEmpty()) {
+            val compound = BsonDocument().apply {
+                if (musts.isNotEmpty()) {
+                    append("must", BsonArray(musts))
+                }
+                if (shoulds.isNotEmpty()) {
+                    append("should", BsonArray(shoulds))
+                }
+            }
+            BsonDocument()
+                .append("\$search", BsonDocument("compound", compound))
+        } else {
             null
+        }
+
         val iterable = collectionStockAnalyses
             .aggregate(
                 listOfNotNull(
@@ -153,6 +164,7 @@ class StockAnalysisService(
                             .append(StockAnalysis2::name.name, BsonInt32(1))
                             .append(StockAnalysis2::published.name, BsonInt32(1))
                             .append(StockAnalysis2::lastUpdated.name, BsonInt32(1))
+                            .append(StockAnalysis2::tags.name, BsonInt32(1))
                             .append(
                                 (StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::targetPrice).name,
                                 BsonInt32(1)
@@ -182,6 +194,7 @@ class StockAnalysisService(
                     targetPrice = targetPrice,
                     published = doc.getBoolean(StockAnalysis2::published.name),
                     lastUpdated = doc.getDate(StockAnalysis2::lastUpdated.name).toInstant(),
+                    tags = doc.getList(StockAnalysis2::tags.name, String::class.java),
                 )
             }
             .toList()

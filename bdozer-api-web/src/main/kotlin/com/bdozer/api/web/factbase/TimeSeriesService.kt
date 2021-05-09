@@ -28,7 +28,7 @@ class TimeSeriesService(mongoDatabase: MongoDatabase) {
         prune: Boolean = false,
     ): List<FactTimeSeries> {
 
-        val fact = col.findOneById(factId) ?: error("")
+        val fact = col.findOneById(factId) ?: return emptyList()
         val conceptName = fact.conceptName
 
         val filters = and(
