@@ -29,13 +29,36 @@ class ModelBuilderWorker(
     private val issueGenerator = IssueGenerator()
 
     override fun handle(consumerTag: String, message: Delivery) {
+        val request = try {
+            deserRequest(message, consumerTag)
+        } catch (e: Exception) {
+            return
+        }
+        /*
+        Attempt to process the request
+         */
+        try {
+            val savedStockAnalysis = stockAnalysisService.getStockAnalysis(stockAnalysisId(request.cik))
+            if (savedStockAnalysis == null) {
+                createNewStockAnalysis(request)
+            } else {
+                updateExistingStockAnalysis(savedStockAnalysis)
+            }
+        } catch (e: Exception) {
+            log.error("Unable to create or update stock analysis cik=${request.cik}, message=${e.message}")
+        } finally {
+            channel.basicAck(message.envelope.deliveryTag, false)
+        }
+    }
+
+    private fun deserRequest(message: Delivery, consumerTag: String): ProcessSECFilingRequest {
         /*
         This is the main processing loop logic for every event this worker receives
         parse the request from binaries off the message queue
          */
         val deliveryTag = message.envelope.deliveryTag
-        val request = try {
-            objectMapper.readValue<ProcessSECFilingRequest>(message.body)
+        return try {
+            objectMapper.readValue(message.body)
         } catch (e: Exception) {
             log.error(
                 "Unable to deserialize message " +
@@ -44,87 +67,72 @@ class ModelBuilderWorker(
                         "message=${e.message}", e
             )
             channel.basicAck(deliveryTag, false)
-            return
+            throw e
         }
+    }
 
-        val cik = request.cik
-        val adsh = request.adsh
-        val stockAnalysisId = "automated_$cik"
+    private fun updateExistingStockAnalysis(savedStockAnalysis: StockAnalysis2) {
+        val cik = savedStockAnalysis.cik ?: error("...")
+        val adsh = savedStockAnalysis.model.adsh ?: error("...")
+        val stockAnalysisId = savedStockAnalysis._id
+        /*
+        create a new model + stock analysis
+         */
+        val updatedModel = modelBuilderFactory.bestEffortModel(cik = cik,adsh = adsh)
 
         /*
-        Attempt to process the request
+        Rerun the issues for the updated model
          */
-        try {
-            val filingEntity = filingEntityManager.getFilingEntity(cik) ?: filingEntityManager.createFilingEntity(cik)
-            val savedStockAnalysis = stockAnalysisService.getStockAnalysis(stockAnalysisId)
-            if (savedStockAnalysis == null) {
-                /*
-                create a new model + stock analysis
-                 */
-                val model = modelBuilderFactory.bestEffortModel(
-                    cik = cik,
-                    adsh = adsh
-                )
-                try {
-                    val resp = stockAnalysisService.evaluateStockAnalysis(EvaluateModelRequest(model))
-                    val stockAnalysis = StockAnalysis2(
-                        _id = stockAnalysisId,
-                        cik = cik,
-                        cells = resp.cells,
-                        ticker = filingEntity.tradingSymbol,
-                        name = filingEntity.name,
-                        derivedStockAnalytics = resp.derivedStockAnalytics,
-                        model = resp.model.copy(adsh = adsh),
-                        tags = listOf("RS3000", "Automated")
-                    )
-                    rerunIssues(stockAnalysis)
-                    stockAnalysisService.saveStockAnalysis(stockAnalysis)
-                } catch (e: Exception) {
-                    stockAnalysisService.saveStockAnalysis(
-                        StockAnalysis2(
-                            _id = stockAnalysisId,
-                            cik = cik,
-                            cells = emptyList(),
-                            ticker = filingEntity.tradingSymbol,
-                            name = filingEntity.name,
-                            derivedStockAnalytics = null,
-                            model = model,
-                            tags = listOf("RS3000", "Automated")
-                        )
-                    )
-                }
-                log.info("Created stock analysis $stockAnalysisId")
-            } else {
-                /*
-                create a new model + stock analysis
-                 */
-                val model = modelBuilderFactory.bestEffortModel(
-                    cik = cik,
-                    adsh = adsh
-                )
-                val resp = stockAnalysisService.evaluateStockAnalysis(EvaluateModelRequest(model))
-                /*
+        rerunIssues(savedStockAnalysis.copy(model = updatedModel))
+        val resp = stockAnalysisService.evaluateStockAnalysis(EvaluateModelRequest(updatedModel))
+        /*
                 Just update the analysis without creating new ones
                  */
-                val stockAnalysis2 = savedStockAnalysis.copy(
-                    cells = resp.cells,
-                    derivedStockAnalytics = resp.derivedStockAnalytics,
-                    model = savedStockAnalysis.model.copy(
-                        incomeStatementItems = resp.model.incomeStatementItems,
-                        cashFlowStatementItems = resp.model.cashFlowStatementItems,
-                        balanceSheetItems = resp.model.balanceSheetItems,
-                        otherItems = resp.model.otherItems,
-                    ),
-                )
-                rerunIssues(stockAnalysis2)
-                stockAnalysisService.saveStockAnalysis(stockAnalysis2)
-                log.info("Updated stock analysis $stockAnalysisId")
-            }
-        } catch (e: Exception) {
-            log.error("Unable to create or update stock analysis $stockAnalysisId, message=${e.message}")
-        } finally {
-            channel.basicAck(deliveryTag, false)
-        }
+        val stockAnalysis2 = savedStockAnalysis.copy(
+            cells = resp.cells,
+            derivedStockAnalytics = resp.derivedStockAnalytics,
+            model = savedStockAnalysis.model.copy(
+                incomeStatementItems = resp.model.incomeStatementItems,
+                cashFlowStatementItems = resp.model.cashFlowStatementItems,
+                balanceSheetItems = resp.model.balanceSheetItems,
+                otherItems = resp.model.otherItems,
+            ),
+        )
+        stockAnalysisService.saveStockAnalysis(stockAnalysis2)
+        log.info("Updated stock analysis $stockAnalysisId")
+    }
+
+    private fun stockAnalysisId(cik: String) = "automated_$cik"
+
+    private fun createNewStockAnalysis(request: ProcessSECFilingRequest) {
+        val cik = request.cik
+        val adsh = request.adsh
+        val stockAnalysisId = stockAnalysisId(cik)
+        val filingEntity = filingEntityManager.getFilingEntity(cik) ?: filingEntityManager.createFilingEntity(cik)
+        /*
+        create a new model + stock analysis
+         */
+        val model = modelBuilderFactory.bestEffortModel(
+            cik = cik,
+            adsh = adsh
+        )
+        /*
+        check and save issues before attempting to evaluate the stock analysis
+         */
+        rerunIssues(StockAnalysis2(_id = stockAnalysisId, model = model))
+        val resp = stockAnalysisService.evaluateStockAnalysis(EvaluateModelRequest(model))
+        val stockAnalysis = StockAnalysis2(
+            _id = stockAnalysisId,
+            cik = cik,
+            cells = resp.cells,
+            ticker = filingEntity.tradingSymbol,
+            name = filingEntity.name,
+            derivedStockAnalytics = resp.derivedStockAnalytics,
+            model = resp.model.copy(adsh = adsh),
+            tags = listOf("RS3000", "Automated")
+        )
+        stockAnalysisService.saveStockAnalysis(stockAnalysis)
+        log.info("Created stock analysis $stockAnalysisId")
     }
 
     private fun rerunIssues(stockAnalysis: StockAnalysis2) {
