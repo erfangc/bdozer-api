@@ -21,6 +21,7 @@ data class Item(
     val formula: String = "0.0",
 
     val sumOfOtherItems: SumOfOtherItems? = null,
+    val productOfOtherItems: ProductOfOtherItems? = null,
     val manualProjections: ManualProjections? = null,
     val percentOfRevenue: PercentOfRevenue? = null,
     val percentOfAnotherItem: PercentOfAnotherItem? = null,
@@ -29,4 +30,3 @@ data class Item(
 
     val commentaries: Commentary? = null,
 )
-

@@ -16,6 +16,9 @@ import com.rabbitmq.client.DeliverCallback
 import com.rabbitmq.client.Delivery
 import org.slf4j.LoggerFactory
 
+/**
+ * [ModelBuilderWorker]
+ */
 class ModelBuilderWorker(
     private val channel: Channel,
     private val filingEntityManager: FilingEntityManager,
@@ -30,7 +33,7 @@ class ModelBuilderWorker(
 
     override fun handle(consumerTag: String, message: Delivery) {
         val request = try {
-            deserRequest(message, consumerTag)
+            deserializeRequest(message, consumerTag)
         } catch (e: Exception) {
             return
         }
@@ -51,7 +54,7 @@ class ModelBuilderWorker(
         }
     }
 
-    private fun deserRequest(message: Delivery, consumerTag: String): ProcessSECFilingRequest {
+    private fun deserializeRequest(message: Delivery, consumerTag: String): ProcessSECFilingRequest {
         /*
         This is the main processing loop logic for every event this worker receives
         parse the request from binaries off the message queue

@@ -216,7 +216,11 @@ class CellGenerator {
 
                     ItemType.Custom -> CustomTranslator(ctx)
                         .translateFormula(cell)
-                    else -> TODO()
+
+                    ItemType.ProductOfOtherItems -> ProductOfOtherItemsTranslator(ctx)
+                        .translateFormula(cell)
+
+                    else -> error("Unsupported item type ${item.type}")
                 }
             }
             updatedCell
