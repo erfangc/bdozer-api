@@ -21,7 +21,7 @@ class CompanyKPIsService(
     }
 
     /**
-     * TODO figure out how to predict KPI metrics based on CAGR
+     * TODO figure out how to predict KPIMetadata metrics based on CAGR
      */
     fun evaluate(companyKPIs: CompanyKPIs) {
         val cells = CellEvaluator()
