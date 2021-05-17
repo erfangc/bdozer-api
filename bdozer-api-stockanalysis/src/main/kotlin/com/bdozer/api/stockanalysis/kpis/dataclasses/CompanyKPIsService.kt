@@ -25,7 +25,7 @@ class CompanyKPIsService(
      * Evaluate KPIs from logical relations declared in items
      * to a set of cells
      */
-    fun evaluate(companyKPIs: CompanyKPIs):CompanyKPIs {
+    fun evaluateCompanyKPIs(companyKPIs: CompanyKPIs):CompanyKPIs {
         val items = companyKPIs.items
         val projectionPeriods = companyKPIs.projectionPeriods
         val cellGenerator = CellGenerator()
