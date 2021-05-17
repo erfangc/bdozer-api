@@ -17,4 +17,9 @@ class CompanyKPIsController(private val companyKPIsService: CompanyKPIsService) 
     fun saveCompanyKPIs(@RequestBody companyKPIs: CompanyKPIs) {
         return companyKPIsService.saveCompanyKPIs(companyKPIs)
     }
+
+    @PostMapping("evaluate")
+    fun evaluate(@RequestBody companyKPIs: CompanyKPIs):CompanyKPIs {
+        return companyKPIsService.evaluate(companyKPIs)
+    }
 }

@@ -1,6 +1,7 @@
 package com.bdozer.api.stockanalysis.kpis.dataclasses
 
 import com.bdozer.api.models.CellEvaluator
+import com.bdozer.api.models.CellGenerator
 import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
@@ -21,9 +22,16 @@ class CompanyKPIsService(
     }
 
     /**
-     * TODO figure out how to predict KPIMetadata metrics based on CAGR
+     * Evaluate KPIs from logical relations declared in items
+     * to a set of cells
      */
-    fun evaluate(companyKPIs: CompanyKPIs) {
-        val cells = CellEvaluator()
+    fun evaluate(companyKPIs: CompanyKPIs):CompanyKPIs {
+        val items = companyKPIs.items
+        val projectionPeriods = companyKPIs.projectionPeriods
+        val cellGenerator = CellGenerator()
+        val unevaluatedCells = cellGenerator.generateCells(items, projectionPeriods)
+        val cellEvaluator = CellEvaluator()
+        val cells = cellEvaluator.evaluate(unevaluatedCells)
+        return companyKPIs.copy(cells = cells)
     }
 }

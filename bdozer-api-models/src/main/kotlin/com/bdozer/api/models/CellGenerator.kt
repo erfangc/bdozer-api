@@ -164,6 +164,27 @@ class CellGenerator {
         }
     }
 
+    /**
+     * Generate unevaluated cells from a list of [Item] instances
+     *
+     * @param items the items for each a cell will be created for each period
+     * @param projectionPeriods the period for which to project forward
+     * @return a List of [Cell] instances for each period in the from 0 to [projectionPeriods] for each item in [items]
+     */
+    fun generateCells(items: List<Item>, projectionPeriods: Int):List<Cell> {
+        return (0..projectionPeriods).flatMap { period ->
+            items.map { item ->
+                Cell(
+                    name = "${item.name}_Period$period",
+                    formula = item.formula,
+                    item = item,
+                    period = period,
+                    address = Address.noop
+                )
+            }
+        }
+    }
+
     fun generateCells(model: Model): List<Cell> {
         return populateCellsWithFormulas(
             cells = generateEmptyCells(model),
