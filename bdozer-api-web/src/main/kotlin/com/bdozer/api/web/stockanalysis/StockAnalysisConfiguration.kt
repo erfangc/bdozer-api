@@ -3,6 +3,7 @@ package com.bdozer.api.web.stockanalysis
 import com.bdozer.api.factbase.core.SECFilingFactory
 import com.bdozer.api.stockanalysis.StockAnalysisService
 import com.bdozer.api.stockanalysis.iex.IEXService
+import com.bdozer.api.stockanalysis.kpis.dataclasses.CompanyKPIsService
 import com.bdozer.api.stockanalysis.support.DerivedAnalyticsComputer
 import com.bdozer.api.stockanalysis.support.StatelessModelEvaluator
 import com.mongodb.client.MongoClient
@@ -24,6 +25,11 @@ class StockAnalysisConfiguration {
             .withSecretToken(System.getenv("IEX_SECRET_TOKEN") ?: error("environment IEX_SECRET_TOKEN not defined"))
             .build()
         return IEXTradingClient.create(token)
+    }
+
+    @Bean
+    fun service(mongoDatabase: MongoDatabase): CompanyKPIsService {
+        return CompanyKPIsService(mongoDatabase)
     }
 
     @Bean

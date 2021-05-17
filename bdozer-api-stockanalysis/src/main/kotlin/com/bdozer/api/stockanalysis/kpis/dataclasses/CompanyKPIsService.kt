@@ -6,7 +6,7 @@ import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
 
-class KPIService(
+class CompanyKPIsService(
     private val mongoDatabase: MongoDatabase
 ) {
 

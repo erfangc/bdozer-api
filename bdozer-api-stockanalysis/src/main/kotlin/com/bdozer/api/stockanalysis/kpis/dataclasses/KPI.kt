@@ -8,5 +8,6 @@ data class KPI(
     val format: Format,
     val value: Double,
     val date: LocalDate,
+    val collapse: Boolean? = null,
 )
 
