@@ -7,9 +7,7 @@ import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
 
-class CompanyKPIsService(
-    private val mongoDatabase: MongoDatabase
-) {
+class CompanyKPIsService(mongoDatabase: MongoDatabase) {
 
     val col = mongoDatabase.getCollection<CompanyKPIs>()
 

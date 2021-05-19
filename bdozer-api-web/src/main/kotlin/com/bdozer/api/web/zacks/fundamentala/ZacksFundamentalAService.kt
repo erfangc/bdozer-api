@@ -1,4 +1,4 @@
-package com.bdozer.api.web.zacks.fa
+package com.bdozer.api.web.zacks.fundamentala
 
 import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.div

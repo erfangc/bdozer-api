@@ -7,7 +7,7 @@ import com.bdozer.api.web.revenuemodeler.dataclasses.ModelRevenueRequest
 import com.bdozer.api.web.revenuemodeler.dataclasses.RevenueDriverType
 import com.bdozer.api.web.revenuemodeler.dataclasses.RevenueModel
 import com.bdozer.api.stockanalysis.StockAnalysisService
-import com.bdozer.api.web.zacks.se.ZacksEstimatesService
+import com.bdozer.api.web.zacks.estimates.ZacksEstimatesService
 import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.deleteOneById
 import org.litote.kmongo.findOneById

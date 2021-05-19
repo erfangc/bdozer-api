@@ -1,4 +1,4 @@
-package com.bdozer.api.web.zacks.se
+package com.bdozer.api.web.zacks.estimates
 
 import java.time.LocalDate
 

@@ -1,4 +1,4 @@
-package com.bdozer.api.web.zacks.se
+package com.bdozer.api.web.zacks.estimates
 
 import bdozer.api.common.extensions.DoubleExtensions.orZero
 import com.bdozer.api.models.dataclasses.Item
