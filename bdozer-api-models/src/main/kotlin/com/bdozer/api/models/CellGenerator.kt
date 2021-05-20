@@ -172,7 +172,8 @@ class CellGenerator {
      * @return a List of [Cell] instances for each period in the from 0 to [projectionPeriods] for each item in [items]
      */
     fun generateCells(items: List<Item>, projectionPeriods: Int):List<Cell> {
-        return (0..projectionPeriods).flatMap { period ->
+        val fakeModel = Model(periods = projectionPeriods, incomeStatementItems = items)
+        val emptyCells = (0..projectionPeriods).flatMap { period ->
             items.map { item ->
                 Cell(
                     name = "${item.name}_Period$period",
@@ -183,6 +184,7 @@ class CellGenerator {
                 )
             }
         }
+        return populateCellsWithFormulas(fakeModel, emptyCells)
     }
 
     fun generateCells(model: Model): List<Cell> {
