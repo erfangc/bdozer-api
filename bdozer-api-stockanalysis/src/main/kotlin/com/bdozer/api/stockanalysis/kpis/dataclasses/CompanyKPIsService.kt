@@ -38,9 +38,12 @@ class CompanyKPIsService(mongoDatabase: MongoDatabase) {
         return companyKPIs.copy(cells = cells)
     }
 
-    private fun processItems(
-        companyKPIs: CompanyKPIs
-    ): List<Item> {
+    /**
+     * Process items
+     * @param companyKPIs
+     */
+    private fun processItems(companyKPIs: CompanyKPIs): List<Item> {
+
         val items = companyKPIs.items
 
         /**

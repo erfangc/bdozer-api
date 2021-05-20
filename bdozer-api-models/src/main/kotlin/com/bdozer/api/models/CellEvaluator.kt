@@ -43,17 +43,11 @@ class CellEvaluator {
          * helper function to determine the unmet dependencies of any given cell
          * this requires the loop up
          */
-        fun unmetDependencies(cell: Cell): List<Cell> {
-            return cell.dependentCellNames.mapNotNull { dep ->
-                val dependentCell = cellLookupByName[dep]
-                when {
-                    dependentCell == null -> {
+        fun unevaluatedDependents(cell: Cell): List<Cell> {
+            return cell.dependentCellNames.map { dep ->
+                when (val dependentCell = cellLookupByName[dep]) {
+                    null -> {
                         error("referenced cell $dep does not exist")
-                    }
-                    // if the dependent cell is already in the stack then ignore it
-                    // this enables circular reference checks to work
-                    stack.contains(dependentCell) -> {
-                        null
                     }
                     else -> {
                         dependentCell
@@ -87,7 +81,7 @@ class CellEvaluator {
                     stack.pop()
                     continue
                 }
-                val unmetDependencies = unmetDependencies(headCell)
+                val unmetDependencies = unevaluatedDependents(headCell)
                 if (unmetDependencies.isEmpty()) {
                     // evaluate the cell
                     // using mXparser
