@@ -8,9 +8,6 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.litote.kmongo.KMongo
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import pl.zankowski.iextrading4j.client.IEXCloudClient
-import pl.zankowski.iextrading4j.client.IEXCloudTokenBuilder
-import pl.zankowski.iextrading4j.client.IEXTradingClient
 import java.lang.System.getenv
 import java.net.URI
 
@@ -56,7 +53,7 @@ class AppConfiguration {
         if (host != null) {
             connectionFactory.host = host
         }
-        if (port != null) {
+        if (port != -1) {
             connectionFactory.port = port
         }
         if (virtualHost != null) {
