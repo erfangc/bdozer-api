@@ -45,6 +45,20 @@ class StockAnalysisService(
         return stockAnalyses.find()
     }
 
+    /**
+     * This method returns the 4 most prominent and featured
+     * stock analyses on the system
+     */
+    fun top4StockAnalyses(): FindStockAnalysisResponse {
+        // TODO replace with an actual search or sort algorithm
+       return findStockAnalyses(limit = 4, published = true)
+    }
+
+    /**
+     * Search is accomplished via the MongoDB text search index
+     * KMongo is not great for this, so we use the raw MongoDB client by
+     * constructing and passing to the server BsonDocument objects
+     */
     fun findStockAnalyses(
         userId: String? = null,
         cik: String? = null,

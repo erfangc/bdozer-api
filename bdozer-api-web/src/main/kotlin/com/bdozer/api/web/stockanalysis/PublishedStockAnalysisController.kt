@@ -17,6 +17,11 @@ class PublishedStockAnalysisController(
         return stockAnalysisService.getStockAnalysis(id)
     }
 
+    @GetMapping("top4")
+    fun top4StockAnalyses(): FindStockAnalysisResponse {
+        return stockAnalysisService.top4StockAnalyses()
+    }
+
     @GetMapping
     fun findPublishedStockAnalyses(
         @RequestParam(required = false) userId: String? = null,
