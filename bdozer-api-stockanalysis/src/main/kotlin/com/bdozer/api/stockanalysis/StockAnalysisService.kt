@@ -187,6 +187,10 @@ class StockAnalysisService(
                                 (StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::currentPrice).name,
                                 BsonInt32(1)
                             )
+                            .append(
+                                (StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::finalPrice).name,
+                                BsonInt32(1)
+                            )
                     ),
                     BsonDocument("\$skip", BsonInt32(skip ?: 0)),
                     BsonDocument("\$limit", BsonInt32((limit ?: 10))),
@@ -198,6 +202,7 @@ class StockAnalysisService(
                 val derivedAnalytics = doc.get(StockAnalysis2::derivedStockAnalytics.name, Document::class.java)
                 val targetPrice = derivedAnalytics?.getDouble(DerivedStockAnalytics::targetPrice.name)
                 val currentPrice = derivedAnalytics?.getDouble(DerivedStockAnalytics::currentPrice.name)
+                val finalPrice = derivedAnalytics?.getDouble(DerivedStockAnalytics::finalPrice.name)
                 StockAnalysisProjection(
                     _id = doc.getString(StockAnalysis2::_id.name),
                     name = doc.getString(StockAnalysis2::name.name),
@@ -206,6 +211,7 @@ class StockAnalysisService(
                     ticker = doc.getString(StockAnalysis2::ticker.name),
                     currentPrice = currentPrice,
                     targetPrice = targetPrice,
+                    finalPrice = finalPrice,
                     published = doc.getBoolean(StockAnalysis2::published.name),
                     lastUpdated = doc.getDate(StockAnalysis2::lastUpdated.name).toInstant(),
                     tags = doc.getList(StockAnalysis2::tags.name, String::class.java),

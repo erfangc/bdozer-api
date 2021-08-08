@@ -1,15 +1,15 @@
 package com.bdozer.api.stockanalysis.support
 
 import bdozer.api.common.extensions.DoubleExtensions.orZero
-import com.bdozer.api.stockanalysis.iex.IEXService
-import com.bdozer.api.models.irr.IRRCalculator
 import com.bdozer.api.models.dataclasses.EvaluateModelResult
-import com.bdozer.api.models.dataclasses.Utility.TerminalValuePerShare
 import com.bdozer.api.models.dataclasses.Item
 import com.bdozer.api.models.dataclasses.Model
+import com.bdozer.api.models.dataclasses.Utility.TerminalValuePerShare
 import com.bdozer.api.models.dataclasses.spreadsheet.Cell
+import com.bdozer.api.models.irr.IRRCalculator
 import com.bdozer.api.stockanalysis.dataclasses.DerivedStockAnalytics
 import com.bdozer.api.stockanalysis.dataclasses.Waterfall
+import com.bdozer.api.stockanalysis.iex.IEXService
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.pow
@@ -47,10 +47,15 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
                 }.toDoubleArray()
             )
         )
-        /*
-        end of IRR compute
-         */
 
+        val finalPrice = evaluateModelResult
+            .cells
+            .find { cell -> cell.period == model.periods && cell.item.name == TerminalValuePerShare }
+            ?.value
+
+        /*
+        End of IRR compute
+         */
         return DerivedStockAnalytics(
             profitPerShare = profitPerShare,
             shareOutstanding = shareOutstanding,
@@ -59,9 +64,8 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
             discountRate = discountRate(evaluateModelResult),
             revenueCAGR = revenueCAGR(evaluateModelResult),
             targetPrice = evaluateModelResult.targetPrice,
-            // FIXME
-            zeroGrowthPrice = 0.0,
             irr = irr,
+            finalPrice = finalPrice,
         )
     }
 

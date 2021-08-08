@@ -10,7 +10,7 @@ data class DerivedStockAnalytics(
     /**
      * value breakdown
      */
-    val zeroGrowthPrice: Double,
+    val zeroGrowthPrice: Double? = null,
 
     /**
      * revenue waterfall by period
@@ -19,10 +19,8 @@ data class DerivedStockAnalytics(
     val shareOutstanding: Item,
     val profitPerShare: Item,
 
-    /**
-     * target price
-     */
     val targetPrice: Double,
+    val finalPrice: Double? = null,
     val discountRate: Double,
     val revenueCAGR: Double = 0.0,
     val currentPrice: Double,
