@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 @Service
 class JwtValidator {
 
-    private val issuer = "https://ease-wealth.us.auth0.com/"
+    private val issuer = "https://bdozer.us.auth0.com/"
 
     private val jwkProvider: JwkProvider = JwkProviderBuilder(issuer)
         .cached(5, 1, TimeUnit.HOURS)
@@ -41,7 +41,12 @@ class JwtValidator {
     private fun jwtVerifierForKid(kid: String): JWTVerifier {
         val jwk = jwkProvider.get(kid)
         val publicKey = jwk.publicKey as RSAPublicKey
-        return JWT.require(Algorithm.RSA256(publicKey, null)).withIssuer(issuer).acceptLeeway(0).build()
+        return JWT
+            .require(Algorithm.RSA256(publicKey, null))
+            .withIssuer(issuer)
+            .acceptLeeway(0)
+            .withAudience("https://bdozer-api.herokuapp.com")
+            .build()
     }
 
 }

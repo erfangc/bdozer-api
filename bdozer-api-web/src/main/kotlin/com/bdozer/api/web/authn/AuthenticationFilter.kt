@@ -1,7 +1,6 @@
 package com.bdozer.api.web.authn
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.interfaces.DecodedJWT
+import com.auth0.client.auth.AuthAPI
 import com.bdozer.api.web.controlleradvice.ApiError
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpHeaders
@@ -15,27 +14,33 @@ import javax.servlet.http.HttpServletResponse
 @Component
 class AuthenticationFilter(
     private val jwtValidator: JwtValidator,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val userProvider: UserProvider,
 ) : OncePerRequestFilter() {
+
+    private val authAPI = AuthAPI("https://bdozer.us.auth0.com", "...", "...")
 
     override fun doFilterInternal(
         servletRequest: HttpServletRequest,
         servletResponse: HttpServletResponse,
         chain: FilterChain
     ) {
-        if (allowedByDefault(servletRequest)) {
+        if (allowUnauthenticated(servletRequest)) {
             doFilter(servletRequest, servletResponse, chain)
-            return
-        }
-        try {
-            jwtValidator.decodeAndVerify(extractJwtToken(servletRequest))
-            doFilter(servletRequest, servletResponse, chain)
-        } catch (e: Exception) {
-            error(servletResponse, e)
+        } else {
+            try {
+                val accessToken = getAccessToken(servletRequest)
+                jwtValidator.decodeAndVerify(accessToken)
+                val user = authAPI.userInfo(accessToken).execute()
+                userProvider.set(user)
+                doFilter(servletRequest, servletResponse, chain)
+            } catch (e: Exception) {
+                error(servletResponse, e)
+            }
         }
     }
 
-    private fun allowedByDefault(servletRequest: HttpServletRequest) =
+    private fun allowUnauthenticated(servletRequest: HttpServletRequest) =
         servletRequest.method == "OPTIONS" || !servletRequest.requestURI.startsWith("/api")
 
     fun error(resp: HttpServletResponse, e: Exception) {
@@ -49,11 +54,7 @@ class AuthenticationFilter(
 
     companion object {
 
-        fun decodeJWT(req: HttpServletRequest): DecodedJWT {
-            return JWT.decode(extractJwtToken(req)) ?: error("unable to decode JWT")
-        }
-
-        fun extractJwtToken(req: HttpServletRequest): String {
+        fun getAccessToken(req: HttpServletRequest): String {
             val header = req.getHeader(HttpHeaders.AUTHORIZATION)
             return header.replaceFirst(("^Bearer ").toRegex(), "")
         }
