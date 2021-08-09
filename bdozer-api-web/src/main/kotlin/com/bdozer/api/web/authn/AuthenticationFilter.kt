@@ -1,6 +1,7 @@
 package com.bdozer.api.web.authn
 
 import com.auth0.client.auth.AuthAPI
+import com.auth0.exception.APIException
 import com.bdozer.api.web.controlleradvice.ApiError
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpHeaders
@@ -31,12 +32,20 @@ class AuthenticationFilter(
             try {
                 val accessToken = getAccessToken(servletRequest)
                 jwtValidator.decodeAndVerify(accessToken)
-                val user = authAPI.userInfo(accessToken).execute()
-                userProvider.set(user)
+                setUser(accessToken)
                 doFilter(servletRequest, servletResponse, chain)
             } catch (e: Exception) {
                 error(servletResponse, e)
             }
+        }
+    }
+
+    private fun setUser(accessToken: String) {
+        try {
+            val user = authAPI.userInfo(accessToken).execute()
+            userProvider.set(user)
+        } catch (ex: APIException) {
+            // unable to retrieve user profile
         }
     }
 
@@ -55,7 +64,7 @@ class AuthenticationFilter(
     companion object {
 
         fun getAccessToken(req: HttpServletRequest): String {
-            val header = req.getHeader(HttpHeaders.AUTHORIZATION)
+            val header = req.getHeader(HttpHeaders.AUTHORIZATION) ?: error("please provide authentication credentials")
             return header.replaceFirst(("^Bearer ").toRegex(), "")
         }
 

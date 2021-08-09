@@ -4,6 +4,5 @@ import com.bdozer.api.models.dataclasses.spreadsheet.Cell
 
 data class EvaluateModelResult(
     val model: Model,
-    val cells: List<Cell>,
-    val targetPrice: Double
+    val cells: List<Cell>
 )

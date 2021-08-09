@@ -4,6 +4,7 @@ import bdozer.api.common.extensions.DoubleExtensions.orZero
 import com.bdozer.api.models.dataclasses.EvaluateModelResult
 import com.bdozer.api.models.dataclasses.Item
 import com.bdozer.api.models.dataclasses.Model
+import com.bdozer.api.models.dataclasses.Utility
 import com.bdozer.api.models.dataclasses.Utility.TerminalValuePerShare
 import com.bdozer.api.models.dataclasses.spreadsheet.Cell
 import com.bdozer.api.models.irr.IRRCalculator
@@ -18,10 +19,13 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
 
     /**
      * Compute derived analytics given the [EvaluateModelResult] from running the stock analyzer
+     *
+     * @param cells the evaluated cells
+     * @param model the model from which the evaluated cells derived from
      */
-    fun computeDerivedAnalytics(evaluateModelResult: EvaluateModelResult): DerivedStockAnalytics {
-        val model = evaluateModelResult.model
+    fun computeDerivedAnalytics(model:Model, cells: List<Cell>): DerivedStockAnalytics {
 
+        val currentPrice = currentPrice(model).orZero()
         /*
         perform validation
          */
@@ -31,12 +35,18 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
         val shareOutstanding = model.allItems().find { it.name == model.sharesOutstandingConceptName }
             ?: error("There must be an Item named ${model.sharesOutstandingConceptName} in your model")
 
-        val currentPrice = currentPrice(model).orZero()
+
+        /*
+        compute the target price as NPV
+         */
+        val targetPrice = cells
+            .filter { cell -> cell.item.name == Utility.PresentValuePerShare }
+            .sumOf { cell -> cell.value ?: 0.0 }
+
         /*
         compute IRR
          */
         val epsConceptName = model.epsConceptName
-        val cells = evaluateModelResult.cells
         val terminalValues = cells.filter { it.item.name == TerminalValuePerShare }.associateBy { it.period }
         val irr = IRRCalculator.irr(
             income = doubleArrayOf(
@@ -48,8 +58,7 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
             )
         )
 
-        val finalPrice = evaluateModelResult
-            .cells
+        val finalPrice = cells
             .find { cell -> cell.period == model.periods && cell.item.name == TerminalValuePerShare }
             ?.value
 
@@ -59,13 +68,13 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
         return DerivedStockAnalytics(
             profitPerShare = profitPerShare,
             shareOutstanding = shareOutstanding,
-            businessWaterfall = businessWaterfall(evaluateModelResult),
+            businessWaterfall = businessWaterfall(model, cells),
             currentPrice = currentPrice,
-            discountRate = discountRate(evaluateModelResult),
-            revenueCAGR = revenueCAGR(evaluateModelResult),
-            targetPrice = evaluateModelResult.targetPrice,
-            irr = irr,
+            discountRate = discountRate(model),
+            revenueCAGR = revenueCAGR(model, cells),
+            targetPrice = targetPrice,
             finalPrice = finalPrice,
+            irr = irr,
         )
     }
 
@@ -75,26 +84,20 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
         }
     }
 
-    private fun revenueCAGR(evalResult: EvaluateModelResult): Double {
-        val model = evalResult.model
-        val revenues = evalResult
-            .cells
+    private fun revenueCAGR(model:Model, cells: List<Cell>): Double {
+        val revenues = cells
             .filter { cell -> cell.item.name == model.totalRevenueConceptName }
         return (revenues.last().value.orZero() / revenues.first().value.orZero()).pow(1.0 / revenues.size) - 1
     }
 
-    private fun discountRate(evalResult: EvaluateModelResult): Double {
-        val model = evalResult.model
-        return (model.equityRiskPremium * model.beta) + model.riskFreeRate
-    }
+    private fun discountRate(model:Model) = (model.equityRiskPremium * model.beta) + model.riskFreeRate
 
 
     /**
      * This method computes the [Waterfall] for every period. A [Waterfall] groups - for 1 period -
      * the major expenses into at most 5 categories for ease of display
      */
-    fun businessWaterfall(evaluateModelResult: EvaluateModelResult): Map<Int, Waterfall> {
-        val model = evaluateModelResult.model
+    private fun businessWaterfall(model:Model, cells: List<Cell>): Map<Int, Waterfall> {
         val lookup = model.allItems().associateBy { it.name }
         val revenueItem = model.item(model.totalRevenueConceptName)
         val netIncomeItem = model.item(model.netIncomeConceptName)
@@ -123,8 +126,7 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
             }
         }
 
-        return evaluateModelResult
-            .cells
+        return cells
             .groupBy { it.period }
             .map { (period, cells) ->
                 /*

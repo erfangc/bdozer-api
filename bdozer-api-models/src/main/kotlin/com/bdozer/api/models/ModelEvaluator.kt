@@ -16,13 +16,9 @@ class ModelEvaluator {
         val overriddenModel = model.override()
         val cells = CellGenerator().generateCells(overriddenModel)
         val evaluatedCells = CellEvaluator().evaluate(cells)
-        val targetPrice = evaluatedCells
-            .filter { cell -> cell.item.name == PresentValuePerShare }
-            .sumByDouble { it.value ?: 0.0 }
         return EvaluateModelResult(
             model = overriddenModel,
-            cells = evaluatedCells,
-            targetPrice = targetPrice
+            cells = evaluatedCells
         )
     }
 }

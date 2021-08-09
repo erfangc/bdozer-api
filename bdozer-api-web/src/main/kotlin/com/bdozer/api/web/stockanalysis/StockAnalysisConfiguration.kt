@@ -33,13 +33,16 @@ class StockAnalysisConfiguration {
     }
 
     @Bean
-    fun stockAnalysisService(mongoDatabase: MongoDatabase, iexService: IEXService): StockAnalysisService {
+    fun derivedAnalyticsComputer(iexService: IEXService): DerivedAnalyticsComputer {
+        return DerivedAnalyticsComputer(iexService)
+    }
+
+    @Bean
+    fun stockAnalysisService(mongoDatabase: MongoDatabase, derivedAnalyticsComputer: DerivedAnalyticsComputer): StockAnalysisService {
         return StockAnalysisService(
             mongoDatabase = mongoDatabase,
             statelessModelEvaluator = StatelessModelEvaluator(
-                derivedAnalyticsComputer = DerivedAnalyticsComputer(
-                    iexService = iexService
-                )
+                derivedAnalyticsComputer = derivedAnalyticsComputer
             )
         )
     }
