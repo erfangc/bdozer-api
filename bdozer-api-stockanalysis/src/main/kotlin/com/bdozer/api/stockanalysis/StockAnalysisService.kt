@@ -51,12 +51,7 @@ class StockAnalysisService(
      */
     fun top4StockAnalyses(): FindStockAnalysisResponse {
         // TODO replace with an actual search or sort algorithm
-       return findStockAnalyses(limit = 4, published = true)
-    }
-
-    enum class SortDirection {
-        ascending,
-        descending,
+        return findStockAnalyses(limit = 4, published = true)
     }
 
     /**
@@ -85,13 +80,16 @@ class StockAnalysisService(
             BsonDocument(
                 "\$sort",
                 BsonDocument()
-                    .append((StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::irr).name, BsonInt32(sortDirection))
+                    .append(
+                        (StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::irr).name,
+                        BsonInt32(sortDirection)
+                    )
             )
         } else {
             null
         }
 
-        val termCondition = term?.let { term ->
+        val termCondition = if (!term.isNullOrBlank()) {
             BsonDocument(
                 "text",
                 BsonDocument()
@@ -105,16 +103,20 @@ class StockAnalysisService(
                         )
                     )
             )
+        } else {
+            null
         }
 
-        val tickerTermCondition = term?.let { it ->
+        val tickerTermCondition = if (!term.isNullOrBlank()) {
             BsonDocument(
                 "text",
                 BsonDocument()
-                    .append("query", BsonString(it.toUpperCase()))
+                    .append("query", BsonString(term.toUpperCase()))
                     .append("path", BsonString(StockAnalysis2::ticker.name))
                     .append("score", BsonDocument("boost", BsonDocument("value", BsonInt32(3))))
             )
+        } else {
+            null
         }
 
         val tagsConditions = tags?.map { tag ->

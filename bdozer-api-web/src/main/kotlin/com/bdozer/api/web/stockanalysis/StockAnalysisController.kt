@@ -1,6 +1,7 @@
 package com.bdozer.api.web.stockanalysis
 
-import com.bdozer.api.stockanalysis.*
+import com.bdozer.api.stockanalysis.SortDirection
+import com.bdozer.api.stockanalysis.StockAnalysisService
 import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelRequest
 import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelResponse
 import com.bdozer.api.stockanalysis.dataclasses.FindStockAnalysisResponse
@@ -83,6 +84,7 @@ class StockAnalysisController(private val stockAnalysisService: StockAnalysisSer
         @RequestParam(required = false) limit: Int? = null,
         @RequestParam(required = false) term: String? = null,
         @RequestParam(required = false) tags: List<String>? = null,
+        @RequestParam(required = false) sort: SortDirection? = null,
     ): FindStockAnalysisResponse {
         return stockAnalysisService.findStockAnalyses(
             userId = userId,
@@ -93,6 +95,7 @@ class StockAnalysisController(private val stockAnalysisService: StockAnalysisSer
             term = term,
             published = published,
             tags = tags,
+            sort = sort,
         )
     }
 
