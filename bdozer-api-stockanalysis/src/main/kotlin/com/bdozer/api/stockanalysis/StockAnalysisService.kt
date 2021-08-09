@@ -54,6 +54,11 @@ class StockAnalysisService(
        return findStockAnalyses(limit = 4, published = true)
     }
 
+    enum class SortDirection {
+        ascending,
+        descending,
+    }
+
     /**
      * Search is accomplished via the MongoDB text search index
      * KMongo is not great for this, so we use the raw MongoDB client by
@@ -68,7 +73,23 @@ class StockAnalysisService(
         limit: Int? = null,
         term: String? = null,
         tags: List<String>? = null,
+        sort: SortDirection? = null,
     ): FindStockAnalysisResponse {
+
+        val sort = if (sort != null) {
+            val sortDirection = if (sort == SortDirection.ascending) {
+                1
+            } else {
+                -1
+            }
+            BsonDocument(
+                "\$sort",
+                BsonDocument()
+                    .append((StockAnalysis2::derivedStockAnalytics / DerivedStockAnalytics::irr).name, BsonInt32(sortDirection))
+            )
+        } else {
+            null
+        }
 
         val termCondition = term?.let { term ->
             BsonDocument(
@@ -169,6 +190,7 @@ class StockAnalysisService(
             .aggregate(
                 listOfNotNull(
                     search,
+                    sort,
                     BsonDocument(
                         "\$project",
                         BsonDocument()
