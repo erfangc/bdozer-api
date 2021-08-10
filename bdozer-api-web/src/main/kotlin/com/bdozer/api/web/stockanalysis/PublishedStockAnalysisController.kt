@@ -4,13 +4,16 @@ import com.bdozer.api.stockanalysis.SortDirection
 import com.bdozer.api.stockanalysis.dataclasses.FindStockAnalysisResponse
 import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import com.bdozer.api.stockanalysis.StockAnalysisService
+import com.bdozer.api.web.stockanalysis.excel.StockAnalysisExcelDownloader
+import org.springframework.http.HttpEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin
 @RequestMapping("public/published-stock-analyses")
 class PublishedStockAnalysisController(
-    private val stockAnalysisService: StockAnalysisService
+    private val stockAnalysisService: StockAnalysisService,
+    private val stockAnalysisExcelDownloader: StockAnalysisExcelDownloader,
 ) {
 
     @GetMapping("{id}")
@@ -21,6 +24,11 @@ class PublishedStockAnalysisController(
     @GetMapping("top4")
     fun top4StockAnalyses(): FindStockAnalysisResponse {
         return stockAnalysisService.top4StockAnalyses()
+    }
+
+    @GetMapping("{id}/excel-download")
+    fun download(@PathVariable id: String): HttpEntity<ByteArray> {
+        return stockAnalysisExcelDownloader.download(id)
     }
 
     @GetMapping

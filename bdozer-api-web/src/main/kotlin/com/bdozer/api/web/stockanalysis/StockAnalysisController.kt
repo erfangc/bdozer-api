@@ -6,13 +6,16 @@ import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelRequest
 import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelResponse
 import com.bdozer.api.stockanalysis.dataclasses.FindStockAnalysisResponse
 import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
+import com.bdozer.api.web.stockanalysis.excel.StockAnalysisExcelDownloader
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("api/stock-analyzer/stock-analyses")
 @CrossOrigin
 @RestController
-class StockAnalysisController(private val stockAnalysisService: StockAnalysisService) {
+class StockAnalysisController(
+    private val stockAnalysisService: StockAnalysisService,
+) {
 
     @Operation(
         description = """
