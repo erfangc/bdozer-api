@@ -1,7 +1,9 @@
 package com.bdozer.api.web.watchlist
 
+import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import com.bdozer.api.web.authn.UserProvider
 import com.mongodb.client.MongoDatabase
+import org.litote.kmongo.`in`
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
@@ -14,12 +16,24 @@ class WatchListsController(
     private val userProvider: UserProvider,
     mongoDatabase: MongoDatabase,
 ) {
+
     private val watchLists = mongoDatabase.getCollection<WatchList>()
+    private val stockAnalyses = mongoDatabase.getCollection<StockAnalysis2>()
 
     @GetMapping
-    fun getWatchList(): WatchList? {
+    fun getWatchedStockAnalyses(): GetWatchedStockAnalysesResponse? {
         val email = getUserEmail()
-        return watchLists.findOneById(email)
+        val watchList = watchLists.findOneById(email) ?: return null
+        return GetWatchedStockAnalysesResponse(
+            watchList = watchList,
+            stockAnalyses = stockAnalyses.find(StockAnalysis2::_id `in` watchList.stockAnalysisIds).toList()
+        )
+    }
+
+    @GetMapping("{stockAnalysisId}")
+    fun isWatching(@PathVariable stockAnalysisId: String): Boolean {
+        val email = getUserEmail()
+        return watchLists.findOneById(email)?.stockAnalysisIds?.any { it == stockAnalysisId } == true
     }
 
     private fun getUserEmail(): String {

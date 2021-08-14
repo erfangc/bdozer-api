@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -17,6 +18,7 @@ class AuthenticationFilter(
     private val jwtValidator: JwtValidator,
     private val objectMapper: ObjectMapper,
     private val userProvider: UserProvider,
+    private val requestIdProvider: RequestIdProvider,
 ) : OncePerRequestFilter() {
 
     private val authAPI = AuthAPI("https://bdozer.us.auth0.com", "...", "...")
@@ -33,9 +35,10 @@ class AuthenticationFilter(
                 val accessToken = getAccessToken(servletRequest)
                 jwtValidator.decodeAndVerify(accessToken)
                 setUser(accessToken)
+                requestIdProvider.set(UUID.randomUUID().toString())
                 doFilter(servletRequest, servletResponse, chain)
             } catch (e: Exception) {
-                error(servletResponse, e)
+                writeError(servletResponse, e)
             }
         }
     }
@@ -52,7 +55,7 @@ class AuthenticationFilter(
     private fun allowUnauthenticated(servletRequest: HttpServletRequest) =
         servletRequest.method == "OPTIONS" || !servletRequest.requestURI.startsWith("/api")
 
-    fun error(resp: HttpServletResponse, e: Exception) {
+    private fun writeError(resp: HttpServletResponse, e: Exception) {
         resp.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         resp.addHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON.toString())
         resp.status = 401
