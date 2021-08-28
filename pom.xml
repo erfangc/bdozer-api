@@ -18,6 +18,7 @@
         <module>bdozer-api-ml-worker</module>
         <module>bdozer-api-factbase-modelbuilder</module>
         <module>bdozer-api-web</module>
+        <module>bdozer-api-matcher</module>
     </modules>
 
 </project>

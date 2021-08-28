@@ -16,7 +16,7 @@
     <name>bdozer-api-web</name>
 
     <properties>
-        <kotlin.version>1.4.21</kotlin.version>
+        <kotlin.version>1.5.30</kotlin.version>
         <jwks-rsa.version>0.19.0</jwks-rsa.version>
         <java-jwt.version>3.18.1</java-jwt.version>
         <kmongo.version>4.2.8</kmongo.version>
