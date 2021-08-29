@@ -20,17 +20,25 @@ class ModelEvaluator(httpClient: HttpClient) {
     private val polygonService = PolygonService(httpClient)
     private val derivedAnalyticsComputer = DerivedAnalyticsComputer(polygonService)
 
+    fun evaluate(evaluateModelRequest: EvaluateModelRequest) =
+        evaluate(StockAnalysis2(model = evaluateModelRequest.model))
+
     /**
      * Evaluate the given model and return a [StockAnalysis2]
      */
-    fun evaluate(request: EvaluateModelRequest): StockAnalysis2 {
+    fun evaluate(existing: StockAnalysis2): StockAnalysis2 {
+        val model = existing.model.let {
+            it.copy(
+                otherItems = it.otherItems.ifEmpty {
+                    it.generateOtherItems()
+                }
+            )
+        }
+
         /*
         perform validation
          */
-        validateRequestOrThrow(request)
-        val model = request
-            .model
-            .copy(otherItems = request.model.generateOtherItems())
+        validateRequestOrThrow(model)
 
         /*
         overlay items form the override to model
@@ -48,10 +56,9 @@ class ModelEvaluator(httpClient: HttpClient) {
         )
 
 
-        val stockAnalysis2 = StockAnalysis2(
+        val stockAnalysis2 = existing.copy(
             name = model.name,
             cik = model.cik,
-            ticker = model.ticker,
             model = model,
             cells = cells,
             derivedStockAnalytics = derivedStockAnalytics,
@@ -63,6 +70,7 @@ class ModelEvaluator(httpClient: HttpClient) {
         return model.ticker?.let { ticker ->
             val tickerDetail = polygonService.tickerDetails(ticker = ticker)
             stockAnalysis2.copy(
+                ticker = model.ticker,
                 description = tickerDetail.description,
                 industry = tickerDetail.industry,
                 sector = tickerDetail.sector,
@@ -70,28 +78,30 @@ class ModelEvaluator(httpClient: HttpClient) {
                 similar = tickerDetail.similar,
                 ceo = tickerDetail.ceo,
                 country = tickerDetail.country,
+                tags = stockAnalysis2.tags + (tickerDetail.tags?: emptyList()),
+                derivedStockAnalytics = derivedStockAnalytics.copy(marketCap = tickerDetail.marketcap),
             )
         } ?: stockAnalysis2
     }
 
-    private fun validateRequestOrThrow(request: EvaluateModelRequest) {
-        request.model.epsConceptName ?: error("Please define ${Model::epsConceptName.name} on the model")
-        request.model.allItems().find { it.name == request.model.epsConceptName }
-            ?: error("There must be an Item named ${request.model.epsConceptName} in your model")
+    private fun validateRequestOrThrow(model: Model) {
+        model.epsConceptName ?: error("Please define ${Model::epsConceptName.name} on the model")
+        model.allItems().find { it.name == model.epsConceptName }
+            ?: error("There must be an Item named ${model.epsConceptName} in your model")
 
-        request.model.netIncomeConceptName ?: error("Please define ${Model::netIncomeConceptName.name} on the model")
-        request.model.allItems().find { it.name == request.model.netIncomeConceptName }
-            ?: error("There must be an Item named ${request.model.netIncomeConceptName} in your model")
+        model.netIncomeConceptName ?: error("Please define ${Model::netIncomeConceptName.name} on the model")
+        model.allItems().find { it.name == model.netIncomeConceptName }
+            ?: error("There must be an Item named ${model.netIncomeConceptName} in your model")
 
-        request.model.totalRevenueConceptName
+        model.totalRevenueConceptName
             ?: error("Please define ${Model::totalRevenueConceptName.name} on the model")
-        request.model.allItems().find { it.name == request.model.totalRevenueConceptName }
-            ?: error("There must be an Item named ${request.model.totalRevenueConceptName} in your model")
+        model.allItems().find { it.name == model.totalRevenueConceptName }
+            ?: error("There must be an Item named ${model.totalRevenueConceptName} in your model")
 
-        request.model.sharesOutstandingConceptName
+        model.sharesOutstandingConceptName
             ?: error("Please define ${Model::sharesOutstandingConceptName.name} on the model")
-        request.model.allItems().find { it.name == request.model.sharesOutstandingConceptName }
-            ?: error("There must be an Item named ${request.model.sharesOutstandingConceptName} in your model")
+        model.allItems().find { it.name == model.sharesOutstandingConceptName }
+            ?: error("There must be an Item named ${model.sharesOutstandingConceptName} in your model")
     }
 
 }
