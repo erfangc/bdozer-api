@@ -20,17 +20,17 @@ class StockAnalysisService(
         val stockAnalysis = getStockAnalysis(stockAnalysisId) ?: error("cannot find stock analysis $stockAnalysisId")
         return evaluateStockAnalysis(
             request = EvaluateModelRequest(model = stockAnalysis.model),
-            save = save
+            saveAs = save?.let { stockAnalysisId }
         )
     }
 
     fun evaluateStockAnalysis(
         request: EvaluateModelRequest,
-        save: Boolean? = null
+        saveAs: String? = null
     ): StockAnalysis2 {
         val stockAnalysis = modelEvaluator.evaluate(request)
-        if (save == true) {
-            saveStockAnalysis(stockAnalysis)
+        if (saveAs != null) {
+            saveStockAnalysis(stockAnalysis.copy(_id = saveAs))
         }
         return stockAnalysis
     }

@@ -15,8 +15,11 @@ class StockAnalysisController(
 ) {
 
     @PostMapping("evaluate")
-    fun evaluateStockAnalysis(@RequestBody request: EvaluateModelRequest, @RequestParam(required = false) save: Boolean? = null): StockAnalysis2 {
-        return stockAnalysisService.evaluateStockAnalysis(request = request, save = save)
+    fun evaluateStockAnalysis(
+        @RequestBody request: EvaluateModelRequest,
+        @RequestParam(required = false) saveAs: String? = null
+    ): StockAnalysis2 {
+        return stockAnalysisService.evaluateStockAnalysis(request = request, saveAs = saveAs)
     }
 
     @PostMapping("{id}/refresh")
