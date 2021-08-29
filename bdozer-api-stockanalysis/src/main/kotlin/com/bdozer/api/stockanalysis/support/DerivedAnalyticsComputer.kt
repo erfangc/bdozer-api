@@ -7,15 +7,15 @@ import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.models.dataclasses.Utility
 import com.bdozer.api.models.dataclasses.Utility.TerminalValuePerShare
 import com.bdozer.api.models.dataclasses.spreadsheet.Cell
-import com.bdozer.api.models.irr.IRRCalculator
 import com.bdozer.api.stockanalysis.dataclasses.DerivedStockAnalytics
 import com.bdozer.api.stockanalysis.dataclasses.Waterfall
-import com.bdozer.api.stockanalysis.iex.IEXService
+import com.bdozer.api.stockanalysis.support.IRRCalculator.irr
+import com.bdozer.api.stockanalysis.support.poylgon.PolygonService
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.pow
 
-class DerivedAnalyticsComputer(private val iexService: IEXService) {
+class DerivedAnalyticsComputer(private val polygonService: PolygonService) {
 
     /**
      * Compute derived analytics given the [EvaluateModelResult] from running the stock analyzer
@@ -23,9 +23,12 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
      * @param cells the evaluated cells
      * @param model the model from which the evaluated cells derived from
      */
-    fun computeDerivedAnalytics(model:Model, cells: List<Cell>): DerivedStockAnalytics {
+    fun computeDerivedAnalytics(model: Model, cells: List<Cell>): DerivedStockAnalytics {
 
-        val currentPrice = currentPrice(model).orZero()
+        val currentPrice = model.ticker?.let { ticker ->
+            val previousClose = polygonService.previousClose(ticker = ticker)
+            previousClose.results.firstOrNull()?.c
+        }
         /*
         perform validation
          */
@@ -34,7 +37,6 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
 
         val shareOutstanding = model.allItems().find { it.name == model.sharesOutstandingConceptName }
             ?: error("There must be an Item named ${model.sharesOutstandingConceptName} in your model")
-
 
         /*
         compute the target price as NPV
@@ -48,22 +50,24 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
          */
         val epsConceptName = model.epsConceptName
         val terminalValues = cells.filter { it.item.name == TerminalValuePerShare }.associateBy { it.period }
-        val irr = IRRCalculator.irr(
-            income = doubleArrayOf(
-                -currentPrice,
-                *cells.filter { it.item.name == epsConceptName }.map { cell ->
-                    val terminalValue = terminalValues[cell.period]?.value.orZero()
-                    cell.value.orZero() + terminalValue
-                }.toDoubleArray()
+        val irr = currentPrice?.let {
+            irr(
+                income = doubleArrayOf(
+                    -currentPrice,
+                    *cells.filter { it.item.name == epsConceptName }.map { cell ->
+                        val terminalValue = terminalValues[cell.period]?.value.orZero()
+                        cell.value.orZero() + terminalValue
+                    }.toDoubleArray()
+                )
             )
-        )
+        }
 
         val finalPrice = cells
             .find { cell -> cell.period == model.periods && cell.item.name == TerminalValuePerShare }
             ?.value
 
         /*
-        End of IRR compute
+        Create the Derived analytics wrapper object
          */
         return DerivedStockAnalytics(
             profitPerShare = profitPerShare,
@@ -78,26 +82,19 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
         )
     }
 
-    private fun currentPrice(model: Model): Double? {
-        return model.ticker?.let { ticker ->
-            iexService.price(ticker)
-        }
-    }
-
-    private fun revenueCAGR(model:Model, cells: List<Cell>): Double {
+    private fun revenueCAGR(model: Model, cells: List<Cell>): Double {
         val revenues = cells
             .filter { cell -> cell.item.name == model.totalRevenueConceptName }
         return (revenues.last().value.orZero() / revenues.first().value.orZero()).pow(1.0 / revenues.size) - 1
     }
 
-    private fun discountRate(model:Model) = (model.equityRiskPremium * model.beta) + model.riskFreeRate
-
+    private fun discountRate(model: Model) = (model.equityRiskPremium * model.beta) + model.riskFreeRate
 
     /**
      * This method computes the [Waterfall] for every period. A [Waterfall] groups - for 1 period -
      * the major expenses into at most 5 categories for ease of display
      */
-    private fun businessWaterfall(model:Model, cells: List<Cell>): Map<Int, Waterfall> {
+    private fun businessWaterfall(model: Model, cells: List<Cell>): Map<Int, Waterfall> {
         val lookup = model.allItems().associateBy { it.name }
         val revenueItem = model.item(model.totalRevenueConceptName)
         val netIncomeItem = model.item(model.netIncomeConceptName)
@@ -135,7 +132,7 @@ class DerivedAnalyticsComputer(private val iexService: IEXService) {
                 val cellLookupByItemName = cells.associateBy { it.item.name }
 
                 /*
-                find total revenue revenue
+                find total revenue
                  */
                 val revenue = cellLookupByItemName[model.totalRevenueConceptName]
                     ?: error("no revenue cell found for period $period")

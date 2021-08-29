@@ -3,11 +3,8 @@ package com.bdozer.api.web.stockanalysis
 import com.bdozer.api.stockanalysis.SortDirection
 import com.bdozer.api.stockanalysis.StockAnalysisService
 import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelRequest
-import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelResponse
 import com.bdozer.api.stockanalysis.dataclasses.FindStockAnalysisResponse
 import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
-import com.bdozer.api.web.stockanalysis.excel.StockAnalysisExcelDownloader
-import io.swagger.v3.oas.annotations.Operation
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("api/stock-analyzer/stock-analyses")
@@ -17,39 +14,17 @@ class StockAnalysisController(
     private val stockAnalysisService: StockAnalysisService,
 ) {
 
-    @Operation(
-        description = """
-        This API evaluates a model you've assembled and return a stock analysis object 
-        
-        The passed in Model represents high level relationship between the various financial statement items of underlying a stock 
-        Calling this method evaluates those relationships and turn them into real numbers
-        
-        This API does not persist (save) the stock analysis. Please call the stock analysis service API to save the analysis
-        
-        This is a stateless calculator
-        """
-    )
     @PostMapping("evaluate")
-    fun evaluateStockAnalysis(@RequestBody request: EvaluateModelRequest): EvaluateModelResponse {
-        return stockAnalysisService.evaluateStockAnalysis(request)
+    fun evaluateStockAnalysis(@RequestBody request: EvaluateModelRequest, @RequestParam(required = false) save: Boolean? = null): StockAnalysis2 {
+        return stockAnalysisService.evaluateStockAnalysis(request = request, save = save)
     }
 
-    @Operation(
-        description = """
-        This API refreshes an existing stock analysis and re-evaluate
-        the model attached to it to produce renewed outputs. Call this API 
-        when you are in possession of a previously run stock analysis
-        
-        The returned refreshed stock analysis preserve all the metadata, model overrides
-        of the original analysis
-        
-        This API does not persist (save) the new analysis. This API is a stateless calculator
-        """,
-        summary = """Refresh a stock analysis by rerunning the model"""
-    )
-    @PostMapping("refresh")
-    fun refreshStockAnalysis(@RequestBody stockAnalysis: StockAnalysis2): StockAnalysis2 {
-        return stockAnalysisService.refreshStockAnalysis(stockAnalysis)
+    @PostMapping("{id}/refresh")
+    fun refreshStockAnalysis(
+        @PathVariable id: String,
+        @RequestParam(required = false) save: Boolean? = null
+    ): StockAnalysis2 {
+        return stockAnalysisService.refreshStockAnalysis(stockAnalysisId = id, save = save)
     }
 
     @PostMapping

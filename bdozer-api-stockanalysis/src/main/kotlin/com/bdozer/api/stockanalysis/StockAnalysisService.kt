@@ -1,7 +1,7 @@
 package com.bdozer.api.stockanalysis
 
 import com.bdozer.api.stockanalysis.dataclasses.*
-import com.bdozer.api.stockanalysis.support.StatelessModelEvaluator
+import com.bdozer.api.stockanalysis.support.ModelEvaluator
 import com.mongodb.client.FindIterable
 import com.mongodb.client.MongoDatabase
 import org.bson.*
@@ -10,27 +10,33 @@ import java.time.Instant
 
 class StockAnalysisService(
     mongoDatabase: MongoDatabase,
-    private val statelessModelEvaluator: StatelessModelEvaluator,
+    private val modelEvaluator: ModelEvaluator,
 ) {
 
     private val stockAnalyses = mongoDatabase.getCollection<StockAnalysis2>()
     private val collectionStockAnalyses = mongoDatabase.getCollection("stockAnalysis2")
 
-    fun refreshStockAnalysis(stockAnalysis: StockAnalysis2): StockAnalysis2 {
-        val request = EvaluateModelRequest(model = stockAnalysis.model)
-        val evaluateModelResponse = statelessModelEvaluator.evaluate(request = request)
-        return stockAnalysis.copy(
-            derivedStockAnalytics = evaluateModelResponse.derivedStockAnalytics,
-            cells = evaluateModelResponse.cells,
+    fun refreshStockAnalysis(stockAnalysisId: String, save: Boolean? = null): StockAnalysis2 {
+        val stockAnalysis = getStockAnalysis(stockAnalysisId) ?: error("cannot find stock analysis $stockAnalysisId")
+        return evaluateStockAnalysis(
+            request = EvaluateModelRequest(model = stockAnalysis.model),
+            save = save
         )
     }
 
-    fun evaluateStockAnalysis(request: EvaluateModelRequest): EvaluateModelResponse {
-        return statelessModelEvaluator.evaluate(request)
+    fun evaluateStockAnalysis(
+        request: EvaluateModelRequest,
+        save: Boolean? = null
+    ): StockAnalysis2 {
+        val stockAnalysis = modelEvaluator.evaluate(request)
+        if (save == true) {
+            saveStockAnalysis(stockAnalysis)
+        }
+        return stockAnalysis
     }
 
-    fun saveStockAnalysis(analysis: StockAnalysis2) {
-        stockAnalyses.save(analysis.copy(lastUpdated = Instant.now()))
+    fun saveStockAnalysis(stockAnalysis: StockAnalysis2) {
+        stockAnalyses.save(stockAnalysis.copy(lastUpdated = Instant.now()))
     }
 
     fun deleteStockAnalysis(id: String) {

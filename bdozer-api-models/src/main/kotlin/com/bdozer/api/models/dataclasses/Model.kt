@@ -66,7 +66,7 @@ data class Model(
     val excelRowOffset: Int = 1,
 ) {
 
-    fun override(): Model {
+    fun withOverrides(): Model {
         val suppressedItems = suppressedItems.toSet()
         val overrideLookup = itemOverrides.associateBy { it.name }
         fun overrideItems(items: List<Item>): List<Item> {

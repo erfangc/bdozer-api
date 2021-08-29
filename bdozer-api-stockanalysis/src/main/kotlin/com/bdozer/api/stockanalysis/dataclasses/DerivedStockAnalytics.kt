@@ -8,21 +8,17 @@ import com.bdozer.api.models.dataclasses.Item
  */
 data class DerivedStockAnalytics(
     /**
-     * value breakdown
-     */
-    val zeroGrowthPrice: Double? = null,
-
-    /**
-     * revenue waterfall by period
+     * Simplified projection of future business based on the current scenario
      */
     val businessWaterfall: Map<Int, Waterfall>,
+    val marketCap: Double? = null,
+    val employees: Int? = null,
     val shareOutstanding: Item,
     val profitPerShare: Item,
-
     val targetPrice: Double,
     val finalPrice: Double? = null,
-    val discountRate: Double,
-    val revenueCAGR: Double = 0.0,
-    val currentPrice: Double,
+    val discountRate: Double? = null,
+    val revenueCAGR: Double? = null,
+    val currentPrice: Double? = null,
     val irr: Double? = null,
 )

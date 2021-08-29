@@ -21,6 +21,13 @@ data class StockAnalysis2(
     val cells: List<Cell> = emptyList(),
     val derivedStockAnalytics: DerivedStockAnalytics? = null,
 
+    val industry: String? = null,
+    val sector: String? = null,
+    val url: String? = null,
+    val similar: List<String>? = null,
+    val ceo: String? = null,
+    val country: String? = null,
+
     val userId: String? = null,
     val tags: List<String> = emptyList(),
     val published: Boolean = false,

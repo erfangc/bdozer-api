@@ -56,12 +56,6 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>pl.zankowski</groupId>
-            <artifactId>iextrading4j-all</artifactId>
-            <version>3.4.3</version>
-        </dependency>
-
         <!--	poi	-->
         <dependency>
             <groupId>org.apache.poi</groupId>
