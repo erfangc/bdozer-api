@@ -28,10 +28,11 @@ class StockAnalysisService(
     fun evaluateStockAnalysis(
         request: EvaluateModelRequest,
         saveAs: String? = null,
+        published: Boolean = false,
     ): StockAnalysis2 {
         val stockAnalysis = modelEvaluator.evaluate(request)
         return if (saveAs != null) {
-            val saveAsAnalysis = stockAnalysis.copy(_id = saveAs)
+            val saveAsAnalysis = stockAnalysis.copy(_id = saveAs, published = published)
             saveStockAnalysis(saveAsAnalysis)
             saveAsAnalysis
         } else {
