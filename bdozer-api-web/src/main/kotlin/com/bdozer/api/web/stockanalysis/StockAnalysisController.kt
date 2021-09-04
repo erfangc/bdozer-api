@@ -1,8 +1,8 @@
 package com.bdozer.api.web.stockanalysis
 
+import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.stockanalysis.SortDirection
 import com.bdozer.api.stockanalysis.StockAnalysisService
-import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelRequest
 import com.bdozer.api.stockanalysis.dataclasses.FindStockAnalysisResponse
 import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import org.springframework.web.bind.annotation.*
@@ -16,14 +16,16 @@ class StockAnalysisController(
 
     @PostMapping("evaluate")
     fun evaluateStockAnalysis(
-        @RequestBody request: EvaluateModelRequest,
+        @RequestBody model: Model,
         @RequestParam(required = false) saveAs: String? = null,
         @RequestParam(required = false) published: Boolean = false,
+        @RequestParam(required = false) tags: List<String> = emptyList(),
     ): StockAnalysis2 {
         return stockAnalysisService.evaluateStockAnalysis(
-            request = request,
+            model = model,
             saveAs = saveAs,
-            published = published
+            published = published,
+            tags = tags,
         )
     }
 

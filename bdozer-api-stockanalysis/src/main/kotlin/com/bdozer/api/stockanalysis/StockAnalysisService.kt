@@ -1,5 +1,6 @@
 package com.bdozer.api.stockanalysis
 
+import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.stockanalysis.dataclasses.*
 import com.bdozer.api.stockanalysis.support.ModelEvaluator
 import com.mongodb.client.FindIterable
@@ -26,13 +27,14 @@ class StockAnalysisService(
     }
 
     fun evaluateStockAnalysis(
-        request: EvaluateModelRequest,
+        model: Model,
         saveAs: String? = null,
         published: Boolean = false,
+        tags: List<String> = emptyList(),
     ): StockAnalysis2 {
-        val stockAnalysis = modelEvaluator.evaluate(request)
+        val stockAnalysis = modelEvaluator.evaluate(model = model)
         return if (saveAs != null) {
-            val saveAsAnalysis = stockAnalysis.copy(_id = saveAs, published = published)
+            val saveAsAnalysis = stockAnalysis.copy(_id = saveAs, published = published, tags = tags)
             saveStockAnalysis(saveAsAnalysis)
             saveAsAnalysis
         } else {

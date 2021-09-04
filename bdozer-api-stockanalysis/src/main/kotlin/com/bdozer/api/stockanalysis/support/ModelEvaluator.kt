@@ -3,7 +3,6 @@ package com.bdozer.api.stockanalysis.support
 import com.bdozer.api.models.CellEvaluator
 import com.bdozer.api.models.CellGenerator
 import com.bdozer.api.models.dataclasses.Model
-import com.bdozer.api.stockanalysis.dataclasses.EvaluateModelRequest
 import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import com.bdozer.api.stockanalysis.support.poylgon.PolygonService
 import org.apache.http.client.HttpClient
@@ -20,8 +19,7 @@ class ModelEvaluator(httpClient: HttpClient) {
     private val polygonService = PolygonService(httpClient)
     private val derivedAnalyticsComputer = DerivedAnalyticsComputer(polygonService)
 
-    fun evaluate(evaluateModelRequest: EvaluateModelRequest) =
-        evaluate(StockAnalysis2(model = evaluateModelRequest.model))
+    fun evaluate(model: Model) = evaluate(StockAnalysis2(model = model))
 
     /**
      * Evaluate the given model and return a [StockAnalysis2]
@@ -78,7 +76,7 @@ class ModelEvaluator(httpClient: HttpClient) {
                 similar = tickerDetail.similar,
                 ceo = tickerDetail.ceo,
                 country = tickerDetail.country,
-                tags = stockAnalysis2.tags + (tickerDetail.tags?: emptyList()),
+                tags = stockAnalysis2.tags + (tickerDetail.tags ?: emptyList()),
                 derivedStockAnalytics = derivedStockAnalytics.copy(marketCap = tickerDetail.marketcap),
             )
         } ?: stockAnalysis2
