@@ -27,19 +27,6 @@ class StockAnalysisController(
         )
     }
 
-    @PostMapping("{id}/refresh")
-    fun refreshStockAnalysis(
-        @PathVariable id: String,
-        @RequestParam(required = false) save: Boolean? = null
-    ): StockAnalysis2 {
-        return stockAnalysisService.refreshStockAnalysis(stockAnalysisId = id, save = save)
-    }
-
-    @PostMapping
-    fun saveStockAnalysis(@RequestBody analysis: StockAnalysis2) {
-        stockAnalysisService.saveStockAnalysis(analysis)
-    }
-
     @DeleteMapping("{id}")
     fun deleteStockAnalysis(@PathVariable id: String) {
         stockAnalysisService.deleteStockAnalysis(id)
