@@ -5,6 +5,7 @@ import com.bdozer.api.models.dataclasses.Utility.PresentValueOfEarningsPerShare
 import com.bdozer.api.models.dataclasses.Utility.PresentValueOfTerminalValuePerShare
 import com.bdozer.api.models.dataclasses.Utility.PresentValuePerShare
 import com.bdozer.api.models.dataclasses.Utility.TerminalValuePerShare
+import java.time.LocalDate
 
 data class Model(
 
@@ -18,6 +19,8 @@ data class Model(
     val adsh: String? = null,
 
     val name: String? = null,
+
+    val mostRecentFilingDate: LocalDate? = null,
 
     /**
      * Manual overrides for items

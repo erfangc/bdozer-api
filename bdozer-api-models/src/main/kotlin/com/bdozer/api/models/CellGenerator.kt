@@ -3,9 +3,9 @@ package com.bdozer.api.models
 import com.bdozer.api.models.dataclasses.Item
 import com.bdozer.api.models.dataclasses.ItemType
 import com.bdozer.api.models.dataclasses.Model
-import com.bdozer.api.models.translator.FormulaTranslationContext
 import com.bdozer.api.models.dataclasses.spreadsheet.Address
 import com.bdozer.api.models.dataclasses.spreadsheet.Cell
+import com.bdozer.api.models.translator.FormulaTranslationContext
 import com.bdozer.api.models.translator.subtypes.*
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
@@ -48,13 +48,14 @@ class CellGenerator {
 
             /**
              * Helper function to write the non-data cells (i.e. date and item name cells)
-             * for each worksheet given it's list of associated items
+             * for each worksheet given its list of associated items
              */
             fun Sheet.writeHeader(items: List<Item>) {
+                val mostRecentFilingDate = model.mostRecentFilingDate ?: LocalDate.now()
                 val yearStyle = yearStyle(wb)
                 val yearRow = this.createRow(model.excelRowOffset - 1)
                 for (period in 0..periods) {
-                    val year = LocalDate.now().year + period - 1
+                    val year = mostRecentFilingDate.year + period
                     val cell = yearRow
                         .createCell(period + model.excelColumnOffset)
                     cell.setCellValue("FY$year")
@@ -171,7 +172,7 @@ class CellGenerator {
      * @param projectionPeriods the period for which to project forward
      * @return a List of [Cell] instances for each period in the from 0 to [projectionPeriods] for each item in [items]
      */
-    fun generateCells(items: List<Item>, projectionPeriods: Int):List<Cell> {
+    fun generateCells(items: List<Item>, projectionPeriods: Int): List<Cell> {
         val fakeModel = Model(periods = projectionPeriods, incomeStatementItems = items)
         val emptyCells = (0..projectionPeriods).flatMap { period ->
             items.map { item ->
