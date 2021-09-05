@@ -20,7 +20,7 @@ data class Model(
 
     val name: String? = null,
 
-    val mostRecentFilingDate: LocalDate? = null,
+    val mostRecentReportDate: LocalDate? = null,
 
     /**
      * Manual overrides for items

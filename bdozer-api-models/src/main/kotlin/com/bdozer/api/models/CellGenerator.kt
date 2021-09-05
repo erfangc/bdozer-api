@@ -51,7 +51,7 @@ class CellGenerator {
              * for each worksheet given its list of associated items
              */
             fun Sheet.writeHeader(items: List<Item>) {
-                val mostRecentFilingDate = model.mostRecentFilingDate ?: LocalDate.now()
+                val mostRecentFilingDate = model.mostRecentReportDate ?: LocalDate.now()
                 val yearStyle = yearStyle(wb)
                 val yearRow = this.createRow(model.excelRowOffset - 1)
                 for (period in 0..periods) {
