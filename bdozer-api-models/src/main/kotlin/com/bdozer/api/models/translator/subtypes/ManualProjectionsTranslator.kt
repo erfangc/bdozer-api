@@ -10,9 +10,10 @@ import java.time.LocalDate
 class ManualProjectionsTranslator(val ctx: FormulaTranslationContext) : FormulaTranslator {
 
     override fun translateFormula(cell: Cell): Cell {
+        val model = ctx.model
         val currentPeriod = cell.period
         val item = cell.item
-        val fy0FiscalYear = item.historicalValue?.documentFiscalYearFocus ?: LocalDate.now().year
+        val fy0FiscalYear = (model.mostRecentReportDate ?: LocalDate.now()).year
         val fiscalYear = fy0FiscalYear + currentPeriod
         val manualProjections = item.manualProjections ?: error("manualProjections must be specified")
         if (manualProjections.manualProjections.isEmpty()) {
