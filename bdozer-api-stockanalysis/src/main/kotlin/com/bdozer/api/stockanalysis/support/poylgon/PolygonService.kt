@@ -32,11 +32,10 @@ class PolygonService {
                     .newBuilder(uri)
                     .GET()
                     .build(),
-                BodyHandlers.ofInputStream(),
+                BodyHandlers.ofString(),
             )
         if (httpResponse.statusCode() > 200) {
-            val responseBody = httpResponse.body().bufferedReader().readText()
-            error("Error executing GET $uri statusCode=${httpResponse.statusCode()} responseBody='${responseBody}'")
+            error("Error executing GET $uri statusCode=${httpResponse.statusCode()} responseBody='${httpResponse.body()}'")
         }
         return objectMapper.readValue(httpResponse.body()) 
     }
@@ -50,11 +49,10 @@ class PolygonService {
                     .newBuilder(URI.create("https://api.polygon.io/v2/aggs/ticker/$ticker/prev?adjusted=true&apiKey=$polygonKey"))
                     .GET()
                     .build(),
-                BodyHandlers.ofInputStream(),
+                BodyHandlers.ofString(),
             )
         if (httpResponse.statusCode() > 200) {
-            val responseBody = httpResponse.body().bufferedReader().readText()
-            error("Error executing GET $uri statusCode=${httpResponse.statusCode()} responseBody='${responseBody}'")
+            error("Error executing GET $uri statusCode=${httpResponse.statusCode()} responseBody='${httpResponse.body()}'")
         }
         return objectMapper.readValue(httpResponse.body())
     }
