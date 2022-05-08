@@ -31,20 +31,14 @@
         <!--   Project   -->
         <dependency>
             <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.bdozer</groupId>
             <artifactId>bdozer-api-models</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <!--	this is so we can read XBRL documents	-->
         <dependency>
-            <groupId>org.litote.kmongo</groupId>
-            <artifactId>kmongo</artifactId>
-            <version>${kmongo.version}</version>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.13.4</version>
         </dependency>
 
         <dependency>

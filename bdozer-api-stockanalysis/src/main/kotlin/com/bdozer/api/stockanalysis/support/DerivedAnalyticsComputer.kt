@@ -1,6 +1,5 @@
 package com.bdozer.api.stockanalysis.support
 
-import bdozer.api.common.extensions.DoubleExtensions.orZero
 import com.bdozer.api.models.dataclasses.EvaluateModelResult
 import com.bdozer.api.models.dataclasses.Item
 import com.bdozer.api.models.dataclasses.Model
@@ -16,6 +15,8 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 class DerivedAnalyticsComputer(private val polygonService: PolygonService) {
+    
+    private fun Double?.orZero() = this ?: 0.0
 
     /**
      * Compute derived analytics given the [EvaluateModelResult] from running the stock analyzer

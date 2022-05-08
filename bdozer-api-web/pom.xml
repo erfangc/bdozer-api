@@ -37,42 +37,22 @@
             <artifactId>bdozer-api-stockanalysis</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-factbase-modelbuilder</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>de.dentrassi.crypto</groupId>
+            <artifactId>pem-keystore</artifactId>
+            <version>2.2.1</version>
         </dependency>
-
         <dependency>
-            <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-factbase-core</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.13.4</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-filing-entity</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
+        
         <!--	poi	-->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>5.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>5.0.0</version>
-        </dependency>
-
-        <!--	this is so we can read XBRL documents	-->
-        <dependency>
-            <groupId>org.litote.kmongo</groupId>
-            <artifactId>kmongo</artifactId>
-            <version>${kmongo.version}</version>
         </dependency>
 
         <dependency>
@@ -110,14 +90,7 @@
             <artifactId>jackson-module-kotlin</artifactId>
             <version>2.12.4</version>
         </dependency>
-
-        <!--	mxparser is used to evaluate cell formulas	-->
-        <dependency>
-            <groupId>org.mariuszgromada.math</groupId>
-            <artifactId>MathParser.org-mXparser</artifactId>
-            <version>${MathParser.org-mXparser.version}</version>
-        </dependency>
-
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

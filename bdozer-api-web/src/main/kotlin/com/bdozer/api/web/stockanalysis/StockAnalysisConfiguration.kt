@@ -1,10 +1,10 @@
 package com.bdozer.api.web.stockanalysis
 
 import com.bdozer.api.stockanalysis.StockAnalysisService
-import com.bdozer.api.stockanalysis.support.DerivedAnalyticsComputer
 import com.bdozer.api.stockanalysis.support.ModelEvaluator
-import com.mongodb.client.MongoDatabase
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.http.client.HttpClient
+import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -13,14 +13,16 @@ class StockAnalysisConfiguration {
 
     @Bean
     fun stockAnalysisService(
-        mongoDatabase: MongoDatabase,
+        restHighLevelClient: RestHighLevelClient,
         httpClient: HttpClient,
+        objectMapper: ObjectMapper,
     ): StockAnalysisService {
         return StockAnalysisService(
-            mongoDatabase = mongoDatabase,
+            restHighLevelClient = restHighLevelClient,
             modelEvaluator = ModelEvaluator(
                 httpClient = httpClient
-            )
+            ),
+            objectMapper = objectMapper,
         )
     }
 

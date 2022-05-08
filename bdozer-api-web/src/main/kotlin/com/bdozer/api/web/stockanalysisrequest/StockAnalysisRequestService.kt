@@ -1,17 +1,24 @@
 package com.bdozer.api.web.stockanalysisrequest
 
-import com.mongodb.client.MongoDatabase
-import org.litote.kmongo.getCollection
-import org.litote.kmongo.save
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.client.RequestOptions
+import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.common.xcontent.XContentType
 import org.springframework.stereotype.Service
 
 @Service
 class StockAnalysisRequestService(
-    mongoDatabase: MongoDatabase,
+    private val restHighLevelClient: RestHighLevelClient,
+    private val objectMapper: ObjectMapper,
 ) {
-    private val stockAnalysisRequests = mongoDatabase.getCollection<StockAnalysisRequest>()
-
     fun saveStockAnalysisRequest(ticker: String, email: String) {
-        stockAnalysisRequests.save(StockAnalysisRequest(ticker = ticker, email = email))
+        val stockAnalysisRequest = StockAnalysisRequest(ticker = ticker, email = email)
+        restHighLevelClient.index(
+            IndexRequest("stock-analysis-request")
+                .id(stockAnalysisRequest._id)
+                .source(objectMapper.writeValueAsString(stockAnalysisRequest), XContentType.JSON),
+            RequestOptions.DEFAULT
+        )
     }
 }

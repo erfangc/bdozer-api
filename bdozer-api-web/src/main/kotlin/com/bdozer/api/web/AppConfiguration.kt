@@ -1,13 +1,15 @@
 package com.bdozer.api.web
 
-import com.mongodb.client.MongoClient
-import com.mongodb.client.MongoDatabase
+import org.apache.http.HttpHost
 import org.apache.http.client.HttpClient
 import org.apache.http.impl.client.HttpClientBuilder
-import org.litote.kmongo.KMongo
+import org.apache.http.message.BasicHeader
+import org.elasticsearch.client.RestClient
+import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.lang.System.getenv
+import java.net.URI
 
 @Configuration
 class AppConfiguration {
@@ -18,16 +20,18 @@ class AppConfiguration {
     }
 
     @Bean
-    fun mongoClient(): MongoClient {
-        val connectionString = getenv("MONGO_URI")
-            ?: error("environment MONGO_URI not defined")
-        return KMongo.createClient(connectionString)
+    fun restHighLevelClient(): RestHighLevelClient {
+        val elasticsearchEndpoint = getenv("ELASTICSEARCH_ENDPOINT") ?: "http://localhost:9200"
+        val elasticsearchCredential = getenv("ELASTICSEARCH_CREDENTIAL") ?: ""
+
+        val uri = URI.create(elasticsearchEndpoint)
+        val httpHost = HttpHost(uri.host, uri.port, uri.scheme)
+        val headers = arrayOf(BasicHeader("Authorization", "Basic $elasticsearchCredential"))
+
+        val builder = RestClient
+            .builder(httpHost)
+            .setDefaultHeaders(headers)
+        return RestHighLevelClient(builder)
     }
 
-    @Bean
-    fun mongoDatabase(mongoClient: MongoClient): MongoDatabase {
-        val database = getenv("MONGO_DATABASE")
-            ?: error("environment MONGO_DATABASE not defined")
-        return mongoClient.getDatabase(database)
-    }
 }
