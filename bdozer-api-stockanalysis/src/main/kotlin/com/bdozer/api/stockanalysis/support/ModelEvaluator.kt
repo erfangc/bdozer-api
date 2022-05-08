@@ -5,7 +5,6 @@ import com.bdozer.api.models.CellGenerator
 import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
 import com.bdozer.api.stockanalysis.support.poylgon.PolygonService
-import org.apache.http.client.HttpClient
 
 /**
  * [ModelEvaluator] evaluates the provided [Model] and runs [DerivedAnalyticsComputer]
@@ -14,9 +13,9 @@ import org.apache.http.client.HttpClient
  * It is stateless in the sense that this service does not CRUD or manage the lifecycle of the analysis
  * which makes it ideal for on-the-fly reruns
  */
-class ModelEvaluator(httpClient: HttpClient) {
+class ModelEvaluator {
 
-    private val polygonService = PolygonService(httpClient)
+    private val polygonService = PolygonService()
     private val derivedAnalyticsComputer = DerivedAnalyticsComputer(polygonService)
 
     fun evaluate(model: Model) = evaluate(StockAnalysis2(model = model))

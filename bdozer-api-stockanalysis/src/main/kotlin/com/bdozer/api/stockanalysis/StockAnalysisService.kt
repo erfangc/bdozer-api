@@ -25,11 +25,11 @@ import java.time.Instant
 
 class StockAnalysisService(
     private val restHighLevelClient: RestHighLevelClient,
-    private val modelEvaluator: ModelEvaluator,
     private val objectMapper: ObjectMapper,
     private val s3: S3Client,
 ) {
     private val log = LoggerFactory.getLogger(StockAnalysisService::class.java)
+    private val modelEvaluator = ModelEvaluator()
     private val bucket = "saved-objects-422873008393"
     private val indexName = "stock-analyses"
     fun refreshStockAnalysis(stockAnalysisId: String, save: Boolean? = null): StockAnalysis2 {
@@ -75,7 +75,7 @@ class StockAnalysisService(
 
     private fun indexProjection(updatedStockAnalysis: StockAnalysis2) {
         val stockAnalysisProjection = StockAnalysisProjection(
-            id = updatedStockAnalysis._id,
+            userId = updatedStockAnalysis.userId,
             name = updatedStockAnalysis.name,
             description = updatedStockAnalysis.description,
             cik = updatedStockAnalysis.cik,
@@ -154,33 +154,52 @@ class StockAnalysisService(
         sort: SortDirection? = null,
     ): FindStockAnalysisResponse {
         val boolQuery = QueryBuilders.boolQuery()
-        // TODO  
-        restHighLevelClient.search(
-            SearchRequest(indexName)
-                .source(
-                    SearchSourceBuilder
-                        .searchSource()
-                        .query(boolQuery)
-                ),
-            RequestOptions.DEFAULT
-        )
-        return FindStockAnalysisResponse(
-            stockAnalyses = allAnalyses().map {
-                StockAnalysisProjection(
-                    _id = it._id,
-                    name = it.name,
-                    description = it.description,
-                    cik = it.cik,
-                    ticker = it.ticker,
-                    currentPrice = it.derivedStockAnalytics?.currentPrice,
-                    targetPrice = it.derivedStockAnalytics?.targetPrice,
-                    finalPrice = it.derivedStockAnalytics?.finalPrice,
-                    published = it.published,
-                    lastUpdated = it.lastUpdated,
-                    tags = it.tags,
-                )
-            })
+        
+        if (userId != null) {
+            boolQuery.must(QueryBuilders.termQuery(StockAnalysisProjection::userId.name.keyword, userId))
+        }
+        
+        if (cik != null) {
+            boolQuery.must(QueryBuilders.termQuery(StockAnalysisProjection::cik.name.keyword, cik))
+        }
+        
+        if (ticker != null) {
+            boolQuery.must(QueryBuilders.termQuery(StockAnalysisProjection::ticker.name.keyword, ticker))
+        }
+        
+        if (published != null) {
+            boolQuery.must(QueryBuilders.termQuery(StockAnalysisProjection::published.name, published))
+        }
+        
+        if (term != null) {
+            boolQuery.should(QueryBuilders.matchQuery(StockAnalysisProjection::published.name, term))
+        }
 
+        if (tags != null && tags.isNotEmpty()) {
+            boolQuery.must(QueryBuilders.termsQuery(StockAnalysisProjection::tags.name.keyword, tags))
+        }
+        
+        val searchSourceBuilder = SearchSourceBuilder
+            .searchSource()
+            .query(boolQuery)
+        
+        if (skip != null) {
+            searchSourceBuilder.from(skip)
+        }
+        
+        if (limit != null) {
+            searchSourceBuilder.size(limit)
+        }
+        
+        val searchRequest = SearchRequest(indexName)
+            .source(searchSourceBuilder)
+        val searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT)
+        val stockAnalyses = searchResponse.hits.map { searchHit -> 
+            objectMapper
+                .readValue<StockAnalysisProjection>(searchHit.sourceAsString)
+                .copy(_id = searchHit.id)
+        }
+        return FindStockAnalysisResponse(stockAnalyses)
     }
 
     fun publish(id: String): StockAnalysis2 {
@@ -194,5 +213,6 @@ class StockAnalysisService(
         saveStockAnalysis(stockAnalysis)
         return stockAnalysis
     }
-
+    private val String.keyword: String
+        get() = "${this}.keyword"
 }

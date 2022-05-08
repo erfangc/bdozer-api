@@ -21,9 +21,6 @@ class StockAnalysisConfiguration {
     ): StockAnalysisService {
         return StockAnalysisService(
             restHighLevelClient = restHighLevelClient,
-            modelEvaluator = ModelEvaluator(
-                httpClient = httpClient
-            ),
             objectMapper = objectMapper,
             s3 = s3,
         )
