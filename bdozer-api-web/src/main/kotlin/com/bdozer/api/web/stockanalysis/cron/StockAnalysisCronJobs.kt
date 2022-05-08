@@ -21,9 +21,9 @@ class StockAnalysisCronJobs(
         val stockAnalyses = stockAnalysisService.findStockAnalyses(limit = 5000, published = true).stockAnalyses
         log.info("Updating rerunning ${stockAnalyses.size} stock analyses for price updates")
         stockAnalyses.forEach {
-            val stockAnalysisId = it._id
+            val stockAnalysisId = it._id!!
             try {
-                val stockAnalysis = stockAnalysisService.getStockAnalysis(stockAnalysisId) ?: error("stock analysis not found")
+                val stockAnalysis = stockAnalysisService.getStockAnalysis(stockAnalysisId)
                 log.info("Updating stock analysis id=$stockAnalysisId ticker=${stockAnalysis.ticker}")
                 stockAnalysisService.refreshStockAnalysis(stockAnalysisId = stockAnalysisId, save = true)
             } catch (e: Exception) {

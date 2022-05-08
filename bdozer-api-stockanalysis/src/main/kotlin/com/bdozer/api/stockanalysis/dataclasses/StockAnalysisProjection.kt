@@ -3,7 +3,8 @@ package com.bdozer.api.stockanalysis.dataclasses
 import java.time.Instant
 
 data class StockAnalysisProjection(
-    val _id: String,
+    val _id: String? = null,
+    val id: String? = null,
     val name: String? = null,
     val description: String? = null,
     val cik: String? = null,

@@ -1,15 +1,20 @@
 package com.bdozer.api.web.watchlist
 
 import com.bdozer.api.web.authn.UserProvider
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.elasticsearch.action.get.GetRequest
+import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.web.bind.annotation.*
 
-// TODO finish this for Elasticsearch
 @RestController
 @CrossOrigin
 @RequestMapping("/api/watch-lists")
 class WatchListsController(
     private val userProvider: UserProvider,
+    private val objectMapper: ObjectMapper,
     private val restHighLevelClient: RestHighLevelClient,
 ) {
 
@@ -17,9 +22,21 @@ class WatchListsController(
 
     @GetMapping
     fun getWatchedStockAnalyses(): GetWatchedStockAnalysesResponse? {
-        val email = getUserEmail()
+        val userEmail = getUserEmail()
+        val getResponse = restHighLevelClient.get(
+            GetRequest(indexName).id(userEmail),
+            RequestOptions.DEFAULT
+        )
+        val watchList = if (getResponse.isExists) {
+            objectMapper.readValue(getResponse.sourceAsBytes)
+        } else {
+            WatchList(
+                _id = userEmail,
+                stockAnalysisIds = emptyList(),
+            )
+        }
         return GetWatchedStockAnalysesResponse(
-            watchList = WatchList(_id = email, emptyList()),
+            watchList = watchList,
             stockAnalyses = emptyList(),
         )
     }
@@ -37,12 +54,54 @@ class WatchListsController(
 
     @PostMapping
     fun watch(@RequestParam stockAnalysisId: String): WatchList {
-        TODO()
+        val userEmail = getUserEmail()
+        val getResponse = restHighLevelClient.get(
+            GetRequest(indexName).id(userEmail),
+            RequestOptions.DEFAULT
+        )
+        val watchList = if (getResponse.isExists) {
+            objectMapper.readValue(getResponse.sourceAsBytes)
+        } else {
+            WatchList(
+                _id = userEmail,
+                stockAnalysisIds = emptyList(),
+            )
+        }
+
+        val watchList1 = watchList.copy(stockAnalysisIds = watchList.stockAnalysisIds + stockAnalysisId)
+        restHighLevelClient.index(
+            IndexRequest(indexName)
+                .id(userEmail)
+                .source(objectMapper.writeValueAsString(watchList1)),
+            RequestOptions.DEFAULT
+        )
+        return watchList1
     }
 
     @DeleteMapping
     fun unwatch(@RequestParam stockAnalysisId: String): WatchList {
-        TODO()
+        val userEmail = getUserEmail()
+        val getResponse = restHighLevelClient.get(
+            GetRequest(indexName).id(userEmail),
+            RequestOptions.DEFAULT
+        )
+        val watchList = if (getResponse.isExists) {
+            objectMapper.readValue(getResponse.sourceAsBytes)
+        } else {
+            WatchList(
+                _id = userEmail,
+                stockAnalysisIds = emptyList(),
+            )
+        }
+
+        val watchList1 = watchList.copy(stockAnalysisIds = watchList.stockAnalysisIds - stockAnalysisId)
+        restHighLevelClient.index(
+            IndexRequest(indexName)
+                .id(userEmail)
+                .source(objectMapper.writeValueAsString(watchList1)),
+            RequestOptions.DEFAULT
+        )
+        return watchList1
     }
 
 }

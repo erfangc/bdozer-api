@@ -8,6 +8,7 @@ import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import software.amazon.awssdk.services.s3.S3Client
 import java.lang.System.getenv
 import java.net.URI
 
@@ -31,7 +32,13 @@ class AppConfiguration {
         val builder = RestClient
             .builder(httpHost)
             .setDefaultHeaders(headers)
+        
         return RestHighLevelClient(builder)
+    }
+    
+    @Bean
+    fun s3(): S3Client {
+        return S3Client.create()
     }
 
 }
