@@ -1,0 +1,306 @@
+openapi: 3.0.2
+info:
+  title: FastAPI
+  version: 0.1.0
+servers:
+- url: /
+paths:
+  /zero_shot_classification:
+    post:
+      operationId: zero_shot_classification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZeroShotClassificationRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZeroShotClassificationResponse'
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Zero Shot Classification
+      tags:
+      - CoreNLP
+      x-contentType: application/json
+      x-accepts: application/json
+  /answer_question:
+    post:
+      operationId: answer_question
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerQuestionRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AnswerQuestionResponse'
+                title: Response Answer Question Answer Question Post
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Answer Question
+      tags:
+      - CoreNLP
+      x-contentType: application/json
+      x-accepts: application/json
+  /sentence_producer:
+    post:
+      description: Turns a input document into sentences using `en_core_web_trf` transformer
+        models
+      operationId: get_sentences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocInput'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sentences'
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Sentence Producer
+      tags:
+      - CoreNLP
+      x-contentType: application/json
+      x-accepts: application/json
+  /cross_encode:
+    post:
+      description: Cross Encoder
+      operationId: cross_encode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrossEncodeInput'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ScoredSentence'
+                title: Response Cross Encode Cross Encode Post
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Cross Encode
+      tags:
+      - CoreNLP
+      x-contentType: application/json
+      x-accepts: application/json
+components:
+  schemas:
+    AnswerQuestionRequest:
+      example:
+        questions:
+        - questions
+        - questions
+        context: context
+      properties:
+        questions:
+          items:
+            type: string
+          title: Questions
+          type: array
+        context:
+          title: Context
+          type: string
+      required:
+      - context
+      - questions
+      title: AnswerQuestionRequest
+      type: object
+    AnswerQuestionResponse:
+      example:
+        question: question
+        best_answer: best_answer
+      properties:
+        question:
+          title: Question
+          type: string
+        best_answer:
+          title: Best Answer
+          type: string
+      required:
+      - best_answer
+      - question
+      title: AnswerQuestionResponse
+      type: object
+    CrossEncodeInput:
+      example:
+        reference: reference
+        comparisons:
+        - comparisons
+        - comparisons
+      properties:
+        reference:
+          title: Reference
+          type: string
+        comparisons:
+          items:
+            type: string
+          title: Comparisons
+          type: array
+      required:
+      - comparisons
+      - reference
+      title: CrossEncodeInput
+      type: object
+    DocInput:
+      example:
+        doc: doc
+      properties:
+        doc:
+          title: Doc
+          type: string
+      required:
+      - doc
+      title: DocInput
+      type: object
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Detail
+          type: array
+      title: HTTPValidationError
+      type: object
+    ScoredSentence:
+      example:
+        sentence: sentence
+        score: 0.8008281904610115
+      properties:
+        sentence:
+          title: Sentence
+          type: string
+        score:
+          title: Score
+          type: number
+      required:
+      - score
+      - sentence
+      title: ScoredSentence
+      type: object
+    Sentences:
+      example:
+        sentences:
+        - sentences
+        - sentences
+      properties:
+        sentences:
+          items:
+            type: string
+          title: Sentences
+          type: array
+      required:
+      - sentences
+      title: Sentences
+      type: object
+    SingleLabelClassificationResult:
+      example:
+        score: 0.8008281904610115
+        label: label
+      properties:
+        label:
+          title: Label
+          type: string
+        score:
+          title: Score
+          type: number
+      required:
+      - label
+      - score
+      title: SingleLabelClassificationResult
+      type: object
+    ValidationError:
+      properties:
+        loc:
+          items:
+            type: string
+          title: Location
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      type: object
+    ZeroShotClassificationRequest:
+      example:
+        sentence: sentence
+        candidate_labels:
+        - candidate_labels
+        - candidate_labels
+      properties:
+        candidate_labels:
+          items:
+            type: string
+          title: Candidate Labels
+          type: array
+        sentence:
+          title: Sentence
+          type: string
+      required:
+      - candidate_labels
+      - sentence
+      title: ZeroShotClassificationRequest
+      type: object
+    ZeroShotClassificationResponse:
+      example:
+        result:
+        - score: 0.8008281904610115
+          label: label
+        - score: 0.8008281904610115
+          label: label
+      properties:
+        result:
+          items:
+            $ref: '#/components/schemas/SingleLabelClassificationResult'
+          title: Result
+          type: array
+      required:
+      - result
+      title: ZeroShotClassificationResponse
+      type: object
+

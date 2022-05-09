@@ -1,0 +1,6 @@
+additionalProperties:
+  groupId: co.bdozer
+  artifactId: core-nlp-sdk
+  apiPackage: co.bdozer.core.nlp.sdk.api
+  modelPackage: co.bdozer.core.nlp.sdk.model
+  library: feign
