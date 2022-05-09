@@ -4,6 +4,12 @@ import co.bdozer.libraries.utils.Beans
 import co.bdozer.libraries.utils.Database
 import co.bdozer.libraries.zacks.models.ZacksDownloadLink
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
+import org.elasticsearch.action.bulk.BulkRequest
+import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.client.RequestOptions
+import org.elasticsearch.client.indices.GetIndexRequest
+import org.elasticsearch.common.xcontent.XContentType
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -22,7 +28,7 @@ object ZacksTableSyncer {
         "mktv" to URI.create("https://www.quandl.com/api/v3/datatables/ZACKS/MKTV?api_key=$quandlApiKey&qopts.export=true"),
         "se" to URI.create("https://www.quandl.com/api/v3/datatables/ZACKS/SE?api_key=$quandlApiKey&qopts.export=true"),
     )
-
+    private val restHighLevelClient = Beans.restHighLevelClient()
     private val httpClient = Beans.httpClient()
     private val objectMapper = Beans.objectMapper()
     private val conn = Database.connection
@@ -77,12 +83,13 @@ object ZacksTableSyncer {
         val body = httpResponse.body()
         val zipInputStream = ZipInputStream(body)
         val schema = schema(table)
-
+        
         zipInputStream.nextEntry?.let { zipEntry ->
             println("Processing file ${zipEntry.name} size=${zipEntry.size}")
             var headers = emptyList<String>()
             var count = 0
 
+            val buffer = mutableListOf<Map<String, Any?>>()
             zipInputStream.bufferedReader().lines().forEach { line ->
                 count++
                 if (count == 1) {
@@ -103,7 +110,22 @@ object ZacksTableSyncer {
                             "'${value.replace("'", "''")}'"
                         }
                     }
-
+                    val asMap = keys.zip(values).toMap()
+                    buffer.add(asMap)
+                    if (buffer.size >= 100) {
+                        val bulkRequest = BulkRequest()
+                        buffer.forEach { item ->
+                            bulkRequest.add(IndexRequest(table).source(
+                                objectMapper.writeValueAsString(item), XContentType.JSON
+                            ))
+                        }
+                        restHighLevelClient.bulk(
+                            bulkRequest,
+                            RequestOptions.DEFAULT
+                        )
+                        println("Processed buffer=${buffer.size} $count rows to Elasticsearch")
+                        buffer.clear()
+                    }
                     val sql = """
                         insert into $table (${keys.joinToString(",")}) values (${values.joinToString(",")})
                         """.trimIndent()
@@ -118,6 +140,22 @@ object ZacksTableSyncer {
                     }
                 }
             }
+            
+            // flush out the remaining items buffer
+            if (buffer.isNotEmpty()) {
+                val bulkRequest = BulkRequest()
+                buffer.forEach { item ->
+                    bulkRequest.add(IndexRequest(table).source(
+                        objectMapper.writeValueAsString(item), XContentType.JSON
+                    ))
+                }
+                restHighLevelClient.bulk(
+                    bulkRequest,
+                    RequestOptions.DEFAULT
+                )
+                println("Processed buffer=${buffer.size} $count rows to Elasticsearch")
+                buffer.clear()
+            }
 
             println("Processed file ${zipEntry.name} total $count rows")
             zipInputStream.close()
@@ -125,6 +163,10 @@ object ZacksTableSyncer {
     }
 
     private fun truncate(table: String) {
+        if (restHighLevelClient.indices().exists(GetIndexRequest(table), RequestOptions.DEFAULT)) {
+            println("Deleted index $table from Elasticsearch")
+            restHighLevelClient.indices().delete(DeleteIndexRequest(table), RequestOptions.DEFAULT)
+        }
         val stmt = conn.createStatement()
         stmt.execute("truncate table $table")
     }
