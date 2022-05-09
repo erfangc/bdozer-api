@@ -89,7 +89,44 @@ object ZacksTableSyncer {
             var headers = emptyList<String>()
             var count = 0
 
-            val buffer = mutableListOf<Map<String, Any?>>()
+            val buffer = mutableListOf<Pair<List<String>, List<Any?>>>()
+            
+            fun indexBufferToEs() {
+                val bulkRequest = BulkRequest()
+                buffer.forEach { item ->
+                    val keys = item.first
+                    val values = item.second.map { if (it is String) it.substring(1, it.length - 1) else it }
+                    val map = keys.zip(values).toMap()
+                    bulkRequest.add(
+                        IndexRequest(table).source(
+                            objectMapper.writeValueAsString(map),
+                            XContentType.JSON
+                        )
+                    )
+                }
+                restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT)
+                println("Processed $count rows to Elasticsearch on $table")
+            }
+            
+            fun insertBufferToPostgres() {
+                val stmt = conn.createStatement()
+                buffer.forEach {
+                        (keys, values) ->
+                    val sql = """
+                        insert into $table (${keys.joinToString(",")}) values (${values.joinToString(",")})
+                        """.trimIndent()
+                    stmt.addBatch(sql)
+                }
+                stmt.executeBatch()
+                println("Processed $count rows to Postgres on $table")
+            }
+            
+            fun flushBuffer() {
+                indexBufferToEs()
+                insertBufferToPostgres()
+                buffer.clear()
+            }
+
             zipInputStream.bufferedReader().lines().forEach { line ->
                 count++
                 if (count == 1) {
@@ -110,51 +147,17 @@ object ZacksTableSyncer {
                             "'${value.replace("'", "''")}'"
                         }
                     }
-                    val asMap = keys.zip(values).toMap()
-                    buffer.add(asMap)
-                    if (buffer.size >= 100) {
-                        val bulkRequest = BulkRequest()
-                        buffer.forEach { item ->
-                            bulkRequest.add(IndexRequest(table).source(
-                                objectMapper.writeValueAsString(item), XContentType.JSON
-                            ))
-                        }
-                        restHighLevelClient.bulk(
-                            bulkRequest,
-                            RequestOptions.DEFAULT
-                        )
-                        println("Processed buffer=${buffer.size} $count rows to Elasticsearch")
-                        buffer.clear()
-                    }
-                    val sql = """
-                        insert into $table (${keys.joinToString(",")}) values (${values.joinToString(",")})
-                        """.trimIndent()
 
-                    try {
-                        val smt = conn.createStatement()
-                        smt.execute(sql)
-                        println("Processed $count rows")
-                    } catch (e: Exception) {
-                        println("Error while executing SQL: $sql")
-                        throw RuntimeException(e)
+                    buffer.add(keys to values)
+                    if (buffer.size >= 100) {
+                        flushBuffer()
                     }
                 }
             }
-            
+
             // flush out the remaining items buffer
             if (buffer.isNotEmpty()) {
-                val bulkRequest = BulkRequest()
-                buffer.forEach { item ->
-                    bulkRequest.add(IndexRequest(table).source(
-                        objectMapper.writeValueAsString(item), XContentType.JSON
-                    ))
-                }
-                restHighLevelClient.bulk(
-                    bulkRequest,
-                    RequestOptions.DEFAULT
-                )
-                println("Processed buffer=${buffer.size} $count rows to Elasticsearch")
-                buffer.clear()
+                flushBuffer()
             }
 
             println("Processed file ${zipEntry.name} total $count rows")
@@ -192,4 +195,6 @@ object ZacksTableSyncer {
         }
         return tokens
     }
+
+    
 }
