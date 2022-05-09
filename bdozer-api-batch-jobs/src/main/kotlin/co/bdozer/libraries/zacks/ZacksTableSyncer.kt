@@ -13,6 +13,8 @@ import org.elasticsearch.common.xcontent.XContentType
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.sql.Date
+import java.sql.Types
 import java.util.zip.ZipInputStream
 
 
@@ -34,7 +36,9 @@ object ZacksTableSyncer {
     private val conn = Database.connection
 
     init {
-        Runtime.getRuntime().addShutdownHook(Thread { conn.close() })
+        Runtime
+            .getRuntime()
+            .addShutdownHook(Thread { conn.close() })
     }
 
     private fun schema(tbl: String): Map<String, String> {
@@ -74,7 +78,7 @@ object ZacksTableSyncer {
         val uri = downloadLinks[table]!!
         val zacksDownloadLink = zacksDownloadLink(uri)
         val link = zacksDownloadLink.datatable_bulk_download.file.link
-        println("Download $link")
+        println("Download link=$link")
         val httpResponse = httpClient.send(
             HttpRequest.newBuilder(URI.create(link)).build(),
             HttpResponse.BodyHandlers.ofInputStream(),
@@ -83,44 +87,73 @@ object ZacksTableSyncer {
         val body = httpResponse.body()
         val zipInputStream = ZipInputStream(body)
         val schema = schema(table)
-        
+
         zipInputStream.nextEntry?.let { zipEntry ->
             println("Processing file ${zipEntry.name} size=${zipEntry.size}")
             var headers = emptyList<String>()
             var count = 0
 
             val buffer = mutableListOf<Pair<List<String>, List<Any?>>>()
-            
+
             fun indexBufferToEs() {
                 val bulkRequest = BulkRequest()
                 buffer.forEach { item ->
                     val keys = item.first
-                    val values = item.second.map { if (it is String) it.substring(1, it.length - 1) else it }
+                    val values = item.second
                     val map = keys.zip(values).toMap()
                     bulkRequest.add(
-                        IndexRequest(table).source(
-                            objectMapper.writeValueAsString(map),
-                            XContentType.JSON
-                        )
+                        IndexRequest(table)
+                            .source(
+                                objectMapper.writeValueAsString(map),
+                                XContentType.JSON,
+                            )
                     )
                 }
                 restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT)
                 println("Processed $count rows to Elasticsearch on $table")
             }
-            
+
             fun insertBufferToPostgres() {
-                val stmt = conn.createStatement()
-                buffer.forEach {
-                        (keys, values) ->
-                    val sql = """
-                        insert into $table (${keys.joinToString(",")}) values (${values.joinToString(",")})
-                        """.trimIndent()
-                    stmt.addBatch(sql)
+                val keys = buffer.first().first
+                val stmt = conn.prepareStatement(
+                    "insert into $table (${keys.joinToString(",")}) values (${keys.joinToString(", ") { "?" }})"
+                )
+                buffer.forEach { (keys, values) ->
+                    keys.zip(values).forEachIndexed { idx, (key, value) ->
+                        val parameterIdx = idx + 1
+                        val type = schema[key] ?: error("...")
+                        if (type == "numeric") {
+                            if (value == null) {
+                                stmt.setNull(parameterIdx, Types.DOUBLE)
+                            } else {
+                                stmt.setDouble(parameterIdx, value as Double)
+                            }
+                        } else if (type.startsWith("int")) {
+                            if (value == null) {
+                                stmt.setNull(parameterIdx, Types.INTEGER)
+                            } else {
+                                stmt.setInt(parameterIdx, value as Int)
+                            }
+                        } else if (type == "date") {
+                            if (value == null) {
+                                stmt.setNull(parameterIdx, Types.DATE)
+                            } else {
+                                stmt.setDate(parameterIdx, Date.valueOf(value.toString()))
+                            }
+                        } else {
+                            if (value == null) {
+                                stmt.setNull(parameterIdx, Types.VARCHAR)
+                            } else {
+                                stmt.setString(parameterIdx, value.toString())
+                            }
+                        }
+                    }
+                    stmt.addBatch()
                 }
                 stmt.executeBatch()
                 println("Processed $count rows to Postgres on $table")
             }
-            
+
             fun flushBuffer() {
                 indexBufferToEs()
                 insertBufferToPostgres()
@@ -144,12 +177,12 @@ object ZacksTableSyncer {
                         } else if (value.isEmpty()) {
                             null
                         } else {
-                            "'${value.replace("'", "''")}'"
+                            value
                         }
                     }
 
                     buffer.add(keys to values)
-                    if (buffer.size >= 100) {
+                    if (buffer.size >= 150) {
                         flushBuffer()
                     }
                 }
@@ -196,5 +229,5 @@ object ZacksTableSyncer {
         return tokens
     }
 
-    
+
 }
