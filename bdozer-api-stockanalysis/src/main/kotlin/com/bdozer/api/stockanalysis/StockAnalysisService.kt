@@ -172,7 +172,9 @@ class StockAnalysisService(
         }
         
         if (term != null) {
-            boolQuery.should(QueryBuilders.matchQuery(StockAnalysisProjection::published.name, term))
+            boolQuery.should(QueryBuilders.matchQuery(StockAnalysisProjection::ticker.name, term))
+            boolQuery.should(QueryBuilders.matchQuery(StockAnalysisProjection::name.name, term))
+            boolQuery.should(QueryBuilders.matchQuery(StockAnalysisProjection::cik.name, term))
         }
 
         if (tags != null && tags.isNotEmpty()) {
