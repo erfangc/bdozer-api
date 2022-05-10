@@ -1,14 +1,18 @@
 package co.bdozer.libraries.master.models
 
 data class LatestMetrics(
-    val revenue: Double?,
-    val ebitda: Double?,
-    val ebit: Double?,
-    val netIncome: Double?,
-    val debtToEquity: Double?,
-    val debtToAsset: Double?,
-    val totalAsset: Double?,
-    val totalLiability: Double?,
-    val longTermDebt: Double?,
-    val longTermDebtToAsset: Double?,
+    val revenue: Double? = null,
+    val ebitda: Double? = null,
+    val ebit: Double? = null,
+    val netIncome: Double? = null,
+    val grossMargin: Double? = null,
+    val ebitdaMargin: Double? = null,
+    val ebitMargin: Double? = null,
+    val daMargin: Double? = null,
+    val debtToEquity: Double? = null,
+    val debtToAsset: Double? = null,
+    val totalAsset: Double? = null,
+    val totalLiability: Double? = null,
+    val longTermDebt: Double? = null,
+    val longTermDebtToAsset: Double? = null,
 )

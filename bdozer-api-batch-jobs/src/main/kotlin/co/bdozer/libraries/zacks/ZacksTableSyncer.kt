@@ -10,6 +10,7 @@ import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.indices.GetIndexRequest
 import org.elasticsearch.common.xcontent.XContentType
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -21,6 +22,7 @@ import java.util.zip.ZipInputStream
 object ZacksTableSyncer {
 
     private val quandlApiKey = System.getenv("QUANDL_API_KEY") ?: error("QUANDL_API_KEY not defined")
+    private val log = LoggerFactory.getLogger(ZacksTableSyncer::class.java)
 
     private val downloadLinks = mapOf(
         "fc" to URI.create("https://www.quandl.com/api/v3/datatables/ZACKS/FC?api_key=$quandlApiKey&qopts.export=true"),
@@ -75,91 +77,25 @@ object ZacksTableSyncer {
 
     fun syncTable(table: String) {
         truncate(table)
+        conn.autoCommit = false
         val uri = downloadLinks[table]!!
         val zacksDownloadLink = zacksDownloadLink(uri)
         val link = zacksDownloadLink.datatable_bulk_download.file.link
-        println("Download link=$link")
+        log.info("Download link=$link")
         val httpResponse = httpClient.send(
             HttpRequest.newBuilder(URI.create(link)).build(),
             HttpResponse.BodyHandlers.ofInputStream(),
         )
-        println("Response headers=${httpResponse.headers()}")
+        log.info("Response headers=${httpResponse.headers()}")
         val body = httpResponse.body()
         val zipInputStream = ZipInputStream(body)
         val schema = schema(table)
 
         zipInputStream.nextEntry?.let { zipEntry ->
-            println("Processing file ${zipEntry.name} size=${zipEntry.size}")
+            log.info("Processing file ${zipEntry.name} size=${zipEntry.size}")
             var headers = emptyList<String>()
             var count = 0
-
-            val buffer = mutableListOf<Pair<List<String>, List<Any?>>>()
-
-            fun indexBufferToEs() {
-                val bulkRequest = BulkRequest()
-                buffer.forEach { item ->
-                    val keys = item.first
-                    val values = item.second
-                    val map = keys.zip(values).toMap()
-                    bulkRequest.add(
-                        IndexRequest(table)
-                            .source(
-                                objectMapper.writeValueAsString(map),
-                                XContentType.JSON,
-                            )
-                    )
-                }
-                restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT)
-                println("Processed $count rows to Elasticsearch on $table")
-            }
-
-            fun insertBufferToPostgres() {
-                val keys = buffer.first().first
-                val stmt = conn.prepareStatement(
-                    "insert into $table (${keys.joinToString(",")}) values (${keys.joinToString(", ") { "?" }})"
-                )
-                buffer.forEach { (keys, values) ->
-                    keys.zip(values).forEachIndexed { idx, (key, value) ->
-                        val parameterIdx = idx + 1
-                        val type = schema[key] ?: error("...")
-                        if (type == "numeric") {
-                            if (value == null) {
-                                stmt.setNull(parameterIdx, Types.DOUBLE)
-                            } else {
-                                stmt.setDouble(parameterIdx, value as Double)
-                            }
-                        } else if (type.startsWith("int")) {
-                            if (value == null) {
-                                stmt.setNull(parameterIdx, Types.INTEGER)
-                            } else {
-                                stmt.setInt(parameterIdx, value as Int)
-                            }
-                        } else if (type == "date") {
-                            if (value == null) {
-                                stmt.setNull(parameterIdx, Types.DATE)
-                            } else {
-                                stmt.setDate(parameterIdx, Date.valueOf(value.toString()))
-                            }
-                        } else {
-                            if (value == null) {
-                                stmt.setNull(parameterIdx, Types.VARCHAR)
-                            } else {
-                                stmt.setString(parameterIdx, value.toString())
-                            }
-                        }
-                    }
-                    stmt.addBatch()
-                }
-                stmt.executeBatch()
-                println("Processed $count rows to Postgres on $table")
-            }
-
-            fun flushBuffer() {
-                indexBufferToEs()
-                insertBufferToPostgres()
-                buffer.clear()
-            }
-
+            val ingestor = Ingestor(table, schema)
             zipInputStream.bufferedReader().lines().forEach { line ->
                 count++
                 if (count == 1) {
@@ -180,27 +116,21 @@ object ZacksTableSyncer {
                             value
                         }
                     }
-
-                    buffer.add(keys to values)
-                    if (buffer.size >= 150) {
-                        flushBuffer()
-                    }
+                    val row = keys to values
+                    ingestor.ingest(row)
                 }
             }
+            ingestor.flushBuffer()
 
             // flush out the remaining items buffer
-            if (buffer.isNotEmpty()) {
-                flushBuffer()
-            }
-
-            println("Processed file ${zipEntry.name} total $count rows")
+            log.info("Processed file ${zipEntry.name} total ${count - 1} rows")
             zipInputStream.close()
         }
     }
 
     private fun truncate(table: String) {
         if (restHighLevelClient.indices().exists(GetIndexRequest(table), RequestOptions.DEFAULT)) {
-            println("Deleted index $table from Elasticsearch")
+            log.info("Deleted index $table from Elasticsearch")
             restHighLevelClient.indices().delete(DeleteIndexRequest(table), RequestOptions.DEFAULT)
         }
         val stmt = conn.createStatement()
@@ -228,6 +158,5 @@ object ZacksTableSyncer {
         }
         return tokens
     }
-
 
 }

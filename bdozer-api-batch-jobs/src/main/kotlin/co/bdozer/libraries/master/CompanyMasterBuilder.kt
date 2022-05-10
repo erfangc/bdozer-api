@@ -7,7 +7,6 @@ import co.bdozer.libraries.polygon.Polygon.tickerDetailV3
 import co.bdozer.libraries.polygon.models.TickerDetailV3
 
 object CompanyMasterBuilder {
-
     fun buildCompanyRecord(ticker: String): CompanyMasterRecord {
         val tickerDetailV3 = tickerDetailV3(ticker)
         val marketCap = tickerDetailV3.results.market_cap
@@ -43,7 +42,9 @@ object CompanyMasterBuilder {
             sales = trend(fcs.quarters) { it.tot_revnu },
             latestMetrics = latestMetrics(rawData),
             perShareMetrics = perShareMetrics(rawData),
-        )
+            tags = emptyList(),
+        ).let { it.copy(tags = TagGenerator().generateTags(it)) }
+        
     }
 
     private fun enterpriseValue(tickerDetailV3: TickerDetailV3, fcs: FCS): Double {

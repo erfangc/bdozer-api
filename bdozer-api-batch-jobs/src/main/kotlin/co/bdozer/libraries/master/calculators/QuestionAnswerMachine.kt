@@ -11,7 +11,6 @@ object QuestionAnswerMachine {
 
     private val coreNLP = Beans.coreNLP()
     private val log = LoggerFactory.getLogger(QuestionAnswerMachine::class.java)
-
     fun answerQuestion(question: String, tenKs: List<TenK>): Answer {
         log.info("Attempting to answer question '$question' across ${tenKs.size} paragraphs found in company 10-K")
         val scoredSentences = coreNLP.crossEncode(
@@ -33,4 +32,5 @@ object QuestionAnswerMachine {
             score = context.score.toDouble()
         )
     }
+    
 }

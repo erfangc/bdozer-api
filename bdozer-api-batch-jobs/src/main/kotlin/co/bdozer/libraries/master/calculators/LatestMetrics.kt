@@ -4,6 +4,7 @@ import co.bdozer.libraries.master.RawData
 import co.bdozer.libraries.master.models.LatestMetrics
 
 fun latestMetrics(rawData: RawData): LatestMetrics {
+    
     val (fcs, _, _) = rawData
 
     val revenue = fcs.quarters.sumOf { it.tot_revnu ?: 0.0 }
@@ -37,4 +38,5 @@ fun latestMetrics(rawData: RawData): LatestMetrics {
         longTermDebt = ltDebt,
         longTermDebtToAsset = ltDebt / asset,
     )
+    
 }

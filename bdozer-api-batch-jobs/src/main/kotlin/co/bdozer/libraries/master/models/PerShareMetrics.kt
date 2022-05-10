@@ -2,33 +2,33 @@ package co.bdozer.libraries.master.models
 
 data class PerShareMetrics(
 
-    val epsBasicNet: Double?,
-    val epsBasicContOper: Double?,
-    val epsBasicDiscontOper: Double?,
-    val epsBasicExtra: Double?,
+    val epsBasicNet: Double? = null,
+    val epsBasicContOper: Double? = null,
+    val epsBasicDiscontOper: Double? = null,
+    val epsBasicExtra: Double? = null,
 
-    val priceToEpsBasicNet: Double?,
-    val priceToEpsBasicContOper: Double?,
-    val priceToEpsBasicDiscontOper: Double?,
-    val priceToEpsBasicExtra: Double?,
+    val priceToEpsBasicNet: Double? = null,
+    val priceToEpsBasicContOper: Double? = null,
+    val priceToEpsBasicDiscontOper: Double? = null,
+    val priceToEpsBasicExtra: Double? = null,
 
-    val epsDilutedNet: Double?,
-    val epsDilutedContOper: Double?,
-    val epsDilutedDiscontOper: Double?,
-    val epsDilutedExtra: Double?,
+    val epsDilutedNet: Double? = null,
+    val epsDilutedContOper: Double? = null,
+    val epsDilutedDiscontOper: Double? = null,
+    val epsDilutedExtra: Double? = null,
 
-    val priceToEpsDilutedNet: Double?,
-    val priceToEpsDilutedContOper: Double?,
-    val priceToEpsDilutedDiscontOper: Double?,
-    val priceToEpsDilutedExtra: Double?,
+    val priceToEpsDilutedNet: Double? = null,
+    val priceToEpsDilutedContOper: Double? = null,
+    val priceToEpsDilutedDiscontOper: Double? = null,
+    val priceToEpsDilutedExtra: Double? = null,
 
-    val freeCashFlowPerShare: Double?,
-    val priceToFreeCashFlowPerShare: Double?,
+    val freeCashFlowPerShare: Double? = null,
+    val priceToFreeCashFlowPerShare: Double? = null,
 
-    val operCashFlowPerShare: Double?,
-    val priceToOperCashFlowPerShare: Double?,
+    val operCashFlowPerShare: Double? = null,
+    val priceToOperCashFlowPerShare: Double? = null,
 
-    val bookValPerShare: Double?,
-    val priceToBookValPerShare: Double?,
+    val bookValPerShare: Double? = null,
+    val priceToBookValPerShare: Double? = null,
 
     )
