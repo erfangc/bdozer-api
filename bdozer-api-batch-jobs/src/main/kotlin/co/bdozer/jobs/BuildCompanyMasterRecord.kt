@@ -9,7 +9,7 @@ import kotlin.system.exitProcess
 private val log = LoggerFactory.getLogger("Main")
 fun main() {
 
-    val lines = File("batch-jobs/russell-1000-constituents.txt")
+    val lines = File("bdozer-api-batch-jobs/russell-1000-constituents.txt")
         .bufferedReader()
         .readLines()
     var remaining = lines.size
