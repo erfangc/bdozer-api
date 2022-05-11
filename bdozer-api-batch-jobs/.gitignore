@@ -1,5 +1,3 @@
 target
 .env
 dependency-reduced-pom.xml
-ingest-ids.sh
-sync-zacks-data.sh

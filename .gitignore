@@ -32,7 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 
-local/fullchain.pem
-local/privkey.pem
-local/keystore.properties
-local/application.properties
+local/
