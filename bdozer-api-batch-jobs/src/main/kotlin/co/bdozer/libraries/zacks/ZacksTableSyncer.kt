@@ -17,8 +17,10 @@ import java.io.FileOutputStream
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.file.CopyOption
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.sql.Date
 import java.sql.Types
 import java.util.zip.ZipInputStream
@@ -94,6 +96,9 @@ object ZacksTableSyncer {
         log.info("Response headers=${httpResponse.headers()}")
         val inputStream = httpResponse.body()
         val filename = "./$table.zip"
+        if (File(filename).exists()) {
+            File(filename).delete()
+        }
         inputStream.use { input ->
             Files.copy(input, Paths.get(filename))
         }
