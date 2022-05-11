@@ -1,7 +1,7 @@
 package com.bdozer.api.web.stockanalysis.excel
 
 import com.bdozer.api.models.CellGenerator
-import com.bdozer.api.stockanalysis.StockAnalysisService
+import com.bdozer.api.web.stockanalysis.StockAnalysisService
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service

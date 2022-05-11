@@ -1,10 +1,8 @@
 package com.bdozer.api.web.stockanalysis
 
 import com.bdozer.api.models.dataclasses.Model
-import com.bdozer.api.stockanalysis.SortDirection
-import com.bdozer.api.stockanalysis.StockAnalysisService
-import com.bdozer.api.stockanalysis.dataclasses.FindStockAnalysisResponse
-import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
+import com.bdozer.api.stockanalysis.models.FindStockAnalysisResponse
+import com.bdozer.api.stockanalysis.models.StockAnalysis2
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("api/stock-analyzer/stock-analyses")
@@ -37,6 +35,14 @@ class StockAnalysisController(
     @GetMapping("{id}")
     fun getStockAnalysis(@PathVariable id: String): StockAnalysis2? {
         return stockAnalysisService.getStockAnalysis(id)
+    }
+
+    @PutMapping("{id}")
+    fun saveStockAnalysis(
+        @PathVariable id: String, 
+        @RequestBody stockAnalysis2: StockAnalysis2
+    ) {
+        return stockAnalysisService.saveStockAnalysis(stockAnalysis2)
     }
 
     @PostMapping("{id}/publish")

@@ -20,9 +20,11 @@ class AppControllerAdvice(private val requestIdProvider: RequestIdProvider) {
         val error = ApiError(
             id = requestId,
             message = ex.message ?: "Unknown server error id=$requestId",
-            timestamp = Instant.now()
+            timestamp = Instant.now(),
         )
-        val ret = ResponseEntity.badRequest().body(error)
+        val ret = ResponseEntity
+            .badRequest()
+            .body(error)
         log.error(requestId, ex)
         return ret
     }
@@ -33,12 +35,11 @@ class AppControllerAdvice(private val requestIdProvider: RequestIdProvider) {
         val error = ApiError(
             id = requestId,
             message = ex.message ?: "Unknown server error id=$requestId",
-            timestamp = Instant.now()
+            timestamp = Instant.now(),
         )
-
-        val ret = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        val ret = ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(error)
-
         log.error(requestId, ex)
         return ret
     }

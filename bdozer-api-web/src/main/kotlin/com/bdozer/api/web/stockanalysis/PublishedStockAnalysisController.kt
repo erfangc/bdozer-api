@@ -1,9 +1,7 @@
 package com.bdozer.api.web.stockanalysis
 
-import com.bdozer.api.stockanalysis.SortDirection
-import com.bdozer.api.stockanalysis.dataclasses.FindStockAnalysisResponse
-import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
-import com.bdozer.api.stockanalysis.StockAnalysisService
+import com.bdozer.api.stockanalysis.models.FindStockAnalysisResponse
+import com.bdozer.api.stockanalysis.models.StockAnalysis2
 import com.bdozer.api.web.stockanalysis.excel.StockAnalysisExcelDownloader
 import org.springframework.http.HttpEntity
 import org.springframework.web.bind.annotation.*

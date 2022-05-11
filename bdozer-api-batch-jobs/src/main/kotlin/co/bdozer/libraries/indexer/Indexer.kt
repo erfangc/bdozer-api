@@ -13,6 +13,10 @@ object Indexer {
 
     fun index(id: String, obj: Any): IndexResponse {
         val index = obj::class.java.simpleName.lowercase()
+        return index(index, id, obj)
+    }
+    
+    fun index(index:String, id: String, obj: Any): IndexResponse {
         val json = objectMapper.writeValueAsString(obj)
         return restHighLevelClient.index(
             IndexRequest(index)

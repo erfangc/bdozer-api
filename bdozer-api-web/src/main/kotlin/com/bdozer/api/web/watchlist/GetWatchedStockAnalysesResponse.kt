@@ -1,6 +1,6 @@
 package com.bdozer.api.web.watchlist
 
-import com.bdozer.api.stockanalysis.dataclasses.StockAnalysis2
+import com.bdozer.api.stockanalysis.models.StockAnalysis2
 
 data class GetWatchedStockAnalysesResponse(
     val watchList: WatchList,

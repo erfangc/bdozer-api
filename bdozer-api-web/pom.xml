@@ -16,13 +16,16 @@
     
     <dependencies>
         <dependency>
-            <groupId>com.bdozer</groupId>
-            <artifactId>bdozer-api-stockanalysis</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
         </dependency>
         <dependency>
             <groupId>de.dentrassi.crypto</groupId>
             <artifactId>pem-keystore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
@@ -72,6 +75,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.bdozer</groupId>
+            <artifactId>bdozer-api-models</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     

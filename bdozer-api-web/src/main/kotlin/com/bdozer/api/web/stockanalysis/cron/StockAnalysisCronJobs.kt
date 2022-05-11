@@ -1,6 +1,6 @@
 package com.bdozer.api.web.stockanalysis.cron
 
-import com.bdozer.api.stockanalysis.StockAnalysisService
+import com.bdozer.api.web.stockanalysis.StockAnalysisService
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
