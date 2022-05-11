@@ -11,9 +11,14 @@ import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.indices.GetIndexRequest
 import org.elasticsearch.common.xcontent.XContentType
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.sql.Date
 import java.sql.Types
 import java.util.zip.ZipInputStream
@@ -87,8 +92,13 @@ object ZacksTableSyncer {
             HttpResponse.BodyHandlers.ofInputStream(),
         )
         log.info("Response headers=${httpResponse.headers()}")
-        val body = httpResponse.body()
-        val zipInputStream = ZipInputStream(body)
+        val inputStream = httpResponse.body()
+        val filename = "./$table.zip"
+        inputStream.use { input ->
+            Files.copy(input, Paths.get(filename))
+        }
+        log.info("Saved file to $filename")
+        val zipInputStream = ZipInputStream(FileInputStream(filename))
         val schema = schema(table)
 
         zipInputStream.nextEntry?.let { zipEntry ->
