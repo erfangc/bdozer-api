@@ -4,7 +4,7 @@ import com.bdozer.api.stockanalysis.master.models.MarketData
 import com.bdozer.api.stockanalysis.master.models.FC
 import com.bdozer.api.web.stockanalysis.support.zacks.models.FR
 import com.bdozer.api.stockanalysis.master.models.MT
-import com.bdozer.api.stockanalysis.models.ZacksDerivedAnalytics
+import com.bdozer.api.web.stockanalysis.models.ZacksDerivedAnalytics
 import com.bdozer.api.stockanalysis.models.LatestMetrics
 import com.bdozer.api.stockanalysis.models.PerShareMetrics
 import com.bdozer.api.stockanalysis.models.Trend

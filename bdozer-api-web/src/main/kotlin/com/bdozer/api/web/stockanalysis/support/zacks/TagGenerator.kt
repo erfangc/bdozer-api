@@ -1,35 +1,23 @@
 package com.bdozer.api.web.stockanalysis.support.zacks
 
-import com.bdozer.api.stockanalysis.models.ZacksDerivedAnalytics
+import com.bdozer.api.web.stockanalysis.models.ZacksDerivedAnalytics
 
 class TagGenerator {
-    
-    enum class Tag {
-        EARNINGS_IMPROVING,
-        REVENUE_GROWING,
-        POSITIVE_EARNINGS,
-        HIGHLY_LEVERED,
-        BELOW_BOOK_VALUE,
-        HIGH_GROSS_MARGIN,
-        HIGH_NET_MARGIN,
-        FUNDAMENTALS_STABLE,
-        RECENTLY_CRASHED,
-    }
-    
-    fun generateTags(zacksDerivedAnalytics: ZacksDerivedAnalytics): List<String>{
+
+    fun generateTags(zacksDerivedAnalytics: ZacksDerivedAnalytics): List<ZacksDerivedTag>{
         
-        val tags = mutableListOf<Tag>()
+        val zacksDerivedTags = mutableListOf<ZacksDerivedTag>()
 
         if (zacksDerivedAnalytics.earnings.isIncreasing) {
-            tags.add(Tag.EARNINGS_IMPROVING)
+            zacksDerivedTags.add(ZacksDerivedTag.EARNINGS_IMPROVING)
         }
 
         if ((zacksDerivedAnalytics.latestMetrics.netIncome ?: 0.0) > 0.0) {
-            tags.add(Tag.POSITIVE_EARNINGS)
+            zacksDerivedTags.add(ZacksDerivedTag.POSITIVE_EARNINGS)
         }
 
         if (zacksDerivedAnalytics.sales.isIncreasing) {
-            tags.add(Tag.REVENUE_GROWING)
+            zacksDerivedTags.add(ZacksDerivedTag.REVENUE_GROWING)
         }
 
         val latestMetrics = zacksDerivedAnalytics.latestMetrics
@@ -38,15 +26,15 @@ class TagGenerator {
         val bookValPerShare = perShareMetrics.bookValPerShare
 
         if ((latestMetrics.debtToAsset ?: 0.0) > 0.5) {
-            tags.add(Tag.HIGHLY_LEVERED)
+            zacksDerivedTags.add(ZacksDerivedTag.HIGHLY_LEVERED)
         }
 
         if (bookValPerShare != null && price != null) {
             if (bookValPerShare > price) {
-                tags.add(Tag.BELOW_BOOK_VALUE)
+                zacksDerivedTags.add(ZacksDerivedTag.BELOW_BOOK_VALUE)
             }
         }
         
-        return tags.map { it.name }
+        return zacksDerivedTags
     }
 }

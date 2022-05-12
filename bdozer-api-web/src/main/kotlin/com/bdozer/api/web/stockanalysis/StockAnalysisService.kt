@@ -4,7 +4,9 @@ import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.stockanalysis.models.FindStockAnalysisResponse
 import com.bdozer.api.stockanalysis.models.StockAnalysis2
 import com.bdozer.api.stockanalysis.models.StockAnalysisProjection
+import com.bdozer.api.web.stockanalysis.models.ZacksDerivedAnalytics
 import com.bdozer.api.web.stockanalysis.support.ModelEvaluator
+import com.bdozer.api.web.stockanalysis.support.zacks.ZacksDerivedTag
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.elasticsearch.action.delete.DeleteRequest
@@ -154,6 +156,7 @@ class StockAnalysisService(
         limit: Int? = null,
         term: String? = null,
         tags: List<String>? = null,
+        zacksDerivedTags: List<ZacksDerivedTag>? = null,
         sort: SortDirection? = null,
     ): FindStockAnalysisResponse {
         val boolQuery = QueryBuilders.boolQuery()
@@ -182,6 +185,12 @@ class StockAnalysisService(
 
         if (tags != null && tags.isNotEmpty()) {
             boolQuery.must(QueryBuilders.termsQuery(StockAnalysisProjection::tags.name.keyword, tags))
+        }
+        
+        if (zacksDerivedTags != null && zacksDerivedTags.isNotEmpty()) {
+            val zacksDerivedAnalytics = StockAnalysisProjection::zacksDerivedAnalytics.name
+            val tags = ZacksDerivedAnalytics::tags.name
+            boolQuery.must(QueryBuilders.termsQuery("$zacksDerivedAnalytics.${tags.keyword}", zacksDerivedTags))
         }
         
         val searchSourceBuilder = SearchSourceBuilder

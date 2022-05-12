@@ -1,4 +1,9 @@
-package com.bdozer.api.stockanalysis.models
+package com.bdozer.api.web.stockanalysis.models
+
+import com.bdozer.api.stockanalysis.models.LatestMetrics
+import com.bdozer.api.stockanalysis.models.PerShareMetrics
+import com.bdozer.api.stockanalysis.models.Trend
+import com.bdozer.api.web.stockanalysis.support.zacks.ZacksDerivedTag
 
 data class ZacksDerivedAnalytics(
     val id: String? = null,
@@ -14,5 +19,5 @@ data class ZacksDerivedAnalytics(
     val latestMetrics: LatestMetrics = LatestMetrics(),
     val sales: Trend = Trend(),
     val earnings: Trend = Trend(),
-    val tags: List<String> = emptyList(),
+    val tags: List<ZacksDerivedTag> = emptyList(),
 )

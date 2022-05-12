@@ -3,6 +3,7 @@ package com.bdozer.api.web.stockanalysis
 import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.stockanalysis.models.FindStockAnalysisResponse
 import com.bdozer.api.stockanalysis.models.StockAnalysis2
+import com.bdozer.api.web.stockanalysis.support.zacks.ZacksDerivedTag
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("api/stock-analyzer/stock-analyses")
@@ -65,6 +66,7 @@ class StockAnalysisController(
         @RequestParam(required = false) limit: Int? = null,
         @RequestParam(required = false) term: String? = null,
         @RequestParam(required = false) tags: List<String>? = null,
+        @RequestParam(required = false) zacksDerivedTags: List<ZacksDerivedTag>? = null,
         @RequestParam(required = false) sort: SortDirection? = null,
     ): FindStockAnalysisResponse {
         return stockAnalysisService.findStockAnalyses(
@@ -76,6 +78,7 @@ class StockAnalysisController(
             term = term,
             published = published,
             tags = tags,
+            zacksDerivedTags = zacksDerivedTags,
             sort = sort,
         )
     }

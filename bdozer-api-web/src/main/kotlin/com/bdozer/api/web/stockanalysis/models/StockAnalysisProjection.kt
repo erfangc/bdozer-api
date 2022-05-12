@@ -1,5 +1,6 @@
 package com.bdozer.api.stockanalysis.models
 
+import com.bdozer.api.web.stockanalysis.models.ZacksDerivedAnalytics
 import java.time.Instant
 
 data class StockAnalysisProjection(
