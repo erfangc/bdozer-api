@@ -190,7 +190,7 @@ class StockAnalysisService(
         if (zacksDerivedTags != null && zacksDerivedTags.isNotEmpty()) {
             val zacksDerivedAnalytics = StockAnalysisProjection::zacksDerivedAnalytics.name
             val tags = ZacksDerivedAnalytics::tags.name
-            boolQuery.must(QueryBuilders.termsQuery("$zacksDerivedAnalytics.${tags.keyword}", zacksDerivedTags))
+            boolQuery.must(QueryBuilders.termsQuery("$zacksDerivedAnalytics.${tags.keyword}", zacksDerivedTags.map { it.toString() }))
         }
         
         val searchSourceBuilder = SearchSourceBuilder
