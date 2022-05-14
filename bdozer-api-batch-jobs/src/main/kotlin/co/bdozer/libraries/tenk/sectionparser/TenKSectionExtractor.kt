@@ -1,8 +1,6 @@
 package co.bdozer.libraries.tenk.sectionparser
 
-import co.bdozer.core.nlp.sdk.ApiClient
-import co.bdozer.core.nlp.sdk.api.DefaultApi
-import co.bdozer.core.nlp.sdk.model.ZeroShotClassificationRequest
+import org.apache.commons.text.similarity.CosineDistance
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
@@ -12,101 +10,43 @@ import kotlin.collections.ArrayDeque
 class TenKSectionExtractor {
 
     private val log = LoggerFactory.getLogger(TenKSectionExtractor::class.java)
-    private val apiClient = ApiClient()
-
-    init {
-        apiClient.basePath = System.getenv("CORE_NLP_ENDPOINT") ?: "http://localhost:8000"
-    }
-
-    private val coreNlp = apiClient.buildClient(DefaultApi::class.java)
+    private val distance = CosineDistance()
 
     /**
      * Take a 10-K document and find the
      * Item 1, 1A sections DOM elements from it
      */
-    fun extractSections(doc: Document): TenKSections {
-        val tables = doc.select("table").take(20)
-        val tableOfContent = tables.maxByOrNull { scoreTable(it) }
-
-        val business = tableRowToSection(tableOfContent, "Item Business")
-        val riskFactors = tableRowToSection(tableOfContent, "Risk Factors")
-
+    fun extractSections(doc: Document): TenKSections? {
+        val item1 = findAnchor(document = doc, query = "item 1. business")
+        val item1a = findAnchor(document = doc, query = "item 1a. risk factors")
+        val item1b = findAnchor(document = doc, query = "item 1b. unresolved staff comments")
+        
+        if (item1 == null || item1a == null) {
+            return null
+        }
+        
+        val businessSection =
+            TenKSection(name = item1.text, startAnchor = item1.anchor, endAnchor = item1a.anchor)
+        val riskFactorsSection =
+            TenKSection(name = item1a.text, startAnchor = item1a.anchor, endAnchor = item1b?.anchor)
+        
         return TenKSections(
-            business = business.copy(elements = findElements(doc, business)),
-            riskFactors = riskFactors.copy(elements = findElements(doc, business)),
+            business = businessSection.copy(elements = findElements(doc, businessSection)),
+            riskFactors = riskFactorsSection.copy(elements = findElements(doc, riskFactorsSection)),
         )
     }
-
-    /**
-     * Take a TOC of a 10-K and figure out the anchor and element ID for different sections
-     * such as Item 1 Business, Item 1A Risk Factors
-     */
-    private fun tableRowToSection(table: Element?, name: String): TenKSection {
-        log.info("Finding anchor tag for name=$name")
-        val rows = table?.select("tr")
-        val tgtRow = rows?.map {
-            val response = coreNlp.zeroShotClassification(
-                ZeroShotClassificationRequest()
-                    .sentence(name)
-                    .candidateLabels(listOf(it.text()))
-            )
-            it to response.result.first().score
-        }?.maxByOrNull { it.second }?.first
-
-        var idx = (rows?.indexOf(tgtRow) ?: 0) + 1
-        fun hasHref(idx: Int): String? {
-            val href = rows
-                ?.get(idx)
-                ?.select("a")
-                ?.attr("href")
-            return if (href?.isBlank() == true) {
-                null
-            } else {
-                href
+    
+    private fun findAnchor(document: Document, query: String): Candidate? {
+        val tables = document.select("table").take(50)
+        val candidate = tables
+            .flatMap { table -> candidates(table, query) }
+            .sortedBy { it.score }
+            .firstOrNull {
+                it.anchor != null
             }
-        }
-
-        val size = rows?.size ?: 0
-        var endAnchor: String? = null
-        while (idx < size) {
-            endAnchor = hasHref(idx)
-            if (endAnchor != null) {
-                break
-            } else {
-                idx++
-            }
-        }
-
-        val startAnchor = tgtRow?.select("a")?.attr("href")
-        return TenKSection(startAnchor = startAnchor, endAnchor = endAnchor, name = name)
+        return candidate
     }
-
-    /**
-     * Returns the overall score of how likely this is the table of content
-     */
-    private fun scoreTable(table: Element): Double {
-        val expectedRows = listOf(
-            "Item Business",
-            "1. Business",
-            "Item Risk Factors",
-            "1A Risk Factors",
-            "Item Unresolved Staff Comments",
-        )
-        // find max score for each expected row them sum them to 
-        // determine the relevance of the entire table
-        val score = expectedRows.sumOf { expectedRow ->
-            val tableRows = table.select("tr").map { it.text() }
-            val response = coreNlp.zeroShotClassification(
-                ZeroShotClassificationRequest()
-                    .sentence(expectedRow)
-                    .candidateLabels(tableRows)
-            )
-            response.result.maxOf { it.score.toDouble() }
-        }
-        return score
-
-    }
-
+    
     /**
      * Find the corresponding DOM elements that corresponds to a given section
      */
@@ -189,4 +129,24 @@ class TenKSectionExtractor {
         return false
     }
 
+    private fun candidates(table: Element, query: String): List<Candidate> {
+        val rows = table.select("tbody > tr")
+        return rows.mapNotNull { row ->
+            val cells = row.select("td")
+            val text = cells.joinToString(" ") { cell ->
+                cell.text().trim()
+            }
+            if (text.trim().isNotEmpty()) {
+                val score = distance.apply(query, text.lowercase().trim())
+                val anchors = cells.select("a")
+                Candidate(
+                    text = text,
+                    anchor = anchors.firstOrNull()?.attr("href")?.trim(),
+                    score = score
+                )
+            } else {
+                null
+            }
+        }
+    }
 }

@@ -13,9 +13,15 @@ import kotlin.system.exitProcess
 object R1000TenKIngestor {
 
     private val log = LoggerFactory.getLogger(R1000TenKIngestor::class.java)
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        ingestR1000ConstituentTenKs()
+        exitProcess(0)
+    }
     fun ingestR1000ConstituentTenKs() {
 
-        val tickers = FileInputStream("batch-jobs/russell-1000-constituents.txt")
+        val tickers = FileInputStream("bdozer-api-batch-jobs/russell-1000-constituents.txt")
             .bufferedReader()
             .readLines()
             .map { it.trim() }
