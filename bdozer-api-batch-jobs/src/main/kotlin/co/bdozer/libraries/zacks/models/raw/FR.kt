@@ -1,15 +1,19 @@
-package co.bdozer.libraries.zacks.models
+package co.bdozer.libraries.zacks.models.raw
 
+import co.bdozer.libraries.zacks.models.PrimaryKeyComponent
 import java.time.LocalDate
 
 data class FR(
+    @PrimaryKeyComponent
     val m_ticker: String,
     val ticker: String?,
     val comp_name: String?,
     val comp_name_2: String?,
     val exchange: String?,
     val currency_code: String?,
+    @PrimaryKeyComponent
     val per_end_date: LocalDate,
+    @PrimaryKeyComponent
     val per_type: String,
     val per_code: String?,
     val per_fisc_year: Int,

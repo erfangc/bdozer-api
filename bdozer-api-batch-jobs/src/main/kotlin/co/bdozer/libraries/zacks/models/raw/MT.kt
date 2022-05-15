@@ -1,8 +1,10 @@
-package co.bdozer.libraries.zacks.models
+package co.bdozer.libraries.zacks.models.raw
 
+import co.bdozer.libraries.zacks.models.PrimaryKeyComponent
 import java.time.LocalDate
 
 data class MT(
+    @PrimaryKeyComponent
     val m_ticker: String?,
     val ticker: String?,
     val comp_name: String?,

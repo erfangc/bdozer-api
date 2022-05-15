@@ -1,7 +1,10 @@
 package co.bdozer.libraries.zacks.models
 
 data class File(
-    val data_snapshot_time: String,
-    val link: String,
-    val status: String
+    val deletions: String,
+    val from: String,
+    val insertions: String,
+    val to: String,
+    val updates: String
 )
+

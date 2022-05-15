@@ -1,13 +1,15 @@
 package co.bdozer.libraries.zacks
 
-class Ingestor(table: String, schema: Map<String, String>) {
+import kotlin.reflect.KClass
+
+class Ingestor(clazz: KClass<Any>) {
     
-    private val elasticsearchIngestor = ElasticsearchIngestor(table)
-    private val postgresIngestor = PostgresIngestor(table, schema)
+    private val elasticsearchIngestor = ElasticsearchInserter(clazz)
+    private val postgresIngestor = PostgresInserter(clazz)
     
-    fun ingest(row: Pair<List<String>, List<Any?>>) {
-         elasticsearchIngestor.ingest(row)
-        postgresIngestor.ingest(row)
+    fun ingest(row: Any) {
+         elasticsearchIngestor.insert(row)
+        postgresIngestor.insert(row)
     }
     
     fun flushBuffer() {
