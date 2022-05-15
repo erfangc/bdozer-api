@@ -11,7 +11,7 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.typeOf
 
-class PostgresInserter(clazz: KClass<Any>) {
+class PostgresInserter<T : Any>(clazz: KClass<T>) {
 
     private val log = LoggerFactory.getLogger(PostgresInserter::class.java)
     private val conn = Database.connection
@@ -20,14 +20,14 @@ class PostgresInserter(clazz: KClass<Any>) {
     private val tableName =
         clazz.findAnnotation<Table>()?.name?.let { it.ifEmpty { null } }
             ?: clazz.simpleName?.lowercase()
-    private val buffer: MutableList<Any> = mutableListOf()
+    private val buffer: MutableList<T> = mutableListOf()
     private var total: Int = 0
     private val insertSql = """
         INSERT INTO $tableName (${properties.joinToString(", ") { it.name }})
         VALUES (${properties.joinToString(", ") { "?" }})
     """.trimIndent()
 
-    fun insert(obj: Any) {
+    fun insert(obj: T) {
         buffer.add(obj)
         total++
         if (buffer.size >= 1000)
@@ -46,24 +46,38 @@ class PostgresInserter(clazz: KClass<Any>) {
                 val parameterIdx = index + 1
                 val value = kProperty.getValue(row, kProperty)
                 val type = kProperty.returnType
-                if (type == typeOf<Double>()) {
+                if (type == typeOf<Double?>()) {
                     if (value == null) {
                         stmt.setNull(parameterIdx, Types.DOUBLE)
                     } else {
                         stmt.setDouble(parameterIdx, value as Double)
                     }
-                } else if (type == typeOf<Int>()) {
+                } else if (type == typeOf<Double>()) {
+                    stmt.setDouble(parameterIdx, value as Double)
+                } else if (type == typeOf<Float?>()) {
+                    if (value == null) {
+                        stmt.setNull(parameterIdx, Types.NUMERIC)
+                    } else {
+                        stmt.setFloat(parameterIdx, value as Float)
+                    }
+                } else if (type == typeOf<Float>()) {
+                    stmt.setFloat(parameterIdx, value as Float)
+                } else if (type == typeOf<Int?>()) {
                     if (value == null) {
                         stmt.setNull(parameterIdx, Types.INTEGER)
                     } else {
                         stmt.setInt(parameterIdx, value as Int)
                     }
-                } else if (type == typeOf<LocalDate>()) {
+                } else if (type == typeOf<Int>()) {
+                    stmt.setInt(parameterIdx, value as Int)
+                } else if (type == typeOf<LocalDate?>()) {
                     if (value == null) {
                         stmt.setNull(parameterIdx, Types.DATE)
                     } else {
                         stmt.setDate(parameterIdx, Date.valueOf(value.toString()))
                     }
+                } else if (type == typeOf<LocalDate>()) {
+                    stmt.setDate(parameterIdx, Date.valueOf(value.toString()))
                 } else {
                     if (value == null) {
                         stmt.setNull(parameterIdx, Types.VARCHAR)

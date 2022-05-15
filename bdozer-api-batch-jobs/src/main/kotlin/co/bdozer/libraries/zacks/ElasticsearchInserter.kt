@@ -14,11 +14,11 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
-class ElasticsearchInserter(clazz: KClass<Any>) {
+class ElasticsearchInserter<T : Any>(clazz: KClass<T>) {
 
     private val log = LoggerFactory.getLogger(ElasticsearchInserter::class.java)
     private var total: Int = 0
-    private val buffer: MutableList<Any> = mutableListOf()
+    private val buffer: MutableList<T> = mutableListOf()
     private val objectMapper = Beans.objectMapper()
     private val restHighLevelClient = Beans.restHighLevelClient()
     private val className = clazz.simpleName
@@ -31,7 +31,7 @@ class ElasticsearchInserter(clazz: KClass<Any>) {
         .declaredMemberProperties
         .filter { property -> property.hasAnnotation<PrimaryKeyComponent>() }
 
-    fun insert(row: Any) {
+    fun insert(row: T) {
         buffer.add(row)
         total++
         if (buffer.size >= 150) {
@@ -64,7 +64,7 @@ class ElasticsearchInserter(clazz: KClass<Any>) {
         buffer.clear()
     }
 
-    private fun id(item: Any): String {
+    private fun id(item: T): String {
         val parts = primaryKeyProperties.map { property ->
             property.getValue(item, property).toString()
         }.toTypedArray()
