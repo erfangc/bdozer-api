@@ -22,7 +22,7 @@ object TenKProcessor {
     private val objectMapper = Beans.objectMapper()
     private val tenKSectionExtractor = TenKSectionExtractor()
 
-    fun buildCompanyText(ticker: String): CompanyText {
+    fun buildCompanyText(ticker: String): List<CompanyText> {
         val cik = toCik(ticker)
 
         /*
@@ -49,21 +49,29 @@ object TenKProcessor {
 
         val textBody = plainText(body)
 
-        /*
-        Index each section
-         */
-        return CompanyText(
-            id = hash(ticker, url),
-            ticker = ticker,
-            text = textBody,
-            url = url,
-            metaData = mapOf(
-                "cik" to cik,
-                "ash" to ash,
-                "reportDate" to reportDate,
-            ),
-            source = "10-K"
-        )
+        val paragraphs = textBody
+            .split("\n+".toRegex())
+            .filter {
+                val trimmed = it.trim()
+                trimmed.isNotBlank() && trimmed.length >50 
+            }
+            .mapIndexed { index, paragraph ->
+                CompanyText(
+                    id = hash(ticker, url, index.toString()),
+                    ticker = ticker,
+                    text = paragraph.trim(),
+                    url = url,
+                    metaData = mapOf(
+                        "cik" to cik,
+                        "ash" to ash,
+                        "index" to index.toString(),
+                        "reportDate" to reportDate,
+                    ),
+                    source = "10-K"
+                )
+            }
+
+        return paragraphs
     }
 
     private fun submission(cik: String): Submission {

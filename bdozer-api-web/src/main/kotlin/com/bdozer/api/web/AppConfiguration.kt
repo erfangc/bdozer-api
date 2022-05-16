@@ -1,8 +1,6 @@
 package com.bdozer.api.web
 
 import org.apache.http.HttpHost
-import org.apache.http.client.HttpClient
-import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.message.BasicHeader
 import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
@@ -11,13 +9,14 @@ import org.springframework.context.annotation.Configuration
 import software.amazon.awssdk.services.s3.S3Client
 import java.lang.System.getenv
 import java.net.URI
+import java.net.http.HttpClient
 
 @Configuration
 class AppConfiguration {
 
     @Bean
     fun httpClient(): HttpClient {
-        return HttpClientBuilder.create().build()
+        return HttpClient.newHttpClient()
     }
 
     @Bean

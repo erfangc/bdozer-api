@@ -21,11 +21,15 @@ object R1000TenKIngestor {
     }
     fun ingestR1000ConstituentTenKs() {
 
-        val tickers = FileInputStream("bdozer-api-batch-jobs/russell-1000-constituents.txt")
+        val filename = "bdozer-api-batch-jobs/russell-1000-constituents.txt"
+        log.info("Starting ingesting Russell 1000 constituent 10-Ks using embedded file $filename")
+        val tickers = FileInputStream(filename)
             .bufferedReader()
             .readLines()
             .map { it.trim() }
             .filter { it.isNotBlank() }
+        
+        log.info("Found {} lines in {}", tickers.size, filename)
 
         var remaining = tickers.size
         var total = 0
@@ -33,10 +37,13 @@ object R1000TenKIngestor {
         var success = 0
 
         for (ticker in tickers) {
-            log.info("Processing $ticker")
+            log.info("Processing ticker {}", ticker)
             try {
-                val companyText = buildCompanyText(ticker)
-                Indexer.index(companyText.id, companyText)
+                val companyTexts = buildCompanyText(ticker)
+                val start = System.currentTimeMillis()
+                Indexer.bulkIndex("companyText", companyTexts.map { it.id to it })
+                val stop = System.currentTimeMillis()
+                log.info("Successfully index {} paragraphs for ticker {}, took={}ms", companyTexts.size, ticker, stop - start)
                 success++
             } catch (e: Exception) {
                 log.error("Exception occurred while processing ticker={}, error={}", ticker, e.message)
