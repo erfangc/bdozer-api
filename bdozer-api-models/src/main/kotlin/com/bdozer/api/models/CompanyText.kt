@@ -1,5 +1,3 @@
-package co.bdozer.libraries
-
 import java.time.Instant
 
 data class CompanyText(

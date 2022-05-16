@@ -1,6 +1,6 @@
 package co.bdozer.libraries.wikipedia
 
-import co.bdozer.libraries.CompanyText
+import CompanyText
 import co.bdozer.libraries.utils.HashGenerator.hash
 import co.bdozer.libraries.utils.HtmlToPlainText.plainText
 import org.jsoup.Jsoup

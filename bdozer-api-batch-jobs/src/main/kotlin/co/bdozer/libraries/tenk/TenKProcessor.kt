@@ -1,6 +1,6 @@
 package co.bdozer.libraries.tenk
 
-import co.bdozer.libraries.CompanyText
+import CompanyText
 import co.bdozer.libraries.tenk.models.Submission
 import co.bdozer.libraries.tenk.sectionparser.TenKSectionExtractor
 import co.bdozer.libraries.utils.Beans
