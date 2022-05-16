@@ -12,9 +12,9 @@ import org.apache.http.entity.BasicHttpEntity
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
-import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.QueryBuilders.*
 import org.elasticsearch.search.SearchHits
-import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.elasticsearch.search.builder.SearchSourceBuilder.searchSource
 import org.springframework.stereotype.Service
 
 @Service
@@ -27,7 +27,7 @@ class SemanticSearchService(
         .getenv("SEMANTIC_SEARCH_SERVER_ENDPOINT")
         ?: "http://localhost:8000"
 
-    fun semanticSearch(ticker: String, question: String): SemanticSearchResponse {
+    fun semanticSearch(ticker: String? = null, question: String): SemanticSearchResponse {
         val searchHits = searchElastic(question, ticker)
         return semanticSearch(searchHits, question)
     }
@@ -56,11 +56,11 @@ class SemanticSearchService(
         basicHttpEntity.setContentType("application/json")
         basicHttpEntity.content = json.byteInputStream()
         httpPost.entity = basicHttpEntity
-        
-         try {
+
+        try {
             val httpResponse = httpClient.execute(httpPost)
-             val body = httpResponse.entity
-             return objectMapper.readValue(body.content)
+            val body = httpResponse.entity
+            return objectMapper.readValue(body.content)
         } catch (e: Exception) {
             throw e
         } finally {
@@ -68,18 +68,22 @@ class SemanticSearchService(
         }
     }
 
-    private fun searchElastic(question: String, ticker: String): SearchHits {
-        val searchSource = SearchSourceBuilder.searchSource()
-        val boolQuery = QueryBuilders.boolQuery()
-        boolQuery.must(QueryBuilders.matchQuery("text", question))
-        boolQuery.must(QueryBuilders.termQuery("${CompanyText::ticker.name}.keyword", ticker))
+    private fun searchElastic(question: String, ticker: String? = null): SearchHits {
+        val searchSource = searchSource()
+        val boolQuery = boolQuery()
+        boolQuery.must(matchQuery("text", question))
+
+        if (ticker != null)
+            boolQuery.must(termQuery("${CompanyText::ticker.name}.keyword", ticker))
+
         searchSource.query(boolQuery)
-        val searchRequest = SearchRequest("companytext")
-            .source(searchSource)
+
+        val searchRequest = SearchRequest("companytext").source(searchSource)
         val searchResponse = restHighLevelClient.search(
             searchRequest,
             RequestOptions.DEFAULT,
         )
+
         return searchResponse.hits
     }
 }

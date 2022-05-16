@@ -10,7 +10,10 @@ class SemanticSearchController(
     private val semanticSearchService: SemanticSearchService
 ) {
     @PostMapping
-    fun semanticSearch(@RequestParam ticker: String, @RequestParam question: String): SemanticSearchResponse {
+    fun semanticSearch(
+        @RequestParam(required = false) ticker: String? = null, 
+        @RequestParam question: String
+    ): SemanticSearchResponse {
         return semanticSearchService.semanticSearch(ticker, question)
     }
 }
