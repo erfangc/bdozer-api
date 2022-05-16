@@ -1,7 +1,6 @@
 package co.bdozer.libraries.investopedia
 
 import co.bdozer.libraries.utils.Beans
-import co.bdozer.libraries.utils.DocumentChunker
 import co.bdozer.libraries.utils.HashGenerator
 import co.bdozer.libraries.utils.HtmlToPlainText
 import org.elasticsearch.action.index.IndexRequest
@@ -65,7 +64,7 @@ object InvestopediaCrawler {
     }
 
     private fun index(url: String, title: String? = null, doc: String) {
-        val chunks = DocumentChunker.chunkDoc(doc)
+        val chunks = listOf(doc)
 
         val indexResponses = chunks.mapIndexed { seqNo, text ->
             val indexRequest = IndexRequest("investopedia")

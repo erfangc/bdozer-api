@@ -1,7 +1,5 @@
 package co.bdozer.libraries.utils
 
-import co.bdozer.core.nlp.sdk.ApiClient
-import co.bdozer.core.nlp.sdk.api.CoreNlpApi
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -34,13 +32,7 @@ object Beans {
             .followRedirects(HttpClient.Redirect.ALWAYS)
             .build()
     }
-
-    fun coreNLP(): CoreNlpApi {
-        val apiClient = ApiClient()
-        apiClient.basePath = System.getenv("CORE_NLP_ENDPOINT") ?: "http://localhost:8000"
-        return apiClient.buildClient(CoreNlpApi::class.java)
-    }
-
+    
     fun objectMapper(): ObjectMapper {
         return jacksonObjectMapper()
             .findAndRegisterModules()

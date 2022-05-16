@@ -12,7 +12,6 @@
         <module>bdozer-api-models</module>
         <module>bdozer-api-web</module>
         <module>bdozer-api-batch-jobs</module>
-        <module>core-nlp-sdk</module>
     </modules>
 
     <properties>
