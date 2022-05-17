@@ -47,6 +47,7 @@ object R1000TenKIngestor {
                 success++
             } catch (e: Exception) {
                 log.error("Exception occurred while processing ticker={}, error={}", ticker, e.message)
+                e.printStackTrace()
                 failures.add(e)
             } finally {
                 remaining--

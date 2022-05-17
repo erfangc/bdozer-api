@@ -53,7 +53,7 @@ object TenKProcessor {
             .split("\n+".toRegex())
             .filter {
                 val trimmed = it.trim()
-                trimmed.isNotBlank() && trimmed.length >50 
+                trimmed.isNotBlank() && trimmed.length > 50
             }
             .mapIndexed { index, paragraph ->
                 CompanyText(
@@ -75,10 +75,19 @@ object TenKProcessor {
     }
 
     private fun submission(cik: String): Submission {
-        val inputStream = HttpClient.newHttpClient().send(
-            HttpRequest.newBuilder().GET().uri(URI.create("https://data.sec.gov/submissions/CIK${cik}.json")).build(),
-            HttpResponse.BodyHandlers.ofInputStream(),
-        ).body()
+        val httpResponse = HttpClient
+            .newHttpClient()
+            .send(
+                HttpRequest.newBuilder().GET().uri(URI.create("https://data.sec.gov/submissions/CIK${cik}.json"))
+                    .build(),
+                HttpResponse.BodyHandlers.ofInputStream(),
+            )
+        if (httpResponse.statusCode() != 200) {
+            val responseBody = httpResponse.body().bufferedReader().readText()
+            log.error("Error calling submissions for cik={} responseBody='{}'", cik, responseBody)
+            error("Error calling submissions for cik=$cik responseBody='$responseBody'")
+        }
+        val inputStream = httpResponse.body()
         return objectMapper.readValue(inputStream)
     }
 
