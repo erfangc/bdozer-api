@@ -2,6 +2,7 @@ package com.bdozer.api.web.stockanalysis
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.pool.HikariPool
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.sql.Connection
@@ -22,6 +23,9 @@ class PostgresService {
         username = System.getenv("JDBC_USERNAME") ?: "postgres"
         password = System.getenv("JDBC_PASSWORD")
         maximumPoolSize = 5
+        minimumIdle = 2
+        connectionTimeout = 30000
+        leakDetectionThreshold = 30000
     })
     
     fun <T : Any> runSql(sql: String, clazz: KClass<T>): Sequence<T> {
@@ -90,9 +94,15 @@ class PostgresService {
             }
         }
     }
+    
+    private val log = LoggerFactory.getLogger(PostgresService::class.java)
 
     fun <T> runSql(sql: String, rowMapper: (resultSet: ResultSet) -> T): Sequence<T> {
         val connection = hikariPool.connection
+        log.info("Opening connection " +
+                "totalConnections=${hikariPool.totalConnections} " +
+                "activeConnections=${hikariPool.activeConnections} " +
+                "idleConnections=${hikariPool.idleConnections}")
         val stmt = connection.createStatement()
         val resultSet = stmt.executeQuery(sql)
         
@@ -100,7 +110,12 @@ class PostgresService {
             if (resultSet.next()) {
                 rowMapper.invoke(resultSet)
             } else {
+                stmt.close()
                 connection.close()
+                log.info("Closing connection " +
+                        "totalConnections=${hikariPool.totalConnections} " +
+                        "activeConnections=${hikariPool.activeConnections} " +
+                        "idleConnections=${hikariPool.idleConnections}")
                 null
             }
         }
