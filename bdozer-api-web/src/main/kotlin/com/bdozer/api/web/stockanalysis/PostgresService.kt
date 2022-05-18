@@ -22,8 +22,8 @@ class PostgresService {
         jdbcUrl = System.getenv("JDBC_URL") ?: "jdbc:postgresql://localhost:5432/postgres"
         username = System.getenv("JDBC_USERNAME") ?: "postgres"
         password = System.getenv("JDBC_PASSWORD")
-        maximumPoolSize = 5
-        minimumIdle = 2
+        maximumPoolSize = 20
+        minimumIdle = 5
         connectionTimeout = 30000
         leakDetectionThreshold = 30000
     })
@@ -105,13 +105,13 @@ class PostgresService {
                 "idleConnections=${hikariPool.idleConnections}")
         val stmt = connection.createStatement()
         val resultSet = stmt.executeQuery(sql)
+        stmt.close()
         
         return generateSequence {
             if (resultSet.next()) {
                 rowMapper.invoke(resultSet)
             } else {
-                stmt.close()
-                connection.close()
+                connection.close()        
                 log.info("Closing connection " +
                         "totalConnections=${hikariPool.totalConnections} " +
                         "activeConnections=${hikariPool.activeConnections} " +
