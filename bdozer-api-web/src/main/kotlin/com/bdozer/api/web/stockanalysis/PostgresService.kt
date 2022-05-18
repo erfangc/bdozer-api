@@ -1,33 +1,23 @@
 package com.bdozer.api.web.stockanalysis
 
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.pool.HikariPool
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 import java.sql.Types
 import java.time.Instant
 import java.time.LocalDate
-import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.typeOf
 
 @Service
 class PostgresService {
 
-    private val hikariPool = HikariPool(HikariConfig().apply { 
-        jdbcUrl = System.getenv("JDBC_URL") ?: "jdbc:postgresql://localhost:5432/postgres"
-        username = System.getenv("JDBC_USERNAME") ?: "postgres"
-        password = System.getenv("JDBC_PASSWORD")
-        maximumPoolSize = 20
-        minimumIdle = 5
-        connectionTimeout = 30000
-        leakDetectionThreshold = 30000
-    })
-    
+    private val jdbcUrl = System.getenv("JDBC_URL") ?: "jdbc:postgresql://localhost:5432/postgres"
+    private val username = System.getenv("JDBC_USERNAME") ?: "postgres"
+    private val password = System.getenv("JDBC_PASSWORD")
+    private val conn = DriverManager.getConnection(jdbcUrl, username, password)
+
     fun <T : Any> runSql(sql: String, clazz: KClass<T>): Sequence<T> {
         return runSql(sql) { resultSet ->
             val ctor = clazz.constructors.first()
@@ -95,27 +85,16 @@ class PostgresService {
         }
     }
     
-    private val log = LoggerFactory.getLogger(PostgresService::class.java)
-
     fun <T> runSql(sql: String, rowMapper: (resultSet: ResultSet) -> T): Sequence<T> {
-        val connection = hikariPool.connection
-        log.info("Opening connection " +
-                "totalConnections=${hikariPool.totalConnections} " +
-                "activeConnections=${hikariPool.activeConnections} " +
-                "idleConnections=${hikariPool.idleConnections}")
+        val connection = conn
         val stmt = connection.createStatement()
         val resultSet = stmt.executeQuery(sql)
-        stmt.close()
-        
+
         return generateSequence {
             if (resultSet.next()) {
                 rowMapper.invoke(resultSet)
             } else {
-                connection.close()        
-                log.info("Closing connection " +
-                        "totalConnections=${hikariPool.totalConnections} " +
-                        "activeConnections=${hikariPool.activeConnections} " +
-                        "idleConnections=${hikariPool.idleConnections}")
+                stmt.close()
                 null
             }
         }
