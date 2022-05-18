@@ -92,12 +92,15 @@ class PostgresService {
     }
 
     fun <T> runSql(sql: String, rowMapper: (resultSet: ResultSet) -> T): Sequence<T> {
-        val stmt = hikariPool.connection.createStatement()
+        val connection = hikariPool.connection
+        val stmt = connection.createStatement()
         val resultSet = stmt.executeQuery(sql)
+        
         return generateSequence {
             if (resultSet.next()) {
                 rowMapper.invoke(resultSet)
             } else {
+                connection.close()
                 null
             }
         }
