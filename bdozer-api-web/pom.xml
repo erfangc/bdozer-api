@@ -16,10 +16,6 @@
     
     <dependencies>
         <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
             <groupId>de.dentrassi.crypto</groupId>
             <artifactId>pem-keystore</artifactId>
         </dependency>

@@ -3,7 +3,8 @@ package co.bdozer.libraries.utils
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.http.HttpHost
 import org.apache.http.message.BasicHeader
 import org.elasticsearch.client.RestClient
@@ -32,10 +33,11 @@ object Beans {
             .followRedirects(HttpClient.Redirect.ALWAYS)
             .build()
     }
-    
+
     fun objectMapper(): ObjectMapper {
-        return jacksonObjectMapper()
-            .findAndRegisterModules()
+        return ObjectMapper()
+            .registerModule(JavaTimeModule())
+            .registerKotlinModule()
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     }
