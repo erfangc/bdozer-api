@@ -19,15 +19,24 @@ class ZacksModelBuilder(
     private val log = LoggerFactory.getLogger(ZacksModelBuilder::class.java)
 
     private fun Double?.or0() = this ?: 0.0
-    
+
     fun buildZacksModel(ticker: String): BuildZacksModelResponse {
 
+        fun badInput(message: String): BuildZacksModelResponse {
+            return BuildZacksModelResponse(
+                id = "-",
+                ticker = ticker,
+                message = message,
+                status = 400
+            )
+        }
+
         val ses = ses(ticker)
-        val fc = fc(ticker) ?: error("cannot find $ticker in fundamentals table 'fc'")
-        val mt = mt(ticker) ?: error("cannot find $ticker in master table in Zacks")
+        val fc = fc(ticker) ?: return badInput("missing entry in fc")
+        val mt = mt(ticker) ?: return badInput("missing entry in mt")
 
         if (ses.isEmpty()) {
-            error("cannot find any Zacks sales estimate for $ticker")
+            return badInput("missing entries in se")
         }
 
         log.info("Building Zacks model for cik={} ticker={} ses={}", mt.comp_cik, mt.ticker, ses.size)
@@ -45,7 +54,7 @@ class ZacksModelBuilder(
             manualProjections = ManualProjections(
                 manualProjections = ses.map { se ->
                     ManualProjection(
-                        fiscalYear = se.per_fisc_year ?: error("se.per_fisc_year cannot be null ticker=$ticker"),
+                        fiscalYear = se.per_fisc_year ?: return badInput("se.per_fisc_year cannot be null"),
                         value = se.sales_mean_est.or0() * scale
                     )
                 }
@@ -61,8 +70,9 @@ class ZacksModelBuilder(
                 value = fc.cost_good_sold.or0() * scale
             ),
             type = ItemType.PercentOfRevenue,
-            percentOfRevenue = PercentOfRevenue(fc.cost_good_sold.or0() / 
-                    (fc.tot_revnu ?: error("fc.tot_revnu cannot be null ticker=$ticker"))
+            percentOfRevenue = PercentOfRevenue(
+                fc.cost_good_sold.or0() /
+                        (fc.tot_revnu ?: return badInput("fc.tot_revnu cannot be null"))
             )
         )
 
@@ -348,8 +358,9 @@ class ZacksModelBuilder(
         )
 
         return BuildZacksModelResponse(
-            cik = model.cik ?: error("model.cik cannot be null ticker=$ticker"),
-            ticker = model.ticker ?: error("model.ticker cannot be null ticker=$ticker"),
+            id = stockAnalysis2._id,
+            cik = model.cik ?: return badInput("model.cik cannot be null"),
+            ticker = model.ticker ?: return badInput("model.ticker cannot be null"),
             targetPrice = stockAnalysis2.derivedStockAnalytics?.targetPrice ?: 0.0,
             finalPrice = stockAnalysis2.derivedStockAnalytics?.finalPrice ?: 0.0,
         )
