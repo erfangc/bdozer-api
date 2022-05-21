@@ -1,31 +1,71 @@
 package co.bdozer.libraries.zacks
 
 import co.bdozer.libraries.utils.Database
+import co.bdozer.libraries.zacks.models.PrimaryKeyComponent
 import co.bdozer.libraries.zacks.models.Table
 import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.Types
 import java.time.LocalDate
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.typeOf
 
 class PostgresInserter<T : Any>(clazz: KClass<T>) {
 
     private val log = LoggerFactory.getLogger(PostgresInserter::class.java)
     private val conn = Database.connection
-    private val properties = clazz.declaredMemberProperties
     private val className = clazz.simpleName
     private val tableName =
         clazz.findAnnotation<Table>()?.name?.let { it.ifEmpty { null } }
             ?: clazz.simpleName?.lowercase()
+
+    private val properties = clazz.declaredMemberProperties
+    /*
+    keyProperties - properties that consists of the primary key
+     */
+    private val keyProperties = clazz
+        .declaredMemberProperties
+        .filter { property ->
+            property.hasAnnotation<PrimaryKeyComponent>()
+        }
+        .sortedByDescending { it.name }
+
+    /*
+    valueProperties - properties that consists of the non-key values
+     */
+    private val valueProperties = clazz
+        .declaredMemberProperties
+        .filter { property ->
+            !property.hasAnnotation<PrimaryKeyComponent>()
+        }
+        .sortedByDescending { it.name }
+    
+    private val upsertSql = """
+        insert into $tableName (${keyProperties.joinToString(", ") { it.name }}, ${valueProperties.joinToString(", ") { it.name }}) 
+        values (${keyProperties.joinToString(", ") { "?" }}, ${valueProperties.joinToString(", ") { "?" }})
+        on conflict on constraint ${tableName}_pkey
+        do update set ${valueProperties.joinToString(", "){ "${it.name} = ?" }}
+    """.trimIndent()
+    
+    private fun indices(property: KProperty1<T, *>): List<Int> {
+        val keySize = keyProperties.size
+        val valueSize = valueProperties.size
+        val keyIdx = keyProperties.indexOf(property)
+        return if (keyIdx != -1) {
+            listOf(keyIdx + 1)
+        } else {
+            val valueIdx = valueProperties.indexOf(property)
+            listOf(keySize + valueIdx + 1, keySize + valueSize + valueIdx + 1)
+        }
+    }
+    
     private val buffer: MutableList<T> = mutableListOf()
     private var total: Int = 0
-    private val insertSql = """
-        INSERT INTO $tableName (${properties.joinToString(", ") { it.name }})
-        VALUES (${properties.joinToString(", ") { "?" }})
-    """.trimIndent()
 
     fun insert(obj: T) {
         buffer.add(obj)
@@ -40,51 +80,54 @@ class PostgresInserter<T : Any>(clazz: KClass<T>) {
         }
         val autoCommit = conn.autoCommit
         conn.autoCommit = false
-        val stmt = conn.prepareStatement(insertSql)
+        val stmt = conn.prepareStatement(upsertSql)
         buffer.forEach { row ->
-            properties.forEachIndexed { index, kProperty ->
-                val parameterIdx = index + 1
+            properties.forEach { kProperty ->
+                
+                val parameterIndices = indices(kProperty)
                 val value = kProperty.getValue(row, kProperty)
                 val type = kProperty.returnType
+                
                 if (type == typeOf<Double?>()) {
                     if (value == null) {
-                        stmt.setNull(parameterIdx, Types.DOUBLE)
+                        parameterIndices.forEach { idx -> stmt.setNull(idx, Types.DOUBLE) }
                     } else {
-                        stmt.setDouble(parameterIdx, value as Double)
+                        parameterIndices.forEach { idx -> stmt.setDouble(idx, value as Double) }
                     }
                 } else if (type == typeOf<Double>()) {
-                    stmt.setDouble(parameterIdx, value as Double)
+                    parameterIndices.forEach { idx -> stmt.setDouble(idx, value as Double) }
                 } else if (type == typeOf<Float?>()) {
                     if (value == null) {
-                        stmt.setNull(parameterIdx, Types.NUMERIC)
+                        parameterIndices.forEach { idx -> stmt.setNull(idx, Types.NUMERIC) }
                     } else {
-                        stmt.setFloat(parameterIdx, value as Float)
+                        parameterIndices.forEach { idx -> stmt.setFloat(idx, value as Float) }
                     }
                 } else if (type == typeOf<Float>()) {
-                    stmt.setFloat(parameterIdx, value as Float)
+                    parameterIndices.forEach { idx -> stmt.setFloat(idx, value as Float) }
                 } else if (type == typeOf<Int?>()) {
                     if (value == null) {
-                        stmt.setNull(parameterIdx, Types.INTEGER)
+                        parameterIndices.forEach { idx -> stmt.setNull(idx, Types.INTEGER) }
                     } else {
-                        stmt.setInt(parameterIdx, value as Int)
+                        parameterIndices.forEach { idx -> stmt.setInt(idx, value as Int) }
                     }
                 } else if (type == typeOf<Int>()) {
-                    stmt.setInt(parameterIdx, value as Int)
+                    parameterIndices.forEach { idx -> stmt.setInt(idx, value as Int) }
                 } else if (type == typeOf<LocalDate?>()) {
                     if (value == null) {
-                        stmt.setNull(parameterIdx, Types.DATE)
+                        parameterIndices.forEach { idx -> stmt.setNull(idx, Types.DATE) }
                     } else {
-                        stmt.setDate(parameterIdx, Date.valueOf(value.toString()))
+                        parameterIndices.forEach { idx -> stmt.setDate(idx, Date.valueOf(value.toString())) }
                     }
                 } else if (type == typeOf<LocalDate>()) {
-                    stmt.setDate(parameterIdx, Date.valueOf(value.toString()))
+                    parameterIndices.forEach { idx -> stmt.setDate(idx, Date.valueOf(value.toString())) }
                 } else {
                     if (value == null) {
-                        stmt.setNull(parameterIdx, Types.VARCHAR)
+                        parameterIndices.forEach { idx -> stmt.setNull(idx, Types.VARCHAR) }
                     } else {
-                        stmt.setString(parameterIdx, value.toString())
+                        parameterIndices.forEach { idx -> stmt.setString(idx, value.toString()) }
                     }
                 }
+                
             }
             stmt.addBatch()
         }

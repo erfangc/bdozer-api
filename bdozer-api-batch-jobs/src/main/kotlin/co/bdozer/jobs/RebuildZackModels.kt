@@ -33,8 +33,10 @@ fun updateStatus(
     }
     val stmt = conn.prepareStatement(
         """
-            insert into zacks_model_run_results (ticker, timestamp, status, stock_analysis_id, message) values (?, ?, ?, ?, ?)
-            on conflict ON CONSTRAINT zacks_model_run_results_pkey DO UPDATE SET timestamp = ?, status = ?, stock_analysis_id = ?, message = ?
+        insert into zacks_model_run_results (ticker, timestamp, status, stock_analysis_id, message) 
+        values (?, ?, ?, ?, ?)
+        on conflict on constraint zacks_model_run_results_pkey 
+        do update set timestamp = ?, status = ?, stock_analysis_id = ?, message = ?
         """.trimIndent()
     )
     stmt.setString(1, ticker)
