@@ -105,9 +105,9 @@ fun main() {
             if (httpResponse.statusCode() == 200) {
                 log.info(
                     "Built Zacks model for ticker={} targetPrice={} id={}",
-                    buildZacksModelResponse.id,
                     buildZacksModelResponse.ticker,
                     buildZacksModelResponse.targetPrice,
+                    buildZacksModelResponse.id,
                 )
                 succeeded++
             } else {
