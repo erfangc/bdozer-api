@@ -380,9 +380,7 @@ class ZacksModelBuilder(
 
     private fun mt(ticker: String) =
         postgresService.runSql(
-            sql = """
-            select * from mt where m_ticker = '$ticker'
-        """.trimIndent(),
+            sql = """select * from mt where ticker = '$ticker'""".trimIndent(),
             clazz = MT::class
         ).firstOrNull()
 
@@ -391,7 +389,7 @@ class ZacksModelBuilder(
             sql = """
                 select *
                 from se
-                where m_ticker = '$ticker'
+                where ticker = '$ticker'
                   and per_type = 'A'
                   and per_end_date >= now()
                 order by per_end_date desc 
@@ -403,7 +401,7 @@ class ZacksModelBuilder(
         sql = """
             select *
             from fc
-            where m_ticker = '$ticker'
+            where ticker = '$ticker'
               and per_type = 'A'
             order by per_end_date desc limit 1
         """.trimIndent(),
