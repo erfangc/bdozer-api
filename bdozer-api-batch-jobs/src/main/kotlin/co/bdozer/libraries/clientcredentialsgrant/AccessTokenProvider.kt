@@ -6,7 +6,7 @@ import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-object AccessTokenFetcher {
+object AccessTokenProvider {
     private val httpClient = Beans.httpClient()
     private val objectMapper = Beans.objectMapper()
     

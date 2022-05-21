@@ -1,6 +1,6 @@
 package co.bdozer.jobs
 
-import co.bdozer.libraries.clientcredentialsgrant.AccessTokenFetcher
+import co.bdozer.libraries.clientcredentialsgrant.AccessTokenProvider
 import co.bdozer.libraries.utils.Beans
 import co.bdozer.libraries.utils.Database
 import com.bdozer.api.models.dataclasses.BuildZacksModelResponse
@@ -16,7 +16,7 @@ import java.sql.Types
 import kotlin.system.exitProcess
 
 private val log = LoggerFactory.getLogger("Main")
-private val accessToken = AccessTokenFetcher.getAccessToken()
+private val accessToken = AccessTokenProvider.getAccessToken()
 private val httpClient = Beans.httpClient()
 private val conn = Database.connection
 private val objectMapper = Beans.objectMapper()
