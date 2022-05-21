@@ -10,7 +10,7 @@ import com.bdozer.api.stockanalysis.models.PerShareMetrics
 import com.bdozer.api.stockanalysis.models.Trend
 import com.bdozer.api.web.stockanalysis.PostgresService
 import com.bdozer.api.web.stockanalysis.support.poylgon.PolygonService
-import com.bdozer.api.web.stockanalysis.support.poylgon.TickerDetail
+import com.bdozer.api.web.stockanalysis.support.poylgon.TickerDetailV3
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -26,7 +26,7 @@ class ZacksDerivedAnalyticsCalculator(
     fun getZacksDerivedAnalytics(ticker: String): ZacksDerivedAnalytics {
         
         val tickerDetailV3 = polygonService.tickerDetails(ticker)
-        val marketCap = tickerDetailV3.marketcap
+        val marketCap = tickerDetailV3.results?.marketCap
 
         val price = price(ticker)
         val mt = mt(ticker)
@@ -184,9 +184,9 @@ class ZacksDerivedAnalyticsCalculator(
         )
     }
     
-    private fun enterpriseValue(tickerDetailV3: TickerDetail, fcs: FCS): Double {
+    private fun enterpriseValue(tickerDetailV3: TickerDetailV3, fcs: FCS): Double {
         val totLiab = fcs.quarters.first().tot_liab
-        val marketCap = tickerDetailV3.marketcap ?: 0.0
+        val marketCap = tickerDetailV3.results?.marketCap ?: 0.0
         return marketCap + (totLiab ?: 0.0)
     }
     private fun mt(ticker: String): MT {

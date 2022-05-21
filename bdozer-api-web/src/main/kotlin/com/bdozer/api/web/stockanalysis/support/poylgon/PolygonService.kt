@@ -12,6 +12,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @Service
 class PolygonService {
@@ -24,9 +25,9 @@ class PolygonService {
     private val polygonKey = getenv("POLYGON_API_KEY")
         ?: error("environment POLYGON_API_KEY not defined")
     
-    fun tickerDetails(ticker: String): TickerDetail {
+    fun tickerDetails(ticker: String): TickerDetailV3 {
         log.info("Calling ticker details on ticker={}", ticker)
-        val uri = URI.create("https://api.polygon.io/v1/meta/symbols/$ticker/company?&apiKey=$polygonKey")
+        val uri = URI.create("https://api.polygon.io/v3/reference/tickers/$ticker?&apiKey=$polygonKey")
         val httpResponse = httpClient
             .send(
                 HttpRequest
@@ -36,7 +37,7 @@ class PolygonService {
                 BodyHandlers.ofString(),
             )
         if (httpResponse.statusCode() > 200) {
-            error("Error executing GET $uri statusCode=${httpResponse.statusCode()} responseBody='${httpResponse.body()}'")
+            error("Failed to get ticker detail v3 responseBody='${httpResponse.body()}'")
         }
         return objectMapper.readValue(httpResponse.body()) 
     }
@@ -53,7 +54,7 @@ class PolygonService {
                 BodyHandlers.ofString(),
             )
         if (httpResponse.statusCode() > 200) {
-            error("Error executing GET $uri statusCode=${httpResponse.statusCode()} responseBody='${httpResponse.body()}'")
+            error("Failed to get previous close responseBody='${httpResponse.body()}'")
         }
         return objectMapper.readValue(httpResponse.body())
     }

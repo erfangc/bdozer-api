@@ -69,19 +69,15 @@ class ModelEvaluator(
         Grab a bunch of things from Polygon.io and throw them onto the analysis
          */
         return model.ticker?.let { ticker ->
-            val tickerDetail = polygonService.tickerDetails(ticker = ticker)
+            val tickerDetail = polygonService.tickerDetails(ticker = ticker).results
             val zacksDerivedAnalytics = zacksDerivedAnalyticsCalculator.getZacksDerivedAnalytics(ticker = ticker)
             stockAnalysis2.copy(
                 ticker = model.ticker,
-                description = tickerDetail.description,
-                industry = tickerDetail.industry,
-                sector = tickerDetail.sector,
-                url = tickerDetail.url,
-                similar = tickerDetail.similar,
-                ceo = tickerDetail.ceo,
-                country = tickerDetail.country,
-                tags = stockAnalysis2.tags + (tickerDetail.tags ?: emptyList()),
-                derivedStockAnalytics = derivedStockAnalytics.copy(marketCap = tickerDetail.marketcap),
+                description = tickerDetail?.description,
+                industry = tickerDetail?.sicDescription,
+                url = tickerDetail?.homepageUrl,
+                tags = stockAnalysis2.tags,
+                derivedStockAnalytics = derivedStockAnalytics.copy(marketCap = tickerDetail?.marketCap),
                 zacksDerivedAnalytics = zacksDerivedAnalytics,
             )
         } ?: stockAnalysis2
