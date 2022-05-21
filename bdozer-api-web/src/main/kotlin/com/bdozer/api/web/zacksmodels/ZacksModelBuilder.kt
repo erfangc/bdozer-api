@@ -21,7 +21,19 @@ class ZacksModelBuilder(
     private fun Double?.or0() = this ?: 0.0
 
     fun buildZacksModel(ticker: String): BuildZacksModelResponse {
-
+        return try {
+            doAnalysis(ticker)
+        } catch (e: Exception) {
+            BuildZacksModelResponse(
+                id = "-",
+                ticker = ticker,
+                status = 500,
+                message = e.message,
+            )
+        }
+    }
+    
+    private fun doAnalysis(ticker: String): BuildZacksModelResponse {
         fun badInput(message: String): BuildZacksModelResponse {
             return BuildZacksModelResponse(
                 id = "-",
