@@ -10,6 +10,7 @@ import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse.BodyHandlers
+import kotlin.system.exitProcess
 
 private val log = LoggerFactory.getLogger("Main")
 private val accessToken = AccessTokenFetcher.getAccessToken()
@@ -55,7 +56,7 @@ fun main() {
             } else {
                 // try to deserialize the message
                 log.error(
-                    "Unable to build Zacks model for id={} ticker={} status={} message={}",
+                    "Unable to build Zacks model for id={} ticker={} status={} message='{}'",
                     buildZacksModelResponse.id,
                     buildZacksModelResponse.ticker,
                     httpResponse.statusCode(),
@@ -79,4 +80,6 @@ fun main() {
     for (ticker in tickers) {
         run(ticker)
     }
+    log.info("Finished processing")
+    exitProcess(0)
 }
