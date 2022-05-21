@@ -1,4 +1,4 @@
-package com.bdozer.api.stockanalysis.master.models
+package com.bdozer.api.web.stockanalysis.support.zacks.models
 
 import java.time.LocalDate
 
