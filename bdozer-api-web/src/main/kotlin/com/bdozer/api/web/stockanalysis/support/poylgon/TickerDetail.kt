@@ -46,7 +46,7 @@ data class Results(
     @JsonProperty("share_class_figi")
     val shareClassFigi: String? = null,
     @JsonProperty("share_class_shares_outstanding")
-    val shareClassSharesOutstanding: Int? = null,
+    val shareClassSharesOutstanding: Long? = null,
     @JsonProperty("sic_code")
     val sicCode: String? = null,
     @JsonProperty("sic_description")
@@ -60,7 +60,7 @@ data class Results(
     @JsonProperty("type")
     val type: String? = null,
     @JsonProperty("weighted_shares_outstanding")
-    val weightedSharesOutstanding: Int? = null
+    val weightedSharesOutstanding: Long? = null
 )
 
 data class Address(
