@@ -1,6 +1,7 @@
-package com.bdozer.api.stockanalysis.models
+package com.bdozer.api.web.stockanalysis.models
 
 import com.bdozer.api.models.dataclasses.Item
+import com.bdozer.api.stockanalysis.models.Waterfall
 
 /**
  * After a valuation model has been run,
@@ -17,6 +18,7 @@ data class DerivedStockAnalytics(
     val profitPerShare: Item,
     val targetPrice: Double,
     val finalPrice: Double? = null,
+    val percentUpside: Double? = null,
     val discountRate: Double? = null,
     val revenueCAGR: Double? = null,
     val currentPrice: Double? = null,

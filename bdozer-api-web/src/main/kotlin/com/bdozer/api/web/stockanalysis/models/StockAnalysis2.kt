@@ -2,6 +2,7 @@ package com.bdozer.api.stockanalysis.models
 
 import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.models.dataclasses.spreadsheet.Cell
+import com.bdozer.api.web.stockanalysis.models.DerivedStockAnalytics
 import com.bdozer.api.web.stockanalysis.models.ZacksDerivedAnalytics
 import java.time.Instant
 import java.util.*

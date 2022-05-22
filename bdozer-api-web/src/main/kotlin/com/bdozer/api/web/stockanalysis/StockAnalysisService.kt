@@ -3,7 +3,7 @@ package com.bdozer.api.web.stockanalysis
 import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.stockanalysis.models.FindStockAnalysisResponse
 import com.bdozer.api.stockanalysis.models.StockAnalysis2
-import com.bdozer.api.stockanalysis.models.StockAnalysisProjection
+import com.bdozer.api.web.stockanalysis.models.StockAnalysisProjection
 import com.bdozer.api.web.stockanalysis.models.ZacksDerivedAnalytics
 import com.bdozer.api.web.stockanalysis.support.ModelEvaluator
 import com.bdozer.api.web.stockanalysis.support.zacks.ZacksDerivedTag
@@ -16,7 +16,9 @@ import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.QueryBuilders.*
 import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.elasticsearch.search.sort.SortOrder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
@@ -87,6 +89,7 @@ class StockAnalysisService(
             currentPrice = updatedStockAnalysis.derivedStockAnalytics?.currentPrice,
             targetPrice = updatedStockAnalysis.derivedStockAnalytics?.targetPrice,
             finalPrice = updatedStockAnalysis.derivedStockAnalytics?.finalPrice,
+            percentUpside = updatedStockAnalysis.derivedStockAnalytics?.percentUpside,
             published = updatedStockAnalysis.published,
             lastUpdated = updatedStockAnalysis.lastUpdated,
             tags = updatedStockAnalysis.tags,
@@ -119,21 +122,7 @@ class StockAnalysisService(
             s3.getObject(GetObjectRequest.builder().bucket(bucket).key("$indexName/$id.json").build())
         )
     }
-
-    fun allAnalyses(): List<StockAnalysis2> {
-        val searchResponse = restHighLevelClient.search(
-            SearchRequest(indexName).source(
-                SearchSourceBuilder.searchSource().query(
-                    QueryBuilders.matchAllQuery()
-                )
-            ), RequestOptions.DEFAULT
-        )
-        return searchResponse.hits.map { searchHit ->
-            val json = searchHit.sourceAsString
-            objectMapper.readValue(json)
-        }
-    }
-
+    
     /**
      * This method returns the 4 most prominent and featured
      * stock analyses on the system
@@ -159,38 +148,40 @@ class StockAnalysisService(
         zacksDerivedTags: List<ZacksDerivedTag>? = null,
         sort: SortDirection? = null,
     ): FindStockAnalysisResponse {
-        val boolQuery = QueryBuilders.boolQuery()
+        val boolQuery = boolQuery()
         
         if (userId != null) {
-            boolQuery.must(QueryBuilders.termQuery(StockAnalysisProjection::userId.name.keyword, userId))
+            boolQuery.must(termQuery(StockAnalysisProjection::userId.name.keyword, userId))
         }
         
         if (cik != null) {
-            boolQuery.must(QueryBuilders.termQuery(StockAnalysisProjection::cik.name.keyword, cik))
+            boolQuery.must(termQuery(StockAnalysisProjection::cik.name.keyword, cik))
         }
         
         if (ticker != null) {
-            boolQuery.must(QueryBuilders.termQuery(StockAnalysisProjection::ticker.name.keyword, ticker))
+            boolQuery.must(termQuery(StockAnalysisProjection::ticker.name.keyword, ticker))
         }
         
         if (published != null) {
-            boolQuery.must(QueryBuilders.termQuery(StockAnalysisProjection::published.name, published))
+            boolQuery.must(termQuery(StockAnalysisProjection::published.name, published))
         }
         
         if (term != null) {
-            boolQuery.should(QueryBuilders.matchQuery(StockAnalysisProjection::ticker.name, term))
-            boolQuery.should(QueryBuilders.matchQuery(StockAnalysisProjection::name.name, term))
-            boolQuery.should(QueryBuilders.matchQuery(StockAnalysisProjection::cik.name, term))
+            boolQuery.should(matchQuery(StockAnalysisProjection::ticker.name, term))
+            boolQuery.should(matchQuery(StockAnalysisProjection::name.name, term))
+            boolQuery.should(matchQuery(StockAnalysisProjection::cik.name, term))
         }
 
         if (tags != null && tags.isNotEmpty()) {
-            boolQuery.must(QueryBuilders.termsQuery(StockAnalysisProjection::tags.name.keyword, tags))
+            boolQuery.must(termsQuery(StockAnalysisProjection::tags.name.keyword, tags))
         }
         
         if (zacksDerivedTags != null && zacksDerivedTags.isNotEmpty()) {
             val zacksDerivedAnalytics = StockAnalysisProjection::zacksDerivedAnalytics.name
             val tags = ZacksDerivedAnalytics::tags.name
-            boolQuery.must(QueryBuilders.termsQuery("$zacksDerivedAnalytics.${tags.keyword}", zacksDerivedTags.map { it.toString() }))
+            zacksDerivedTags.forEach { tag ->
+                boolQuery.must(termsQuery("$zacksDerivedAnalytics.${tags.keyword}", tag))   
+            }
         }
         
         val searchSourceBuilder = SearchSourceBuilder
@@ -203,6 +194,16 @@ class StockAnalysisService(
         
         if (limit != null) {
             searchSourceBuilder.size(limit)
+        }
+
+        if (sort != null) {
+            searchSourceBuilder.sort(
+                StockAnalysisProjection::percentUpside.name, 
+                if (sort == SortDirection.ascending)
+                    SortOrder.ASC
+                else
+                    SortOrder.DESC
+            )
         }
         
         val searchRequest = SearchRequest(indexName)

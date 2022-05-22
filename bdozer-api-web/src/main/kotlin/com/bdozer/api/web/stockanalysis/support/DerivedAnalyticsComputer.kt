@@ -6,7 +6,7 @@ import com.bdozer.api.models.dataclasses.Model
 import com.bdozer.api.models.dataclasses.Utility
 import com.bdozer.api.models.dataclasses.Utility.TerminalValuePerShare
 import com.bdozer.api.models.dataclasses.spreadsheet.Cell
-import com.bdozer.api.stockanalysis.models.DerivedStockAnalytics
+import com.bdozer.api.web.stockanalysis.models.DerivedStockAnalytics
 import com.bdozer.api.stockanalysis.models.Waterfall
 import com.bdozer.api.stockanalysis.support.IRRCalculator.irr
 import com.bdozer.api.web.stockanalysis.support.poylgon.PolygonService
@@ -17,7 +17,7 @@ import kotlin.math.pow
 
 @Service
 class DerivedAnalyticsComputer(private val polygonService: PolygonService) {
-    
+
     private fun Double?.orZero() = this ?: 0.0
 
     /**
@@ -82,6 +82,8 @@ class DerivedAnalyticsComputer(private val polygonService: PolygonService) {
             targetPrice = targetPrice,
             finalPrice = finalPrice,
             irr = irr,
+            percentUpside = if (currentPrice != null && finalPrice != null && finalPrice > 0.0) 
+                    (finalPrice / currentPrice) - 1 else 0.0,
         )
     }
 
