@@ -128,7 +128,16 @@ class StockAnalysisService(
      * stock analyses on the system
      */
     fun top4StockAnalyses(): FindStockAnalysisResponse {
-        return findStockAnalyses(limit = 4, published = true)
+        return findStockAnalyses(
+            limit = 4,
+            published = true, 
+            zacksDerivedTags = listOf(
+                ZacksDerivedTag.POSITIVE_EARNINGS,
+                ZacksDerivedTag.REVENUE_GROWING,
+                ZacksDerivedTag.EARNINGS_IMPROVING,
+            ),
+            sort = SortDirection.descending,
+        )
     }
 
     /**
