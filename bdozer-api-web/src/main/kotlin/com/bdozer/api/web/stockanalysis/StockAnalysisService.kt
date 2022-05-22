@@ -180,7 +180,7 @@ class StockAnalysisService(
             val zacksDerivedAnalytics = StockAnalysisProjection::zacksDerivedAnalytics.name
             val tags = ZacksDerivedAnalytics::tags.name
             zacksDerivedTags.forEach { tag ->
-                boolQuery.must(termsQuery("$zacksDerivedAnalytics.${tags.keyword}", tag))   
+                boolQuery.must(termsQuery("$zacksDerivedAnalytics.${tags.keyword}", tag.toString()))   
             }
         }
         
