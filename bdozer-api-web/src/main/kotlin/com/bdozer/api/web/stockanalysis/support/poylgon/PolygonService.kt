@@ -48,7 +48,7 @@ class PolygonService {
         val httpResponse = httpClient
             .send(
                 HttpRequest
-                    .newBuilder(URI.create("https://api.polygon.io/v2/aggs/ticker/$ticker/prev?adjusted=true&apiKey=$polygonKey"))
+                    .newBuilder(uri)
                     .GET()
                     .build(),
                 BodyHandlers.ofString(),
