@@ -33,11 +33,6 @@
                 <version>4.4.2</version>
             </dependency>
             <dependency>
-                <groupId>com.bdozer</groupId>
-                <artifactId>bdozer-api-stockanalysis</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>de.dentrassi.crypto</groupId>
                 <artifactId>pem-keystore</artifactId>
                 <version>2.2.1</version>
